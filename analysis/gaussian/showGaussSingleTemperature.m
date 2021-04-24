@@ -67,8 +67,9 @@ end
 strs=strsplit(imgdir,filesep);
 str=[strs{end-1} filesep strs{end}];
 
-hF=figure('Name',[str ' : Gauss Temperature 1shot'],...
-    'units','pixels','color','w','Menubar','none','Resize','off');
+hF=figure('Name',['Gauss Temp Single ' str],...
+    'units','pixels','color','w','Menubar','none','Resize','off',...
+    'numbertitle','off');
 hF.Position(1)=400;
 hF.Position(2)=480;
 hF.Position(3)=800;

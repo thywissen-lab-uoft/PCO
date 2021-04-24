@@ -659,7 +659,7 @@ end
     
     
 %% Animate cloud
-doAnimate = 1;
+doAnimate = 0;
 if doAnimate == 1
 animateOpts=struct;
 animateOpts.StartDelay=3; % Time to hold on first picture

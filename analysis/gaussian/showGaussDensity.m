@@ -56,8 +56,9 @@ end
 strs=strsplit(imgdir,filesep);
 str=[strs{end-1} filesep strs{end}];
 
-hF=figure('Name',[str ' : Density'],...
-    'units','pixels','color','w','Menubar','none','Resize','off');
+hF=figure('Name',['Gauss Density ' str],...
+    'units','pixels','color','w','Menubar','none','Resize','off',...
+    'numbertitle','off');
 hF.Position(1)=1200;
 hF.Position(2)=50;
 hF.Position(3)=400;

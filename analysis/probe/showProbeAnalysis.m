@@ -35,7 +35,7 @@ end
 strs=strsplit(imgdir,filesep);
 str=[strs{end-1} filesep strs{end}];
 
-hF=figure('Name',[str ' : Probe Beam'],...
+hF=figure('Name',['Probe Waist ' str'],...
     'units','pixels','color','w','Menubar','none','Resize','off');
 hF.Position(1)=300;
 hF.Position(2)=750;

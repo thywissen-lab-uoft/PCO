@@ -1,7 +1,7 @@
 function hFs=showGaussProfile(atomdata,direction,style,rNum,xVar)
 global imgdir
 
-pMax=25;
+pMax=36;
 
 switch nargin
     case 1
@@ -37,7 +37,7 @@ for kk=1:(ceil(length(atomdata)/pMax))
     strs=strsplit(imgdir,filesep);
     str=[strs{end-1} filesep strs{end}];
     
-    hFs(kk)=figure('Name', [str ': Cut ' direction], 'Visible', 'On', ...
+    hFs(kk)=figure('Name', [str ': Cut ' direction ' ' num2str(kk)], 'Visible', 'On', ...
         'NumberTitle','off','color','w','MenuBar','none','units','pixels',...
         'Resize','off'); 
     hF=hFs(kk);
@@ -148,7 +148,7 @@ for kk=1:(ceil(length(atomdata)/pMax))
             'FontSize', 8,...
             'verticalalignment','cap','horizontalalignment','right'); 
 
-        iterNum=kk*pMax+ii;
+        iterNum=(kk-1)*pMax+ii;
         
         % Draw the iteration number and variable value
         text(3, thisAxes.Position(4)-1, ...

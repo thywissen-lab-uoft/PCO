@@ -66,8 +66,9 @@ fitY=fit(TOFs',Ys,myfit,opt);
 strs=strsplit(imgdir,filesep);
 str=[strs{end-1} filesep strs{end}];
 
-hF=figure('Name', [str ' : Gaussian Temperature'],...
-    'NumberTitle','off','menubar','none','toolbar','none','color','w'); 
+hF=figure('Name', ['Gauss Temp ' str],...
+    'NumberTitle','off','menubar','none','toolbar','none','color','w',...
+    'numbertitle','off'); 
 clf;
 hF.Position(1)=0;
 hF.Position(2)=480;

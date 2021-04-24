@@ -51,7 +51,7 @@ end
 strs=strsplit(imgdir,filesep);
 str=[strs{end-1} filesep strs{end}];
 
-hF=figure('Name',[str ' : Gaussian Centre'],...
+hF=figure('Name',['Gauss Centre' str],...
     'units','pixels','color','w','Menubar','none','Resize','off');
 hF.Position(1)=1200;
 hF.Position(2)=480;

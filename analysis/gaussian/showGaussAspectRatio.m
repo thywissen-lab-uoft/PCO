@@ -61,8 +61,9 @@ end
 strs=strsplit(imgdir,filesep);
 str=[strs{end-1} filesep strs{end}];
 
-hF=figure('Name',[str ' : Aspect Ratio'],...
-    'units','pixels','color','w','Menubar','none','Resize','off');
+hF=figure('Name',['Gauss Aspect Ratio ' str],...
+    'units','pixels','color','w','Menubar','none','Resize','off',...
+    'numbertitle','off');
 hF.Position(1)=0;
 hF.Position(2)=480;
 hF.Position(3)=400;

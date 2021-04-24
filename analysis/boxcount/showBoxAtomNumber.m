@@ -86,7 +86,7 @@ end
 strs=strsplit(imgdir,filesep);
 str=[strs{end-1} filesep strs{end}];
 
-hF=figure('Name',[str ' : Box Atom Number'],...
+hF=figure('Name',['Box Number ' str],...
     'units','pixels','color','w','Menubar','none','Resize','off');
 hF.Position(1)=1;
 hF.Position(2)=50;
