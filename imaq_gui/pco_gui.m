@@ -241,20 +241,20 @@ tbl_dispROI.Position(3:4)=tbl_dispROI.Extent(3:4);
 tbl_dispROI.Position(1:2)=[0 hp.Position(4)-tbl_dispROI.Position(4)];
 
 ttstr='Maximize display ROI to full image size.';
-cdata=imresize(imread('fullLim.png'),[15 15]);
+cdata=imresize(imread('images/fullLim.png'),[15 15]);
 hbFullLim=uicontrol(hp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
     'Backgroundcolor','w','Position',[1 1 21 20],'Callback',@fullDispCB,...
     'ToolTipString',ttstr);
 
 ttstr='Snap display ROI to data ROI(s).';
-cdata=imresize(imread('snapLim.png'),[15 15]);
+cdata=imresize(imread('images/snapLim.png'),[15 15]);
 hbSnapLim=uicontrol(hp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
     'Backgroundcolor','w','Position',[1 1 21 20],'Callback',@snapDispCB,...
     'ToolTipString',ttstr);
 
 % Button to enable GUI selection of display limits
 ttstr='Select the display ROI.';
-cdata=imresize(imread('target.jpg'),[15 15]);
+cdata=imresize(imread('images/target.jpg'),[15 15]);
 hbSlctLim=uicontrol(hp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
     'Backgroundcolor','w','Position',[1 1 20 20],'Callback',@slctDispCB,...
     'ToolTipString',ttstr);
@@ -361,7 +361,7 @@ cAutoUpdate.Position(3:4)=[90 14];
 % Save button
 ttstr=['Save the image, OD, and fits to file. Images are automatically ' ...
     'saved to the image history if you want to grab them.'];
-cdata=imresize(imread('save.jpg'),[20 20]);
+cdata=imresize(imread('images/save.jpg'),[20 20]);
 bSave=uicontrol(hp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
     'Backgroundcolor','w','Position',[140 5 20 20],'Callback',@saveCB,...
     'ToolTipString',ttstr);
@@ -385,7 +385,7 @@ bSave=uicontrol(hp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
 
 % Settings button
 ttstr='Change some settings.';
-cdata=imresize(imread('gear.jpg'),[20 20]);
+cdata=imresize(imread('images/gear.jpg'),[20 20]);
 hbSettings=uicontrol(hp,'style','pushbutton','CData',cdata,'callback',@settingsCB,...
     'enable','on','backgroundcolor','w','position',[265 5 size(cdata,[1 2])],...
     'ToolTipString',ttstr);
@@ -425,7 +425,7 @@ hbSettings=uicontrol(hp,'style','pushbutton','CData',cdata,'callback',@settingsC
 
 % Button to load an image into the acquisition
 ttstr='Load an image into the acquisition GUI.';
-cdata=imresize(imread('browse.jpg'),[20 20]);
+cdata=imresize(imread('images/browse.jpg'),[20 20]);
 hbBrowseImage=uicontrol(hp,'style','pushbutton','CData',cdata,'callback',@browseImageCB,...
     'enable','on','backgroundcolor','w','position',[265 5 size(cdata,[1 2])],...
     'ToolTipString',ttstr);
@@ -656,7 +656,7 @@ hcautoFits=uicontrol(hpAcq,'style','checkbox','string','save fits?','fontsize',1
     end
 
 % Browse button
-cdata=imresize(imread('browse.jpg'),[20 20]);
+cdata=imresize(imread('images/browse.jpg'),[20 20]);
 bBrowse=uicontrol(hpAcq,'style','pushbutton','CData',cdata,'callback',@browseCB,...
     'enable','off','backgroundcolor','w','position',[270 5 size(cdata,[1 2])]);
 
