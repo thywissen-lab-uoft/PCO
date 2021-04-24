@@ -1,0 +1,394 @@
+function [fitFermi, fitGauss, hF]=fermiFit(X,Y,Z,opts)
+% Fits an image of optical density to a time of flight of a Fermi-Dirac
+% distribution in a harmonic trap
+%
+%   X - X pixel vector (N x 1)
+%   Y - Y pixel vector (M x 1)
+%   Z - 2D data of optical density (M x N)
+%   opts - strucutre which define some important physical options.
+%
+%   opts.tof - the tof time in seconds
+%   opts.pixelsize - the pixel size in meters
+%
+
+disp(' ');
+disp('fermiFit.m')
+%% Physical constants
+
+kB=1.38064852E-23;
+amu=1.66053907E-27 ;
+m=40*amu;
+h=6.62607004E-34;
+hbar=h/(2*pi);
+
+% Image constants
+lambda=767E-9;
+crosssec=lambda^2*(3/(2*pi));
+crosssec=crosssec;
+
+%% Load polylogfunctions
+% polylog is slow and therefore fitting the distribution which calls many
+% polylogs will also be slow. We have made spline lookup tables for Li(2,z)
+% and Li(3,z). They are loaded in this portion of the code
+global polylog2spline
+global polylog3spline
+
+warning off
+polylog2spline = loadLi2;
+polylog3spline = loadLi3;
+warning on
+
+
+%% Make initial guessing
+
+
+% Mesh grid
+[xx,yy]=meshgrid(X,Y);
+
+% X Center Guess - Find average of >90%
+Zx=sum(Z,1);
+Zx(Zx<0)=0;
+Xc=mean(X(Zx>.9*max(Zx)));
+
+
+% Y Center Guess - Find average of >90%
+Zy=sum(Z,2)';
+Zy(Zy<0)=0;
+
+Yc=mean(Y(Zy>.9*max(Zy)));
+
+% Y Width
+Xs=1.0*sqrt(sum((X-Xc).^2.*Zx)/sum(Zx)); % X standard deviation * 1.5
+
+% X Width
+Ys=1.0*sqrt(sum((Y-Yc).^2.*Zy)/sum(Zy)); % Y standard deviation * 1.5
+
+% Width
+W = mean([Xs Ys]);
+
+% Temperature Guess
+% Tg=m*(W*opts.PixelSize/opts.TOF)^2/kB;
+
+% Fugacity guess (always guess to 1, FREE PARAMTER)
+z = 1; % Whhen z=1, T/Tf is about 0.5;
+% z=10^-5;
+
+Q = log(z); % Fit using ln(fugacity), numerically simpler (see writeups)
+Q = 1;
+Trel=real((-6*polylog(3,-z))^(-1/3));
+
+% Amplitude Guess - Find average of >80%.
+A = median(Z(Z>.8*max(max(Z))))/.9;
+Ag = -A/(polylog(2,-1)*Trel^2);        % Scale by amplitude of polylog
+A1 = -A/(polylog(2,-1)*(1E-2)^2);
+A2 = -A/(polylog(2,-1)*(1E2)^2);
+
+% The guess vector
+gg=[Ag W Q Xc Yc];
+
+%% Gauss Fit 2D
+gaussFit=fittype('A*exp(-(X-Xc).^2/(2*Wx^2))*exp(-(Y-Yc).^2/(2*Wy^2))',...
+    'coefficients',{'A','Wx','Wy','Xc','Yc'},'independent',{'X','Y'});
+fitGopts=fitoptions(gaussFit);
+
+% Set the fitting parameters bounds
+fitGopts.Start=[A W W Xc Yc];
+fitGopts.Lower=[0 W/5 W/5 Xc-10 Yc-10];
+fitGopts.Upper=[2*A 5*W 5*W Xc+10 Yc+10];
+
+fitGopts.TolFun=1E-9;
+fitGopts.MaxIter=1000;
+fitGopts.DiffMaxChange=0.5;
+fitGopts.MaxFunEvals=1000;
+
+% Perform the fit
+fprintf('Performing gaussian benchmark fit ... ');
+[foutG, gofG, ~]=fit([xx(:),yy(:)],Z(:),gaussFit,fitGopts);
+disp('done');
+
+% Analyze the results
+fitGauss=struct;
+fitGauss.Fit=foutG;
+fitGauss.GOF=gofG;
+fitGauss.AtomNumber = (foutG.A*2*pi*foutG.Wx*foutG.Wy)*(opts.PixelSize^2/crosssec);
+fitGauss.Temperature = m/kB*(sqrt(foutG.Wx*foutG.Wy)*opts.PixelSize/opts.TOF)^2;
+fitGauss.SSE=gofG.sse;
+fitGauss.AspectRatio=foutG.Wx/foutG.Wy;
+
+disp(['     Gauss Fit Result']);
+disp(['     TOF (ms)        : ' num2str(round(opts.TOF*1E3,2))]);
+disp(['     Center (px)     : ' '[' num2str(round(foutG.Xc,1)) ',' num2str(round(foutG.Yc,1)) ']']);
+disp(['     Width (px)      : ' '[' num2str(round(foutG.Wx,1)) ',' num2str(round(foutG.Wy,1)) ']']);
+disp(['     Temp (uK)       : ' num2str(round(fitGauss.Temperature*1E6,4))]);
+disp(['     Atom Number     : ' num2str(fitGauss.AtomNumber,'%e')]);
+disp(['     sum square err  : ' num2str(gofG.sse)]);
+
+
+%% Fermi-Fit Iniitial Guess
+
+disp(' ');
+disp('Initializing guesses for Fermi-Fit ...');
+
+% Make the guess
+Zg=ODfunc(xx,yy,Ag,W,Q,Xc,Yc);
+
+disp(' ');
+disp(['     Fermi-Fit Guess']);
+disp(['     Center (px)  : ' '[' num2str(round(Xc,1)) ','...
+    num2str(round(Yc,1)) ']']);
+disp(['     Fugacity     : ' num2str(round(z,2))]);
+disp(['     Temp. (Tf)   : ' num2str(round(Trel,3))]);
+disp(['     Width (px)   : ' num2str(round(W,3))]);
+
+if opts.ShowDetails
+
+    % Plot the initial guess
+    hF_guess = figure(1200);
+    clf
+    set(hF_guess,'color','w','Name','Fermi-Fit Guess');
+
+    % Raw data
+    subplot(121)
+    imagesc(X,Y,Z);
+    cl=get(gca,'CLim');
+    axis equal tight
+    colorbar
+    set(gca,'box','on','linewidth',1,'fontsize',14);
+
+    % Residue of the guess
+    subplot(122)
+    imagesc(X,Y,Z-Zg);
+    axis equal tight
+    caxis([-.1 .1]);
+    set(gca,'box','on','linewidth',1,'fontsize',14);
+    colorbar
+end
+
+disp(' ');
+%% Fermi-Fit 
+
+% Define the fit object
+fitFermi=fittype(@(A,W,Q,Xc,Yc,X,Y) ODfunc(X,Y,A,W,Q,Xc,Yc),...
+    'coefficients',{'A','W','Q','Xc','Yc'},'independent',{'X','Y'});
+fitopts=fitoptions(fitFermi);
+
+% Make the initial guess
+fitopts.Start=gg;
+fitopts.Lower=[0 W/5 -14 Xc-10 Yc-10];
+fitopts.Upper=[A1 5*W 20 Xc+10 Yc+10];
+fitopts.TolFun=1E-9;
+fitopts.MaxIter=1000;
+fitopts.DiffMaxChange=0.5;
+fitopts.MaxFunEvals=1000;
+
+% Actually do the fit
+fprintf('Performing Fermi-Fit ...');
+tic
+[fout, gof, ~]=fit([xx(:),yy(:)],Z(:),fitFermi,fitopts);
+disp('done');
+toc
+disp(' ');
+
+% Evaluate the fit
+warning off
+Zfit=feval(fout,xx,yy);
+warning on
+
+% Confidence Intervals
+c=confint(fout);
+
+% Define fit output structure
+fitFermi=struct;
+fitFermi.QtoT = @(Q) real((-6*polylog(3,-exp(Q)))^(-1/3));
+fitFermi.Fit=fout;
+fitFermi.GOF=gof;
+fitFermi.ConfInt=c;
+fitFermi.Temperature=m*(fout.W*opts.PixelSize/opts.TOF)^2/kB;
+fitFermi.FermiTemperature=(fitFermi.QtoT(fout.Q)^(-1))*fitFermi.Temperature;
+
+
+% fitFermi.NAtoms=sum(sum(Zfit))*(opts.PixelSize^2/crosssec);
+warning off
+fitFermi.AtomNumber=real(1/crosssec*2*pi*(fout.W*opts.PixelSize)^2*fout.A/6^(2/3)*(-polylog(3,-exp(fout.Q)))^(1/3));
+warning on
+
+fitFermi.SSE=gof.sse;
+
+%% Display Fermi Fit Result
+
+% disp('%%%%%%%%%%%%%%%%')
+disp(['     Fermi Fit Result']);
+disp(['     Center       (px) : ' '[' num2str(round(fout.Xc,1)) ',' num2str(round(fout.Yc,1)) ']']);
+disp(['     Fugacity          : ' num2str(exp(fout.Q),'%e')]);
+disp(['     Width        (px) : ' num2str(round(fout.W,3))]);
+disp(['     Atom Number       : ' num2str(fitFermi.AtomNumber,'%e')]);
+disp(['     Temp.        (nK) : ' num2str(fitFermi.Temperature*1E9)]);
+disp(['     Fermi Temp.  (nK) : ' num2str(fitFermi.FermiTemperature*1E9)]);
+disp(['     T/Tf              : ' num2str(fitFermi.Temperature/fitFermi.FermiTemperature)]);
+disp(['     sum square err  : ' num2str(gof.sse)]);
+
+%% Plot the results
+hF=[];
+if opts.ShowDetails
+    hF = figure(1917);
+    clf
+    set(hF,'color','w','Name','Fermi-Fit');
+    hF.Position(3:4)=[600 800];
+    hF.Position(1:2)=[100 100];
+
+    % Plot the data
+    subplot(321)
+    imagesc(X,Y,Z);
+    cl=get(gca,'CLim');
+    axis equal tight
+    % colorbar
+    set(gca,'box','on','linewidth',1,'fontsize',6);
+    text(5,5,'data','units','pixels','verticalalignment','bottom',...
+        'color','r');
+
+    % Plot the fit
+    subplot(322)
+    imagesc(X,Y,Zfit);
+    axis equal tight
+    caxis(cl);
+    set(gca,'box','on','linewidth',1,'fontsize',8);
+    % colorbar
+    text(5,5,'fit','units','pixels','verticalalignment','bottom',...
+        'color','r');
+
+    % Plot xcut
+    subplot(323)
+    p1=plot(X,feval(foutG,X,foutG.Yc),'-','linewidth',2,'color','cyan');
+    hold
+    p2=plot(X,feval(fout,X,fout.Yc),'r-','linewidth',2);
+    hold on
+    iY=find(Y==round(fout.Yc),1);
+    % iY=[iY-1 iY iY+1];
+    ZyCut=sum(Z(iY,:),1)/length(iY);
+    plot(X,ZyCut,'k.-','linewidth',1);
+    xlim([min(X) max(X)]);
+    % xlabel('x position (px)');
+    set(gca,'box','on','linewidth',1,'fontsize',8);
+    text(.02,.98,'x cut','units','normalized','verticalalignment','top',...
+        'color','r');
+    ylabel('optical density');
+
+    % Plot ycut
+    subplot(324)
+    iX=find(X==round(fout.Xc),1);
+    % iX=[iX-1 iX iX+1];
+    % iX=
+    ZxCut=sum(Z(:,iX),2)/length(iX);
+    plot(Y,feval(foutG,foutG.Xc,Y),'-','linewidth',2,'color','cyan');
+    hold on
+    plot(Y,feval(fout,fout.Xc,Y),'r-','linewidth',2);
+    hold on
+    plot(Y,ZxCut,'k.-','linewidth',1);
+    xlim([min(Y) max(Y)]);
+    set(gca,'box','on','linewidth',1,'fontsize',8);
+    text(.02,.98,'y cut','units','normalized','verticalalignment','top',...
+        'color','r');
+    ylabel('optical density');
+
+
+    subplot(325)
+    imagesc(X,Y,Z-Zfit);
+    axis equal tight
+    caxis([-.1 .1]);
+    set(gca,'box','on','linewidth',1,'fontsize',8);
+    % colorbar
+    text(5,5,'residue','units','pixels','verticalalignment','bottom',...
+        'color','r');
+
+    ax6=subplot(326);
+
+
+    tbl=uitable('fontsize',8,'ColumnEditable',[false false false],'units','normalized');
+    tbl.ColumnName={'','Gaussian','Fermi'};
+    tbl.RowName={};
+    tbl.ColumnWidth={85 65 65};
+
+    data{1,1}='TOF (ms)';
+    data{2,1}='Atom Number';
+    data{3,1}='Center X';
+    data{4,1}='Center Y';
+    data{5,1}='Temp. (nK)';
+    data{6,1}='SSE';
+    data{7,1}='Fugacity';
+    data{8,1}='Fermi Temp. (nK)';
+    data{9,1}='T/Tf';
+    data{10,1}='Wx/Wy';
+
+    data{1,2}=opts.TOF*1E3;
+    data{1,3}=opts.TOF*1E3;
+
+    data{2,2}=fitGauss.AtomNumber;
+    data{3,2}=round(fitGauss.Fit.Xc,1);
+    data{4,2}=round(fitGauss.Fit.Yc,1);
+    data{5,2}=round(fitGauss.Temperature*1E9,1);
+    data{6,2}=round(fitGauss.SSE,3);
+
+    data{2,3}=fitFermi.AtomNumber;
+    data{3,3}=round(fitFermi.Fit.Xc,1);
+    data{4,3}=round(fitFermi.Fit.Yc,1);
+    data{5,3}=round(fitFermi.Temperature*1E9,1);
+    data{6,3}=round(fitFermi.SSE,3);
+    data{7,3}=round(exp(fitFermi.Fit.Q),2);
+    data{8,3}=round(fitFermi.FermiTemperature*1E9,1);
+    data{9,3}=round(fitFermi.Temperature/fitFermi.FermiTemperature,4);
+
+    data{10,2}=round(fitGauss.AspectRatio,4);
+
+    tbl.Data=data;
+
+    tbl.Position(3:4)=tbl.Extent(3:4);
+
+
+    tbl.Position(1:2)=ax6.Position(1:2);
+    delete(ax6);
+end
+
+end
+
+% This is the actual fitting function used
+function Z=ODfunc(X,Y,A,W,Q,xc,yc)
+
+% Use global definition of polylog2/3 splines (clunky)
+    global polylog2spline
+    global polylog3spline
+
+    % Load splines fo polylog(2,z) polylog(3,z)
+%     tic
+%     polylog2spline = loadLi2;
+%     polylog3spline = loadLi3;
+%     toc
+
+    % Pre-process data for visual clarity
+    z=exp(Q);                   % Fugacity from Q=ln(z)
+    R2=(Y-yc).^2+(X-xc).^2;     % Relative distance squared
+    zz=exp(-(R2./(2*W.^2)));    % z=0 Gaussian distribution
+    
+
+    warning off    
+        
+    % Calculate T=T/Tf
+%   T=real((-6*polylog(3,-z))^(-1/3));          % Symbolic form (slow)
+%   T=real((-6*polylogB(3,-z))^(-1/3));         % Jonquiere's (|z|<0.55)
+    T=real((-6*polylog3spline(-z))^(-1/3));     % Look up table
+    
+    % Calculate distribution
+
+    % Symbolic form (slow)
+%     Z=-A*T^2* polylog(2,-z*zz);
+    
+    % Jonquiere's function |z|<0.55
+    % Z=-A*T^2* polylogB(2,-z*zz*(1/T));   
+    
+    
+    % Put it all together
+% %     Z=-A*T^2*polylog2spline(-z*zz*(1/T));
+        Z=-A*T^2*polylog2spline(-z*zz);
+
+    Z=real(Z);
+    warning on    
+end
