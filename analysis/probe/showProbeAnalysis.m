@@ -35,8 +35,9 @@ end
 strs=strsplit(imgdir,filesep);
 str=[strs{end-1} filesep strs{end}];
 
-hF=figure('Name',['Probe Waist ' str'],...
-    'units','pixels','color','w','Menubar','none','Resize','off');
+hF=figure('Name',[pad('Probe Waist',20) str],...
+    'units','pixels','color','w','Menubar','none','Resize','off',...
+    'numbertitle','off');
 hF.Position(1)=300;
 hF.Position(2)=750;
 hF.Position(3)=300;

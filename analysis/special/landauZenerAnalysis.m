@@ -108,8 +108,9 @@ str=[strs{end-1} filesep strs{end}];
 
 
 % Initialize the figure
-hF=figure('Name',[str ' : Landau Zener Analysis'],...
-    'units','pixels','color','w','Menubar','none','Resize','off');
+hF=figure('Name',[pad('Landau Zener',20) str],...
+    'units','pixels','color','w','Menubar','none','Resize','off',...
+    'numbertitle','off');
 hF.Position(1)=0;
 hF.Position(2)=50;
 hF.Position(3)=500;
