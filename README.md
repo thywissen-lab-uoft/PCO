@@ -2,7 +2,7 @@
 MATLAB code for running the PCO cameras
 
 
-##### Hardware Requirements
+### Hardware Requirements
 To get the camera initially working with a Windows 10 machine,
 you will require the following:
 
@@ -22,7 +22,7 @@ Use the following steps to power cycle the box.
 2) Turn on Magma with camera plugged in
 3) Turn on PC
 
-#### Initial Communication
+### Initial Communication
 The drivers for the pco 540 camera are provided by PCO at 
 
 https://www.pco.de/support/interface/scientific-cameras-1/pixelfly-qe/
@@ -42,4 +42,12 @@ version 3.17.  The software may be found at
 
 https://ca.pco-tech.com/software/camera-control-software/pcocamware/
 
-SW_CAMWAREWIN64_317      
+SW_CAMWAREWIN64_317  
+
+You should verifying that you can take images with the camera from here.
+
+### Operating the code
+Once all drivers have been installed, you may run the gui and the analysis programs
+
+analysis/PCO_analysis.m
+imaq_gui/PCO_gui.m

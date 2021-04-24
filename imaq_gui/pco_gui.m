@@ -1,5 +1,5 @@
-function pco_abs_gui
-% pco_abs_gui.m
+function pco_gui
+% pco_gui.m
 %
 % Author      : CF Fujiwara
 % Last Edited : 2020/12
