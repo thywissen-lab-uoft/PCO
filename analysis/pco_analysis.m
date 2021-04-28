@@ -109,8 +109,8 @@ end
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-xVar='ExecutionDate';
-unit='Hz';
+xVar='lat_mod_freq';
+unit='kHz';
 
 %xVar='lens_pos';
 %unit='mm';
@@ -207,7 +207,7 @@ atomdata=atomdata(inds);
 
 % ROI=  [729 1042 230 453];   % XDT TOF 5 ms
 
-ROI=[717 1039 331 633]; %K RF1B 5ms tof
+% ROI=[717 1039 331 633]; %K RF1B 5ms tof
 % ROI=[751 1032 272 408]; %K ODT loading 5ms tof
 
 % ROI=[500 1200 480 680;
@@ -252,6 +252,14 @@ ROI=[717 1039 331 633]; %K RF1B 5ms tof
 % 10 ms tof am spec 75-200 recoil y
 % ROI = [855 895 345 430;
 %     810 940 345 430];
+
+
+% 7 ms tof am spec 75-200 recoil x, y camera
+% ROI = [556 619 542 634;
+%     500 676 541 655];
+ROI = [560 610 535 615;
+    490 685 535 615];
+
 
 % 10ms tof am spec 25 recoil Z
 % ROI = [830 920 365 415;
@@ -468,7 +476,7 @@ if doBoxCount
 end
 
 % Custom Box Count
-doCustomBox=0;
+doCustomBox=1;
 if doCustomBox 
     xx=Ndatabox.X;
     N1=Ndatabox.Natoms(:,1);
@@ -485,7 +493,8 @@ if doCustomBox
     ylabel('Relative Excited Atoms');
     set(gca,'fontsize',12,'linewidth',1,'box','on');
     yL=get(gca,'YLim');
-    ylim([0 yL(2)]);
+%     ylim([0 yL(2)]);
+    ylim([0 1]);
     hold on
     
     Y=dNRel;
@@ -519,7 +528,7 @@ if doCustomBox
             '$\mathrm{FWHM} = ' num2str(round(abs(fout_lorentz.G),2)) ' $ kHz'];
         legend(pExp,{str},'interpreter','latex','location','best');
         
-        xlim([175 260]);
+        xlim([60 150]);
     
     end
 %     hax.YLim(1)=0;
@@ -659,7 +668,7 @@ end
     
     
 %% Animate cloud
-doAnimate = 0;
+doAnimate = 1;
 if doAnimate == 1
 animateOpts=struct;
 animateOpts.StartDelay=3; % Time to hold on first picture
