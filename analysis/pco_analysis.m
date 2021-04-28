@@ -110,7 +110,7 @@ doSave=1;
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-xVar='lat_mod_freq';
+xVar='ExecutionDate';
 unit='kHz';
 
 %xVar='lens_pos';
@@ -197,7 +197,7 @@ atomdata=atomdata(inds);
 % While in principle different images can have different analysis ROIs,
 % this is currently disabled because it creates code issues at the moment.
 
-% ROI = [533 1323 230 980];   % RF1B 5 ms TOF
+ROI = [533 1323 230 980];   % RF1B 5 ms TOF
 
 % ROI = [840 930 200 265;
 %     840 930 265 310;
@@ -238,7 +238,7 @@ atomdata=atomdata(inds);
 
 
 % ROI = [800 960 330 450]; % BM 10 ms TOF
-ROI= [830 930 400 465;830 930 330 395];  % BM, SG, 10 ms
+% ROI= [830 930 400 465;830 930 330 395];  % BM, SG, 10 ms
 % ROI= [820 930 450 550;820 930 350 450];  % BM, SG, 13 ms
 
 % ROI = [820 930 280 510;
@@ -258,8 +258,8 @@ ROI= [830 930 400 465;830 930 330 395];  % BM, SG, 10 ms
 % 7 ms tof am spec 75-200 recoil x, y camera
 % ROI = [556 619 542 634;
 %     500 676 541 655];
-ROI = [560 610 535 615;
-    490 685 535 615];
+% ROI = [560 610 535 615;
+%     490 685 535 615];
 
 
 % 10ms tof am spec 25 recoil Z
@@ -497,7 +497,7 @@ if doBoxCount
 end
 
 % Custom Box Count
-doCustomBox=1;
+doCustomBox=0;
 if doCustomBox 
     xx=Ndatabox.X;
     N1=Ndatabox.Natoms(:,1);
@@ -549,7 +549,10 @@ if doCustomBox
             '$\mathrm{FWHM} = ' num2str(round(abs(fout_lorentz.G),2)) ' $ kHz'];
         legend(pExp,{str},'interpreter','latex','location','best');
         
-        xlim([60 150]);
+%         xlim([60 150]);
+        xlim([min(xx*1E-3) max(xx*1E-3)]);
+
+        
     
     end
 %     hax.YLim(1)=0;
