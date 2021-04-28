@@ -103,7 +103,7 @@ switch camaxis
         error('You didn''t pick a camera');
 end
 
-doSave=0;
+doSave=1;
 %% Analysis Variable
 % This section of code chooses the variable to plot against for aggregate
 % plots.  The chosen variable MUST match a variable provided in the params
