@@ -103,6 +103,7 @@ switch camaxis
         error('You didn''t pick a camera');
 end
 
+doSave=0;
 %% Analysis Variable
 % This section of code chooses the variable to plot against for aggregate
 % plots.  The chosen variable MUST match a variable provided in the params
@@ -111,6 +112,8 @@ end
 
 xVar='ExecutionDate';
 unit='Hz';
+xVar='Raman_Freq';
+unit='kHz';
 
 %xVar='lens_pos';
 %unit='mm';
@@ -207,7 +210,7 @@ atomdata=atomdata(inds);
 
 % ROI=  [729 1042 230 453];   % XDT TOF 5 ms
 
-ROI=[717 1039 331 633]; %K RF1B 5ms tof
+% ROI=[717 1039 331 633]; %K RF1B 5ms tof
 % ROI=[751 1032 272 408]; %K ODT loading 5ms tof
 
 % ROI=[500 1200 480 680;
@@ -237,7 +240,7 @@ ROI=[717 1039 331 633]; %K RF1B 5ms tof
 
 
 % ROI = [800 960 330 450]; % BM 10 ms TOF
-% ROI= [830 930 400 465;830 930 330 395];  % BM, SG, 10 ms
+ROI= [830 930 400 465;830 930 330 395];  % BM, SG, 10 ms
 % ROI= [820 930 450 550;820 930 350 450];  % BM, SG, 13 ms
 
 % ROI = [820 930 280 510;
@@ -306,7 +309,10 @@ doProbeFit=0;
 if doProbeFit
    atomdata=analyzeProbeBeam(atomdata);
    [hF_probe]=showProbeAnalysis(atomdata,xVar);
-    saveFigure(atomdata,hF_probe,'probe_details')
+   
+   if doSave
+        saveFigure(atomdata,hF_probe,'probe_details')
+   end
 end
 
 %% ANALYSIS : Box Count
@@ -415,10 +421,16 @@ end
 % Plotting
 if doFermiFitLong
     hF_fermi_temp=showFermiTemp(atomdata,xVar);
-    saveFigure(atomdata,hF_fermi_temp,'fermi_temperature')
+    
+    if doSave
+        saveFigure(atomdata,hF_fermi_temp,'fermi_temperature');
+    end
     
     hF_fermi_error=showFermiError(atomdata,xVar);
-    saveFigure(atomdata,hF_fermi_error,'fermi_error')
+    
+    if doSave
+        saveFigure(atomdata,hF_fermi_error,'fermi_error')
+    end
     
     
     % Use trap frequencies
@@ -432,7 +444,10 @@ if doFermiFitLong
 %     freqs=307.38*ones(1,length(atomdata));
     
     hF_fermi_temp2=showFermiTempCompare(atomdata,xVar,freqs);
-    saveFigure(atomdata,hF_fermi_temp2,'fermi_compare')
+    
+    if doSave
+        saveFigure(atomdata,hF_fermi_temp2,'fermi_compare')
+    end
 
 end
 
@@ -450,19 +465,27 @@ boxPopts.NumberExpFit = 0;                  % Fit exponential decay to atom numb
 if doBoxCount  
     % Plot the atom number
     [hF_numberbox,Ndatabox]=showBoxAtomNumber(atomdata,xVar,boxPopts);      
-    saveFigure(atomdata,hF_numberbox,'box_number'); 
+    
+    if doSave
+        saveFigure(atomdata,hF_numberbox,'box_number'); 
+    end
     
     % Plot the ratios if there are more than one ROI.
     if size(ROI,1)>1    
         [hF_numberratio,Ndataratio]=showBoxAtomNumberRatio(atomdata,xVar,boxPopts);
-        saveFigure(atomdata,hF_numberratio,'box_number_ratio');
+        
+        if doSave
+            saveFigure(atomdata,hF_numberratio,'box_number_ratio');
+        end
     end      
     
        
         % Plot the atom number
     hF_box_ratio=showBoxAspectRatio(atomdata,xVar);      
-    saveFigure(atomdata,hF_box_ratio,'box_ratio');
     
+    if doSave
+        saveFigure(atomdata,hF_box_ratio,'box_ratio');
+    end
      
     
 end
@@ -549,40 +572,64 @@ gaussPopts.CenterLinearFit = 0;     % Linear fit to cloud center
 if doGaussFit  
     % Plot the statistics
     hF_stats=showGaussStats(atomdata); 
-    saveFigure(atomdata,hF_stats,['gauss_stats']);
+    
+    if doSave
+        saveFigure(atomdata,hF_stats,['gauss_stats']);
+    end
        
     % Plot the atom number
     [hF_numbergauss,Ndatagauss]=showGaussAtomNumber(atomdata,xVar,gaussPopts);  
      %ylim([0 max(get(gca,'YLim'))]);
      %ylim([3.5E6 4.5E6]);
      %xlim([0 max(get(gca,'XLim'))]);    
-    saveFigure(atomdata,hF_numbergauss,'gauss_number');    
+     
+     if doSave
+        saveFigure(atomdata,hF_numbergauss,'gauss_number');    
+     end
     
     % Plot the ratios if there are more than one ROI.
     if size(ROI,1)>1    
         hF_numbergaussratio=showGaussAtomNumberRatio(atomdata,xVar,gaussPopts);
-        saveFigure(atomdata,hF_numbergaussratio,'gauss_number_ratio');
+        if doSave
+            saveFigure(atomdata,hF_numbergaussratio,'gauss_number_ratio');
+        end
     end
     
     % Plot the gaussian radii
     hF_size=showGaussSize(atomdata,xVar);
-    saveFigure(atomdata,hF_size,'gauss_size')   
+    
+    if doSave
+        saveFigure(atomdata,hF_size,'gauss_size');   
+    end
         
     % Plot the aspect ratio
     hF_ratio=showGaussAspectRatio(atomdata,xVar);
-    saveFigure(atomdata,hF_ratio,['gauss_ratio']);
+    
+    if doSave
+        saveFigure(atomdata,hF_ratio,['gauss_ratio']);
+    end
     
     % Plot the peak gaussian density
     hF_density=showGaussDensity(atomdata,xVar);
-    saveFigure(atomdata,hF_density,'gauss_density')
+    
+    if doSave
+        saveFigure(atomdata,hF_density,'gauss_density');
+    end
     
     % Single shot temperature analysis
     [hF_tempsingle,Tdata]=showGaussSingleTemperature(atomdata,xVar);
-    saveFigure(atomdata,hF_tempsingle,'gauss_tempsingle')      
+    
+    if doSave
+        saveFigure(atomdata,hF_tempsingle,'gauss_tempsingle');
+    end
+    
    
     % Cloud centre
     hF_Centre=showGaussAtomCentre(atomdata,xVar,gaussPopts);
-    saveFigure(atomdata,hF_Centre,'gauss_position')  
+    
+    if doSave
+        saveFigure(atomdata,hF_Centre,'gauss_position');
+    end
     
     
     if isequal(xVar,'tof') && length(atomdata)>2
@@ -603,14 +650,15 @@ if doGaussFit
         hF_Ys_rNum=showGaussProfile(atomdata,'Y',style,rNum,xVar);  
 
 %       Save the figures (this can be slow)
-        for kk=1:length(hF_Xs_rNum)            
-            saveFigure(atomdata,hF_Xs_rNum(kk),['gauss_profile_X' num2str(rNum) '_' num2str(kk)]);
-        end 
-        
-        for kk=1:length(hF_Ys_rNum)
-            saveFigure(atomdata,hF_Ys_rNum(kk),['gauss_profile_Y' num2str(rNum) '_' num2str(kk)]);
+        if doSave
+            for kk=1:length(hF_Xs_rNum)            
+                saveFigure(atomdata,hF_Xs_rNum(kk),['gauss_profile_X' num2str(rNum) '_' num2str(kk)]);
+            end 
+
+            for kk=1:length(hF_Ys_rNum)
+                saveFigure(atomdata,hF_Ys_rNum(kk),['gauss_profile_Y' num2str(rNum) '_' num2str(kk)]);
+            end
         end
-        
         hF_X=[hF_X; hF_Xs_rNum];
         hF_Y=[hF_Y; hF_Ys_rNum];
     end    
@@ -652,7 +700,10 @@ if doLandauZener && size(ROI,1)==2 && doBoxCount && length(atomdata)>3
 
     % Perform the analysis and save the output
     [hF_LandauZener,frabi]=landauZenerAnalysis(atomdata,dtdf,lz_opts); 
-    saveFigure(atomdata,hF_LandauZener,'box_landau_zener');
+    
+    if doSave
+        saveFigure(atomdata,hF_LandauZener,'box_landau_zener');
+    end
 
 end
     
