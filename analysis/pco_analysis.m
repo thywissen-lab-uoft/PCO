@@ -360,31 +360,49 @@ if doBoxCount
     
 end
 
-%% ANALYSIS : Box Count BANDMAP CUSTOM
+%% ANALYSIS : Box Count Raman Spectroscopy
 
 % VERY MUCH IN PROTOTYPE
-%{
-doBandMapBox=0;
 
-bmap=struct;
-bmap.FBZ_SIZE=[20 40]; % Size of FBZ in pixels (x,y)
-% bmap.TwoSpin
+doRamanSpec=1;
 
-doSubBG=1;
-bgROI=[900 1000 450 500]; % even more zoom in for BM
-if doBandMapBox
-    disp(repmat('-',1,60));    
-    disp('Performing band map analysis.');
-    disp(repmat('-',1,60));        
+raman=struct;
+raman.doSubBG=1;
+raman.bgROI=[920 970 350 450];
+raman.ROI_1=[835 920 400 465];
+raman.ROI_2=[835 920 330 400];
+
+raman.ROI_2_V=[860 895 330 350;
+   860 895 385 400];
+
+raman.ROI_2_H=[835 865 350 390;
+   895 920 350 390];
+
+% Spectrum Fitting
+
+raman.doFit=1;
+raman.CFitBounds=[-300 -50;
+   -50 200];
+raman.VFitBounds=[-50 200;
+   200 450];
+raman.HFitBounds=[-50 200;
+       200 450];
+raman.CLim=[0 .5];
+   
+if doRamanSpec
+    disp(repmat('-',1,60));
+    disp('Analyzing box count with Raman Spectroscopy...');
+    disp(repmat('-',1,60));
+    atomdata=ramanSpectroscopy(atomdata,raman);
+    hF_raman=showRamanSpectroscopy(atomdata,xVar,raman);    
     
-    if doSubBG
-        atomdata=boxCount(atomdata,bgROI);
-    else
-        atomdata=boxCount(atomdata);
+    if doSave
+        saveFigure(atomdata,hF_raman,'raman_spec');
     end
     
+    
 end
-%}
+
 %% ANALYSIS : 2D Gaussian
 % This section of code computes a 2D gaussin fit on all your data and ROIs.
 % Warning, this can take a while.
