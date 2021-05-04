@@ -37,18 +37,20 @@ N_2_H_r=N_2_H./(N_1+N_2);
 N_2_C_r=N_2_C./(N_1+N_2);
 
 %% Fitting
+
+cFits={};
+vFits={};
+hFits={};
+
 if opts.doFit
-    cFits={};
     for kk=1:size(opts.CFitBounds,1)
         cFits{kk}=fitLorentzian(xvals,N_2_C_r,opts.CFitBounds(kk,:));
     end
     
-    vFits={};
     for kk=1:size(opts.VFitBounds,1)
         vFits{kk}=fitLorentzian(xvals,N_2_V_r,opts.VFitBounds(kk,:));
     end
     
-    hFits={};
     for kk=1:size(opts.HFitBounds,1)
         hFits{kk}=fitLorentzian(xvals,N_2_H_r,opts.HFitBounds(kk,:));
     end
@@ -105,14 +107,18 @@ xlabel(xVar,'interpreter','none');
 ylabel('relative box atom number');
 
 
-cStrs=[];
+cStrs='';
 for kk=1:length(cFits)
     plot(xx,feval(cFits{kk},xx),'-','color','k','linewidth',2);
-    cStrs=[cStrs num2str(round(cFits{kk}.x0)) ' kHz' newline];
+    cStrs=[cStrs num2str(round(cFits{kk}.x0)) ' kHz'];    
+    if kk<length(cFits)
+       cStrs=[cStrs newline]; 
+    end
 end
 
-text(.02,.98,cStrs,'units','normalized','fontsize',12,...
-    'color','k','verticalalignment','top');
+text(.98,.98,cStrs,'units','normalized','fontsize',12,...
+    'color','k','verticalalignment','top','backgroundcolor',[1 1 1 .5],...
+    'horizontalalignment','right');
 
 
 
@@ -126,22 +132,30 @@ xlabel(xVar,'interpreter','none');
 ylabel('relative box atom number');
 
 
-vStrs=[];
+vStrs='';
 for kk=1:length(vFits)
     plot(xx,feval(vFits{kk},xx),'-','color',co(5,:),'linewidth',2);
-    vStrs=[vStrs num2str(round(vFits{kk}.x0)) ' kHz' newline];
+    vStrs=[vStrs num2str(round(vFits{kk}.x0)) ' kHz'];
+    if kk<length(vFits)
+       vStrs=[vStrs newline]; 
+    end
 end
 
-hStrs=[];
+hStrs='';
 for kk=1:length(hFits)
     plot(xx,feval(hFits{kk},xx),'-','color',co(6,:),'linewidth',2);
-    hStrs=[hStrs num2str(round(hFits{kk}.x0)) ' kHz' newline];
+    hStrs=[hStrs num2str(round(hFits{kk}.x0)) ' kHz'];
+    if kk<length(hFits)
+       hStrs=[hStrs newline]; 
+    end
 end
 
 text(.02,.98,hStrs,'units','normalized','fontsize',12,...
-    'color',co(6,:),'verticalalignment','top');
+    'color',co(6,:),'verticalalignment','top','backgroundcolor',[1 1 1 .5]);
+
+
 text(.98,.98,vStrs,'units','normalized','fontsize',12,...
-    'color',co(5,:),'verticalalignment','top','horizontalalignment','right');
+    'color',co(5,:),'verticalalignment','top','horizontalalignment','right','backgroundcolor',[1 1 1 .5]);
 
 
 
@@ -241,6 +255,7 @@ function fout=fitLorentzian(X,Y,xb)
     opt.StartPoint=[A0 G0 x0 bg];   
     
     opt.Lower=[0 0 min(X) 0];   
+    opt.Upper=[A0*1.2 100 max(X) .2];   
 
     opt.Robust='bisquare';
 

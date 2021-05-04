@@ -372,21 +372,38 @@ raman.bgROI=[920 970 350 450];
 raman.ROI_1=[835 920 400 465];
 raman.ROI_2=[835 920 330 400];
 
+
 raman.ROI_2_V=[860 895 330 350;
    860 895 385 400];
-
 raman.ROI_2_H=[835 865 350 390;
    895 920 350 390];
 
 % Spectrum Fitting
 
 raman.doFit=1;
+
+% 750 750 750
 raman.CFitBounds=[-300 -50;
    -50 200];
 raman.VFitBounds=[-50 200;
    200 450];
 raman.HFitBounds=[-50 200;
        200 450];
+   
+% 700 700 700
+raman.CFitBounds=[-300 -50;
+   -50 200];
+raman.VFitBounds=[-50 200;
+   200 450];
+raman.HFitBounds=[-50 200;
+       200 450];   
+
+% 500 500 500
+raman.CFitBounds=[-300 -50;
+   -50 200];
+raman.VFitBounds=[-70 150];
+raman.HFitBounds=[-70 150];   
+   
 raman.CLim=[0 .5];
    
 if doRamanSpec
