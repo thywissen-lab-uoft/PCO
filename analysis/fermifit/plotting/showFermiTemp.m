@@ -166,7 +166,7 @@ end
 
 
 
- ylim([0 500]);
+ ylim([0 400]);
 % ylim([0 1500]);
 
 yyaxis right
@@ -178,9 +178,9 @@ for nn=1:size(atomdata(1).ROI,1)
 end
 
 
-legend([p1 p2 p3],{'T','T_F','gauss'},'location','best');
+legend([p1 p2 p3],{'T','T_F','gauss'},'location','best','orientation','horizontal','fontsize',8);
 
-ylim([0 1]);
+ylim([0 .5]);
 ylabel('T/TF');
 
 set(gca,'YColor',co(3,:))

@@ -110,7 +110,7 @@ doSave=1;
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-xVar='ExecutionDate';
+xVar='Raman_Freq';
 unit='kHz';
 
 %xVar='lens_pos';
@@ -197,7 +197,7 @@ atomdata=atomdata(inds);
 % While in principle different images can have different analysis ROIs,
 % this is currently disabled because it creates code issues at the moment.
 
-ROI = [533 1323 230 980];   % RF1B 5 ms TOF
+% ROI = [533 1323 230 980];   % RF1B 5 ms TOF
 
 % ROI = [840 930 200 265;
 %     840 930 265 310;
@@ -207,8 +207,8 @@ ROI = [533 1323 230 980];   % RF1B 5 ms TOF
 % ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
 
 % ROI=  [729 1042 230 453];   % XDT TOF 5 ms
-
-% ROI=[717 1039 331 633]; %K RF1B 5ms tof
+% 
+% ROI=[700 1050 350 650]; %K RF1B 5ms tof
 % ROI=[751 1032 272 408]; %K ODT loading 5ms tof
 
 % ROI=[500 1200 480 680;
@@ -258,8 +258,7 @@ ROI = [533 1323 230 980];   % RF1B 5 ms TOF
 % 7 ms tof am spec 75-200 recoil x, y camera
 % ROI = [556 619 542 634;
 %     500 676 541 655];
-% ROI = [560 610 535 615;
-%     490 685 535 615];
+
 
 
 % 10ms tof am spec 25 recoil Z
@@ -268,6 +267,15 @@ ROI = [533 1323 230 980];   % RF1B 5 ms TOF
 %%%%%%%%%%%%%%%%%%% Y CAM %%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % ROI = [1 1392 400 600]; % XDT Insitu long
+
+% 7 ms tof am spec 75-200 recoil y camera
+% ROI = [560 610 535 615;
+%     490 685 535 615];
+
+%%% Raman transfers SG bandmapping 10ms tof
+ROI = [830 924 404 471;
+    804 954 303 404]; 
+
 
 
 %%%%%%%%%%%%%%%%%%%CHIP
@@ -335,6 +343,9 @@ bgROI=[400 500 400 500];
 bgROI=[700 800 450 500];
 
 %bgROI=[900 1000 450 500]; % even more zoom in for BM
+
+
+bgROI=[800 1000 600 700]; % for k dfg long tof
 
 if doBoxCount
     disp(repmat('-',1,60));    
@@ -496,6 +507,7 @@ if doBoxCount
     
 end
 
+%%
 % Custom Box Count
 doCustomBox=0;
 if doCustomBox 
@@ -523,26 +535,40 @@ if doCustomBox
     
 
     if length(atomdata)>4
-        myfit=fittype('A*((x-x0).^2+(G/2).^2).^(-1)+bg','coefficients',{'A','G','x0','bg'},...
-            'independent','x');
+        % Symmetric Lorentzian
+%         myfit=fittype('A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)+bg','coefficients',{'A','G','x0','bg'},...
+%             'independent','x');
+%         opt=fitoptions(myfit);
+%         G0=10;
+%         bg=min(Y);
+%         A0=(max(Y)-min(Y));
+%         inds=[Y>.8*max(Y)];
+%         x0=mean(X(inds));     
+%         opt.StartPoint=[A0 G0 x0 bg];   
+%         opt.Robust='bisquare';
+
+        
+        % Assymmetric
+        g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
+        y=@(x,a,x0,G,A,bg) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1)+bg;        
+        myfit=fittype(@(a,x0,G,A,bg,x) y(x,a,x0,G,A,bg),'coefficients',{'a','x0','G','A','bg'},...
+            'independent','x'); 
         opt=fitoptions(myfit);
-        A0=max(Y)-min(Y);
-        G0=range(X)/2;
+        G0=10;
         bg=min(Y);
-
+        A0=(max(Y)-min(Y))*(G0/2).^2;
         inds=[Y>.8*max(Y)];
-        x0=mean(X(inds));       
-        opt.StartPoint=[A0 G0 x0 bg];    
-    %     opt.Upper=[1.1*A0 2*G0 2*x0 1.5*bg];    
+        x0=mean(X(inds));     
+        opt.StartPoint=[.2 x0 G0 A0 bg];  
         opt.Robust='bisquare';
-    %     opt.StartPoint=[.075 50 95 .06];
 
-        opt.Lower=[0 0 0 0];    
+        
+ 
 
         fout_lorentz=fit(X',Y,myfit,opt);
 
 
-        XF=linspace(min(X),max(X),100);
+        XF=linspace(min(X),max(X),1000);
         pExp=plot(XF,feval(fout_lorentz,XF),'r-','linewidth',2);
 
         str=['$f_0 = ' num2str(round(fout_lorentz.x0,1)) '$ kHz' newline ...
