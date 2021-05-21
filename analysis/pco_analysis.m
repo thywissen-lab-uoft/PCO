@@ -71,8 +71,7 @@ lambdaRb=780E-9;lambdaK=770E-9;   % Rb and K wavelengths
 lambda=mean([lambdaRb lambdaK]);  % mean wavelength      
 crosssec=3/(2*pi)*lambda^2; % ideal cross 2-level cross section
 
-% Choose display rotation
-doRotate=0;
+
 
 % Choose your camera
 camaxis='X';
@@ -110,11 +109,15 @@ doSave=1;
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-xVar='Raman_Freq';
-unit='kHz';
+xVar='k_op_am';'Rb_Trap_Frequency_Offset';'op_time';'k_rftransfer_freq';
+xVar='k_op_am';
+unit='V';
 
 %xVar='lens_pos';
 %unit='mm';
+
+% Rotate the images?
+doRotate=0;
 
 %% Select image directory
 % Choose the directory where the images to analyze are stored
@@ -206,35 +209,34 @@ atomdata=atomdata(inds);
 
 % ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
 
-% ROI=  [729 1042 230 453];   % XDT TOF 5 ms
-% 
-% ROI=[700 1050 350 650]; %K RF1B 5ms tof
+% ROI=  [507 1299 104 966];
+
+ROI=[700 1050 350 650]; %K RF1B 5ms tof
 % ROI=[751 1032 272 408]; %K ODT loading 5ms tof
 
 % ROI=[500 1200 480 680;
 %     500 1200 720 920];
-
-% ROI=[753 1013 183 554];   % XDT TOF 15 ms
+% ROI=[649 1160 580 1024];   % XDT TOF 15 ms
 
 
  %ROI=[617 1091 258 385];   % XDT1 only TOF 5 ms
  %ROI = [500 1392 250 360]; % XDT 1/2 insitu long X
 %  ROI = [500 1392 300 500]; % XDT 1/2 TOF 10 ms long X9
 
-
-
-% ROI=[700 1050 200 400];   % XDT  TOF 5 ms
+% ROI=[784 1000 270 420];   % XDT  TOF 5 ms
 % ROI=[577 1250 240 819];   % XDT  TOF 15 ms
 % ROI=[708 1089 377 608];   % XDT  TOF 20 ms evaporation
 
-
-
 % ROI=[713 1015 310 601];
 %  ROI=[780 970 200 1013];   % XDT  TOF analysis
-
 % ROI=[812 938 701 866];   % XDT  TOF 25 ms evaporation ZOOM
 % 
 % ROI=[800 950 680 880];   % XDT  TOF 25 ms evaporation
+% ROI=[650 1150 600 1000];   % XDT  TOF 25 ms evaporation
+
+
+
+% ROI=[820 920 270 400]; 
 
 
 % ROI = [800 960 330 450]; % BM 10 ms TOF
@@ -244,6 +246,14 @@ atomdata=atomdata(inds);
 % ROI = [820 930 280 510;
 %     820 920 370 410]; % BMZ AM SPEC 10 ms TOF
 
+
+% % 12ms tof SG from XDT #850 900 300 560;
+% ROI = [825 900 300 565;
+%        825 900 565 610];
+
+% 12ms tof SG from lattice #850 900 300 560;
+% ROI = [830 900 695 760;
+%        830 900 630 695];
 %%%%%%%%%% X CAM AM SPEC
 
 % 10 ms tof am spec 75-200 recoil z
@@ -261,6 +271,7 @@ atomdata=atomdata(inds);
 
 
 
+
 % 10ms tof am spec 25 recoil Z
 % ROI = [830 920 365 415;
 %     830 920 330 450];
@@ -273,10 +284,12 @@ atomdata=atomdata(inds);
 %     490 685 535 615];
 
 %%% Raman transfers SG bandmapping 10ms tof
-ROI = [830 924 404 471;
-    804 954 303 404]; 
+% ROI = [830 924 400 475;
+%     830 924 320 395]; 
 
-
+%%% Raman transfers SG bandmapping 18ms tof
+% ROI = [830 940 590 700;
+%     830 940 450 560]; 
 
 %%%%%%%%%%%%%%%%%%%CHIP
 
@@ -332,7 +345,7 @@ end
 %% ANALYSIS : Box Count
 % This section of code computes the box counts on all your data and ROIs.
 
-doBoxCount=1;
+doBoxCount=0;
 
 doSubBG=1;
 bgROI=[400 500 400 500];
@@ -364,7 +377,7 @@ end
 
 % VERY MUCH IN PROTOTYPE
 
-doRamanSpec=1;
+doRamanSpec=0;
 
 raman=struct;
 raman.doSubBG=1;
@@ -561,8 +574,8 @@ if doCustomBox
     ylabel('Relative Excited Atoms');
     set(gca,'fontsize',12,'linewidth',1,'box','on');
     yL=get(gca,'YLim');
-%     ylim([0 yL(2)]);
-    ylim([0 1]);
+    ylim([0 yL(2)]);
+%     ylim([0 1]);
     hold on
     
     Y=dNRel;
@@ -610,8 +623,8 @@ if doCustomBox
             '$\mathrm{FWHM} = ' num2str(round(abs(fout_lorentz.G),2)) ' $ kHz'];
         legend(pExp,{str},'interpreter','latex','location','best');
         
-%         xlim([60 150]);
-        xlim([min(xx*1E-3) max(xx*1E-3)]);
+        xlim([130 200]);
+%         xlim([min(xx*1E-3) max(xx*1E-3)]);
 
         
     
@@ -667,41 +680,32 @@ if doGaussFit
     end
     
     % Plot the gaussian radii
-    hF_size=showGaussSize(atomdata,xVar);
-    
+    hF_size=showGaussSize(atomdata,xVar);    
     if doSave
         saveFigure(atomdata,hF_size,'gauss_size');   
     end
         
     % Plot the aspect ratio
-    hF_ratio=showGaussAspectRatio(atomdata,xVar);
-    
-    if doSave
-        saveFigure(atomdata,hF_ratio,['gauss_ratio']);
-    end
+    hF_ratio=showGaussAspectRatio(atomdata,xVar);    
+    if doSave saveFigure(atomdata,hF_ratio,['gauss_ratio']); end
     
     % Plot the peak gaussian density
-    hF_density=showGaussDensity(atomdata,xVar);
-    
+    hF_density=showGaussDensity(atomdata,xVar);    
     if doSave
         saveFigure(atomdata,hF_density,'gauss_density');
     end
     
     % Single shot temperature analysis
-    [hF_tempsingle,Tdata]=showGaussSingleTemperature(atomdata,xVar);
-    
+    [hF_tempsingle,Tdata]=showGaussSingleTemperature(atomdata,xVar);    
     if doSave
         saveFigure(atomdata,hF_tempsingle,'gauss_tempsingle');
-    end
-    
+    end    
    
     % Cloud centre
-    hF_Centre=showGaussAtomCentre(atomdata,xVar,gaussPopts);
-    
+    hF_Centre=showGaussAtomCentre(atomdata,xVar,gaussPopts);    
     if doSave
         saveFigure(atomdata,hF_Centre,'gauss_position');
-    end
-    
+    end    
     
     if isequal(xVar,'tof') && length(atomdata)>2
         [hF,fitX,fitY]=computeGaussianTemperature(atomdata,xVar);
@@ -790,8 +794,8 @@ animateOpts.EndDelay=2;     % Time to hold final picture
 
 
 % animateOpts.Order='descend';    % Asceneding or descending
-animateOpts.Order='ascend';
-animateOpts.CLim=[0 .5];   % Color limits
+animateOpts.Order='descend';
+animateOpts.CLim=[0 1.5];   % Color limits
 
 animateCloud(atomdata,xVar,animateOpts);
 end

@@ -118,10 +118,19 @@ set(gca,'units','pixels','box','on','linewidth',2);
 % Add ROI
 for kk=1:size(atomdata(1).ROI,1)
     ROI=atomdata(1).ROI(kk,:);
-    x0=ROI(1);
-    y0=ROI(3);
-    H=ROI(4)-ROI(3);
-    W=ROI(2)-ROI(1);
+    
+    if doRotate
+        y0=ROI(1);
+        x0=ROI(3);    
+        W=ROI(4)-ROI(3);
+        H=ROI(2)-ROI(1);
+    else
+        x0=ROI(1);
+        y0=ROI(3);
+        H=ROI(4)-ROI(3);
+        W=ROI(2)-ROI(1);
+    end
+    
     pROI=rectangle('position',[x0 y0 W H],'edgecolor',co(kk,:),'linewidth',2);
 end
 
