@@ -78,8 +78,8 @@ camaxis='X';
 % camaxis='Y';
 
 % Choose your atom
-% atom = 'K';
 atom = 'K';
+% atom = 'Rb';
 
 % Load pertinent physical constants
 amu=1.660539E-27; 
@@ -158,10 +158,10 @@ for kk=1:length(files)
 %     Pplug=interp1(plug_curr(1,:),plug_curr(3,:),Iplug);    
 %     data.Params.PlugPower=Pplug;
 %     disp([Iplug Pplug])
-
     
     atomdata(kk)=data;    
 end
+
 disp(' ');
 
 if isequal(xVar,'ExecutionDate')
@@ -179,18 +179,14 @@ clear x
 disp(['Sorting atomdata by the given ''' xVar '''']);
 
 for kk=1:length(atomdata)
-
     if isfield(atomdata(kk).Params,xVar)
         x(kk)=atomdata(kk).Params.(xVar);
     else
         warning(['atomdata(' num2str(kk) ') has no ''' xVar '''']);
     end
 end
-
 [~, inds]=sort(x);
 atomdata=atomdata(inds);
-
-
 %% Analysis ROI
 % Analysis ROI is an Nx4 matrix of [X1 X2 Y1 Y2] which specifies a region
 % to analyze. Each new row in the matrix indicates a separate ROI to
@@ -300,13 +296,11 @@ ROI=[852 905 706 767;
 [atomdata.ROI]=deal(ROI);
 
 %% Display ROI
-% ROI over which to display
+% ROI over which to display, useful for the animation
 global aROI
 
 % Default is to snap to minimum ROI
 aROI=[min(ROI(:,1)) max(ROI(:,2)) min(ROI(:,3)) max(ROI(:,4))];
-
-
 
 
 %% Calculate the optical density
@@ -317,8 +311,6 @@ ODopts=struct;
 % Scale probe beam to minimize background offset?
 ODopts.ScaleProbe=1;
 ODopts.ScaleProbeROI=[1 100 900 1000];  % ROI to do the scaling
-
-% ODopts.ScaleProbeROI=[800 900 50 150];  % ROI CHIP
 
 % Apply gaussian filter to images?
 ODopts.GaussFilter=0;
@@ -336,11 +328,8 @@ saveFigure(atomdata,hF_probe,'probe')
 doProbeFit=0;
 if doProbeFit
    atomdata=analyzeProbeBeam(atomdata);
-   [hF_probe]=showProbeAnalysis(atomdata,xVar);
-   
-   if doSave
-        saveFigure(atomdata,hF_probe,'probe_details')
-   end
+   [hF_probe]=showProbeAnalysis(atomdata,xVar);   
+   if doSave;saveFigure(atomdata,hF_probe,'probe_details');end
 end
 
 %% ANALYSIS : Box Count
@@ -425,13 +414,8 @@ if doRamanSpec
     disp('Analyzing box count with Raman Spectroscopy...');
     disp(repmat('-',1,60));
     atomdata=ramanSpectroscopy(atomdata,raman);
-    hF_raman=showRamanSpectroscopy(atomdata,xVar,raman);    
-    
-    if doSave
-        saveFigure(atomdata,hF_raman,'raman_spec');
-    end
-    
-    
+    hF_raman=showRamanSpectroscopy(atomdata,xVar,raman);      
+    if doSave;saveFigure(atomdata,hF_raman,'raman_spec');end        
 end
 
 %% ANALYSIS : 2D Gaussian
@@ -483,77 +467,42 @@ if doFermiFitLong
     atomdata=computeFermiFit(atomdata,fermiFitOpts);      
 end
 
-
 % Plotting
 if doFermiFitLong
-    hF_fermi_temp=showFermiTemp(atomdata,xVar);
+    hF_fermi_temp=showFermiTemp(atomdata,xVar);    
+    if doSave;saveFigure(atomdata,hF_fermi_temp,'fermi_temperature');end
     
-    if doSave
-        saveFigure(atomdata,hF_fermi_temp,'fermi_temperature');
-    end
+    hF_fermi_error=showFermiError(atomdata,xVar);    
+    if doSave;saveFigure(atomdata,hF_fermi_error,'fermi_error');end    
     
-    hF_fermi_error=showFermiError(atomdata,xVar);
-    
-    if doSave
-        saveFigure(atomdata,hF_fermi_error,'fermi_error')
-    end
-    
-    
-    % Use trap frequencies
+    % Calculate trap frequencies
     params=[atomdata.Params];
     powers=[params.Evap_End_Power];
     foo = @(P) 61.5*sqrt(P./(0.085)); % Calibrated 2021.02.25
-    freqs=foo(powers);
+    freqs=foo(powers);    
     
-
-% % CHIP
-%     freqs=307.38*ones(1,length(atomdata));
-    
-    hF_fermi_temp2=showFermiTempCompare(atomdata,xVar,freqs);
-    
-    if doSave
-        saveFigure(atomdata,hF_fermi_temp2,'fermi_compare')
-    end
-
+    hF_fermi_temp2=showFermiTempCompare(atomdata,xVar,freqs);    
+    if doSave;saveFigure(atomdata,hF_fermi_temp2,'fermi_compare');end
 end
-
-
-
-
-
 %% PLOTTING : BOX COUNT
-
 boxPopts = struct;
-boxPopts.NumberExpFit = 0;                  % Fit exponential decay to atom number
-
+boxPopts.NumberExpFit = 0;                  
 
 % gaussPopts.
 if doBoxCount  
     % Plot the atom number
-    [hF_numberbox,Ndatabox]=showBoxAtomNumber(atomdata,xVar,boxPopts);      
-    
-    if doSave
-        saveFigure(atomdata,hF_numberbox,'box_number'); 
-    end
+    [hF_numberbox,Ndatabox]=showBoxAtomNumber(atomdata,xVar,boxPopts); 
+    if doSave;saveFigure(atomdata,hF_numberbox,'box_number');end
     
     % Plot the ratios if there are more than one ROI.
     if size(ROI,1)>1    
         [hF_numberratio,Ndataratio]=showBoxAtomNumberRatio(atomdata,xVar,boxPopts);
-        
-        if doSave
-            saveFigure(atomdata,hF_numberratio,'box_number_ratio');
-        end
-    end      
+        if doSave;saveFigure(atomdata,hF_numberratio,'box_number_ratio');end
+    end       
     
-       
-        % Plot the atom number
-    hF_box_ratio=showBoxAspectRatio(atomdata,xVar);      
-    
-    if doSave
-        saveFigure(atomdata,hF_box_ratio,'box_ratio');
-    end
-     
-    
+    % Plot the box aspect ratio
+    hF_box_ratio=showBoxAspectRatio(atomdata,xVar);
+    if doSave;saveFigure(atomdata,hF_box_ratio,'box_ratio');end
 end
 
 %%
@@ -596,7 +545,6 @@ if doCustomBox
 %         opt.StartPoint=[A0 G0 x0 bg];   
 %         opt.Robust='bisquare';
 
-        
         % Assymmetric
         g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
         y=@(x,a,x0,G,A,bg) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1)+bg;        
@@ -611,35 +559,20 @@ if doCustomBox
         opt.StartPoint=[.2 x0 G0 A0 bg];  
         opt.Robust='bisquare';
 
-        
- 
-
         fout_lorentz=fit(X',Y,myfit,opt);
-
 
         XF=linspace(min(X),max(X),1000);
         pExp=plot(XF,feval(fout_lorentz,XF),'r-','linewidth',2);
 
         str=['$f_0 = ' num2str(round(fout_lorentz.x0,1)) '$ kHz' newline ...
             '$\mathrm{FWHM} = ' num2str(round(abs(fout_lorentz.G),2)) ' $ kHz'];
-        legend(pExp,{str},'interpreter','latex','location','best');
-        
-        xlim([130 200]);
-%         xlim([min(xx*1E-3) max(xx*1E-3)]);
-
-        
-    
+        legend(pExp,{str},'interpreter','latex','location','best');        
+        xlim([130 200]);    
     end
 %     hax.YLim(1)=0;
     pp=get(gcf,'position');
-    set(gcf,'position',[pp(1) pp(2) 400 400]);
-    
+    set(gcf,'position',[pp(1) pp(2) 400 400]);    
     saveFigure(atomdata,hFB,'am_spec');
-    
-
-
-
-    
 end
 
 %% PLOTTING : 2D 
@@ -655,63 +588,47 @@ gaussPopts.CenterLinearFit = 0;     % Linear fit to cloud center
 
 % gaussPopts.
 if doGaussFit  
-    % Plot the statistics
-    hF_stats=showGaussStats(atomdata); 
-    
-    if doSave
-        saveFigure(atomdata,hF_stats,['gauss_stats']);
-    end
+    % Plot the statistics of gaussian fit
+    hF_stats=showGaussStats(atomdata);     
+    if doSave;saveFigure(atomdata,hF_stats,'gauss_stats');end
        
-    % Plot the atom number
+    % Atom number
     [hF_numbergauss,Ndatagauss]=showGaussAtomNumber(atomdata,xVar,gaussPopts);  
      %ylim([0 max(get(gca,'YLim'))]);
      %ylim([3.5E6 4.5E6]);
      %xlim([0 max(get(gca,'XLim'))]);    
      
-     if doSave
-        saveFigure(atomdata,hF_numbergauss,'gauss_number');    
-     end
+    if doSave;saveFigure(atomdata,hF_numbergauss,'gauss_number');end
     
     % Plot the ratios if there are more than one ROI.
     if size(ROI,1)>1    
         hF_numbergaussratio=showGaussAtomNumberRatio(atomdata,xVar,gaussPopts);
-        if doSave
-            saveFigure(atomdata,hF_numbergaussratio,'gauss_number_ratio');
-        end
+        if doSave;saveFigure(atomdata,hF_numbergaussratio,'gauss_number_ratio');end
     end
     
-    % Plot the gaussian radii
+    % Gaussian radii
     hF_size=showGaussSize(atomdata,xVar);    
-    if doSave
-        saveFigure(atomdata,hF_size,'gauss_size');   
-    end
+    if doSave;saveFigure(atomdata,hF_size,'gauss_size');end
         
-    % Plot the aspect ratio
+    % Aspect ratio
     hF_ratio=showGaussAspectRatio(atomdata,xVar);    
-    if doSave saveFigure(atomdata,hF_ratio,['gauss_ratio']); end
+    if doSave;saveFigure(atomdata,hF_ratio,'gauss_ratio');end
     
-    % Plot the peak gaussian density
+    % Peak gaussian density
     hF_density=showGaussDensity(atomdata,xVar);    
-    if doSave
-        saveFigure(atomdata,hF_density,'gauss_density');
-    end
+    if doSave;saveFigure(atomdata,hF_density,'gauss_density');end
     
     % Single shot temperature analysis
     [hF_tempsingle,Tdata]=showGaussSingleTemperature(atomdata,xVar);    
-    if doSave
-        saveFigure(atomdata,hF_tempsingle,'gauss_tempsingle');
-    end    
+    if doSave;saveFigure(atomdata,hF_tempsingle,'gauss_tempsingle');end    
    
     % Cloud centre
     hF_Centre=showGaussAtomCentre(atomdata,xVar,gaussPopts);    
-    if doSave
-        saveFigure(atomdata,hF_Centre,'gauss_position');
-    end    
+    if doSave;saveFigure(atomdata,hF_Centre,'gauss_position');end    
     
     if isequal(xVar,'tof') && length(atomdata)>2
         [hF,fitX,fitY]=computeGaussianTemperature(atomdata,xVar);
-    end
-        
+    end       
 
 
      % Style of profile --> cut or sum?
@@ -737,8 +654,7 @@ if doGaussFit
         end
         hF_X=[hF_X; hF_Xs_rNum];
         hF_Y=[hF_Y; hF_Ys_rNum];
-    end    
-    
+    end        
 end
     
 
