@@ -78,8 +78,8 @@ camaxis='X';
 % camaxis='Y';
 
 % Choose your atom
+% atom = 'K';
 atom = 'K';
-% atom = 'Rb';
 
 % Load pertinent physical constants
 amu=1.660539E-27; 
@@ -109,9 +109,8 @@ doSave=1;
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-xVar='k_op_am';'Rb_Trap_Frequency_Offset';'op_time';'k_rftransfer_freq';
-xVar='k_op_am';
-unit='V';
+xVar='ExecutionDate';
+unit='s';
 
 %xVar='lens_pos';
 %unit='mm';
@@ -209,9 +208,7 @@ atomdata=atomdata(inds);
 
 % ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
 
-% ROI=  [507 1299 104 966];
-
-ROI=[700 1050 350 650]; %K RF1B 5ms tof
+% ROI=[700 1050 350 650]; %K RF1B 5ms tof
 % ROI=[751 1032 272 408]; %K ODT loading 5ms tof
 
 % ROI=[500 1200 480 680;
@@ -229,14 +226,18 @@ ROI=[700 1050 350 650]; %K RF1B 5ms tof
 
 % ROI=[713 1015 310 601];
 %  ROI=[780 970 200 1013];   % XDT  TOF analysis
-% ROI=[812 938 701 866];   % XDT  TOF 25 ms evaporation ZOOM
+
+
+ROI=[812 938 701 866];   % XDT  TOF 25 ms evaporation ZOOM
 % 
 % ROI=[800 950 680 880];   % XDT  TOF 25 ms evaporation
 % ROI=[650 1150 600 1000];   % XDT  TOF 25 ms evaporation
 
+% ROI = [830 925 350 465;
+%     830 925 515 595];
 
-
-% ROI=[820 920 270 400]; 
+ROI=[852 905 706 767;
+    852 905 600 706];    %K SG 15ms TOF -9,-7 boxes
 
 
 % ROI = [800 960 330 450]; % BM 10 ms TOF
@@ -345,7 +346,7 @@ end
 %% ANALYSIS : Box Count
 % This section of code computes the box counts on all your data and ROIs.
 
-doBoxCount=0;
+doBoxCount=1;
 
 doSubBG=1;
 bgROI=[400 500 400 500];
@@ -436,7 +437,7 @@ end
 %% ANALYSIS : 2D Gaussian
 % This section of code computes a 2D gaussin fit on all your data and ROIs.
 % Warning, this can take a while.
-doGaussFit=1;           % Flag for performing the gaussian fit
+doGaussFit=0;           % Flag for performing the gaussian fit
 
 if doGaussFit
     disp(repmat('-',1,60));    
@@ -747,7 +748,7 @@ doLandauZener=0;
 
 
 lz_opts=struct;
-lz_opts.LZ_GUESS=[10 .8]; % Fit guess kHz,ampltidue can omit guess as well
+lz_opts.LZ_GUESS=[1 .8]; % Fit guess kHz,ampltidue can omit guess as well
 % Only perform landau zener on two ROI, boxcount, and more than three
 % pictures
 % Note to CF : Could add analysis for raw and gaussian (later)
@@ -759,16 +760,16 @@ if doLandauZener && size(ROI,1)==2 && doBoxCount && length(atomdata)>3
     params=[atomdata.Params];
 
     % Get df and dt
-    SweepTimeVar='sweep_time';      % Variable that defines sweep time
-    SweepRangeVar='delta_freq';    %    Variable that defines sweep range
+    SweepTimeVar='rf_k_sweep_time_post_evap';      % Variable that defines sweep time
+    SweepRangeVar='rf_k_sweep_range_post_evap';    %    Variable that defines sweep range
     
-    SweepTimeVar='Raman_Time';      % Variable that defines sweep time
-    SweepRangeVar='Sweep_Range';    %    Variable that defines sweep range
-    
+%     SweepTimeVar='Raman_Time';      % Variable that defines sweep time
+%     SweepRangeVar='Sweep_Range';    %    Variable that defines sweep range
+%     
     % Convert the parameter into df and dt (add whatever custom processing
     % you want).
     dT=[params.(SweepTimeVar)];
-    dF=[params.(SweepRangeVar)];
+    dF= 10;%[params.(SweepRangeVar)];
     
     % Convert to dtdf
     dtdf=dT./dF; 
@@ -794,8 +795,8 @@ animateOpts.EndDelay=2;     % Time to hold final picture
 
 
 % animateOpts.Order='descend';    % Asceneding or descending
-animateOpts.Order='descend';
-animateOpts.CLim=[0 1.5];   % Color limits
+animateOpts.Order='ascend';
+animateOpts.CLim=[0 1];   % Color limits
 
 animateCloud(atomdata,xVar,animateOpts);
 end
