@@ -232,12 +232,14 @@ ROI=[812 938 701 866];   % XDT  TOF 25 ms evaporation ZOOM
 % ROI = [830 925 350 465;
 %     830 925 515 595];
 
-ROI=[852 905 706 767;
-    852 905 600 706];    %K SG 15ms TOF -9,-7 boxes
+% ROI=[852 905 706 767;
+%     852 905 600 706];    %K SG 15ms TOF -9,-7 boxes
 
 
 % ROI = [800 960 330 450]; % BM 10 ms TOF
-% ROI= [830 930 400 465;830 930 330 395];  % BM, SG, 10 ms
+
+% ROI= [830 930 230 430;830 930 430 590];  % BM, SG, 10 ms
+
 % ROI= [820 930 450 550;820 930 350 450];  % BM, SG, 13 ms
 
 % ROI = [820 930 280 510;
@@ -335,19 +337,14 @@ end
 %% ANALYSIS : Box Count
 % This section of code computes the box counts on all your data and ROIs.
 
-doBoxCount=1;
+doBoxCount=0;   % Enable box count analysis
+doSubBG=1;      % Subtract background based on reference spot?
 
-doSubBG=1;
 bgROI=[400 500 400 500];
-
 % Box count for small cloud (get close to where the atoms live)
 % bgROI=[750 820 350 450];
-
 bgROI=[700 800 450 500];
-
 %bgROI=[900 1000 450 500]; % even more zoom in for BM
-
-
 bgROI=[800 1000 600 700]; % for k dfg long tof
 
 if doBoxCount
@@ -359,8 +356,7 @@ if doBoxCount
         atomdata=boxCount(atomdata,bgROI);
     else
         atomdata=boxCount(atomdata);
-    end
-    
+    end    
 end
 
 %% ANALYSIS : Box Count Raman Spectroscopy
@@ -452,7 +448,7 @@ end
 % However, if the trap frequency is known via an independent measure, it
 % can be used as a check.
 
-doFermiFitLong=0;
+doFermiFitLong=1;
 
 fermiFitOpts=struct;
 fermiFitOpts.ShowDetails=1;         % Plot shot-by-shot details?
@@ -484,9 +480,19 @@ if doFermiFitLong
     hF_fermi_temp2=showFermiTempCompare(atomdata,xVar,freqs);    
     if doSave;saveFigure(atomdata,hF_fermi_temp2,'fermi_compare');end
 end
+
 %% PLOTTING : BOX COUNT
 boxPopts = struct;
-boxPopts.NumberExpFit = 0;                  
+boxPopts.NumberExpFit = 0;       
+
+% NOT IMPLEMETNED YET
+% boxPopts.NumberSineFit = 0;
+% boxPopts.NumberSineDecayFit = 0;
+
+boxPopts.RatioSineFit=0;
+
+% NOT IMPLEMENTED YET
+% boxPopts.RatioSineDecayFit=0;
 
 % gaussPopts.
 if doBoxCount  

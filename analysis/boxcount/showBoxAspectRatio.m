@@ -92,7 +92,6 @@ hax.Position(4)=hax.Position(4)-20;
 co=get(gca,'colororder');
 
 for nn=1:size(atomdata(1).ROI,1)
-    disp(co(nn,:))
    plot(xvals,Ys(:,nn)./Xs(:,nn),'o','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
