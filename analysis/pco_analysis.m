@@ -109,14 +109,18 @@ doSave=1;
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-xVar='ExecutionDate';
-unit='s';
+xVar= 'uwave_pulse_time';
+unit='MHz';
 
 %xVar='lens_pos';
 %unit='mm';
 
 % Rotate the images?
 doRotate=0;
+
+% Rename the paramete ri nplots  TO BE CODED
+doRename=0;
+new_name='bob (kHz)';
 
 %% Select image directory
 % Choose the directory where the images to analyze are stored
@@ -217,20 +221,22 @@ atomdata=atomdata(inds);
 %  ROI = [500 1392 300 500]; % XDT 1/2 TOF 10 ms long X9
 
 % ROI=[784 1000 270 420];   % XDT  TOF 5 ms
-% ROI=[577 1250 240 819];   % XDT  TOF 15 ms
+% % ROI=[577 1250 240 819];   % XDT  TOF 15 ms
 % ROI=[708 1089 377 608];   % XDT  TOF 20 ms evaporation
 
 % ROI=[713 1015 310 601];
 %  ROI=[780 970 200 1013];   % XDT  TOF analysis
 
 
-ROI=[812 938 701 866];   % XDT  TOF 25 ms evaporation ZOOM
+% ROI=[812 938 701 866];   % XDT  TOF 25 ms evaporation ZOOM
 % 
 % ROI=[800 950 680 880];   % XDT  TOF 25 ms evaporation
 % ROI=[650 1150 600 1000];   % XDT  TOF 25 ms evaporation
 
 % ROI = [830 925 350 465;
 %     830 925 515 595];
+ROI = [830 925 280 355;    % K 10 ms tof 9 v
+    830 925 470 545];
 
 % ROI=[852 905 706 767;
 %     852 905 600 706];    %K SG 15ms TOF -9,-7 boxes
@@ -334,10 +340,10 @@ if doProbeFit
    if doSave;saveFigure(atomdata,hF_probe,'probe_details');end
 end
 
-%% ANALYSIS : Box Count
+%% ANALYSIS : Box Cojuunt
 % This section of code computes the box counts on all your data and ROIs.
 
-doBoxCount=0;   % Enable box count analysis
+doBoxCount=1;   % Enable box count analysis
 doSubBG=1;      % Subtract background based on reference spot?
 
 bgROI=[400 500 400 500];
@@ -448,7 +454,7 @@ end
 % However, if the trap frequency is known via an independent measure, it
 % can be used as a check.
 
-doFermiFitLong=1;
+doFermiFitLong=0;
 
 fermiFitOpts=struct;
 fermiFitOpts.ShowDetails=1;         % Plot shot-by-shot details?
@@ -490,6 +496,9 @@ boxPopts.NumberExpFit = 0;
 % boxPopts.NumberSineDecayFit = 0;
 
 boxPopts.RatioSineFit=0;
+
+boxPopts.RatioRabiFit=1;
+boxPopts.RatioRabiFitGuess=[1 2*pi*1.5 0 0.01]; % Amplitude,frequency,phase,decay
 
 % NOT IMPLEMENTED YET
 % boxPopts.RatioSineDecayFit=0;
@@ -682,8 +691,12 @@ if doLandauZener && size(ROI,1)==2 && doBoxCount && length(atomdata)>3
     params=[atomdata.Params];
 
     % Get df and dt
-    SweepTimeVar='rf_k_sweep_time_post_evap';      % Variable that defines sweep time
-    SweepRangeVar='rf_k_sweep_range_post_evap';    %    Variable that defines sweep range
+%     SweepTimeVar='sweep_time';      % Variable that defines sweep time
+%     SweepRangeVar='sweep_range';    %    Variable that defines sweep range
+    
+
+    SweepTimeVar='uwave_sweep_time';      % Variable that defines sweep time
+    SweepRangeVar='uwave_delta_freq';    %    Variable that defines sweep range
     
 %     SweepTimeVar='Raman_Time';      % Variable that defines sweep time
 %     SweepRangeVar='Sweep_Range';    %    Variable that defines sweep range
@@ -691,7 +704,7 @@ if doLandauZener && size(ROI,1)==2 && doBoxCount && length(atomdata)>3
     % Convert the parameter into df and dt (add whatever custom processing
     % you want).
     dT=[params.(SweepTimeVar)];
-    dF= 10;%[params.(SweepRangeVar)];
+    dF= 2*[params.(SweepRangeVar)]*1000; % Factor of two for the SRS
     
     % Convert to dtdf
     dtdf=dT./dF; 

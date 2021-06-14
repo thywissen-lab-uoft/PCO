@@ -8,6 +8,7 @@ if nargin==2
     opts=struct;
     opts.RatioSineFit=0;
     opts.RatioSineDecayFit=0;
+    opts.RatioRabiFit=0;
 end
 
 
@@ -43,6 +44,7 @@ end
 Xs = Xs*pxsize;
 Ys = Ys*pxsize;
 Zs = Zs*pxsize;
+
 %% Automatically detect low data points
 
 badInds=[NatomsTot<3E4];
@@ -74,6 +76,11 @@ if opts.RatioSineFit
     end    
 end
 
+if opts.RatioRabiFit
+% Fit the number ratio to a sine wave.
+    [func_rabi,params_rabi]=makeRabiFit(outdata.X,outdata.NRatio,opts.RatioRabiFitGuess);
+end
+
 %% Make Figure
 
 % Create image directory string name
@@ -102,7 +109,10 @@ co=get(gca,'colororder');
 set(hax,'box','on','linewidth',1,'fontsize',14,'units','pixels');
 hold on
 xlabel(xVar,'interpreter','none');
+% xlabel('pulsetime');
+
 ylabel('relative box atom number');
+
 hax.Position(4)=hax.Position(4)-20;
 
 
@@ -119,12 +129,21 @@ if opts.RatioSineFit
     end    
 end
 
+if opts.RatioRabiFit
+    xx=linspace(min(xvals),max(xvals),100);
+    Nfit=func_rabi(params_rabi,xx');    
+    ps(1)=plot(xx,Nfit(:,1),'-','linewidth',2,...
+            'color',co(1,:)); 
+    ps(2)=plot(xx,Nfit(:,2),'-','linewidth',2,...
+            'color',co(2,:));    
+end
+
 
 for nn=1:size(atomdata(1).ROI,1)
    plot(xvals,Natoms(:,nn)./NatomsTot','o','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
-ylim([0 1]);
+ylim([0 1.2]);
 
 
 
@@ -139,10 +158,27 @@ ylim([0 yL(2)]);
 set(gca,'YColor',[.4 .4 .4]);
 
 if opts.RatioSineFit
-
-legend(ps,fstrs,'fontsize',8,'interpreter','latex');
-
+    legend(ps,fstrs,'fontsize',8,'interpreter','latex');
 end
+
+if opts.RatioRabiFit
+    rabi_freq=params_rabi(1)/(2*pi); % Convert angular frequency to frequency
+    phi=params_rabi(2)/pi; % convert phase to in units of pi
+    A=params_rabi(3); % amplitude;
+    tau=params_rabi(4); % decay time
+    
+    tstr=['$0.5\left(1\pm\cos(\Omega t+\phi)A\exp(-t/\tau)\right)$' newline ...
+        '$\Omega=2\pi\times~' num2str(rabi_freq,3) ',~' ...
+        'A=' num2str(A,2) ',~' ...
+        '\phi=' num2str(phi,2) '\pi,~'  ...
+        '\tau=' num2str(tau,1) '$'];
+    
+    text(.02,.98,tstr,'units','normalized','fontsize',8,...
+        'backgroundcolor',[1 1 1 .8],'interpreter','latex',...
+        'verticalalignment','top','edgecolor','k','margin',1);      
+    
+end
+
 % Image directory folder string
 t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left','fontsize',6);
@@ -153,6 +189,34 @@ t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
 
 
     
+end
+
+function [myfunc,outparams]=makeRabiFit(Tdata,Ndata,pGuess)
+% N is a column matrix of Nx2
+% t is a time column vector Nx1
+
+myfunc=@ (A,Omega,phi,tau,t) [0.5*(1+cos(Omega*t).*A.*exp(-t./tau)) ...
+    0.5*(1-cos(Omega*t).*A.*exp(-t./tau))];
+
+% T=2;
+% fG=1/T;
+
+% Guess of amplitude, rabi frequency, and T2 time
+
+myfunc=@ (p,t) ...
+    [0.5*(1+cos(p(1)*t+p(2)).*p(3).*exp(-t./p(4))) ...
+    0.5*(1-cos(p(1)*t+p(2)).*p(3).*exp(-t./p(4)))];
+
+err_func = @(p) norm(Ndata - myfunc(p,Tdata));
+
+options=optimset('MaxFunEvals', 1000000, ...
+    'MaxIter',1000000, 'Display', 'off', 'TolX', 1e-0012);
+
+[x,fval,exitflag,output] = fminsearch(err_func,pGuess,options);
+
+outparams=x;
+
+
 end
 
 function fitResult=makeSineDecayFit(X,Y)
@@ -167,6 +231,7 @@ gD=0.5*(max(Y)+min(Y));
 iHigh=find((Y-gD)/gA>.8,1);
 iLow=find((Y-gD)/gA<-.8,1);
 gB=abs(X(iHigh)-X(iLow))*2;
+
 
 % Guess initial phase (hardest to do)
 gC= 0 ;

@@ -53,7 +53,7 @@ Zs = Zs*pxsize;
 
 % Which ROI do we plot against?
 % [~,ind]=min(Natoms(1,:));    
-ind=2;
+ind=1;
 
 % Calculate the normalized atom number
 Nrel=Natoms(:,ind)'./NatomsTot;
@@ -84,14 +84,14 @@ yy1=feval(fout1,dtdfVec);
 
 % Output the frabi frequency
 frabi=fout1.f_rabi;
-f1str=['$\Omega_R=2\pi \times' num2str(round(fout1.f_rabi,2))  '~\mathrm{kHz}$'];
+f1str=['$\Omega_R=2\pi \times' num2str(round(fout1.f_rabi,3))  '~\mathrm{kHz}$'];
 
 
 % Fit to the other function that has T2
 fout2=doLZFit2(dtdf',Nrel');
 yy2=feval(fout2,dtdfVec);
 frabi2=fout2.f_rabi;
-f2str=['$\Omega_R=2\pi \times' num2str(round(fout2.f_rabi,2))  '~\mathrm{kHz},~T_2=' num2str(round(fout2.T2,2)) '~\mathrm{ms}$'];
+f2str=['$\Omega_R=2\pi \times' num2str(round(fout2.f_rabi,3))  '~\mathrm{kHz},~T_2=' num2str(round(fout2.T2,2)) '~\mathrm{ms}$'];
 
 %% Make Figure
 
@@ -206,9 +206,9 @@ fitstr='(1-exp(-0.25*(2*pi*f_rabi).^2*dtdf)).*0.5.*(1+exp(-pi*dtdf*(2*pi*f_rabi)
 myfit=fittype(fitstr,...
     'independent','dtdf','coefficients',{'f_rabi','T2'});
 opts=fitoptions(myfit);
-opts.StartPoint=[3 1]; % Initial rabi guess is 3 kHz
+opts.StartPoint=[1 15]; % Initial rabi guess is 3 kHz
 opts.Lower=[0 0];      % Lower limits
-opts.Upper=[100 50];     % Upper limits
+opts.Upper=[20 inf];     % Upper limits
 
 % Output 
 fout=fit(dtdf,Nrel,myfit,opts);
