@@ -109,8 +109,8 @@ doSave=1;
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-xVar= 'uwave_pulse_time';
-unit='MHz';
+xVar= 'ExecutionDate';
+unit= 's';
 
 %xVar='lens_pos';
 %unit='mm';
@@ -221,7 +221,13 @@ atomdata=atomdata(inds);
 %  ROI = [500 1392 300 500]; % XDT 1/2 TOF 10 ms long X9
 
 % ROI=[784 1000 270 420];   % XDT  TOF 5 ms
-% % ROI=[577 1250 240 819];   % XDT  TOF 15 ms
+
+
+
+ROI=[741 1014 616 858];   % XDT  TOF 15 ms HF imaging
+ROI=[741 1014 593 858];   % XDT  TOF 20 ms HF imaging
+
+
 % ROI=[708 1089 377 608];   % XDT  TOF 20 ms evaporation
 
 % ROI=[713 1015 310 601];
@@ -235,8 +241,8 @@ atomdata=atomdata(inds);
 
 % ROI = [830 925 350 465;
 %     830 925 515 595];
-ROI = [830 925 280 355;    % K 10 ms tof 9 v
-    830 925 470 545];
+% ROI = [830 925 280 355;    % K 10 ms tof 9 v
+%     830 925 470 545];
 
 % ROI=[852 905 706 767;
 %     852 905 600 706];    %K SG 15ms TOF -9,-7 boxes
@@ -324,6 +330,9 @@ ODopts.ScaleProbeROI=[1 100 900 1000];  % ROI to do the scaling
 ODopts.GaussFilter=0;
 ODopts.GaussFilterSigma=.5;
 
+% Get the high field flag (this may throw error for old data)
+ODopts.HighField = data(1).Flags.High_Field_Imaging; 
+
 % Calculate the optical density
 atomdata=computeOD(atomdata,ODopts);
 
@@ -343,7 +352,7 @@ end
 %% ANALYSIS : Box Cojuunt
 % This section of code computes the box counts on all your data and ROIs.
 
-doBoxCount=1;   % Enable box count analysis
+doBoxCount=0;   % Enable box count analysis
 doSubBG=1;      % Subtract background based on reference spot?
 
 bgROI=[400 500 400 500];
@@ -423,7 +432,7 @@ end
 %% ANALYSIS : 2D Gaussian
 % This section of code computes a 2D gaussin fit on all your data and ROIs.
 % Warning, this can take a while.
-doGaussFit=0;           % Flag for performing the gaussian fit
+doGaussFit=1;           % Flag for performing the gaussian fit
 
 if doGaussFit
     disp(repmat('-',1,60));    

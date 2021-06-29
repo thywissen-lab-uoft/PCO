@@ -13,6 +13,7 @@ for kk=1:length(data)
         opts.GaussFilterSigma=0.5;
         opts.ScaleProbe=0;
         opts.ScaleProbeROI=[1 100 900 1000];
+        opts.HighField=0;
     end
 
     if opts.GaussFilter
@@ -33,8 +34,13 @@ for kk=1:length(data)
 
     % Create and store the optical density
     OD=log(PWOA./PWA);
-    data(kk).OD=OD;
     
+    % Calculate optical density if high field imaging
+    if opts.HighField
+        OD=log(abs(PWOA./(2*PWA-PWOA))); %deets on labbook entry 2021.06.26 
+    end   
+    
+    data(kk).OD=OD;    
 end
     
 end

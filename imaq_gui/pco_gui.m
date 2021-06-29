@@ -74,7 +74,7 @@ clf
 
 set(hF,'Color','w','units','pixels','Name',guiname,'toolbar','none','Tag','GUI',...
     'CloseRequestFcn',@closeGUI,'NumberTitle','off','Position',[50 50 800 800]);
-set(hF,'WindowStyle','docked');
+% set(hF,'WindowStyle','docked');
 
 % Callback for when the GUI is requested to be closed.
     function closeGUI(fig,~)
@@ -475,7 +475,21 @@ hbhistoryRight.Position(3:4)=[12 20];
             dstruct=performFits(dstruct);
             updatePlots(dstruct); 
            tbl_params.Data=[fieldnames(dstruct.Params), ...
-                    struct2cell(dstruct.Params)];         
+                    struct2cell(dstruct.Params)];     
+            fnames=fieldnames(dstruct.Flags);
+                for nn=1:length(fnames)
+                    tbl_flags.Data{nn,1}=fnames{nn};
+                    val=dstruct.Flags.(fnames{nn});
+                    if isa(val,'double')
+                        tbl_flags.Data{nn,2}=num2str(val);
+                    end
+                    
+                    if isa(val,'struct')
+                       tbl_flags.Data{nn,2}='[struct]'; 
+                    end
+                    
+                end
+                
         catch badness
             dstruct=olddata;
             dstruct=computeOD(dstruct);
@@ -483,7 +497,20 @@ hbhistoryRight.Position(3:4)=[12 20];
             dstruct=performFits(dstruct);
             updatePlots(dstruct);      
            tbl_params.Data=[fieldnames(dstruct.Params), ...
-                    struct2cell(dstruct.Params)];       
+                    struct2cell(dstruct.Params)];     
+            fnames=fieldnames(dstruct.Flags);
+                for nn=1:length(fnames)
+                    tbl_flags.Data{nn,1}=fnames{nn};
+                    val=dstruct.Flags.(fnames{nn});
+                    if isa(val,'double')
+                        tbl_flags.Data{nn,2}=num2str(val);
+                    end
+                    
+                    if isa(val,'struct')
+                       tbl_flags.Data{nn,2}='[struct]'; 
+                    end
+                    
+                end
         end
     end
 
@@ -742,15 +769,20 @@ hpFit=uitabgroup(hF,'units','pixels');
 hpFit.Position=[0 0 200 hp.Position(4)-100];
 
 tabs(1)=uitab(hpFit,'Title','params','units','pixels');
-tabs(2)=uitab(hpFit,'Title','1','units','pixels','foregroundcolor',co(1,:));
+tabs(2)=uitab(hpFit,'Title','flags','units','pixels');
+tabs(3)=uitab(hpFit,'Title','1','units','pixels','foregroundcolor',co(1,:));
 
 % Table for run parameters
 tbl_params=uitable(tabs(1),'units','normalized','RowName',{},'fontsize',8,...
     'ColumnName',{},'ColumnWidth',{125 50},'columneditable',[false false],...
     'Position',[0 0 1 1]);
+% Table for run parameters
+tbl_flags=uitable(tabs(2),'units','normalized','RowName',{},'fontsize',7,...
+    'ColumnName',{},'ColumnWidth',{135 40},'columneditable',[false false],...
+    'Position',[0 0 1 1]);
 
 % Table for analysis outputs
-tbl_analysis(1)=uitable(tabs(2),'units','normalized','RowName',{},'ColumnName',{},...
+tbl_analysis(1)=uitable(tabs(3),'units','normalized','RowName',{},'ColumnName',{},...
     'fontsize',8,'ColumnWidth',{60 65 65},'columneditable',false(ones(1,3)),...
     'Position',[0 0 1 1],'backgroundcolor',[brighten(coNew(1,:),.5); 1 1 1]);
 %% ROI Settings panel
@@ -837,7 +869,7 @@ uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
                 delete(pGaussRet(2:end));pGaussRet(2:end)=[];
                 
                 delete(tbl_analysis(2:end));tbl_analysis(2:end)=[];
-                delete(tabs(3:end));tabs(3:end)=[];
+                delete(tabs(4:end));tabs(4:end)=[];
                 
                 ROI=tblROI.Data(1,:);
                 pos=[ROI(1) ROI(3) ROI(2)-ROI(1) ROI(4)-ROI(3)];
@@ -1080,14 +1112,44 @@ tbl_cam.Position(1:2)=[0 0];
 
 % This is alpha stage, perhaps enable filtering? or fringe removal?
 hpImgProcess=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
-    'title','image pre-processing');
-hpImgProcess.Position=[hpSet.Position(1)+hpSet.Position(3) hp.Position(4) 150 105]; 
+    'title','processing');
+hpImgProcess.Position=[hpSet.Position(1)+hpSet.Position(3) hp.Position(4) 200 105]; 
+
+% Method of calculating OD
+bgODFieldText=uicontrol('style','text','parent',hpImgProcess,...
+    'String','field : ','backgroundcolor','w','position',[0 70 30 20]);
+bgODField = uibuttongroup('units','pixels','backgroundcolor','w',...
+    'position',[30 75 180 20],...
+    'SelectionChangedFcn',@chOD,'parent',hpImgProcess,'BorderType','None');        
+% Create radio buttons in the button group.
+uicontrol(bgODField,'Style','radiobutton','String','Detect',...
+    'Position',[5 0 50 20],'units','pixels','backgroundcolor','w',...
+    'Value',1,'fontsize',8);
+uicontrol(bgODField,'Style','radiobutton','String','High',...
+    'Position',[60 0 50 20],'units','pixels','backgroundcolor','w',...
+    'Value',0,'fontsize',8);
+uicontrol(bgODField,'Style','radiobutton','String','Low',...
+    'Position',[105 0 50 20],'units','pixels','backgroundcolor','w',...
+    'fontsize',8,'value',0);
+
+    function chOD(src,evt)
+        switch evt.NewValue.String
+            case 'High'
+                disp('Switching OD to high field imaging');
+            case 'Low'
+                disp('Switching OD to low field imaging.');
+            case 'Detect'
+                disp('Auto detect Low/High Field imaging from Flags');            
+            otherwise
+                error('error in OD calculation choice');     
+        end
+    end
 
 % Checkbox for enabling 2D gauss fitting
 cGaussFilter=uicontrol('style','checkbox','string','gauss filter',...
     'units','pixels','parent',hpImgProcess,'backgroundcolor','w',...
     'value',0);
-cGaussFilter.Position=[5 hpImgProcess.Position(4)-35 75 15];
+cGaussFilter.Position=[5 hpImgProcess.Position(4)-50 75 15];
 
 tblGaussFilter=uitable('parent',hpImgProcess,'units','pixels',...
     'rowname',{},'columnname',{},'Data',.5,'columneditable',[true],...
@@ -1096,7 +1158,7 @@ tblGaussFilter.Position=[80 cGaussFilter.Position(2)-2 50 20];
 
 % Pixels label
 uicontrol('parent',hpImgProcess,'units','pixels',...
-    'style','text','string','px','position',[132 70 15 15],...
+    'style','text','string','px','position',[132 60 15 15],...
     'fontsize',8,'backgroundcolor','w');
 
 % Checkbox for enabling scaling of the probe
@@ -1120,10 +1182,13 @@ tblROIPScale=uitable(hpImgProcess,'units','pixels','ColumnWidth',{30 30 30 30},.
     'CellEditCallback',@chROIPScale);
 tblROIPScale.Position(3)=tblROIPScale.Extent(3);
 tblROIPScale.Position(4)=20;
-tblROIPScale.Position(1:2)=[22 30];
+tblROIPScale.Position(1:2)=[22 15];
 
 pROIPScale=rectangle('position',pp,'edgecolor','k','linewidth',2,...
     'visible','off','parent',axImg,'linestyle',':');
+
+
+
 
 
     function chROIPScale(src,evt)
@@ -1158,6 +1223,10 @@ pROIPScale=rectangle('position',pp,'edgecolor','k','linewidth',2,...
            src.Data(m,n)=evt.PreviousData;
         end
     end
+
+
+
+
 
 mstr='Calculate the optical density; perform fits; update graphics';
 uicontrol('parent',hpImgProcess,'units','pixels',...
@@ -1233,9 +1302,14 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
         data.PWOA=camera.Images{2};                     
         
         % Grab the sequence parameters
-        [data.Params,dstr]=grabSequenceParams;
+%         [data.Params,dstr]=grabSequenceParams;        
+%         data.Params.ExecutionDate=dstr;
         
-        data.Params.ExecutionDate=dstr;
+%             [data.Params,dstr]=grabSequenceParams2;        
+%         data.Params.ExecutionDate=dstr;    
+        
+            [data.Params,data.Units,data.Flags]=grabSequenceParams2;
+
         % If in debug mode, create some example data
         if doDebug  
            [xx,yy]=meshgrid(data.X,data.Y);
@@ -1276,7 +1350,30 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
        end       
              
        % Create and store the optical density
-       OD=log(PWOA./PWA);
+%        OD=log(PWOA./PWA);
+       
+       ODtype=bgODField.SelectedObject.String;
+       
+       if isequal(ODtype,'Detect')
+          if data.Flags.High_Field_Imaging
+             ODtype='High'; 
+          else
+              ODtype='Low';
+          end
+       end       
+       
+      switch ODtype
+          case 'Low'
+                disp('Computing low-field optical density');
+                OD=log(PWOA./PWA);
+          case 'High'
+              disp('Computing high-field optical density');
+                OD=log(abs(PWOA./(2*PWA-PWOA))); %deets on labbook entry 2021.06.26 
+          otherwise
+              warning('Issue with OD type. Assuming low field.');
+              OD=log(PWOA./PWA);
+      end           
+
        data.OD=single(OD);
     end
 
@@ -1568,7 +1665,7 @@ end
             saveData(data)         
             
             % Save images to local folder 
-            if hcauto.Value & ~hcautoFits.Value
+            if hcauto.Value && ~hcautoFits.Value
                saveData(data,tSaveDir.UserData); 
             end  
             
@@ -1576,7 +1673,24 @@ end
                 dstruct=data;
                 % Update parameters in table
                 tbl_params.Data=[fieldnames(dstruct.Params), ...
-                    struct2cell(dstruct.Params)];            
+                    struct2cell(dstruct.Params)];  
+                
+                fnames=fieldnames(dstruct.Flags);
+                for nn=1:length(fnames)
+                    tbl_flags.Data{nn,1}=fnames{nn};
+                    val=dstruct.Flags.(fnames{nn});
+                    if isa(val,'double')
+                        tbl_flags.Data{nn,2}=num2str(val);
+                    end
+                    
+                    if isa(val,'struct')
+                       tbl_flags.Data{nn,2}='[struct]'; 
+                    end
+                    
+                end
+                
+                
+
 
                 dstruct=computeOD(dstruct);
                 updateImages(dstruct);
@@ -2059,4 +2173,17 @@ function [out,dstr]=grabSequenceParams(src)
     % Convert the string into a structure
     out=cell2struct(num2cell(str2double(params{2})),params{1});
 end
+function [vals,units,flags]=grabSequenceParams2(src)
+    if nargin~=1
+        src='Y:\_communication\control2.mat';
+    end    
+    data=load(src);    
+    disp(['Opening information from from ' src]);
+    vals=data.vals;
+    units=data.units;   
+    flags=data.flags;
+end
+
+
+
 
