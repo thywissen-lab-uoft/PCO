@@ -19,7 +19,7 @@ function pco_gui
 % least the pixel size). Just putting the code here for now, since I keep
 % on forgetting the optical 4F setup.
 
-exptime=374;
+% exptime=374;
 raw_pixel_size=6.45E-6; % Pixelsize on the pixefly cameras
 mag=[1 2]; % ideal manification of X and Y cams respectively
 % X Cam has 200 mm objective, 200 mm refocuing
@@ -27,6 +27,22 @@ mag=[1 2]; % ideal manification of X and Y cams respectively
 historyDir=['C:' filesep 'ImageHistory'];
 frVar='ExecutionDate';
 doDebug=0;
+
+%% Default Camera Settings
+camera=struct;
+camera.ExposureTime=374;
+if doDebug
+    camera.CameraMode=17; % 0x11 = software trigger
+else
+    camera.CameraMode=16; % 0x10 = hardware trigger
+end
+
+camera.NumImages=2;
+camera.isConnected=0;
+
+% camera.CameraMode=32 (0x20 double hardware trigger)
+% camera.CameraMode=33 (0x21 double software trigger)
+
 %% Initialize
 % Add all subdirectories for this m file
 curpath = fileparts(mfilename('fullpath'));
@@ -56,7 +72,6 @@ X=1:1392;                       % X pixel vector
 Y=1:1024;                       % Y pixel vector
 Z=zeros(length(Y),length(X));   % Image to show
 dstruct=struct;                 % Data strucutre for current image
-
 %% Initialize GUI Figure
 % Initialize the primary figure
 hF=figure;clf
@@ -171,6 +186,8 @@ l=80;   % Left gap for fitting and data analysis summary
 
         %%%%% Resize Top Row Panels %%%%%
         hpROISettings.Position(2)=hp.Position(4);
+        hpAcq2.Position(2)=hp.Position(4);
+        
         hpSet.Position(2)=hp.Position(4);
         hpAnl.Position(2)=hp.Position(4);
         hpImgProcess.Position(2)=hp.Position(4);
@@ -633,23 +650,71 @@ set(axImg,'XLim',tbl_dispROI.Data(1:2),'YLim',tbl_dispROI.Data(3:4));
 hpAcq=uipanel(hF,'units','pixels','backgroundcolor','w',...
     'Position',[0 hp.Position(4) hF.Position(3)-150 30]);
 
+% Connect button
+ttstr='Connect to camera and initialize settings.';
+hbConnect=uicontrol(hpAcq,'style','pushbutton','string','connect','units','pixels',...
+    'fontsize',10,'Position',[5 5 60 20],'backgroundcolor',[80 200 120]/255,...
+    'Callback',@connectCamCB,'ToolTipString',ttstr,'enable','on');
+
+% Disconnect button
+ttstr='Connect to camera and initialize settings.';
+hbDisconnect=uicontrol(hpAcq,'style','pushbutton','string','disconnect','units','pixels',...
+    'fontsize',10,'Position',[65 5 75 20],'backgroundcolor',[255 102 120]/255,...
+    'Callback',@disconnectCamCB,'ToolTipString',ttstr,'enable','off');
+
+% 16 - hardware trigger 
+% 17 - software trigger
+% 32 - double hardware trigger
+
+    function connectCamCB(~,~)
+        disp('Connecting to camera');
+        
+        camera.ExposureTime=tbl_cama.Data{1,2};
+        camera.NumImages=tbl_cama.Data{2,2};
+        camera.CameraMode=tbl_cama.Data{3,2};        
+        camera=initCam(camera);        
+        
+        hbDisconnect.Enable='on';
+        hbConnect.Enable='off';
+        
+        hbstart.Enable='on';
+        hbclear.Enable='on';
+        hbstop.Enable='off';
+        
+    end
+
+    function disconnectCamCB(~,~)
+        disp('Disconnecting from camera.');        
+        closeCam(camera.BoardHandle);        
+        
+        hbDisconnect.Enable='off';
+        hbConnect.Enable='on';
+        
+        hbstart.Enable='off';
+        hbclear.Enable='off';
+        hbstop.Enable='off';
+        
+
+    end
+
+
 % Start acquisition button
 ttstr='Start the camera and image acquisition';
 hbstart=uicontrol(hpAcq,'style','pushbutton','string','start','units','pixels',...
-    'fontsize',10,'Position',[5 5 40 20],'backgroundcolor',[80 200 120]/255,...
-    'Callback',@startCamCB,'ToolTipString',ttstr);
+    'fontsize',10,'Position',[145 5 40 20],'backgroundcolor',[80 200 120]/255,...
+    'Callback',@startCamCB,'ToolTipString',ttstr,'enable','off');
 
 % Clear the camera buffer
 ttstr='Clear the camera buffer.';
 hbclear=uicontrol(hpAcq,'style','pushbutton','string','clear',...
-    'units','pixels','fontsize',10,'Position',[50 5 40 20],'enable','off',...
+    'units','pixels','fontsize',10,'Position',[190 5 40 20],'enable','off',...
     'backgroundcolor',[255 204 0]/255,'callback',@clearBuffer,...
     'ToolTipString',ttstr);
 
 % Stop acquisition button
 ttstr='Stop the camera.';
 hbstop=uicontrol(hpAcq,'style','pushbutton','string','stop',...
-    'units','pixels','fontsize',10,'Position',[95 5 40 20],'enable','off',...
+    'units','pixels','fontsize',10,'Position',[235 5 40 20],'enable','off',...
     'backgroundcolor',[255 102 120]/255,'callback',@stopCamCB,...
     'ToolTipString',ttstr);
 
@@ -657,13 +722,13 @@ hbstop=uicontrol(hpAcq,'style','pushbutton','string','stop',...
 ttstr=['Enable/Disable automatic saving to external directory. Does ' ...
     'not override saving to image history.'];
 hcauto=uicontrol(hpAcq,'style','checkbox','string','save?','fontsize',10,...
-    'backgroundcolor','w','Position',[140 0 100 30],'callback',@saveCheck,...
+    'backgroundcolor','w','Position',[280 0 100 30],'callback',@saveCheck,...
     'ToolTipString',ttstr);
 
 ttstr=['Also save the fits. Warning, these files can be large.' ...
     ' This functionality also hasn''t been fully tested'];
 hcautoFits=uicontrol(hpAcq,'style','checkbox','string','save fits?','fontsize',10,...
-    'backgroundcolor','w','Position',[195 0 100 30],'ToolTipString',ttstr,...
+    'backgroundcolor','w','Position',[335 0 100 30],'ToolTipString',ttstr,...
     'callback',@saveCheckFits,'enable','off');
 
     function saveCheckFits(src,~)
@@ -694,12 +759,12 @@ hcautoFits=uicontrol(hpAcq,'style','checkbox','string','save fits?','fontsize',1
 % Browse button
 cdata=imresize(imread('images/browse.jpg'),[20 20]);
 bBrowse=uicontrol(hpAcq,'style','pushbutton','CData',cdata,'callback',@browseCB,...
-    'enable','off','backgroundcolor','w','position',[270 5 size(cdata,[1 2])]);
+    'enable','off','backgroundcolor','w','position',[410 5 size(cdata,[1 2])]);
 
 % String for current save directory
 tSaveDir=uicontrol(hpAcq,'style','text','string','directory','fontsize',8,...
     'backgroundcolor','w','units','pixels','horizontalalignment','left',...
-    'enable','off','UserData','','Position',[290 0 hF.Position(3)-290 22]);
+    'enable','off','UserData','','Position',[430 0 hF.Position(3)-290 22]);
 
 % Browse button callback
     function browseCB(~,~)
@@ -718,7 +783,7 @@ tSaveDir=uicontrol(hpAcq,'style','text','string','directory','fontsize',8,...
 % Button for software trigger
 hbSWtrig=uicontrol(hpAcq,'style','pushbutton','backgroundcolor','w',...
     'string','trigger','fontsize',10,'units','pixels','callback',@swTrigCB,...
-    'enable','off','visible',doDebug,'Position',[hpAcq.Position(3)-60 5 50 20]);
+    'enable','off','visible','on','Position',[hpAcq.Position(3)-60 5 50 20]);
 
 % Call for software trigger button
 function swTrigCB(~,~)
@@ -1077,11 +1142,95 @@ pROIboxsub=rectangle('position',pp,'edgecolor','k','linewidth',1,...
            src.Data(m,n)=evt.PreviousData;
         end
     end
+%% Camera Settings Panel
+hpAcq2=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
+    'title','camera','fontsize',6);
+hpAcq2.Position=[hpAnl.Position(1)+hpAnl.Position(3) hp.Position(4) 150 105];
+
+tbl_cama=uitable('parent',hpAcq2,'units','pixels','RowName',{},...
+    'ColumnName',{},'fontsize',8,'ColumnWidth',{90,40},...
+    'columneditable',[false true],'celleditcallback',@chCamSettingsCB,...
+    'ColumnFormat',{'char','numeric'});
+
+tbl_cama.Data={...
+    ['exposure (' char(956) 's)'],camera.ExposureTime;
+    'num images', camera.NumImages;
+    'camera mode',camera.CameraMode};
+ 
+tbl_cama.Position(3:4)=tbl_cama.Extent(3:4);
+tbl_cama.Position(1:2)=[5 30];
+
+    function chCamSettingsCB(src,evt)
+       disp('Changing camera settings');
+       m=evt.Indices(1); n=evt.Indices(2);
+        
+        data=src.Data{m,n};
+        % Check that the data is numeric
+        if sum(~isnumeric(data)) || sum(isinf(data)) || sum(isnan(data)) || data<0
+            warning('Only positive intergers plox.');
+            src.Data{m,n}=evt.PreviousData;
+            return;
+        end            
+        data=round(data);      % Make sure this ROI are integers 
+                  
+        % Reassign the ROI
+        src.Data{m,n}=data;      
+        
+        if m==3 && ~ismember(data,[16 17 32])
+            warning(['Invalid camera mode. Going back to the previous value. ' ...
+                'You collosal nincompoop']);
+            src.Data{m,n}=evt.PreviousData;               
+        end
+        
+        camera.ExposureTime=tbl_cama.Data{1,2};
+        camera.NumImages=tbl_cama.Data{2,2};
+        camera.CameraMode=tbl_cama.Data{3,2};        
+        
+        if camera.isConnected
+           configCam(camera); 
+        else
+            disp('Camera not connected. Will write on camera connect');
+        end
+    end
+
+% bgCam = uibuttongroup('units','pixels','backgroundcolor','w',...
+%     'position',[0 75 150 20],...
+%     'SelectionChangedFcn',@chCam,'parent',hpSet,'BorderType','None');        
+% % Create radio buttons in the button group.
+% uicontrol(bgCam,'Style','radiobutton','String','X Cam',...
+%     'Position',[5 0 50 20],'units','pixels','backgroundcolor','w',...
+%     'Value',1);
+% uicontrol(bgCam,'Style','radiobutton','String','Y Cam',...
+%     'Position',[60 0 70 20],'units','pixels','backgroundcolor','w');
+% 
+%     function chCam(~,evt)
+%         switch evt.NewValue.String
+%             case 'X Cam'
+%                 tbl_cam.Data{2,2}=mag(1);
+%                 tbl_cam.Data{4,2}=raw_pixel_size*1E6/mag(1);
+%             case 'Y Cam'
+%                 tbl_cam.Data{2,2}=mag(2);
+%                 tbl_cam.Data{4,2}=raw_pixel_size*1E6/mag(2);
+%         end
+%        updateScalebar;
+%     end
+% 
+% tbl_cam=uitable('parent',hpSet,'units','pixels','RowName',{},'ColumnName',{},...
+%     'fontsize',8,'ColumnWidth',{100,40},'columneditable',[false false]);
+% 
+% tbl_cam.Data={...
+%     ['exposure (' char(956) 's)'],exptime;
+%     'magnification',mag(1);
+%     ['raw pixelsize (' char(956) 'm)'], raw_pixel_size*1E6;
+%     ['img pixelsize (' char(956) 'm)'], raw_pixel_size*1E6/mag(1)};
+% 
+% tbl_cam.Position(3:4)=tbl_cam.Extent(3:4);
+% tbl_cam.Position(1:2)=[0 0];
 
 %% Camera Settings Panel
 hpSet=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
     'title','camera','fontsize',6);
-hpSet.Position=[hpAnl.Position(1)+hpAnl.Position(3) hp.Position(4) 150 105];
+hpSet.Position=[hpAcq2.Position(1)+hpAcq2.Position(3) hp.Position(4) 150 105];
 
 bgCam = uibuttongroup('units','pixels','backgroundcolor','w',...
     'position',[0 75 150 20],...
@@ -1096,11 +1245,11 @@ uicontrol(bgCam,'Style','radiobutton','String','Y Cam',...
     function chCam(~,evt)
         switch evt.NewValue.String
             case 'X Cam'
-                tbl_cam.Data{2,2}=mag(1);
-                tbl_cam.Data{4,2}=raw_pixel_size*1E6/mag(1);
+                tbl_cam.Data{1,2}=mag(1);
+                tbl_cam.Data{3,2}=raw_pixel_size*1E6/mag(1);
             case 'Y Cam'
-                tbl_cam.Data{2,2}=mag(2);
-                tbl_cam.Data{4,2}=raw_pixel_size*1E6/mag(2);
+                tbl_cam.Data{1,2}=mag(2);
+                tbl_cam.Data{3,2}=raw_pixel_size*1E6/mag(2);
         end
        updateScalebar;
     end
@@ -1109,7 +1258,6 @@ tbl_cam=uitable('parent',hpSet,'units','pixels','RowName',{},'ColumnName',{},...
     'fontsize',8,'ColumnWidth',{100,40},'columneditable',[false false]);
 
 tbl_cam.Data={...
-    ['exposure (' char(956) 's)'],exptime;
     'magnification',mag(1);
     ['raw pixelsize (' char(956) 'm)'], raw_pixel_size*1E6;
     ['img pixelsize (' char(956) 'm)'], raw_pixel_size*1E6/mag(1)};
@@ -1283,15 +1431,8 @@ SizeChangedFcn(hF,[]);
 updateScalebar;
 drawnow;
 %% Initialize Camera
-try
-    if doDebug
-        camera=initCam(17);
-    else
-        camera=initCam;
-    end
-catch exception
-    error('Unable to open camera!');
-end
+
+
 % Initialize the trig checker
 trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
     'ExecutionMode','FixedSpacing','TimerFcn',@trigCheckerCB);
@@ -1307,8 +1448,16 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
         data.BitDepth=camera.BitDepth;
        
         % Grab the images
-        data.PWA=camera.Images{1};
-        data.PWOA=camera.Images{2};                     
+        if camera.NumImages==2
+            data.PWA=camera.Images{1};
+            data.PWOA=camera.Images{2};                     
+        else
+            data.PWA=camera.Images{1};
+            data.PWA(:,:,2)=camera.Images{2};
+
+            data.PWOA=camera.Images{3};        
+            data.PWOA(:,:,2)=camera.Images{4};
+        end
         
         % Grab the sequence parameters
 %         [data.Params,dstr]=grabSequenceParams;        
@@ -1339,51 +1488,60 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
        
     function data=computeOD(data)
         disp('Calculating optical density.');
-        PWA=double(data.PWA);
-        PWOA=double(data.PWOA);
+        PWA_all=double(data.PWA);
+        PWOA_all=double(data.PWOA);
         
-       if cGaussFilter.Value
-           s=tblGaussFilter.Data;
-          PWOA=imgaussfilt(PWOA,s);
-          PWA=imgaussfilt(PWA,s);
-          disp(['Applying gaussian filter. s=' num2str(s) ' px']);
-       end
-       
-       if cScaleProbe.Value
-           R=tblROIPScale.Data;
-           s1=sum(sum(PWOA(R(3):R(4),R(1):R(2))));
-           s2=sum(sum(PWA(R(3):R(4),R(1):R(2))));
-           s=s2/s1;
-           PWOA=s*PWOA;
-           disp(['Scaling the PWOA image by ' num2str(round(s,4))]);
-       end       
-             
-       % Create and store the optical density
-%        OD=log(PWOA./PWA);
-       
-       ODtype=bgODField.SelectedObject.String;
-       
-       if isequal(ODtype,'Detect')
-          if data.Flags.High_Field_Imaging
-             ODtype='High'; 
-          else
-              ODtype='Low';
-          end
-       end       
-       
-      switch ODtype
-          case 'Low'
-                disp('Computing low-field optical density');
-                OD=log(PWOA./PWA);
-          case 'High'
-              disp('Computing high-field optical density');
-                OD=log(abs(PWOA./(2*PWA-PWOA))); %deets on labbook entry 2021.06.26 
-          otherwise
-              warning('Issue with OD type. Assuming low field.');
-              OD=log(PWOA./PWA);
-      end           
+        OD_all=zeros(size(PWOA_all,1),size(PWOA_all,2),size(PWOA_all,3));
+        for nn=1:size(PWOA_all,3)
+            PWA=PWA_all(:,:,nn);
+            PWOA=PWOA_all(:,:,nn);
 
-       data.OD=single(OD);
+           if cGaussFilter.Value
+               s=tblGaussFilter.Data;
+              PWOA=imgaussfilt(PWOA,s);
+              PWA=imgaussfilt(PWA,s);
+              disp(['Applying gaussian filter. s=' num2str(s) ' px']);
+           end
+
+           if cScaleProbe.Value
+               R=tblROIPScale.Data;
+               s1=sum(sum(PWOA(R(3):R(4),R(1):R(2))));
+               s2=sum(sum(PWA(R(3):R(4),R(1):R(2))));
+               s=s2/s1;
+               PWOA=s*PWOA;
+               disp(['Scaling the PWOA image by ' num2str(round(s,4))]);
+           end       
+
+           % Create and store the optical density
+    %        OD=log(PWOA./PWA);
+
+           ODtype=bgODField.SelectedObject.String;
+
+           if isequal(ODtype,'Detect')
+              if data.Flags.High_Field_Imaging
+                 ODtype='High'; 
+              else
+                  ODtype='Low';
+              end
+           end       
+
+          switch ODtype
+              case 'Low'
+                    disp('Computing low-field optical density');
+                    OD=log(PWOA./PWA);
+              case 'High'
+                  disp('Computing high-field optical density');
+                    OD=log(abs(PWOA./(2*PWA-PWOA))); %deets on labbook entry 2021.06.26 
+              otherwise
+                  warning('Issue with OD type. Assuming low field.');
+                  OD=log(PWOA./PWA);
+          end     
+          
+          OD_all(:,:,nn)=OD;
+      
+        end
+        
+       data.OD=single(OD_all);
     end
 
 
@@ -1411,8 +1569,8 @@ end
         ROI=tbl_dispROI.Data;
         set(pScaleX,'XData',axImg.XTick(1:2),'YData',[1 1]*ROI(3)+(ROI(4)-ROI(3))*(1-35/axImg.Position(3)));           
         set(pScaleY,'YData',axImg.YTick(1:2),'XData',[1 1]*ROI(1)++(ROI(2)-ROI(1))*20/axImg.Position(4));
-        tScaleX.String=[num2str(range(axImg.XTick(1:2))*tbl_cam.Data{4,2}) '\mum'];
-        tScaleY.String=[num2str(range(axImg.YTick(1:2))*tbl_cam.Data{4,2}) '\mum'];
+        tScaleX.String=[num2str(range(axImg.XTick(1:2))*tbl_cam.Data{3,2}) '\mum'];
+        tScaleY.String=[num2str(range(axImg.YTick(1:2))*tbl_cam.Data{3,2}) '\mum'];
         tScaleX.Position(1:2)=[axImg.XTick(1) pScaleX.YData(1)];
         tScaleY.Position(1:2)=[pScaleY.XData(1) axImg.YTick(1)]; 
         drawnow;
@@ -1531,7 +1689,7 @@ function data=performFits(data)
     for m=1:size(ROI,1)
         ind=2;fr(m,ind)=m;ind=ind+1; %
         tbl_analysis(m).Data=[];        % Clear old analysis table
-        pxsize=tbl_cam.Data{4,2};       % Pixel size in um
+        pxsize=tbl_cam.Data{3,2};       % Pixel size in um
         
         % Gaussian analysis
         if cGaussFit.Value            
@@ -1595,10 +1753,10 @@ function data=performFits(data)
             % Box counts analysis table string
             str={'','','',;
                 'Nb (OD,N)',bcount.Ncounts,Natoms;
-                ['Xc (px,' char(956) 'm)'],bcount.Xc,bcount.Xc*tbl_cam.Data{4,2};
-                ['Yc (px,' char(956) 'm)'],bcount.Yc,bcount.Yc*tbl_cam.Data{4,2};
-                [char(963) ' x (px,' char(956) 'm)'],bcount.Xs,bcount.Xs*tbl_cam.Data{4,2};
-                [char(963) ' y (px,' char(956) 'm)'],bcount.Ys,bcount.Ys*tbl_cam.Data{4,2};
+                ['Xc (px,' char(956) 'm)'],bcount.Xc,bcount.Xc*tbl_cam.Data{3,2};
+                ['Yc (px,' char(956) 'm)'],bcount.Yc,bcount.Yc*tbl_cam.Data{3,2};
+                [char(963) ' x (px,' char(956) 'm)'],bcount.Xs,bcount.Xs*tbl_cam.Data{3,2};
+                [char(963) ' y (px,' char(956) 'm)'],bcount.Ys,bcount.Ys*tbl_cam.Data{3,2};
                 ['Nb bg'],bcount.Nbkgd,NatomsBKGD;
                 'Nb tot',bcount.Nraw,(Natoms+NatomsBKGD);
                 'nb bg', bcount.nbkgd,[]};
@@ -1630,7 +1788,12 @@ end
 
 %% GUI callbacks of camera functions
     function trigCheckerCB(src,evt)
-        doProcess=0;        
+%         camera.NumAcquired=camera.NumAcquired+1;
+
+        
+        doProcess=0;       
+        
+        %{
         % Is the first buffer filled?
         if GetBuffStatus(camera,1)==3 && camera.NumAcquired==0
            disp('Trigger (1)'); 
@@ -1643,9 +1806,51 @@ end
            if camera.NumImages==2
               doProcess=1;
            end           
-        end        
+        end      
+        %}
+        
+        % Check if next buffer is filled
+        if GetBuffStatus(camera,camera.NumAcquired+1)==3
+            
+            
+            % Incrememtn number of images acquired
+            camera.NumAcquired=camera.NumAcquired+1;            
+            disp(['Trigger (' num2str(camera.NumAcquired) ')']);        
+            
+            % Check if more images to take
+            if camera.NumImages==camera.NumAcquired
+                doProcess=1;
+            end       
+        else
+%             
+%             if camera.NumImages==4
+%             bStatus=[GetBuffStatus(camera,1) ...
+%                 GetBuffStatus(camera,2) ...
+%                 GetBuffStatus(camera,3) ...
+%                 GetBuffStatus(camera,4) ];
+%                         disp(bStatus)
+% 
+%             end
+            
+%             if camera.NumImages==2
+%             bStatus=[GetBuffStatus(camera,1) ...
+%                 GetBuffStatus(camera,2)];
+%                         disp(bStatus)
+% 
+%             end
+            
+%             disp(GetBuffStatus(camera,1));
+% %             disp(GetBuffStatus(camera,2));
+%             disp(GetBuffStatus(camera,3));
+%             disp(GetBuffStatus(camera,4));
+
+        end
+        
+        
+        
         % Process the images
         if doProcess
+%             keyboard
             t=evt.Data.time;    % Grab the time
             stop(src);          % Stop the trigger check   
             
@@ -1709,7 +1914,14 @@ end
 
 
                 dstruct=computeOD(dstruct);
+                
+                if camera.NumImages==4
+                   keyboard 
+                end
                 updateImages(dstruct);
+
+                
+                
                 dstruct=performFits(dstruct);
                 
                 % Put save here, so saving happens typically before fitting
@@ -1723,10 +1935,9 @@ end
                 thistoryInd.String=sprintf('%03d',str2double(thistoryInd.String)+1); 
             end
             
-            
+            camera.NumAcquired=0;
             
             CamQueueBuffers(camera)             % Requeue buffers
-            camera.NumAcquired=0;
             start(src);                         % Restart trig timer              
         end                    
     end
@@ -1741,7 +1952,11 @@ end
             hbstop.Enable='on';
             hbstart.Enable='off';            
             hbclear.Enable='on';
-            if doDebug; hbSWtrig.Enable='on';end
+            
+            tbl_cama.Enable='off';
+
+            
+            if camera.CameraMode==17 || camera.CameraMode==33; hbSWtrig.Enable='on';end
        end
     end
 
@@ -1756,6 +1971,9 @@ end
             hbstop.Enable='off';
             hbclear.Enable='off';
             hbSWtrig.Enable='off';
+            
+            tbl_cama.Enable='on';
+
        end
     end
 
@@ -1978,6 +2196,7 @@ function CamQueueBuffers(camera)
 fprintf('Adding the buffers to the write list ');
       
 bufsize=camera.W*camera.H*floor((camera.BitDepth+7)/8);  
+% bufsize=2*camera.W*camera.H*floor((camera.BitDepth+7)/8);  
 
     for i = 1:camera.NumImages
         fprintf(['...' num2str(i) ]);
@@ -1991,54 +2210,27 @@ bufsize=camera.W*camera.H*floor((camera.BitDepth+7)/8);
             return;
         end         
     end
-    disp(' done.');
+    disp(' done.');    
 
 end
 
-function camera=initCam(cammode)   
-    if nargin==0
-        cammode=16;  % 16 is hardware 17 is software
-    end
-    NumImages=2;
-    
-    camera=struct;
-    camera.NumImages=NumImages; % Number of images to take (2 or 3)
-    camera.RunStatus=0;         % Camera status (1 = on, 0 = off);
-    camera.CamMode=cammode;     % Camera mode (software or hardware)
-    camera.NumAcquired=0;       % Number of acquired images (0,1,2)
-    disp('Intializing PCI PCO 540 board...');
-    
-    % Connect to the PCI PCO 540 Board
-    [error_code,board_handle] = pfINITBOARD(0);    
-    if(error_code~=0) 
-        disp('Unable to initialize board!!');
-        error(['Could not the board. Error is ' ...
-            '0x' dec2hex(pco_uint32err(error_code))]);
-        return;
-    end         
-    camera.BoardHandle=board_handle;    
-    % Stop any running camera on the Board
-    disp('Stopping any running camera on the board...');
-    [error_code, value] = pfGETBOARDVAL(board_handle,'PCC_VAL_BOARD_STATUS');
-    if(error_code)
-        pco_errdisp('pfGETBOARDVAL',error_code);    
-    else
-        if(bitand(value,hex2dec('01'))==hex2dec('01'))
-            disp('Camera is running call STOP_CAMERA')     
-            error_code=pfSTOP_CAMERA(board_handle);
-            pco_errdisp('pfSTOP_CAMERA',error_code);
-        end 
-    end        
-    
-    % Set the default camera mode   
-    exptime=374; % Default exposure time is 374 us (why this number? idk)
+function camera=configCam(camera)
+    disp(' ');
+    disp('Configuring camera acquisition');
+    disp(['     ExposureTime : ' num2str(camera.ExposureTime) ' us']);
+    disp(['     CameraMode   : ' num2str(camera.CameraMode)]);
+    disp(['     NumImages    : ' num2str(camera.NumImages)]);
+
     bit_pix=12;
-    [error_code] = pfSETMODE(board_handle,cammode,50,exptime,...
+    [error_code] = pfSETMODE(camera.BoardHandle,...
+        camera.CameraMode,...
+        50,...
+        camera.ExposureTime,...
         0,0,0,0,bit_pix,0);      
     
     % Read in the camera settings
     [error_code,ccd_width,ccd_height,act_width,act_height,bit_pix]=...
-        pfGETSIZES(board_handle);
+        pfGETSIZES(camera.BoardHandle);
     
     camera.H=double(act_height);
     camera.W=double(act_width);
@@ -2046,45 +2238,93 @@ function camera=initCam(cammode)
 
     % Determine size of buffer to allocate 
     imasize=act_width*act_height*floor((bit_pix+7)/8);  
-    image_stack=ones(act_width,act_height,NumImages,'uint16');    
+    image_stack=ones(act_width,act_height,camera.NumImages,'uint16');    
+%     image_stack=ones(act_width,2*act_height,camera.NumImages,'uint16');    
 
     disp(' ');
-    disp(['Allocating buffers for ' num2str(NumImages) ' images.']);
+    disp(['Allocating buffers for ' num2str(camera.NumImages) ' images.']);
     
     % Allocate and map buffers for each image
-    for i = 1:NumImages   
+    for i = 1:camera.NumImages   
         disp(['Allocating buffer ' num2str(i) ' ...']);
         ima_ptr(i) = libpointer('uint16Ptr',image_stack(:,:,i));
         [error_code, buf_nums(i)] = pfALLOCATE_BUFFER_EX(...
-            board_handle,-1,imasize,ima_ptr(i)); 
+            camera.BoardHandle,-1,imasize,ima_ptr(i)); 
         disp(['Allocated to buffer ' num2str(i) ' to buffer num ' ...
             num2str(buf_nums(i))]);
     end
-    disp(' ');
-        
+    disp(' ');        
     camera.buf_ptrs=ima_ptr;
     camera.buf_nums=buf_nums;
     % Remove buffers from list write (ie. clear them)
     fprintf('Removing buffers from write list ...');
-    [error_code] = pfREMOVE_ALL_BUFFER_FROM_LIST(board_handle);
-    
-    disp(' done');    
+    [error_code] = pfREMOVE_ALL_BUFFER_FROM_LIST(camera.BoardHandle);    
+    disp(' done');   
+    disp('Camera acquistion configured.');
 end
 
-function clearCameraBuffer(board_handle)
+function camera=initCam(camera)   
+    disp('Intializing PCI PCO 540 board and camera ...');
+
+    % If no arguments, go to default settings
+    if nargin==0
+        camera=struct;
+        camera.CameraMode=16; % 16 : software, 17 : hardware
+        camera.NumImages=2;
+        camera.ExposureTime=374;
+        camera.isConnected=0;
+    end
+    
+    % Set camera status to defaults
+    camera.RunStatus=0;         % Camera status (1 = on, 0 = off);
+    camera.NumAcquired=0;       % Number of acquired images (0,1,2)
+    
+    % Connect to the PCI PCO 540 Board
+    [error_code,camera.BoardHandle] = pfINITBOARD(0);    
+    if(error_code~=0) 
+        disp('Unable to initialize board!!');
+        error(['Could not the board. Error is ' ...
+            '0x' dec2hex(pco_uint32err(error_code))]);
+        return;
+    end   
+    
+    camera.isConnected=1;
+    
+    % Stop any running camera on the Board
+    disp('Stopping any running camera on the board...');
+    [error_code, value] = pfGETBOARDVAL(camera.BoardHandle,'PCC_VAL_BOARD_STATUS');
+    if(error_code)
+        pco_errdisp('pfGETBOARDVAL',error_code);    
+    else
+        if(bitand(value,hex2dec('01'))==hex2dec('01'))
+            disp('Camera is running call STOP_CAMERA')     
+            error_code=pfSTOP_CAMERA(camera.BoardHandle);
+            pco_errdisp('pfSTOP_CAMERA',error_code);
+        end 
+    end    
+    
+    disp('Done');
+    
+    % Configure the camera
+    camera=configCam(camera);
+end
+
+function error_code=clearCameraBuffer(board_handle)
     % Remove buffers from list write (ie. clear them)
     fprintf('Removing buffers from write list ...');
     [error_code] = pfREMOVE_ALL_BUFFER_FROM_LIST(board_handle);    
     disp(' done');    
 end
 
-function closeCam(board_handle)
+function error_code=closeCam(board_handle)
 disp('Closing the PCI 540 PCO');
     [error_code] = pfCLOSEBOARD(board_handle);
     if(error_code~=0) 
      error(['Error closing camera. Error is ',int2str(error_code)]);
      return;
     end 
+    camera.isConnected=0;
+
 end
 
 function buff_status = GetBuffStatus(camera,n)
@@ -2132,7 +2372,7 @@ end
 end
 
 function error_code=triggerCamera(camera)
-if camera.CamMode~=17
+if ~ismember(camera.CameraMode,[17 33])
     warning(['You tried to send a software trigger and the camera ' ...
         'isn''t in software mode you dumb dumb!']);
    return; 
