@@ -474,8 +474,12 @@ hbhistoryRight.Position(3:4)=[12 20];
             updateImages(dstruct);
             dstruct=performFits(dstruct);
             updatePlots(dstruct); 
-           tbl_params.Data=[fieldnames(dstruct.Params), ...
-                    struct2cell(dstruct.Params)];     
+            
+            [~,inds] = sort(lower(fieldnames(dstruct.Params)));
+            params = orderfields(dstruct.Params,inds);  
+           tbl_params.Data=[fieldnames(params), ...
+                    struct2cell(params)];     
+                
             fnames=fieldnames(dstruct.Flags);
                 for nn=1:length(fnames)
                     tbl_flags.Data{nn,1}=fnames{nn};
@@ -495,9 +499,14 @@ hbhistoryRight.Position(3:4)=[12 20];
             dstruct=computeOD(dstruct);
             updateImages(dstruct);
             dstruct=performFits(dstruct);
-            updatePlots(dstruct);      
-           tbl_params.Data=[fieldnames(dstruct.Params), ...
-                    struct2cell(dstruct.Params)];     
+            updatePlots(dstruct);  
+            
+             [~,inds] = sort(lower(fieldnames(dstruct.Params)));
+            params = orderfields(dstruct.Params,inds);  
+           tbl_params.Data=[fieldnames(params), ...
+                    struct2cell(params)];    
+            
+   
             fnames=fieldnames(dstruct.Flags);
                 for nn=1:length(fnames)
                     tbl_flags.Data{nn,1}=fnames{nn};
@@ -1672,8 +1681,15 @@ end
             if cAutoUpdate.Value        
                 dstruct=data;
                 % Update parameters in table
-                tbl_params.Data=[fieldnames(dstruct.Params), ...
-                    struct2cell(dstruct.Params)];  
+%                 tbl_params.Data=[fieldnames(dstruct.Params), ...
+%                     struct2cell(dstruct.Params)];  
+                
+                            
+                [~,inds] = sort(lower(fieldnames(dstruct.Params)));
+                    params = orderfields(dstruct.Params,inds);  
+                tbl_params.Data=[fieldnames(params), ...
+                        struct2cell(params)];    
+                
                 
                 fnames=fieldnames(dstruct.Flags);
                 for nn=1:length(fnames)

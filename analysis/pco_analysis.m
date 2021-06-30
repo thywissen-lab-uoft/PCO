@@ -109,8 +109,8 @@ doSave=1;
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-xVar= 'ExecutionDate';
-unit= 's';
+xVar= 'HF_prob_freq';
+unit= 'MHz';
 
 %xVar='lens_pos';
 %unit='mm';
@@ -227,6 +227,7 @@ atomdata=atomdata(inds);
 ROI=[741 1014 616 858];   % XDT  TOF 15 ms HF imaging
 ROI=[741 1014 593 858];   % XDT  TOF 20 ms HF imaging
 
+ROI=[741 1014 780 1024];   % XDT  TOF 15 ms HF+SG imaging
 
 % ROI=[708 1089 377 608];   % XDT  TOF 20 ms evaporation
 
@@ -327,8 +328,8 @@ ODopts.ScaleProbe=1;
 ODopts.ScaleProbeROI=[1 100 900 1000];  % ROI to do the scaling
 
 % Apply gaussian filter to images?
-ODopts.GaussFilter=0;
-ODopts.GaussFilterSigma=.5;
+ODopts.GaussFilter=1;
+ODopts.GaussFilterSigma=1;
 
 % Get the high field flag (this may throw error for old data)
 ODopts.HighField = data(1).Flags.High_Field_Imaging; 
@@ -352,7 +353,7 @@ end
 %% ANALYSIS : Box Cojuunt
 % This section of code computes the box counts on all your data and ROIs.
 
-doBoxCount=0;   % Enable box count analysis
+doBoxCount=1;   % Enable box count analysis
 doSubBG=1;      % Subtract background based on reference spot?
 
 bgROI=[400 500 400 500];
@@ -360,7 +361,7 @@ bgROI=[400 500 400 500];
 % bgROI=[750 820 350 450];
 bgROI=[700 800 450 500];
 %bgROI=[900 1000 450 500]; % even more zoom in for BM
-bgROI=[800 1000 600 700]; % for k dfg long tof
+% bgROI=[800 1000 600 700]; % for k dfg long tof
 
 if doBoxCount
     disp(repmat('-',1,60));    
@@ -618,7 +619,9 @@ if doGaussFit
        
     % Atom number
     [hF_numbergauss,Ndatagauss]=showGaussAtomNumber(atomdata,xVar,gaussPopts);  
-     %ylim([0 max(get(gca,'YLim'))]);
+%      ylim([0 max(get(gca,'YLim'))]);
+          ylim([0 max(get(gca,'YLim'))]);
+
      %ylim([3.5E6 4.5E6]);
      %xlim([0 max(get(gca,'XLim'))]);    
      

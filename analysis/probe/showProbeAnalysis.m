@@ -1,4 +1,4 @@
-function hF = showProbeAnalysis(atomdata,xVar)
+function [hF,outdata] = showProbeAnalysis(atomdata,xVar)
 
 global pxsize
 global imgdir
