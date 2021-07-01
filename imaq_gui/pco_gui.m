@@ -394,7 +394,7 @@ rbI2=uicontrol(bgImgNum,'Style','radiobutton','String','image 2',...
 
     function chImgNumCB(~,~)
         updateImages(dstruct);
-       updatePlots(dstruct); 
+        updatePlots(dstruct); 
     end
 
 
@@ -691,33 +691,22 @@ hbDisconnect=uicontrol(hpAcq,'style','pushbutton','string','disconnect','units',
 % 17 - software trigger
 % 32 - double hardware trigger
 
-    function connectCamCB(~,~)
-        
+% Connect to camera callback
+    function connectCamCB(~,~)        
         camera.ExposureTime=tbl_cama.Data{1,2};
         camera.NumImages=tbl_cama.Data{2,2};
         camera.CameraMode=tbl_cama.Data{3,2};        
         camera=initCam(camera);        
         
         hbDisconnect.Enable='on';
-        hbConnect.Enable='off';
-        
+        hbConnect.Enable='off';        
         hbstart.Enable='on';
         hbclear.Enable='on';
         hbstop.Enable='off';
-        tbl_cama.Enable='off';
-        
-        if ismember(camera.CameraMode,[32 33])
-            rbI1.Enable='on';
-            rbI2.Enable='on';
-        else
-            rbI1.Enable='off';
-            rbI2.Enable='off';
-            rbI1.Value=1;
-            rbI2.Value=0;
-        end
-        
+        tbl_cama.Enable='off';   
     end
 
+% Disconnect from camera callback
     function disconnectCamCB(~,~)
         disp('Disconnecting from camera.');        
         closeCam(camera.BoardHandle);        
@@ -728,18 +717,13 @@ hbDisconnect=uicontrol(hpAcq,'style','pushbutton','string','disconnect','units',
         camera.CameraMode=tbl_cama.Data{3,2};             
         camera.isConnected=0;
 
-
         hbDisconnect.Enable='off';
-        hbConnect.Enable='on';
-        
+        hbConnect.Enable='on';        
         hbstart.Enable='off';
         hbclear.Enable='off';
         hbstop.Enable='off';
         tbl_cama.Enable='on';
-
-
     end
-
 
 % Start acquisition button
 ttstr='Start the camera and image acquisition';
@@ -1574,6 +1558,9 @@ end
     end
 
 function updatePlots(data)
+    imgnum=bgImgNum.SelectedObject.UserData;
+
+    
     fprintf('Updating graphics ... ');
     data.ROI=tblROI.Data;
     
@@ -1582,8 +1569,7 @@ for n=1:size(data.ROI,1)
     x=ROI(1):ROI(2);
     y=ROI(3):ROI(4); 
     [xx,yy]=meshgrid(x,y);
-    
-    subOD=data.OD(ROI(3):ROI(4),ROI(1):ROI(2));
+    subOD=data.OD(ROI(3):ROI(4),ROI(1):ROI(2),imgnum);
     
     if rbSum.Value
         ODySum=sum(subOD,2);
@@ -1592,11 +1578,10 @@ for n=1:size(data.ROI,1)
         set(pX(n),'XData',x,'YData',ODxSum);
         set(pY(n),'XData',ODySum,'YData',y);
         drawnow;
-    end   
-    
+    end       
 
     if cGaussFit.Value && isfield(data,'GaussFit')
-        fout=data.GaussFit{n};
+        fout=data.GaussFit{imgnum,n};
         zF=feval(fout,xx,yy); 
         
         % Evaluate and plot 1/e^2 gaussian reticle
@@ -1633,7 +1618,8 @@ for n=1:size(data.ROI,1)
             set(pYF(n),'XData',ODySumF,'YData',y,'Visible','on');
         end  
     end
-end    
+end  
+
 disp('done.');
 end
 
@@ -1669,7 +1655,9 @@ function data=performFits(data)
     %%%%%% Where the actual analysis occurs
     
     % Perform 2D gaussian fit       
-    if cGaussFit.Value;data=fitGauss(data);end
+    if cGaussFit.Value
+        data=fitGauss(data);
+    end
     
     % Perform box analysis
     if cBox.Value         
@@ -1690,82 +1678,84 @@ function data=performFits(data)
         ind=2;fr(m,ind)=m;ind=ind+1; %
         tbl_analysis(m).Data=[];        % Clear old analysis table
         pxsize=tbl_cam.Data{3,2};       % Pixel size in um
-        
-        % Gaussian analysis
-        if cGaussFit.Value            
-            fout = data.GaussFit{m};                % Grab the fit
-            N=2*pi*fout.Xs*fout.Ys*fout.A;          % OD counts from gaussian
-            Natoms=N*((pxsize*1E-6)^2/crosssec);   % Atom nuber
+        for rr=1:size(data.PWOA,3)
+            % Gaussian analysis
+            if cGaussFit.Value            
+                fout = data.GaussFit{rr,m};                % Grab the fit
+                N=2*pi*fout.Xs*fout.Ys*fout.A;          % OD counts from gaussian
+                Natoms=N*((pxsize*1E-6)^2/crosssec);   % Atom nuber
 
-            % Generate table string
-            str={
-                ['Ng (OD,N)'],N,Natoms;
-                ['Xc (px,' char(956) 'm)'],fout.Xc,fout.Xc*pxsize;
-                ['Yc (px,' char(956) 'm)'],fout.Yc,fout.Yc*pxsize;
-                [char(963) ' x (px,' char(956) 'm)'],fout.Xs,fout.Xs*pxsize;
-                [char(963) ' y (px,' char(956) 'm)'],fout.Ys,fout.Ys*pxsize;
-                'Amp (OD)',fout.A,[];
-                'n bg', fout.nbg,[];
-               };
-            % Update table string
-            tbl_analysis(m).Data=[tbl_analysis(m).Data; str];   
+                % Generate table string
+                str={
+                    ['Ng (OD,N)'],N,Natoms;
+                    ['Xc (px,' char(956) 'm)'],fout.Xc,fout.Xc*pxsize;
+                    ['Yc (px,' char(956) 'm)'],fout.Yc,fout.Yc*pxsize;
+                    [char(963) ' x (px,' char(956) 'm)'],fout.Xs,fout.Xs*pxsize;
+                    [char(963) ' y (px,' char(956) 'm)'],fout.Ys,fout.Ys*pxsize;
+                    'Amp (OD)',fout.A,[];
+                    'n bg', fout.nbg,[];
+                    '','','';
+                   };
+                % Update table string
+                tbl_analysis(m).Data=[tbl_analysis(m).Data; str];   
 
-            % Appends values to fitresults
-            fr(m,ind)=Natoms;ind=ind+1;  
-            fr(m,ind)=fout.Xc;ind=ind+1;
-            fr(m,ind)=fout.Yc;ind=ind+1;  
-            fr(m,ind)=fout.Xs*pxsize;ind=ind+1;
-            fr(m,ind)=fout.Ys*pxsize;ind=ind+1;  
-        end
+                % Appends values to fitresults
+                fr(m,ind)=Natoms;ind=ind+1;  
+                fr(m,ind)=fout.Xc;ind=ind+1;
+                fr(m,ind)=fout.Yc;ind=ind+1;  
+                fr(m,ind)=fout.Xs*pxsize;ind=ind+1;
+                fr(m,ind)=fout.Ys*pxsize;ind=ind+1;  
+            end
 
-        % Perform single shot temperature analysis
-        if cTemp.Value               
-            amu=1.66054e-27;            % amu in kg
-            kB=1.38064852E-23;          % kB in J/K                
-            mRb=87*amu;                 % 87Rb mass
-            mK=40*amu;                  % 40K mass
-            tof=data.Params.tof*1E-3;   % TOF in seconds
+            % Perform single shot temperature analysis
+            if cTemp.Value               
+                amu=1.66054e-27;            % amu in kg
+                kB=1.38064852E-23;          % kB in J/K                
+                mRb=87*amu;                 % 87Rb mass
+                mK=40*amu;                  % 40K mass
+                tof=data.Params.tof*1E-3;   % TOF in seconds
 
-            % Obtain gaussian radius
-            sX=fout.Xs*pxsize*1E-6;
-            sY=fout.Ys*pxsize*1E-6;
+                % Obtain gaussian radius
+                sX=fout.Xs*pxsize*1E-6;
+                sY=fout.Ys*pxsize*1E-6;
 
-            % Temperature in K
-            TxK=(sX/tof)^2*mK/kB;TyK=(sY/tof)^2*mK/kB;
-            TxRb=(sX/tof)^2*mRb/kB;TyRb=(sY/tof)^2*mRb/kB;
+                % Temperature in K
+                TxK=(sX/tof)^2*mK/kB;TyK=(sY/tof)^2*mK/kB;
+                TxRb=(sX/tof)^2*mRb/kB;TyRb=(sY/tof)^2*mRb/kB;
 
-            % Analysis string
-            str={'','','';
-                'TOF (ms,s)',data.Params.tof,tof;
-                ['TK (' char(956) 'K)'], TxK*1E6, TyK*1E6;
-                ['TRb (' char(956) 'K)'], TxRb*1E6, TyRb*1E6};   
-            
-            % Update analysis table
-            tbl_analysis(m).Data=[tbl_analysis(m).Data; str]; 
-        end 
+                % Analysis string
+                str={'TOF (ms,s)',data.Params.tof,tof;
+                    ['TK (' char(956) 'K)'], TxK*1E6, TyK*1E6;
+                    ['TRb (' char(956) 'K)'], TxRb*1E6, TyRb*1E6;
+                    '','',''};   
 
-        % Box Counts analysis
-        if cBox.Value
-            bcount = data.BoxCount(m);
-            Natoms=bcount.Ncounts*(pxsize*1E-6)^2/crosssec; 
-            NatomsBKGD=bcount.Nbkgd*(pxsize*1E-6)^2/crosssec; 
-            
-            % Box counts analysis table string
-            str={'','','',;
-                'Nb (OD,N)',bcount.Ncounts,Natoms;
-                ['Xc (px,' char(956) 'm)'],bcount.Xc,bcount.Xc*tbl_cam.Data{3,2};
-                ['Yc (px,' char(956) 'm)'],bcount.Yc,bcount.Yc*tbl_cam.Data{3,2};
-                [char(963) ' x (px,' char(956) 'm)'],bcount.Xs,bcount.Xs*tbl_cam.Data{3,2};
-                [char(963) ' y (px,' char(956) 'm)'],bcount.Ys,bcount.Ys*tbl_cam.Data{3,2};
-                ['Nb bg'],bcount.Nbkgd,NatomsBKGD;
-                'Nb tot',bcount.Nraw,(Natoms+NatomsBKGD);
-                'nb bg', bcount.nbkgd,[]};
+                % Update analysis table
+                tbl_analysis(m).Data=[tbl_analysis(m).Data; str]; 
+            end 
 
-            % Update analysis string
-            tbl_analysis(m).Data=[tbl_analysis(m).Data; str];
-        
-            % Update fitresults
-            fr(m,ind)=Natoms*1.0;ind=ind+1;                 
+            % Box Counts analysis
+            if cBox.Value
+                bcount = data.BoxCount(m);
+                Natoms=bcount.Ncounts*(pxsize*1E-6)^2/crosssec; 
+                NatomsBKGD=bcount.Nbkgd*(pxsize*1E-6)^2/crosssec; 
+
+                % Box counts analysis table string
+                str={'Nb (OD,N)',bcount.Ncounts,Natoms;
+                    ['Xc (px,' char(956) 'm)'],bcount.Xc,bcount.Xc*tbl_cam.Data{3,2};
+                    ['Yc (px,' char(956) 'm)'],bcount.Yc,bcount.Yc*tbl_cam.Data{3,2};
+                    [char(963) ' x (px,' char(956) 'm)'],bcount.Xs,bcount.Xs*tbl_cam.Data{3,2};
+                    [char(963) ' y (px,' char(956) 'm)'],bcount.Ys,bcount.Ys*tbl_cam.Data{3,2};
+                    ['Nb bg'],bcount.Nbkgd,NatomsBKGD;
+                    'Nb tot',bcount.Nraw,(Natoms+NatomsBKGD);
+                    'nb bg', bcount.nbkgd,[];
+                    '','',''};
+
+                % Update analysis string
+                tbl_analysis(m).Data=[tbl_analysis(m).Data; str];
+
+                % Update fitresults
+                fr(m,ind)=Natoms*1.0;ind=ind+1;                 
+            end
         end
     end  
     disp('done');
@@ -1998,21 +1988,24 @@ end
 
 function dstruct=fitGauss(dstruct)
     fits={};
-    for n=1:size(dstruct.ROI,1)              
-        ROI=dstruct.ROI(n,:);         
-        disp(['Fitting 2D gaussian on [' num2str(ROI) '].']);
-        t1=now;
-        % Grab data from the data structure
-        x=dstruct.X(ROI(1):ROI(2));                 % X vector
-        y=dstruct.Y(ROI(3):ROI(4));                 % Y vector
-        z=dstruct.OD(ROI(3):ROI(4),ROI(1):ROI(2));  % optical density     
+    
+    for rr=1:size(dstruct.PWOA,3)    
+        for n=1:size(dstruct.ROI,1)              
+            ROI=dstruct.ROI(n,:);         
+            disp(['Fitting 2D gaussian on [' num2str(ROI) '].']);
+            t1=now;
+            % Grab data from the data structure
+            x=dstruct.X(ROI(1):ROI(2));                 % X vector
+            y=dstruct.Y(ROI(3):ROI(4));                 % Y vector
+            z=dstruct.OD(ROI(3):ROI(4),ROI(1):ROI(2),rr);  % optical density     
 
-        % Perform the fit
-        fout=gaussfit2D(x,y,z);
-        t2=now;
-        fits{n}=fout;  
-    end
+            % Perform the fit
+            fout=gaussfit2D(x,y,z);
+            t2=now;
+            fits{rr,n}=fout;  
+        end
         dstruct.GaussFit=fits;
+    end
 end
   
 function fout=gaussfit2D(Dx,Dy,data)
