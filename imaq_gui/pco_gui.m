@@ -2,24 +2,18 @@ function pco_gui
 % pco_gui.m
 %
 % Author      : CF Fujiwara
-% Last Edited : 2020/12
+% Last Edited : 2021/06
 % 
 % This code run the PCO cameras which the lattice experiment uses for
 % absorption imaging along the X and Y lattice directions. The design of
 % this GUI is based upon the original GUI 
 %
-% The original GUI had a bunch of "bells and whistles" to do GUI based
-% analysis. In order to maintain user continuity, this functionality is
-% largely maintained, but it also more easily allows for command line based
-% analysis protocols.
-
 
 %% Caculate pixel sizes
 % This could probably move or mabye even be sampled from the camera (at
 % least the pixel size). Just putting the code here for now, since I keep
 % on forgetting the optical 4F setup.
 
-% exptime=374;
 raw_pixel_size=6.45E-6; % Pixelsize on the pixefly cameras
 mag=[1 2]; % ideal manification of X and Y cams respectively
 % X Cam has 200 mm objective, 200 mm refocuing
@@ -30,12 +24,8 @@ doDebug=0;
 
 %% Default Camera Settings
 camera=struct;
+
 camera.ExposureTime=374;
-if doDebug
-    camera.CameraMode=17; % 0x11 = software trigger
-else
-    camera.CameraMode=16; % 0x10 = hardware trigger
-end
 camera.CameraMode=17;
 camera.NumImages=2;
 camera.isConnected=0;
@@ -44,11 +34,10 @@ camera.isConnected=0;
 % camera.CameraMode=33 (0x21 double software trigger)
 
 %% Initialize
+
 % Add all subdirectories for this m file
 curpath = fileparts(mfilename('fullpath'));
 addpath(curpath);addpath(genpath(curpath))
-
-
 
 % Add the SDK MATLAB drivers to the path
 sdk_dir=fullfile(fileparts(curpath), 'pixelfly_plugin_rev3_01_beta');
@@ -67,15 +56,20 @@ for kk=1:length(a.Children)
     end
 end
 
+
 %% Initialize Dummy Data
+
 X=1:1392;                       % X pixel vector
 Y=1:1024;                       % Y pixel vector
 Z=zeros(length(Y),length(X));   % Image to show
 dstruct=struct;                 % Data strucutre for current image
+
 %% Initialize GUI Figure
 % Initialize the primary figure
-hF=figure;clf
+hF=figure;
+clf
 co=get(gca,'colororder');co=circshift(co,3,1);co=[co;co;co];
+
 coNew=[hex2dec(['78';'a2';'cc'])';
         hex2dec(['ff';'c7';'a1'])';
         hex2dec(['fd';'fd';'96'])';
@@ -85,11 +79,12 @@ coNew=[hex2dec(['78';'a2';'cc'])';
         hex2dec(['ff';'a1';'94'])']/255;      
 coNew=circshift(coNew,3,1);
 coNew=brighten([coNew;coNew;coNew],.2);       
+
 clf
 
-set(hF,'Color','w','units','pixels','Name',guiname,'toolbar','none','Tag','GUI',...
-    'CloseRequestFcn',@closeGUI,'NumberTitle','off','Position',[50 50 800 800]);
-% set(hF,'WindowStyle','docked');
+set(hF,'Color','w','units','pixels','Name',guiname,...
+    'toolbar','none','Tag','GUI','CloseRequestFcn',@closeGUI,...
+    'NumberTitle','off','Position',[50 50 1600 800]);
 
 % Callback for when the GUI is requested to be closed.
     function closeGUI(fig,~)
@@ -180,7 +175,7 @@ l=80;   % Left gap for fitting and data analysis summary
         thistoryInd.Position(1:2)=[96 hp.Position(4)-21];
         hbhistoryRight.Position(1:2)=[124 hp.Position(4)-21];
         tImageFileFig.Position(1:2)=[136 ...
-            hp.Position(4)-tImageFileFig.Position(4)];
+        hp.Position(4)-tImageFileFig.Position(4)];
         %%%%%% Resize Acquisition Panel %%%%
         hpAcq.Position(2:3)=[hp.Position(4)+100 hF.Position(3)];
         tSaveDir.Position(3)=hpAcq.Position(3)-2;
@@ -762,38 +757,18 @@ hbstop=uicontrol(hpAcq,'style','pushbutton','string','stop',...
 % Auto Save check box
 ttstr=['Enable/Disable automatic saving to external directory. Does ' ...
     'not override saving to image history.'];
-hcauto=uicontrol(hpAcq,'style','checkbox','string','save?','fontsize',10,...
+hcSave=uicontrol(hpAcq,'style','checkbox','string','save?','fontsize',10,...
     'backgroundcolor','w','Position',[280 0 100 30],'callback',@saveCheck,...
     'ToolTipString',ttstr);
-
-ttstr=['Also save the fits. Warning, these files can be large.' ...
-    ' This functionality also hasn''t been fully tested'];
-hcautoFits=uicontrol(hpAcq,'style','checkbox','string','save fits?','fontsize',10,...
-    'backgroundcolor','w','Position',[335 0 100 30],'ToolTipString',ttstr,...
-    'callback',@saveCheckFits,'enable','off');
-
-    function saveCheckFits(src,~)
-       if src.Value
-            cAutoUpdate.Value=1;
-            cAutoUpdate.Enable='off';
-       else
-            cAutoUpdate.Enable='on';
-       end
-       
-    end
-
 
 % Save checkbox callback
     function saveCheck(src,~)
         if src.Value
             tSaveDir.Enable='on';
             bBrowse.Enable='on';
-            hcautoFits.Enable='on';
         else
             tSaveDir.Enable='off';
             bBrowse.Enable='off';
-            hcautoFits.Enable='off';
-            hcautoFits.Value=0;
         end
     end
 
@@ -1839,79 +1814,30 @@ function data=performFits(data)
 end
 
 %% GUI callbacks of camera functions
-    function trigCheckerCB(src,evt)
-%         camera.NumAcquired=camera.NumAcquired+1;
-
-        
-        doProcess=0;       
-        
-        %{
-        % Is the first buffer filled?
-        if GetBuffStatus(camera,1)==3 && camera.NumAcquired==0
-           disp('Trigger (1)'); 
-           camera.NumAcquired=1;
-        end        
-        % Is the second buffer filled?
-        if GetBuffStatus(camera,2)==3 && camera.NumAcquired==1
-           disp('Trigger (2)');
-           camera.NumAcquired=2;
-           if camera.NumImages==2
-              doProcess=1;
-           end           
-        end      
-        %}
+    function trigCheckerCB(src,evt)        
+        doProcess=0;           
         
         % Check if next buffer is filled
-        if GetBuffStatus(camera,camera.NumAcquired+1)==3
-            
-            
-            % Incrememtn number of images acquired
+        if GetBuffStatus(camera,camera.NumAcquired+1)==3   
+            % Increment number of images acquired
             camera.NumAcquired=camera.NumAcquired+1;            
             disp(['Trigger (' num2str(camera.NumAcquired) ')']);        
             
-            % Check if more images to take
+            % Check if acquisition is complete
             if camera.NumImages==camera.NumAcquired
                 doProcess=1;
             end       
-        else
-%             
-%             if camera.NumImages==4
-%             bStatus=[GetBuffStatus(camera,1) ...
-%                 GetBuffStatus(camera,2) ...
-%                 GetBuffStatus(camera,3) ...
-%                 GetBuffStatus(camera,4) ];
-%                         disp(bStatus)
-% 
-%             end
-            
-%             if camera.NumImages==2
-%             bStatus=[GetBuffStatus(camera,1) ...
-%                 GetBuffStatus(camera,2)];
-%                         disp(bStatus)
-% 
-%             end
-            
-%             disp(GetBuffStatus(camera,1));
-% %             disp(GetBuffStatus(camera,2));
-%             disp(GetBuffStatus(camera,3));
-%             disp(GetBuffStatus(camera,4));
-
-        end
-        
-        
+        end   
         
         % Process the images
         if doProcess
-%             keyboard
             t=evt.Data.time;    % Grab the time
             stop(src);          % Stop the trigger check   
             
             % Grab the images
             for i = 1:camera.NumImages
                 camera.Images{i}=double(get(camera.buf_ptrs(i),'Value'));                
-            end          
-            % Only grab images after all triggers to prevent acquisition
-            % issues due to reading from camera.
+            end   
             
             % Rotate images to get into "correct" orientation
             for i=1:camera.NumImages
@@ -1928,65 +1854,45 @@ end
             disp(['     Sequence  : ' tstr]);
             disp(' ');
             
-            saveData(data)         
+            % Save image to history
+            saveData(data)     
             
-            % Save images to local folder 
-            if hcauto.Value && ~hcautoFits.Value
+            % Save image to folder
+            if hcSave.Value
                saveData(data,tSaveDir.UserData); 
             end  
             
+            % Update displayed image
             if cAutoUpdate.Value        
                 dstruct=data;
-                % Update parameters in table
-%                 tbl_params.Data=[fieldnames(dstruct.Params), ...
-%                     struct2cell(dstruct.Params)];  
                 
-                            
+                % Update parameters table                            
                 [~,inds] = sort(lower(fieldnames(dstruct.Params)));
                     params = orderfields(dstruct.Params,inds);  
                 tbl_params.Data=[fieldnames(params), ...
                         struct2cell(params)];    
                 
-                
+                % Update flags table
                 fnames=fieldnames(dstruct.Flags);
                 for nn=1:length(fnames)
                     tbl_flags.Data{nn,1}=fnames{nn};
                     val=dstruct.Flags.(fnames{nn});
                     if isa(val,'double')
                         tbl_flags.Data{nn,2}=num2str(val);
-                    end
-                    
+                    end                    
                     if isa(val,'struct')
                        tbl_flags.Data{nn,2}='[struct]'; 
-                    end
-                    
-                end
+                    end                    
+                end        
                 
-                
-
-
-                dstruct=computeOD(dstruct);
-                
-          
-                updateImages(dstruct);
-                
-                
-                dstruct=performFits(dstruct);
-                
-                % Put save here, so saving happens typically before fitting
-                % ugh, this is ugly CF MAKE THIS BETTER
-                if hcautoFits.Value
-                   saveData(dstruct,tSaveDir.UserData); 
-                end
-                
-                
+                dstruct=computeOD(dstruct);     % Calculate the optical density 
+                updateImages(dstruct);          % Update display with new data  
+                dstruct=performFits(dstruct);   % Fit the data                    
             else
                 thistoryInd.String=sprintf('%03d',str2double(thistoryInd.String)+1); 
             end
             
-            camera.NumAcquired=0;
-            
-            CamQueueBuffers(camera)             % Requeue buffers
+            camera=CamQueueBuffers(camera);             % Requeue buffers
             start(src);                         % Restart trig timer              
         end                    
     end
@@ -1995,7 +1901,7 @@ end
        disp('Starting camera acquisition...'); 
        error_code=startCamera(camera.BoardHandle);    
        if ~error_code       
-            CamQueueBuffers(camera);
+            camera=CamQueueBuffers(camera);
             camera.RunStatus=1;
             start(trigTimer);            
             hbstop.Enable='on';
@@ -2027,7 +1933,7 @@ end
     function clearBuffer(~,~)
         stop(trigTimer);
         clearCameraBuffer(camera.BoardHandle);
-        CamQueueBuffers(camera)
+        CamQueueBuffers(camera);
         start(trigTimer);
     end
 
@@ -2239,18 +2145,15 @@ clearCameraBuffer(board_handle);
 
 end
 
+% Add allocated buffers to the queue.
 function CamQueueBuffers(camera)
-fprintf('Adding the buffers to the write list ');
-      
-bufsize=camera.W*camera.H*floor((camera.BitDepth+7)/8);  
-
-    
-        disp(bufsize);
+    fprintf(['Adding (' num2str(length(camera.NumImages)) ...
+        ') buffers to the queue ... ']);    
+    bufsize=camera.W*camera.H*floor((camera.BitDepth+7)/8);  
+    camera.NumAcquired=0;      
 
     for i = 1:camera.NumImages
-        fprintf(['...' num2str(i) ]);
-%         disp(['Adding buffer ' num2str(i) ' with buf num of ' ...
-%             num2str(camera.buf_nums(i)) ' to write list']);        
+        fprintf([num2str(i) ' ... ']);    
         [error_code] = pfADD_BUFFER_TO_LIST(...
             camera.BoardHandle,camera.buf_nums(i),bufsize,0,0);
         if(error_code~=0) 
@@ -2259,8 +2162,7 @@ bufsize=camera.W*camera.H*floor((camera.BitDepth+7)/8);
             return;
         end         
     end
-    disp(' done.');    
-
+    disp(' done.');  
 end
 
 function camera=configCam(camera)
