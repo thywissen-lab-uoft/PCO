@@ -684,7 +684,6 @@ hbDisconnect=uicontrol(hpAcq,'style','pushbutton','string','disconnect','units',
 % 32 - double hardware trigger
 
     function connectCamCB(~,~)
-        disp('Connecting to camera');
         
         camera.ExposureTime=tbl_cama.Data{1,2};
         camera.NumImages=tbl_cama.Data{2,2};
@@ -758,7 +757,7 @@ hbstop=uicontrol(hpAcq,'style','pushbutton','string','stop',...
 ttstr=['Enable/Disable automatic saving to external directory. Does ' ...
     'not override saving to image history.'];
 hcSave=uicontrol(hpAcq,'style','checkbox','string','save?','fontsize',10,...
-    'backgroundcolor','w','Position',[280 0 100 30],'callback',@saveCheck,...
+    'backgroundcolor','w','Position',[280 0 60 30],'callback',@saveCheck,...
     'ToolTipString',ttstr);
 
 % Save checkbox callback
@@ -775,12 +774,12 @@ hcSave=uicontrol(hpAcq,'style','checkbox','string','save?','fontsize',10,...
 % Browse button
 cdata=imresize(imread('images/browse.jpg'),[20 20]);
 bBrowse=uicontrol(hpAcq,'style','pushbutton','CData',cdata,'callback',@browseCB,...
-    'enable','off','backgroundcolor','w','position',[410 5 size(cdata,[1 2])]);
+    'enable','off','backgroundcolor','w','position',[340 5 size(cdata,[1 2])]);
 
 % String for current save directory
 tSaveDir=uicontrol(hpAcq,'style','text','string','directory','fontsize',8,...
     'backgroundcolor','w','units','pixels','horizontalalignment','left',...
-    'enable','off','UserData','','Position',[430 0 hF.Position(3)-290 22]);
+    'enable','off','UserData','','Position',[360 0 hF.Position(3)-290 22]);
 
 % Browse button callback
     function browseCB(~,~)
@@ -1828,9 +1827,10 @@ end
                 doProcess=1;
             end       
         end   
-        
+                    
+
         % Process the images
-        if doProcess
+        if doProcess            
             t=evt.Data.time;    % Grab the time
             stop(src);          % Stop the trigger check   
             
@@ -1842,8 +1842,8 @@ end
             % Rotate images to get into "correct" orientation
             for i=1:camera.NumImages
                camera.Images{i}=imrotate(camera.Images{i},-90); 
-            end                           
-          
+            end        
+
             data=processImages(t);           % Process images   
             disp(' ');
             disp('     New Image!');
@@ -1860,8 +1860,8 @@ end
             % Save image to folder
             if hcSave.Value
                saveData(data,tSaveDir.UserData); 
-            end  
-            
+            end                          
+
             % Update displayed image
             if cAutoUpdate.Value        
                 dstruct=data;
@@ -1892,7 +1892,10 @@ end
                 thistoryInd.String=sprintf('%03d',str2double(thistoryInd.String)+1); 
             end
             
-            camera=CamQueueBuffers(camera);             % Requeue buffers
+            
+            CamQueueBuffers(camera);             % Requeue buffers
+            camera.NumAcquired=0;
+
             start(src);                         % Restart trig timer              
         end                    
     end
@@ -1901,13 +1904,13 @@ end
        disp('Starting camera acquisition...'); 
        error_code=startCamera(camera.BoardHandle);    
        if ~error_code       
-            camera=CamQueueBuffers(camera);
+            CamQueueBuffers(camera);
+            camera.NumAcquired=0;
             camera.RunStatus=1;
             start(trigTimer);            
             hbstop.Enable='on';
             hbstart.Enable='off';            
-            hbclear.Enable='on';
-            
+            hbclear.Enable='on';           
 
             
             if camera.CameraMode==17 || camera.CameraMode==33; hbSWtrig.Enable='on';end
@@ -1934,6 +1937,7 @@ end
         stop(trigTimer);
         clearCameraBuffer(camera.BoardHandle);
         CamQueueBuffers(camera);
+        camera.NumAcquired=0;
         start(trigTimer);
     end
 
@@ -2147,13 +2151,13 @@ end
 
 % Add allocated buffers to the queue.
 function CamQueueBuffers(camera)
-    fprintf(['Adding (' num2str(length(camera.NumImages)) ...
+    fprintf(['Adding (' num2str(camera.NumImages) ...
         ') buffers to the queue ... ']);    
     bufsize=camera.W*camera.H*floor((camera.BitDepth+7)/8);  
     camera.NumAcquired=0;      
 
     for i = 1:camera.NumImages
-        fprintf([num2str(i) ' ... ']);    
+        fprintf([num2str(i) ' ']);    
         [error_code] = pfADD_BUFFER_TO_LIST(...
             camera.BoardHandle,camera.buf_nums(i),bufsize,0,0);
         if(error_code~=0) 
@@ -2172,6 +2176,7 @@ function camera=configCam(camera)
     disp(['     CameraMode   : ' num2str(camera.CameraMode)]);
     disp(['     NumImages    : ' num2str(camera.NumImages)]);
 
+    % Set the camera mode (mode, exposure, binning, etc.)
     bit_pix=12;
     [error_code] = pfSETMODE(camera.BoardHandle,...
         camera.CameraMode,...
@@ -2179,7 +2184,7 @@ function camera=configCam(camera)
         camera.ExposureTime,...
         0,0,0,0,bit_pix,0);      
     
-    % Read in the camera settings
+    % Read in the camera image size
     [error_code,ccd_width,ccd_height,act_width,act_height,bit_pix]=...
         pfGETSIZES(camera.BoardHandle);
     
@@ -2189,53 +2194,32 @@ function camera=configCam(camera)
 
     % Determine size of buffer to allocate 
     imasize=act_width*act_height*floor((bit_pix+7)/8);  
-    image_stack=ones(act_width,act_height,camera.NumImages,'uint16');    
-    
- 
-    
-    disp(' ');
-    whos image_stack
-    disp(imasize);
-    disp(' ');
-    
-    % Remove previously allocated buffers
-%     if isfield(camera,'buf_nums')  && ~isempty(camera.buf_nums)
-%         disp('Removing previously allocated buffers');
-%         for kk=1:length(camera.buf_nums)       
-%             disp(['Removing buf num ' num2str(camera.buf_nums(kk))]);
-%            error_code=pfFREE_BUFFER(camera.BoardHandle, camera.buf_nums(kk)); 
-%            if error_code
-%               warning('you fucked up'); 
-%            end           
-%         end   
-%         camera.buf_nums=[];
-%         camera.buf_ptrs=[];
-%     end
+    image_stack=ones(act_width,act_height,camera.NumImages,'uint16');      
 
-    disp(' ');
-    disp(['Allocating buffers for ' num2str(camera.NumImages) ' images.']);    
     % Allocate and map buffers for each image
+    fprintf(['Allocating (' num2str(camera.NumImages) ') buffers ... ']);    
     for i = 1:camera.NumImages   
-        disp(['Allocating buffer ' num2str(i) ' ...']);
+        fprintf([num2str(i) ' ']);
         ima_ptr(i) = libpointer('uint16Ptr',image_stack(:,:,i));
         [error_code, buf_nums(i)] = pfALLOCATE_BUFFER_EX(...
             camera.BoardHandle,-1,imasize,ima_ptr(i)); 
-        disp(['Allocated to buffer ' num2str(i) ' to buffer num ' ...
-            num2str(buf_nums(i))]);
+        fprintf(['(bnum=' num2str(buf_nums(i)) ') ']);        
     end
-    disp(' ');        
+    disp('done');
+    
     camera.buf_ptrs=ima_ptr;
     camera.buf_nums=buf_nums;
+    
     % Remove buffers from list write (ie. clear them)
-    fprintf('Removing buffers from write list ...');
-    [error_code] = pfREMOVE_ALL_BUFFER_FROM_LIST(camera.BoardHandle);    
+    fprintf('Clearing buffer queue ...');
+    [error_code] = pfREMOVE_ALL_BUFFER_FROM_LIST(camera.BoardHandle);
+    camera.NumAcquired=0;
     disp(' done');   
     disp('Camera acquistion configured.');
 end
 
 function camera=initCam(camera)   
-
-    disp('Intializing PCI PCO 540 board and camera ...');
+    fprintf('Intializing PCI PCO 540 board and camera ...');
 
     % If no arguments, go to default settings
     if nargin==0
@@ -2262,12 +2246,11 @@ function camera=initCam(camera)
     camera.isConnected=1;
     
     % Stop any running camera on the Board
-    disp('Stopping any running camera on the board...');
     [error_code, value] = pfGETBOARDVAL(camera.BoardHandle,'PCC_VAL_BOARD_STATUS');
     if(error_code)
         pco_errdisp('pfGETBOARDVAL',error_code);    
     else
-        if(bitand(value,hex2dec('01'))==hex2dec('01'))
+        if(bitand(value,hex2dec('01'))==hex2dec('01'))            
             disp('Camera is running call STOP_CAMERA')     
             error_code=pfSTOP_CAMERA(camera.BoardHandle);
             pco_errdisp('pfSTOP_CAMERA',error_code);
