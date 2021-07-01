@@ -9,9 +9,8 @@ atomdata=atomdata(inds);
 
 %% Grab the gaussian fit outputs
 for kk=1:length(atomdata)
-    NWA(kk)=sum(sum(atomdata(kk).PWA));
-    NWOA(kk)=sum(sum(atomdata(kk).PWOA));
-    
+    NWA(kk)=sum(sum(atomdata(kk).PWA,1),2);
+    NWOA(kk)=sum(sum(atomdata(kk).PWOA,1),2);    
 end
 
 counts=struct;

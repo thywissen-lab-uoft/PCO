@@ -7,34 +7,8 @@ function pco_gui
 % This code run the PCO cameras which the lattice experiment uses for
 % absorption imaging along the X and Y lattice directions. The design of
 % this GUI is based upon the original GUI 
-%
 
-%% Caculate pixel sizes
-% This could probably move or mabye even be sampled from the camera (at
-% least the pixel size). Just putting the code here for now, since I keep
-% on forgetting the optical 4F setup.
-
-raw_pixel_size=6.45E-6; % Pixelsize on the pixefly cameras
-mag=[1 2]; % ideal manification of X and Y cams respectively
-% X Cam has 200 mm objective, 200 mm refocuing
-% Y Cam has 200 mm objective, 400 mm refocusing
-historyDir=['C:' filesep 'ImageHistory'];
-frVar='ExecutionDate';
-doDebug=0;
-
-%% Default Camera Settings
-camera=struct;
-
-camera.ExposureTime=374;
-camera.CameraMode=17;
-camera.NumImages=2;
-camera.isConnected=0;
-
-% camera.CameraMode=32 (0x20 double hardware trigger)
-% camera.CameraMode=33 (0x21 double software trigger)
-
-%% Initialize
-
+%% Load dependencies
 % Add all subdirectories for this m file
 curpath = fileparts(mfilename('fullpath'));
 addpath(curpath);addpath(genpath(curpath))
@@ -56,15 +30,31 @@ for kk=1:length(a.Children)
     end
 end
 
+%% Caculate pixel sizes
+% This could probably move or mabye even be sampled from the camera (at
+% least the pixel size).
+
+% Whether to enter debug mode
+doDebug=0;
+
+raw_pixel_size=6.45E-6; % Pixelsize on the pixefly cameras
+mag=[1 2]; % ideal manification of X and Y cams respectively
+
+% X Cam has 200 mm objective, 200 mm refocuing
+% Y Cam has 200 mm objective, 400 mm refocusing
+
+historyDir=['C:' filesep 'ImageHistory'];
+frVar='ExecutionDate';
+camera=initCamStruct;
+
 
 %% Initialize Dummy Data
 
 X=1:1392;                       % X pixel vector
 Y=1:1024;                       % Y pixel vector
 Z=zeros(length(Y),length(X));   % Image to show
-dstruct=struct;                 % Data strucutre for current image
 
-
+% Load in sample data to fill the objcts
 example_fname='PixelflyImage_2021-06-29_09-03-26';
 dstruct=load(example_fname);
 dstruct=dstruct.data;
@@ -74,7 +64,14 @@ dstruct.Name='example';
 % Initialize the primary figure
 hF=figure;
 clf
-co=get(gca,'colororder');co=circshift(co,3,1);co=[co;co;co];
+
+set(hF,'Color','w','units','pixels','Name',guiname,...
+    'toolbar','none','Tag','GUI','CloseRequestFcn',@closeGUI,...
+    'NumberTitle','off','Position',[50 50 1600 800]);
+
+co=get(gca,'colororder');
+co=circshift(co,3,1);
+co=[co;co;co];
 
 coNew=[hex2dec(['78';'a2';'cc'])';
         hex2dec(['ff';'c7';'a1'])';
@@ -87,22 +84,26 @@ coNew=circshift(coNew,3,1);
 coNew=brighten([coNew;coNew;coNew],.2);       
 
 
-
-set(hF,'Color','w','units','pixels','Name',guiname,...
-    'toolbar','none','Tag','GUI','CloseRequestFcn',@closeGUI,...
-    'NumberTitle','off','Position',[50 50 1600 800]);
-
 % Callback for when the GUI is requested to be closed.
     function closeGUI(fig,~)
         disp('Closing camera GUI...');
         try            
             if camera.RunStatus     % Stop camera if necessary
-                disp('You didn''t stop the camera first, tsk tsk. Closing the camera for you.');
+                disp(['You didn''t stop the camera first, tsk tsk. ' ...
+                    'Closing the camera for you.']);
                 stopCamCB;
                 stop(trigTimer);    % Stop trigger check
             end
-            delete(trigTimer);      % Delete trigger check timer
-            closeCam(camera.BoardHandle);   % Close camera
+            % Delete trigger check timer
+            delete(trigTimer);      
+            % Close camera
+            
+            if camera.isConnected
+                closeCam(camera.BoardHandle);   
+            end
+        catch ME
+            warning('Error when closing GUI.');
+            warning(ME.message);
         end
         delete(fig);                % Delete the figure
     end
@@ -152,7 +153,7 @@ l=80;   % Left gap for fitting and data analysis summary
         % commenserate positioning with respect the actual image shown
         
         W=hF.Position(3);H=hF.Position(4);      % Grab figure dimensions           
-        hp.Position=[200 1 W-200 H-130];        % Resize image panel        
+        hp.Position=[220 1 W-220 H-130];        % Resize image panel        
         resizePlots;                            % Resize plots
         
         % Reposition the display ROI and axis equal options
@@ -245,6 +246,7 @@ pXF=plot(X,0*ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2)
 hAxY=axes('box','on','linewidth',1,'fontsize',10,'units','pixels',...
     'YAxisLocation','Right','YDir','Reverse','parent',hp);
 hAxY.Position=[axImg.Position(1)+axImg.Position(3) axImg.Position(2) l axImg.Position(4)];
+
 hold on
 % Add Y data data and fit plots
 pY=plot(ones(length(Y),1),Y,'k.-'); 
@@ -279,8 +281,6 @@ hbSlctLim=uicontrol(hp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
     'Backgroundcolor','w','Position',[1 1 20 20],'Callback',@slctDispCB,...
     'ToolTipString',ttstr);
 
-
-
     function tbl_dispROICB(src,evt)
         ROI=src.Data;        % Grab the new ROI     
         % Check that the data is numeric
@@ -300,8 +300,8 @@ hbSlctLim=uicontrol(hp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
         end       
         if ROI(1)<1; ROI(1)=1; end       
         if ROI(3)<1; ROI(3)=1; end   
-        if ROI(4)>1024; ROI(4)=1024;end       
-        if ROI(2)>1392; ROI(2)=1392;end       
+        if ROI(4)>size(dstruct.PWA,1); ROI(4)=size(dstruct.PWA,1);end       
+        if ROI(2)>size(dstruct.PWA,2); ROI(2)=size(dstruct.PWA,2);end       
         src.Data=ROI;       
         try
             set(axImg,'XLim',ROI(1:2),'YLim',ROI(3:4));
@@ -695,7 +695,7 @@ hbDisconnect=uicontrol(hpAcq,'style','pushbutton','string','disconnect','units',
     function connectCamCB(~,~)        
         camera.ExposureTime=tbl_cama.Data{1,2};
         camera.NumImages=tbl_cama.Data{2,2};
-        camera.CameraMode=tbl_cama.Data{3,2};        
+        camera.CameraMode=bgCamMode.SelectedObject.UserData;
         camera=initCam(camera);        
         
         hbDisconnect.Enable='on';
@@ -703,26 +703,28 @@ hbDisconnect=uicontrol(hpAcq,'style','pushbutton','string','disconnect','units',
         hbstart.Enable='on';
         hbclear.Enable='on';
         hbstop.Enable='off';
-        tbl_cama.Enable='off';   
+        tbl_cama.Enable='off';  
+        rbSingleAcq.Enable='off';
+        rbDoubleAcq.Enable='off';
     end
 
 % Disconnect from camera callback
     function disconnectCamCB(~,~)
         disp('Disconnecting from camera.');        
-        closeCam(camera.BoardHandle);        
-        
-        camera=struct;
+        closeCam(camera.BoardHandle);           
+        camera=initCamStruct;
+        camera.CameraMode=bgCamMode.SelectedObject.UserData;
         camera.ExposureTime=tbl_cama.Data{1,2};
         camera.NumImages=tbl_cama.Data{2,2};
-        camera.CameraMode=tbl_cama.Data{3,2};             
-        camera.isConnected=0;
-
+        
         hbDisconnect.Enable='off';
         hbConnect.Enable='on';        
         hbstart.Enable='off';
         hbclear.Enable='off';
         hbstop.Enable='off';
         tbl_cama.Enable='on';
+        rbSingleAcq.Enable='on';
+        rbDoubleAcq.Enable='on';
     end
 
 % Start acquisition button
@@ -790,7 +792,7 @@ tSaveDir=uicontrol(hpAcq,'style','text','string','directory','fontsize',8,...
 % Button for software trigger
 hbSWtrig=uicontrol(hpAcq,'style','pushbutton','backgroundcolor','w',...
     'string','trigger','fontsize',10,'units','pixels','callback',@swTrigCB,...
-    'enable','off','visible','on','Position',[hpAcq.Position(3)-60 5 50 20]);
+    'enable','off','visible','off','Position',[hpAcq.Position(3)-60 5 50 20]);
 
 % Call for software trigger button
 function swTrigCB(~,~)
@@ -799,7 +801,7 @@ end
 
 %% ROI Panels
 hpROI=uipanel(hF,'units','pixels','backgroundcolor','w');
-hpROI.Position=[0 hp.Position(4)-100 200 200];
+hpROI.Position=[0 hp.Position(4)-100 220 200];
 
 % Table of ROIs
 tblROI=uitable(hpROI,'units','pixels','ColumnWidth',{30 30 30 30},...
@@ -829,8 +831,8 @@ tblROI.Position(1:2)=[1 hpROI.Position(4)-tblROI.Position(4)-5];
         % Check that ROI is within image bounds
         if ROI(1)<1; ROI(1)=1; end       
         if ROI(3)<1; ROI(3)=1; end   
-        if ROI(4)>1024; ROI(4)=1024; end       
-        if ROI(2)>1392; ROI(2)=1392; end         
+        if ROI(4)>size(dstruct.PWA,1); ROI(4)=size(dstruct.PWA,1); end       
+        if ROI(2)>size(dstruct.PWA,2); ROI(2)=size(dstruct.PWA,2); end         
         % Reassign the ROI
         src.Data(m,:)=ROI;      
         % Try to update ROI graphics
@@ -847,7 +849,7 @@ tblROI.Position(1:2)=[1 hpROI.Position(4)-tblROI.Position(4)-5];
 % hpFit.Position=[0 0 200 hp.Position(4)-100];
 
 hpFit=uitabgroup(hF,'units','pixels');
-hpFit.Position=[0 0 200 hp.Position(4)-100];
+hpFit.Position=[0 0 220 hp.Position(4)-100];
 
 tabs(1)=uitab(hpFit,'Title','params','units','pixels');
 tabs(2)=uitab(hpFit,'Title','flags','units','pixels');
@@ -855,11 +857,11 @@ tabs(3)=uitab(hpFit,'Title','1','units','pixels','foregroundcolor',co(1,:));
 
 % Table for run parameters
 tbl_params=uitable(tabs(1),'units','normalized','RowName',{},'fontsize',8,...
-    'ColumnName',{},'ColumnWidth',{125 50},'columneditable',[false false],...
+    'ColumnName',{},'ColumnWidth',{135 60},'columneditable',[false false],...
     'Position',[0 0 1 1]);
 % Table for run parameters
 tbl_flags=uitable(tabs(2),'units','normalized','RowName',{},'fontsize',7,...
-    'ColumnName',{},'ColumnWidth',{135 40},'columneditable',[false false],...
+    'ColumnName',{},'ColumnWidth',{145 50},'columneditable',[false false],...
     'Position',[0 0 1 1]);
 
 % Table for analysis outputs
@@ -869,7 +871,7 @@ tbl_analysis(1)=uitable(tabs(3),'units','normalized','RowName',{},'ColumnName',{
 %% ROI Settings panel
 hpROISettings=uipanel(hF,'units','pixels','backgroundcolor','w',...
     'title','ROI','fontsize',6);
-hpROISettings.Position=[200 hp.Position(4) 120 105];
+hpROISettings.Position=[220 hp.Position(4) 120 105];
 
 % Table for number of ROIs
 tblNumROIs=uitable(hpROISettings,'Data',1,'RowName','Num ROIs','columnName',{},...
@@ -1003,8 +1005,8 @@ uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
         % Constrain ROI to image
         if ROI(1)<1; ROI(1)=1; end       
         if ROI(3)<1; ROI(3)=1; end   
-        if ROI(4)>1024; ROI(4)=1024; end       
-        if ROI(2)>1392; ROI(2)=1392; end     
+        if ROI(4)>size(dstruct.PWA,1); ROI(4)=size(dstruct.PWA,1); end       
+        if ROI(2)>size(dstruct.PWA,2); ROI(2)=size(dstruct.PWA,2); end     
         % Try to update ROI graphics
         try
             pos=[ROI(1) ROI(3) ROI(2)-ROI(1) ROI(4)-ROI(3)];
@@ -1035,9 +1037,9 @@ hpAnl.Position=[hpROISettings.Position(1)+hpROISettings.Position(3) ...
     hp.Position(4) 150 105];
 
 % Refit button
-hbfit=uicontrol('style','pushbutton','string','refit',...
+hbfit=uicontrol('style','pushbutton','string','analyze',...
     'units','pixels','callback',@cbrefit,'parent',hpAnl,'backgroundcolor','w');
-hbfit.Position=[hpAnl.Position(3)-26 1 25 15];
+hbfit.Position=[1 1 50 15];
 
 % Callback function for redoing fits button
     function cbrefit(~,~)
@@ -1136,8 +1138,8 @@ pROIboxsub=rectangle('position',pp,'edgecolor','k','linewidth',1,...
         % Check that ROI is within image bounds
         if ROI(1)<1; ROI(1)=1; end       
         if ROI(3)<1; ROI(3)=1; end   
-        if ROI(4)>1024; ROI(4)=1024; end       
-        if ROI(2)>1392; ROI(2)=1392; end         
+        if ROI(4)>size(dstruct.PWA,1); ROI(4)=size(dstruct.PWA,1); end       
+        if ROI(2)>size(dstruct.PWA,2); ROI(2)=size(dstruct.PWA,2); end         
         % Reassign the ROI
         src.Data(m,:)=ROI;      
         % Try to update ROI graphics
@@ -1151,7 +1153,7 @@ pROIboxsub=rectangle('position',pp,'edgecolor','k','linewidth',1,...
     end
 %% Camera Settings Panel
 hpAcq2=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
-    'title','camera','fontsize',6);
+    'title','acquisition','fontsize',6);
 hpAcq2.Position=[hpAnl.Position(1)+hpAnl.Position(3) hp.Position(4) 150 105];
 
 tbl_cama=uitable('parent',hpAcq2,'units','pixels','RowName',{},...
@@ -1161,11 +1163,10 @@ tbl_cama=uitable('parent',hpAcq2,'units','pixels','RowName',{},...
 
 tbl_cama.Data={...
     ['exposure (' char(956) 's)'],camera.ExposureTime;
-    'num images', camera.NumImages;
-    'camera mode',camera.CameraMode};
- 
+    'num images', camera.NumImages};
+
 tbl_cama.Position(3:4)=tbl_cama.Extent(3:4);
-tbl_cama.Position(1:2)=[5 30];
+tbl_cama.Position(1:2)=[5 50];
 
     function chCamSettingsCB(src,evt)
        disp('Changing camera settings');
@@ -1183,23 +1184,40 @@ tbl_cama.Position(1:2)=[5 30];
         % Reassign the ROI
         src.Data{m,n}=data;      
         
-        if m==3 && ~ismember(data,[16 17 32 33])
-            warning(['Invalid camera mode. Going back to the previous value. ' ...
-                'You collosal nincompoop']);
-            src.Data{m,n}=evt.PreviousData;               
-        end
+%         if m==3 && ~ismember(data,[16 17 32 33])
+%             warning(['Invalid camera mode. Going back to the previous value. ' ...
+%                 'You collosal nincompoop']);
+%             src.Data{m,n}=evt.PreviousData;               
+%         end
         
         camera.ExposureTime=tbl_cama.Data{1,2};
         camera.NumImages=tbl_cama.Data{2,2};
-        camera.CameraMode=tbl_cama.Data{3,2};        
-
+%         camera.CameraMode=tbl_cama.Data{3,2};   
     end
 
+% Button group for deciding what the X/Y plots show
+bgCamMode = uibuttongroup(hpAcq2,'units','pixels','backgroundcolor','w','BorderType','None',...
+    'SelectionChangeFcn',@chCamModeCB);  
+bgCamMode.Position(3:4)=[150 40];
+bgCamMode.Position(1:2)=[5 5];
+    
+% Radio buttons for cuts vs sum
+rbSingleAcq=uicontrol(bgCamMode,'Style','radiobutton','String','single exp (0x16)',...
+    'Position',[0 20 150 20],'units','pixels','backgroundcolor','w',...
+    'Value',1,'UserData',16);
+rbDoubleAcq=uicontrol(bgCamMode,'Style','radiobutton','String','double exp (0x32)',...
+    'Position',[0 0 150 20],'units','pixels','backgroundcolor','w',...
+    'UserData',32);
+
+    function chCamModeCB(~,~)
+       disp('Changing camera acquistion mode');
+       camera.CameraMode=bgCamMode.SelectedObject.UserData;
+    end
 
 
 %% Camera Settings Panel
 hpSet=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
-    'title','camera','fontsize',6);
+    'title','optics','fontsize',6);
 hpSet.Position=[hpAcq2.Position(1)+hpAcq2.Position(3) hp.Position(4) 150 105];
 
 bgCam = uibuttongroup('units','pixels','backgroundcolor','w',...
@@ -1357,7 +1375,7 @@ pROIPScale=rectangle('position',pp,'edgecolor','k','linewidth',2,...
 
 mstr='Calculate the optical density; perform fits; update graphics';
 uicontrol('parent',hpImgProcess,'units','pixels',...
-    'style','pushbutton','string','recalculate OD','position',[69 1 80 15],...
+    'style','pushbutton','string','calculate OD','position',[1 1 70 15],...
     'fontsize',8,'backgroundcolor','w','callback',@recalcODCB,...
     'ToolTipString',mstr);
 
@@ -1418,19 +1436,23 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
         data.BitDepth=camera.BitDepth;
        
         % Grab the images
-        if ismember(camera.CameraMode,[16 17])
-            data.PWA=camera.Images{1};
-            data.PWOA=camera.Images{2};                     
-        else
-            data.PWA=camera.Images{1}(1:1024,:);
-            data.PWA(:,:,2)=camera.Images{1}(1025:end,:);
-
-            data.PWOA=camera.Images{2}(1:1024,:);        
-            data.PWOA(:,:,2)=camera.Images{2}(1025:end,:);
-            
-            data.X=1:size(data.PWOA,2);
-            data.Y=1:size(data.PWOA,1);
-        end
+%         if ismember(camera.CameraMode,[16 17])
+%             data.PWA=camera.Images{1};
+%             data.PWOA=camera.Images{2};                     
+%         else
+%             data.PWA=camera.Images{1}(1:1024,:);
+%             data.PWA(:,:,2)=camera.Images{1}(1025:end,:);
+% 
+%             data.PWOA=camera.Images{2}(1:1024,:);        
+%             data.PWOA(:,:,2)=camera.Images{2}(1025:end,:);
+%             
+%             data.X=1:size(data.PWOA,2);
+%             data.Y=1:size(data.PWOA,1);
+%         end
+        
+        
+        data.PWA=camera.Images{1};
+        data.PWOA=camera.Images{2};
         
         % Grab the sequence parameters        
         [data.Params,data.Units,data.Flags]=grabSequenceParams2;
@@ -1735,7 +1757,7 @@ function data=performFits(data)
 
             % Box Counts analysis
             if cBox.Value
-                bcount = data.BoxCount(m);
+                bcount = data.BoxCount(rr,m);
                 Natoms=bcount.Ncounts*(pxsize*1E-6)^2/crosssec; 
                 NatomsBKGD=bcount.Nbkgd*(pxsize*1E-6)^2/crosssec; 
 
@@ -1944,46 +1966,53 @@ function dstruct=boxCount(dstruct,bgROI)
             num2str(bgROI) ']']);        
     end    
     BoxCount=struct;    
-    for k=1:size(dstruct.ROI,1)
-        ROI=dstruct.ROI(k,:);
-        x=dstruct.X(ROI(1):ROI(2));                 % X vector
-        y=dstruct.Y(ROI(3):ROI(4));                 % Y vector
-        z=double(dstruct.OD(ROI(3):ROI(4),ROI(1):ROI(2)));
-        nbg=0;
-        if nargin==2
-            zbg=double(dstruct.OD(bgROI(3):bgROI(4),bgROI(1):bgROI(2)));
-            nbg=sum(sum(zbg))/(size(zbg,1)*size(zbg,2)); % count density
-        end      
-        Nraw=sum(sum(z));
-        Nbg=nbg*size(z,1)*size(z,2);  
-        
-        zNoBg=z-nbg;        
-        Ncounts=sum(sum(zNoBg));   
-        zY=sum(zNoBg,2)';
-        zX=sum(zNoBg,1);
-               
-        % Calculate center of mass
-        Xc=sum(zX.*x)/Ncounts;
-        Yc=sum(zY.*y)/Ncounts;
-        
-        % Calculate central second moment/variance and the standard
-        % deviation
-        X2=sum(zX.*(x-Xc).^2)/Ncounts; % x variance
-        Xs=sqrt(X2); % standard deviation X
-        Y2=sum(zY.*(y-Yc).^2)/Ncounts; % x variance
-        Ys=sqrt(Y2); % standard deviation Y               
+    
+    for rr=1:size(dstruct.PWOA,3)  
+        for k=1:size(dstruct.ROI,1)
+            ROI=dstruct.ROI(k,:);
+            x=dstruct.X(ROI(1):ROI(2));                 % X vector
+            y=dstruct.Y(ROI(3):ROI(4));                 % Y vector
+            z=double(dstruct.OD(ROI(3):ROI(4),ROI(1):ROI(2),rr));
+            nbg=0;
+            if nargin==2
+                zbg=double(dstruct.OD(bgROI(3):bgROI(4),bgROI(1):bgROI(2),rr));
+                nbg=sum(sum(zbg))/(size(zbg,1)*size(zbg,2)); % count density
+            end      
+            Nraw=sum(sum(z));
+            Nbg=nbg*size(z,1)*size(z,2);  
 
-        BoxCount(k).Ncounts=Ncounts;    % Number of counts (w/ bkgd removed)
-        BoxCount(k).Nraw=Nraw;          % Raw of number of counts
-        BoxCount(k).Nbkgd=Nbg;          % Bakcground number of counts
-        BoxCount(k).nbkgd=nbg;          % Background counts/px
-        BoxCount(k).bgROI=bgROI;        % ROI for calculating bgkd
-        BoxCount(k).Xc=Xc;              % X center of mass
-        BoxCount(k).Yc=Yc;              % Y center of mass
-        BoxCount(k).Xs=Xs;              % X standard deviation
-        BoxCount(k).Ys=Ys;              % Y standard deviation
-    end    
+            zNoBg=z-nbg;        
+            Ncounts=sum(sum(zNoBg));   
+            zY=sum(zNoBg,2)';
+            zX=sum(zNoBg,1);
+            
+            zX(zX<0)=0;
+            zY(zY<0)=0;
+
+            % Calculate center of mass
+            Xc=sum(zX.*x)/sum(zX);
+            Yc=sum(zY.*y)/sum(zY);
+
+            % Calculate central second moment/variance and the standard
+            % deviation
+            X2=sum(zX.*(x-Xc).^2)/sum(zX); % x variance
+            Xs=sqrt(X2); % standard deviation X
+            Y2=sum(zY.*(y-Yc).^2)/sum(zY); % x variance
+            Ys=sqrt(Y2); % standard deviation Y               
+
+            BoxCount(rr,k).Ncounts=Ncounts;    % Number of counts (w/ bkgd removed)
+            BoxCount(rr,k).Nraw=Nraw;          % Raw of number of counts
+            BoxCount(rr,k).Nbkgd=Nbg;          % Bakcground number of counts
+            BoxCount(rr,k).nbkgd=nbg;          % Background counts/px
+            BoxCount(rr,k).bgROI=bgROI;        % ROI for calculating bgkd
+            BoxCount(rr,k).Xc=Xc;              % X center of mass
+            BoxCount(rr,k).Yc=Yc;              % Y center of mass
+            BoxCount(rr,k).Xs=Xs;              % X standard deviation
+            BoxCount(rr,k).Ys=Ys;              % Y standard deviation
+        end
+    end
     dstruct.BoxCount=BoxCount;
+    
 end
 
 function dstruct=fitGauss(dstruct)
@@ -2041,6 +2070,7 @@ data2=data;xx2=xx;yy2=yy;
 
 % Elminate data points below a threshold to reduce # points to fit
 th=0.1;
+th=-1;
 xx2(Zguess<th*N0)=[];yy2(Zguess<th*N0)=[];data2(Zguess<th*N0)=[];
 
 xx2(isinf(data2))=[];
@@ -2167,9 +2197,10 @@ function camera=configCam(camera)
 
     % Set the camera mode (mode, exposure, binning, etc.)
     bit_pix=12;
+    auto_exp=50;    % auto exposure level (ignored)
     [error_code] = pfSETMODE(camera.BoardHandle,...
         camera.CameraMode,...
-        50,...
+        auto_exp,...
         camera.ExposureTime,...
         0,0,0,0,bit_pix,0);      
     
@@ -2204,37 +2235,43 @@ function camera=configCam(camera)
     [error_code] = pfREMOVE_ALL_BUFFER_FROM_LIST(camera.BoardHandle);
     camera.NumAcquired=0;
     disp(' done');   
+    
+    % Read the anticpated CCD readout time (useful for double shutter
+    % exposure)
+    [error_code, rTime] = pfGETBOARDVAL(camera.BoardHandle, 'PCC_VAL_READOUTTIME');
+    if ~error_code
+        disp(['Calculated CCD read time per image is ' ...
+            num2str(1E-3*double(rTime)) ' ms.']);
+    end
+    
     disp('Camera acquistion configured.');
+    
+    
 end
 
 function camera=initCam(camera)   
     fprintf('Intializing PCI PCO 540 board and camera ...');
 
-    % If no arguments, go to default settings
+    % If no arguments, go to default settings    
     if nargin==0
-        camera=struct;
-        camera.CameraMode=16; % 16 : software, 17 : hardware
-        camera.NumImages=2;
-        camera.ExposureTime=374;
-        camera.isConnected=0;
+        camera=initCamStruct;
     end
     
-    % Set camera status to defaults
+    % Reset camera
     camera.RunStatus=0;         % Camera status (1 = on, 0 = off);
     camera.NumAcquired=0;       % Number of acquired images (0,1,2)
     
     % Connect to the PCI PCO 540 Board
     [error_code,camera.BoardHandle] = pfINITBOARD(0);    
-    if(error_code~=0) 
-        disp('Unable to initialize board!!');
-        error(['Could not the board. Error is ' ...
+    if  error_code~=0
+        warning('Unable to initialize board!!');
+        error(['Could not connect to the board. Error is ' ...
             '0x' dec2hex(pco_uint32err(error_code))]);
         return;
     end   
     
     camera.isConnected=1;
-    
-    % Stop any running camera on the Board
+
     [error_code, value] = pfGETBOARDVAL(camera.BoardHandle,'PCC_VAL_BOARD_STATUS');
     if(error_code)
         pco_errdisp('pfGETBOARDVAL',error_code);    
@@ -2491,5 +2528,19 @@ function [vals,units,flags]=grabSequenceParams2(src)
 end
 
 
+function camera=initCamStruct
+% camera.CameraMode=16 (0x10 hardware trigger)
+% camera.CameraMode=17 (0x11 software trigger)
+% camera.CameraMode=32 (0x20 double hardware trigger)
+% camera.CameraMode=33 (0x21 double software trigger)
 
+    camera=struct;
+    camera.ExposureTime=374;
+    camera.CameraMode=17;
+    camera.NumImages=2;
+    camera.isConnected=0;
+    camera.RunStatus=0;
+    camera.NumAcquired=0;
+    camera.BoardHandle=[];
+end
 

@@ -71,8 +71,6 @@ lambdaRb=780E-9;lambdaK=770E-9;   % Rb and K wavelengths
 lambda=mean([lambdaRb lambdaK]);  % mean wavelength      
 crosssec=3/(2*pi)*lambda^2; % ideal cross 2-level cross section
 
-
-
 % Choose your camera
 camaxis='X';
 % camaxis='Y';
@@ -109,18 +107,20 @@ doSave=1;
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-xVar= 'HF_prob_freq';
-unit= 'MHz';
+xVar= 'ExecutionDate';
+unit= 's';
 
 %xVar='lens_pos';
 %unit='mm';
 
+% Should the analysis attempt to automatically find the unit?
+pco_autoUnit=1;
+
+% If ixon_autoUnit=0, this will be used.
+pco_overrideUnit='V';
+
 % Rotate the images?
 doRotate=0;
-
-% Rename the paramete ri nplots  TO BE CODED
-doRename=0;
-new_name='bob (kHz)';
 
 %% Select image directory
 % Choose the directory where the images to analyze are stored
@@ -137,7 +137,6 @@ clear atomdata
 disp(['Loading data from ' imgdir]);
 files=dir([imgdir filesep '*.mat']);
 files={files.name};
-
 
 for kk=1:length(files)
     str=fullfile(imgdir,files{kk});
@@ -156,16 +155,10 @@ for kk=1:length(files)
     
     if isequal(xVar,'ExecutionDate')
         data.Params.(xVar)=datenum(data.Params.(xVar))*24*60*60;
-    end
-    
-%     Iplug=data.Params.plug_current;    
-%     Pplug=interp1(plug_curr(1,:),plug_curr(3,:),Iplug);    
-%     data.Params.PlugPower=Pplug;
-%     disp([Iplug Pplug])
+    end   
     
     atomdata(kk)=data;    
 end
-
 disp(' ');
 
 if isequal(xVar,'ExecutionDate')
@@ -190,6 +183,7 @@ for kk=1:length(atomdata)
     end
 end
 [~, inds]=sort(x);
+
 atomdata=atomdata(inds);
 %% Analysis ROI
 % Analysis ROI is an Nx4 matrix of [X1 X2 Y1 Y2] which specifies a region
@@ -329,7 +323,7 @@ ODopts.ScaleProbeROI=[1 100 900 1000];  % ROI to do the scaling
 
 % Apply gaussian filter to images?
 ODopts.GaussFilter=1;
-ODopts.GaussFilterSigma=1;
+ODopts.GaussFilterSigma=.5;
 
 % Get the high field flag (this may throw error for old data)
 ODopts.HighField = data(1).Flags.High_Field_Imaging; 
