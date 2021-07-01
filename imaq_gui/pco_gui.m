@@ -64,6 +64,12 @@ Y=1:1024;                       % Y pixel vector
 Z=zeros(length(Y),length(X));   % Image to show
 dstruct=struct;                 % Data strucutre for current image
 
+
+example_fname='PixelflyImage_2021-06-29_09-03-26';
+dstruct=load(example_fname);
+dstruct=dstruct.data;
+dstruct.Name='example';
+
 %% Initialize GUI Figure
 % Initialize the primary figure
 hF=figure;
@@ -80,7 +86,7 @@ coNew=[hex2dec(['78';'a2';'cc'])';
 coNew=circshift(coNew,3,1);
 coNew=brighten([coNew;coNew;coNew],.2);       
 
-clf
+
 
 set(hF,'Color','w','units','pixels','Name',guiname,...
     'toolbar','none','Tag','GUI','CloseRequestFcn',@closeGUI,...
@@ -233,7 +239,7 @@ hAxX.Position=[axImg.Position(1) axImg.Position(2)-l axImg.Position(3) l];
 hold on
 % Add X data data and fit plots
 pX=plot(X,ones(length(X),1),'k.-');
-pXF=plot(X,ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2);
+pXF=plot(X,0*ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2);
 
 % Y Cut/Sum Axis
 hAxY=axes('box','on','linewidth',1,'fontsize',10,'units','pixels',...
@@ -242,7 +248,7 @@ hAxY.Position=[axImg.Position(1)+axImg.Position(3) axImg.Position(2) l axImg.Pos
 hold on
 % Add Y data data and fit plots
 pY=plot(ones(length(Y),1),Y,'k.-'); 
-pYF=plot(X,ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2);
+pYF=plot(X,0*ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2);
 
 
 %%%%% Lower right area of figure %%%%%
@@ -380,10 +386,10 @@ bgImgNum.Position(3:4)=[80 40];
     
 % Radio buttons for cuts vs sum
 rbI1=uicontrol(bgImgNum,'Style','radiobutton','String','image 1',...
-    'Position',[0 20 80 20],'units','pixels','backgroundcolor','w','Value',1,'Enable','off',...
+    'Position',[0 20 80 20],'units','pixels','backgroundcolor','w','Value',1,'Enable','on',...
     'UserData',1);
 rbI2=uicontrol(bgImgNum,'Style','radiobutton','String','image 2',...
-    'Position',[0 0 80 20],'units','pixels','backgroundcolor','w','Enable','off',...
+    'Position',[0 0 80 20],'units','pixels','backgroundcolor','w','Enable','on',...
     'UserData',2);
 
     function chImgNumCB(~,~)
@@ -524,11 +530,12 @@ hbhistoryRight.Position(3:4)=[12 20];
                     
                     if isa(val,'struct')
                        tbl_flags.Data{nn,2}='[struct]'; 
-                    end
-                    
+                    end                    
                 end
                 
-        catch badness
+        catch ME
+            warning(ME.message);
+            warning('Unable to load image. Reverting to previous');
             dstruct=olddata;
             dstruct=computeOD(dstruct);
             updateImages(dstruct);
@@ -578,10 +585,13 @@ hbhistoryRight.Position(3:4)=[12 20];
             case '0'
                 ind=1;        
         end        
+        
+        
         thistoryInd.String=sprintf('%03d',ind);
         drawnow;        
         filename=filenames{ind};
         loadImage(fullfile(historyDir,filename));
+        drawnow;
     end
 
 % Toggle for axis equal tight
@@ -1200,47 +1210,10 @@ tbl_cama.Position(1:2)=[5 30];
         camera.ExposureTime=tbl_cama.Data{1,2};
         camera.NumImages=tbl_cama.Data{2,2};
         camera.CameraMode=tbl_cama.Data{3,2};        
-        
-%         if camera.isConnected
-%            configCam(camera); 
-%         else
-%             disp('Camera not connected. Will write on camera connect');
-%         end
+
     end
 
-% bgCam = uibuttongroup('units','pixels','backgroundcolor','w',...
-%     'position',[0 75 150 20],...
-%     'SelectionChangedFcn',@chCam,'parent',hpSet,'BorderType','None');        
-% % Create radio buttons in the button group.
-% uicontrol(bgCam,'Style','radiobutton','String','X Cam',...
-%     'Position',[5 0 50 20],'units','pixels','backgroundcolor','w',...
-%     'Value',1);
-% uicontrol(bgCam,'Style','radiobutton','String','Y Cam',...
-%     'Position',[60 0 70 20],'units','pixels','backgroundcolor','w');
-% 
-%     function chCam(~,evt)
-%         switch evt.NewValue.String
-%             case 'X Cam'
-%                 tbl_cam.Data{2,2}=mag(1);
-%                 tbl_cam.Data{4,2}=raw_pixel_size*1E6/mag(1);
-%             case 'Y Cam'
-%                 tbl_cam.Data{2,2}=mag(2);
-%                 tbl_cam.Data{4,2}=raw_pixel_size*1E6/mag(2);
-%         end
-%        updateScalebar;
-%     end
-% 
-% tbl_cam=uitable('parent',hpSet,'units','pixels','RowName',{},'ColumnName',{},...
-%     'fontsize',8,'ColumnWidth',{100,40},'columneditable',[false false]);
-% 
-% tbl_cam.Data={...
-%     ['exposure (' char(956) 's)'],exptime;
-%     'magnification',mag(1);
-%     ['raw pixelsize (' char(956) 'm)'], raw_pixel_size*1E6;
-%     ['img pixelsize (' char(956) 'm)'], raw_pixel_size*1E6/mag(1)};
-% 
-% tbl_cam.Position(3:4)=tbl_cam.Extent(3:4);
-% tbl_cam.Position(1:2)=[0 0];
+
 
 %% Camera Settings Panel
 hpSet=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
@@ -1335,7 +1308,7 @@ uicontrol('parent',hpImgProcess,'units','pixels',...
 
 % Checkbox for enabling scaling of the probe
 cScaleProbe=uicontrol('style','checkbox','string','scale probe',...
-    'value',0,'parent',hpImgProcess,'backgroundcolor','w',...
+    'value',1,'parent',hpImgProcess,'backgroundcolor','w',...
     'position',[5 cGaussFilter.Position(2)-20 100 15],...
     'callback',@cScaleProbeCB);
 
@@ -1357,7 +1330,7 @@ tblROIPScale.Position(4)=20;
 tblROIPScale.Position(1:2)=[22 15];
 
 pROIPScale=rectangle('position',pp,'edgecolor','k','linewidth',2,...
-    'visible','off','parent',axImg,'linestyle',':');
+    'visible','on','parent',axImg,'linestyle',':');
 
 
 
@@ -1477,14 +1450,8 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
             data.Y=1:size(data.PWOA,1);
         end
         
-        % Grab the sequence parameters
-%         [data.Params,dstr]=grabSequenceParams;        
-%         data.Params.ExecutionDate=dstr;
-        
-%             [data.Params,dstr]=grabSequenceParams2;        
-%         data.Params.ExecutionDate=dstr;    
-        
-            [data.Params,data.Units,data.Flags]=grabSequenceParams2;
+        % Grab the sequence parameters        
+        [data.Params,data.Units,data.Flags]=grabSequenceParams2;
 
         % If in debug mode, create some example data
         if doDebug  
@@ -1530,9 +1497,6 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
                disp(['Scaling the PWOA image by ' num2str(round(s,4))]);
            end       
 
-           % Create and store the optical density
-    %        OD=log(PWOA./PWA);
-
            ODtype=bgODField.SelectedObject.String;
 
            if isequal(ODtype,'Detect')
@@ -1565,10 +1529,18 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
 
 function updateImages(data)
     
-        
-    n=bgImgNum.SelectedObject.UserData;
-       
+    if size(data.PWOA,3)==2
+       rbI1.Enable='on'; 
+        rbI2.Enable='on'; 
+    else
+        rbI1.Enable='off'; 
+        rbI2.Enable='off'; 
+        rbI2.Value=0;
+        rbI1.Value=1;
+    end
     
+        
+    n=bgImgNum.SelectedObject.UserData;         
     
    set(hPWOA,'XData',data.X,'YData',data.Y,'CData',data.PWOA(:,:,n));
    set(hPWA,'XData',data.X,'YData',data.Y,'CData',data.PWA(:,:,n));
@@ -1619,7 +1591,8 @@ for n=1:size(data.ROI,1)
         set(pX(n),'XData',x,'YData',ODxSum);
         set(pY(n),'XData',ODySum,'YData',y);
         drawnow;
-    end
+    end   
+    
 
     if cGaussFit.Value && isfield(data,'GaussFit')
         fout=data.GaussFit{n};
@@ -1963,6 +1936,9 @@ end
         save(fname,'data');
         disp(' done'); 
     end
+
+chData([],[],0);   
+
 end
 
 
@@ -2073,6 +2049,11 @@ data2=data;xx2=xx;yy2=yy;
 th=0.1;
 xx2(Zguess<th*N0)=[];yy2(Zguess<th*N0)=[];data2(Zguess<th*N0)=[];
 
+xx2(isinf(data2))=[];
+yy2(isinf(data2))=[];
+data2(isinf(data2))=[];
+
+
 % Calculate the appropriate background
 bg=sum(sum(data-Zguess))/(length(X)*length(Y));
 
@@ -2084,6 +2065,20 @@ opt.StartPoint=[N0 Xc Xs Yc Ys bg];
 opt.Lower=[N0/10 10 1 10 1 -1];
 opt.Upper=[5*N0 max(Dx) range(Dx) max(Dy) range(Dy) N0];
 opt.Weights=[];
+
+% Check that guesses are not nan or inf
+if sum(isnan(opt.StartPoint)) || sum(isinf(opt.StartPoint))
+   opt.StartPoint=[.5 500 500 500 500 0];
+end
+
+if sum(isnan(opt.Lower)) || sum(isinf(opt.Lower))
+   opt.Lower=[0 0 0 0 0 -100];
+end
+
+if sum(isnan(opt.Upper)) || sum(isinf(opt.Upper))
+   opt.Upper=[10 2000 2000 2000 2000 5];
+end
+
 
 % Check that the upper and lower bounds make sense
 badInds=opt.Upper<opt.Lower;
