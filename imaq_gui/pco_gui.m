@@ -513,7 +513,6 @@ hbhistoryRight.Position(3:4)=[12 20];
             dstruct=computeOD(dstruct);
             updateImages(dstruct);
             dstruct=performFits(dstruct);
-            updatePlots(dstruct); 
             
             [~,inds] = sort(lower(fieldnames(dstruct.Params)));
             params = orderfields(dstruct.Params,inds);  
@@ -540,7 +539,6 @@ hbhistoryRight.Position(3:4)=[12 20];
             dstruct=computeOD(dstruct);
             updateImages(dstruct);
             dstruct=performFits(dstruct);
-            updatePlots(dstruct);  
             
              [~,inds] = sort(lower(fieldnames(dstruct.Params)));
             params = orderfields(dstruct.Params,inds);  
@@ -1529,42 +1527,45 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
 
 function updateImages(data)
     
-    if size(data.PWOA,3)==2
-       rbI1.Enable='on'; 
+    % Determine which image to show
+    if size(data.PWOA,3)>1
+        rbI1.Enable='on'; 
         rbI2.Enable='on'; 
     else
         rbI1.Enable='off'; 
         rbI2.Enable='off'; 
         rbI2.Value=0;
         rbI1.Value=1;
-    end
-    
-        
+    end            
     n=bgImgNum.SelectedObject.UserData;         
     
-   set(hPWOA,'XData',data.X,'YData',data.Y,'CData',data.PWOA(:,:,n));
-   set(hPWA,'XData',data.X,'YData',data.Y,'CData',data.PWA(:,:,n));
-   set(hImg,'XData',data.X,'YData',data.Y,'CData',data.OD(:,:,n));
-   set(tImageFile,'String',data.Name);
-   set(tImageFileFig,'String',data.Name);
+    % Update images
+    set(hPWOA,'XData',data.X,'YData',data.Y,'CData',data.PWOA(:,:,n));
+    set(hPWA,'XData',data.X,'YData',data.Y,'CData',data.PWA(:,:,n));
+    set(hImg,'XData',data.X,'YData',data.Y,'CData',data.OD(:,:,n));
+    
+    % Update data string
+    set(tImageFile,'String',data.Name);
+    set(tImageFileFig,'String',data.Name);
 
+    % Find where in the history this image lies
     filenames=dir([historyDir  filesep '*.mat']);
     filenames={filenames.name};       
     filenames=sort(filenames);
-    filenames=flip(filenames);
-       
+    filenames=flip(filenames);       
     myname=[data.Name '.mat'];           % Current data mat       
     ind=find(ismember(filenames,myname));    % index in filenames        
     if isempty(ind)
       ind=1; 
     end
+    
     thistoryInd.String=sprintf('%03d',ind);        
 end
 
     function updateScalebar
         ROI=tbl_dispROI.Data;
         set(pScaleX,'XData',axImg.XTick(1:2),'YData',[1 1]*ROI(3)+(ROI(4)-ROI(3))*(1-35/axImg.Position(3)));           
-        set(pScaleY,'YData',axImg.YTick(1:2),'XData',[1 1]*ROI(1)++(ROI(2)-ROI(1))*20/axImg.Position(4));
+        set(pScaleY,'YData',axImg.YTick(1:2),'XData',[1 1]*ROI(1)+(ROI(2)-ROI(1))*20/axImg.Position(4));
         tScaleX.String=[num2str(range(axImg.XTick(1:2))*tbl_cam.Data{3,2}) '\mum'];
         tScaleY.String=[num2str(range(axImg.YTick(1:2))*tbl_cam.Data{3,2}) '\mum'];
         tScaleX.Position(1:2)=[axImg.XTick(1) pScaleX.YData(1)];
