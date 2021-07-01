@@ -170,6 +170,8 @@ l=80;   % Left gap for fitting and data analysis summary
               
         % Reposition filename
         cAutoUpdate.Position(1:2)=[1 hp.Position(4)-35];
+        bgImgNum.Position(1:2)=[1 hp.Position(4)-75];
+        
         hbSettings.Position(1:2)=[1 hp.Position(4)-21];        
         bSave.Position(1:2)=[20 hp.Position(4)-21];
         hbBrowseImage.Position(1:2)=[40 hp.Position(4)-21];
@@ -374,6 +376,26 @@ cAutoUpdate=uicontrol('parent',hp,'units','pixels','string',...
     'auto update?','value',1,'fontsize',8,'backgroundcolor','w',...
     'Style','checkbox','ToolTipString',ttstr);
 cAutoUpdate.Position(3:4)=[90 14];
+
+
+% Button group for deciding what the X/Y plots show
+bgImgNum = uibuttongroup(hp,'units','pixels','backgroundcolor','w','BorderType','None',...
+    'SelectionChangeFcn',@chImgNumCB);  
+bgImgNum.Position(3:4)=[80 40];
+    
+% Radio buttons for cuts vs sum
+rbI1=uicontrol(bgImgNum,'Style','radiobutton','String','image 1',...
+    'Position',[0 20 80 20],'units','pixels','backgroundcolor','w','Value',1,'Enable','off',...
+    'UserData',1);
+rbI2=uicontrol(bgImgNum,'Style','radiobutton','String','image 2',...
+    'Position',[0 0 80 20],'units','pixels','backgroundcolor','w','Enable','off',...
+    'UserData',2);
+
+    function chImgNumCB(~,~)
+        updateImages(dstruct);
+       updatePlots(dstruct); 
+    end
+
 
 % Save button
 ttstr=['Save the image, OD, and fits to file. Images are automatically ' ...
@@ -681,6 +703,16 @@ hbDisconnect=uicontrol(hpAcq,'style','pushbutton','string','disconnect','units',
         hbclear.Enable='on';
         hbstop.Enable='off';
         tbl_cama.Enable='off';
+        
+        if ismember(camera.CameraMode,[32 33])
+            rbI1.Enable='on';
+            rbI2.Enable='on';
+        else
+            rbI1.Enable='off';
+            rbI2.Enable='off';
+            rbI1.Value=1;
+            rbI2.Value=0;
+        end
         
     end
 
@@ -1412,7 +1444,7 @@ hpRaw=uipanel('parent',hF,'units','pixels','backgroundcolor','w');
 hpRaw.Position=[hF.Position(3)-250 hp.Position(4) 250 100];
 
 axPWA=axes('parent',hpRaw,'units','pixels');
-axPWA.Position=[0 0 125 75];
+axPWA.Position=[0 2 125 73];
 hPWA=imagesc(X,Y,Z);
 set(axPWA,'box','on','XTick',[],'YTick',[]);
 axis equal tight
@@ -1420,7 +1452,7 @@ axis equal tight
 pDisp=rectangle('position',[1 1 1392 1024],'edgecolor','r','linewidth',2);
 
 axPWOA=axes('parent',hpRaw,'units','pixels');
-axPWOA.Position=[125 0 125 75];
+axPWOA.Position=[125 2 125 73];
 hPWOA=imagesc(X,Y,Z);
 set(axPWOA,'box','on','XTick',[],'YTick',[]);
 axis equal tight
@@ -1457,15 +1489,18 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
         data.BitDepth=camera.BitDepth;
        
         % Grab the images
-        if camera.NumImages==2
+        if ismember(camera.CameraMode,[16 17])
             data.PWA=camera.Images{1};
             data.PWOA=camera.Images{2};                     
         else
-            data.PWA=camera.Images{1};
-            data.PWA(:,:,2)=camera.Images{2};
+            data.PWA=camera.Images{1}(1:1024,:);
+            data.PWA(:,:,2)=camera.Images{1}(1025:end,:);
 
-            data.PWOA=camera.Images{3};        
-            data.PWOA(:,:,2)=camera.Images{4};
+            data.PWOA=camera.Images{2}(1:1024,:);        
+            data.PWOA(:,:,2)=camera.Images{2}(1025:end,:);
+            
+            data.X=1:size(data.PWOA,2);
+            data.Y=1:size(data.PWOA,1);
         end
         
         % Grab the sequence parameters
@@ -1555,9 +1590,15 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
 
 
 function updateImages(data)
-   set(hPWOA,'XData',data.X,'YData',data.Y,'CData',data.PWOA);
-   set(hPWA,'XData',data.X,'YData',data.Y,'CData',data.PWA);
-   set(hImg,'XData',data.X,'YData',data.Y,'CData',data.OD);
+    
+        
+    n=bgImgNum.SelectedObject.UserData;
+       
+    
+    
+   set(hPWOA,'XData',data.X,'YData',data.Y,'CData',data.PWOA(:,:,n));
+   set(hPWA,'XData',data.X,'YData',data.Y,'CData',data.PWA(:,:,n));
+   set(hImg,'XData',data.X,'YData',data.Y,'CData',data.OD(:,:,n));
    set(tImageFile,'String',data.Name);
    set(tImageFileFig,'String',data.Name);
 
@@ -1668,9 +1709,11 @@ function data=performFits(data)
     % Create fitresults output
     fr=ones(size(data.ROI,1),1)*val;
 
+    imgnum=bgImgNum.SelectedObject.UserData;
+    
     % Create sum profiles        
     for m=1:size(ROI,1)
-        subOD=data.OD(ROI(m,3):ROI(m,4),ROI(m,1):ROI(m,2));
+        subOD=data.OD(ROI(m,3):ROI(m,4),ROI(m,1):ROI(m,2),imgnum);
         data.ODxSum{m}=sum(subOD,1);
         data.ODySum{m}=sum(subOD,2);
     end       
@@ -1924,11 +1967,8 @@ end
 
                 dstruct=computeOD(dstruct);
                 
-                if camera.NumImages==4
-                   keyboard 
-                end
+          
                 updateImages(dstruct);
-
                 
                 
                 dstruct=performFits(dstruct);
