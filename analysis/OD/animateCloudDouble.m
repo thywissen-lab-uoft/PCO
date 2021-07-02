@@ -1,4 +1,4 @@
-function animateCloud(atomdata,xVar,opts)
+function animateCloudDouble(atomdata,xVar,opts)
 
 clim=opts.CLim;
 global imgdir
@@ -74,8 +74,14 @@ t.Position(3)=hF.Position(3);
 t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
 
 % Axes for data
-hAxImg=axes('parent',hF,'units','pixels','Box','on','XGrid','on',...
+ax1=subplot(121);
+set(ax1,'units','pixels','Box','on','XGrid','on',...
     'YGrid','on','YDir','reverse','XAxisLocation','bottom');
+
+ax2=subplot(122);
+set(ax2,'units','pixels','Box','on','XGrid','on',...
+    'YGrid','on','YDir','reverse','XAxisLocation','bottom');
+
 
 drawnow;
 

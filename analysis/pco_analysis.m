@@ -107,8 +107,8 @@ doSave=1;
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-xVar= 'ExecutionDate';
-unit= 's';
+xVar= 'rf_freq_HF';
+unit= 'MHz';
 
 %xVar='lens_pos';
 %unit='mm';
@@ -214,16 +214,19 @@ atomdata=atomdata(inds);
  %ROI = [500 1392 250 360]; % XDT 1/2 insitu long X
 %  ROI = [500 1392 300 500]; % XDT 1/2 TOF 10 ms long X9
 
-% ROI=[784 1000 270 420];   % XDT  TOF 5 ms
+% ROI=[830 920 320 360];   % XDT  TOF 5 ms
 
 
 
-ROI=[741 1014 616 858];   % XDT  TOF 15 ms HF imaging
-ROI=[741 1014 593 858];   % XDT  TOF 20 ms HF imaging
+% ROI=[741 1014 616 858];   % XDT  TOF 15 ms HF imaging
+% ROI=[741 1014 593 858];   % XDT  TOF 20 ms HF imaging
 
-ROI=[741 1014 780 1024];   % XDT  TOF 15 ms HF+SG imaging
+% ROI=[741 1014 780 1024];   % XDT  TOF 15 ms HF+SG imaging
 
 % ROI=[708 1089 377 608];   % XDT  TOF 20 ms evaporation
+
+% ROI=[708 1089 377 608];   % XDT  TOF 20 ms evaporation
+
 
 % ROI=[713 1015 310 601];
 %  ROI=[780 970 200 1013];   % XDT  TOF analysis
@@ -260,6 +263,19 @@ ROI=[741 1014 780 1024];   % XDT  TOF 15 ms HF+SG imaging
 % 12ms tof SG from lattice #850 900 300 560;
 % ROI = [830 900 695 760;
 %        830 900 630 695];
+
+
+%%%%%%%%%%%%%%%%%%%%% X CAM DOUBLE SHUTTER %%%%%%%%%%%%%%%%%%%%%
+% ROI=[800 950 670 780;
+%     800 950 1700 1810];   % XDT TOF High Field Double 20 ms evaporation
+% 
+ROI=[800 950 182 1011;
+    800 950 1228 2040];   % XDT TOF High Field Double 20 ms evaporation
+
+ROI=[800 950 660 760;
+    800 950 1700 1800];   % XDT TOF High Field Double 20 ms evaporation zoom
+
+
 %%%%%%%%%% X CAM AM SPEC
 
 % 10 ms tof am spec 75-200 recoil z
@@ -304,12 +320,7 @@ ROI=[741 1014 780 1024];   % XDT  TOF 15 ms HF+SG imaging
 % Assign the ROI
 [atomdata.ROI]=deal(ROI);
 
-%% Display ROI
-% ROI over which to display, useful for the animation
-global aROI
 
-% Default is to snap to minimum ROI
-aROI=[min(ROI(:,1)) max(ROI(:,2)) min(ROI(:,3)) max(ROI(:,4))];
 
 
 %% Calculate the optical density
@@ -322,11 +333,17 @@ ODopts.ScaleProbe=1;
 ODopts.ScaleProbeROI=[1 100 900 1000];  % ROI to do the scaling
 
 % Apply gaussian filter to images?
-ODopts.GaussFilter=1;
+ODopts.GaussFilter=0;
 ODopts.GaussFilterSigma=.5;
 
 % Get the high field flag (this may throw error for old data)
-ODopts.HighField = data(1).Flags.High_Field_Imaging; 
+
+if isfield(data(1).Flags,'High_Field_Imaging')
+    ODopts.HighField = data(1).Flags.High_Field_Imaging; 
+else
+    ODopts.HighField=0;
+end
+%     ODopts.HighField=0;
 
 % Calculate the optical density
 atomdata=computeOD(atomdata,ODopts);
@@ -344,7 +361,7 @@ if doProbeFit
    if doSave;saveFigure(atomdata,hF_probe,'probe_details');end
 end
 
-%% ANALYSIS : Box Cojuunt
+%% ANALYSIS : Box Count
 % This section of code computes the box counts on all your data and ROIs.
 
 doBoxCount=1;   % Enable box count analysis
@@ -648,7 +665,7 @@ if doGaussFit
     if doSave;saveFigure(atomdata,hF_Centre,'gauss_position');end    
     
     if isequal(xVar,'tof') && length(atomdata)>2
-        [hF,fitX,fitY]=computeGaussianTemperature(atomdata,xVar);
+%         [hF,fitX,fitY]=computeGaussianTemperature(atomdata,xVar);
     end       
 
 
@@ -729,17 +746,16 @@ end
 %% Animate cloud
 doAnimate = 1;
 if doAnimate == 1
-animateOpts=struct;
-animateOpts.StartDelay=3; % Time to hold on first picture
-animateOpts.MidDelay=.5;     % Time to hold in middle picutres
-animateOpts.EndDelay=2;     % Time to hold final picture
+    animateOpts=struct;
+    animateOpts.StartDelay=3; % Time to hold on first picture
+    animateOpts.MidDelay=.5;     % Time to hold in middle picutres
+    animateOpts.EndDelay=2;     % Time to hold final picture
 
+    % animateOpts.Order='descend';    % Asceneding or descending
+    animateOpts.Order='ascend';
+    animateOpts.CLim=[0 3];   % Color limits
 
-% animateOpts.Order='descend';    % Asceneding or descending
-animateOpts.Order='ascend';
-animateOpts.CLim=[0 1];   % Color limits
-
-animateCloud(atomdata,xVar,animateOpts);
+    animateCloud(atomdata,xVar,animateOpts);
 end
 
 %% Show Atom Number

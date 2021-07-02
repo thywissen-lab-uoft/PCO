@@ -172,7 +172,6 @@ l=80;   % Left gap for fitting and data analysis summary
               
         % Reposition filename
         cAutoUpdate.Position(1:2)=[1 hp.Position(4)-35];
-        bgImgNum.Position(1:2)=[1 hp.Position(4)-75];
         
         hbSettings.Position(1:2)=[1 hp.Position(4)-21];        
         bSave.Position(1:2)=[20 hp.Position(4)-21];
@@ -317,7 +316,7 @@ hbSlctLim=uicontrol(hp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
     end
 
     function fullDispCB(~,~)
-       ROI=[1 size(Z,2) 1 size(Z,1)];
+       ROI=[1 size(dstruct.PWA,2) 1 size(dstruct.PWOA,1)];
        tbl_dispROI.Data=ROI;
        tbl_dispROICB(tbl_dispROI);
        resizePlots;
@@ -351,8 +350,8 @@ hbSlctLim=uicontrol(hp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
         % Constrain ROI to image
         if ROI(1)<1; ROI(1)=1; end       
         if ROI(3)<1; ROI(3)=1; end   
-        if ROI(4)>1024; ROI(4)=1024; end       
-        if ROI(2)>1392; ROI(2)=1392; end   
+        if ROI(4)>size(dstruct.PWA,1); ROI(4)=size(dstruct.PWA,2); end       
+        if ROI(2)>size(dstruct.PWA,2); ROI(2)=size(dstruct.PWA,2); end   
         
         % Try to update ROI graphics
         tbl_dispROI.Data=ROI;
@@ -377,25 +376,6 @@ cAutoUpdate=uicontrol('parent',hp,'units','pixels','string',...
     'auto update?','value',1,'fontsize',8,'backgroundcolor','w',...
     'Style','checkbox','ToolTipString',ttstr);
 cAutoUpdate.Position(3:4)=[90 14];
-
-
-% Button group for deciding what the X/Y plots show
-bgImgNum = uibuttongroup(hp,'units','pixels','backgroundcolor','w','BorderType','None',...
-    'SelectionChangeFcn',@chImgNumCB);  
-bgImgNum.Position(3:4)=[80 40];
-    
-% Radio buttons for cuts vs sum
-rbI1=uicontrol(bgImgNum,'Style','radiobutton','String','image 1',...
-    'Position',[0 20 80 20],'units','pixels','backgroundcolor','w','Value',1,'Enable','on',...
-    'UserData',1);
-rbI2=uicontrol(bgImgNum,'Style','radiobutton','String','image 2',...
-    'Position',[0 0 80 20],'units','pixels','backgroundcolor','w','Enable','on',...
-    'UserData',2);
-
-    function chImgNumCB(~,~)
-        updateImages(dstruct);
-        updatePlots(dstruct); 
-    end
 
 
 % Save button
@@ -1477,79 +1457,80 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
        
     function data=computeOD(data)
         disp('Calculating optical density.');
-        PWA_all=double(data.PWA);
-        PWOA_all=double(data.PWOA);
+
+        PWA=data.PWA;
+        PWOA=data.PWOA;
         
-        OD_all=zeros(size(PWOA_all,1),size(PWOA_all,2),size(PWOA_all,3));
-        for nn=1:size(PWOA_all,3)
-            PWA=PWA_all(:,:,nn);
-            PWOA=PWOA_all(:,:,nn);
+        % Apply a gaussianfilter
+       if cGaussFilter.Value
+          s=tblGaussFilter.Data;
+          PWOA=imgaussfilt(PWOA,s);
+          PWA=imgaussfilt(PWA,s);
+          disp(['Applying gaussian filter. s=' num2str(s) ' px']);
+       end
 
-           if cGaussFilter.Value
-               s=tblGaussFilter.Data;
-              PWOA=imgaussfilt(PWOA,s);
-              PWA=imgaussfilt(PWA,s);
-              disp(['Applying gaussian filter. s=' num2str(s) ' px']);
-           end
-
-           if cScaleProbe.Value
-               R=tblROIPScale.Data;
+       % Scale the probe beams
+       if cScaleProbe.Value
+           R=tblROIPScale.Data;
+           
+           if size(data.PWOA,1)==1024           
                s1=sum(sum(PWOA(R(3):R(4),R(1):R(2))));
                s2=sum(sum(PWA(R(3):R(4),R(1):R(2))));
                s=s2/s1;
                PWOA=s*PWOA;
                disp(['Scaling the PWOA image by ' num2str(round(s,4))]);
-           end       
+           else
+               s1=sum(sum(PWOA(R(3):R(4),R(1):R(2))));
+               s2=sum(sum(PWA(R(3):R(4),R(1):R(2))));
+               sa=s2/s1;
+               
+               s3=sum(sum(PWOA(1024+[R(3):R(4)],R(1):R(2))));
+               s4=sum(sum(PWA(1024+[R(3):R(4)],R(1):R(2))));
+               sb=s4/s3;
+               
+                PWOA(1:1024,:)=sa*PWOA(1:1024,:);               
+                PWOA(1025:2048,:)=sb*PWOA(1025:2048,:);
+               disp(['Scaling the PWOA image by ' ...
+                   num2str(round(sa,4)) ' and ' num2str(round(sb,4))]);               
+           end
+       end       
 
-           ODtype=bgODField.SelectedObject.String;
+       ODtype=bgODField.SelectedObject.String;
 
-           if isequal(ODtype,'Detect')
-              if data.Flags.High_Field_Imaging
-                 ODtype='High'; 
-              else
-                  ODtype='Low';
-              end
-           end       
+       if isequal(ODtype,'Detect')
+          if isfield(data.Flags,'High_Field_Imaging') && data.Flags.High_Field_Imaging
+             ODtype='High'; 
+          else
+              ODtype='Low';
+          end
+       end       
 
-          switch ODtype
-              case 'Low'
-                    disp('Computing low-field optical density');
-                    OD=log(PWOA./PWA);
-              case 'High'
-                  disp('Computing high-field optical density');
-                    OD=log(abs(PWOA./(2*PWA-PWOA))); %deets on labbook entry 2021.06.26 
-              otherwise
-                  warning('Issue with OD type. Assuming low field.');
-                  OD=log(PWOA./PWA);
-          end     
-          
-          OD_all(:,:,nn)=OD;
-      
-        end
+      switch ODtype
+          case 'Low'
+                disp('Computing low-field optical density');
+                OD=log(PWOA./PWA);
+          case 'High'
+              disp('Computing high-field optical density');
+                OD=log(abs(PWOA./(2*PWA-PWOA))); %deets on labbook entry 2021.06.26 
+          otherwise
+              warning('Issue with OD type. Assuming low field.');
+              OD=log(PWOA./PWA);
+      end 
         
-       data.OD=single(OD_all);
+        data.OD=single(OD);
     end
 
 
 function updateImages(data)
     
-    % Determine which image to show
-    if size(data.PWOA,3)>1
-        rbI1.Enable='on'; 
-        rbI2.Enable='on'; 
-    else
-        rbI1.Enable='off'; 
-        rbI2.Enable='off'; 
-        rbI2.Value=0;
-        rbI1.Value=1;
-    end            
-    n=bgImgNum.SelectedObject.UserData;         
+          
     
     % Update images
-    set(hPWOA,'XData',data.X,'YData',data.Y,'CData',data.PWOA(:,:,n));
-    set(hPWA,'XData',data.X,'YData',data.Y,'CData',data.PWA(:,:,n));
-    set(hImg,'XData',data.X,'YData',data.Y,'CData',data.OD(:,:,n));
-    
+    set(hPWOA,'XData',data.X,'YData',data.Y,'CData',data.PWOA);
+    set(hPWA,'XData',data.X,'YData',data.Y,'CData',data.PWA);
+    set(hImg,'XData',data.X,'YData',data.Y,'CData',data.OD);
+
+
     % Update data string
     set(tImageFile,'String',data.Name);
     set(tImageFileFig,'String',data.Name);
@@ -1580,7 +1561,6 @@ end
     end
 
 function updatePlots(data)
-    imgnum=bgImgNum.SelectedObject.UserData;
 
     
     fprintf('Updating graphics ... ');
@@ -1591,7 +1571,7 @@ for n=1:size(data.ROI,1)
     x=ROI(1):ROI(2);
     y=ROI(3):ROI(4); 
     [xx,yy]=meshgrid(x,y);
-    subOD=data.OD(ROI(3):ROI(4),ROI(1):ROI(2),imgnum);
+    subOD=data.OD(ROI(3):ROI(4),ROI(1):ROI(2));
     
     if rbSum.Value
         ODySum=sum(subOD,2);
@@ -1603,7 +1583,7 @@ for n=1:size(data.ROI,1)
     end       
 
     if cGaussFit.Value && isfield(data,'GaussFit')
-        fout=data.GaussFit{imgnum,n};
+        fout=data.GaussFit{n};
         zF=feval(fout,xx,yy); 
         
         % Evaluate and plot 1/e^2 gaussian reticle
@@ -1665,11 +1645,10 @@ function data=performFits(data)
     % Create fitresults output
     fr=ones(size(data.ROI,1),1)*val;
 
-    imgnum=bgImgNum.SelectedObject.UserData;
     
     % Create sum profiles        
     for m=1:size(ROI,1)
-        subOD=data.OD(ROI(m,3):ROI(m,4),ROI(m,1):ROI(m,2),imgnum);
+        subOD=data.OD(ROI(m,3):ROI(m,4),ROI(m,1):ROI(m,2));
         data.ODxSum{m}=sum(subOD,1);
         data.ODySum{m}=sum(subOD,2);
     end       
@@ -1950,8 +1929,9 @@ end
         disp(' done'); 
     end
 
+try
 chData([],[],0);   
-
+end
 end
 
 
@@ -1967,50 +1947,55 @@ function dstruct=boxCount(dstruct,bgROI)
     end    
     BoxCount=struct;    
     
-    for rr=1:size(dstruct.PWOA,3)  
-        for k=1:size(dstruct.ROI,1)
-            ROI=dstruct.ROI(k,:);
-            x=dstruct.X(ROI(1):ROI(2));                 % X vector
-            y=dstruct.Y(ROI(3):ROI(4));                 % Y vector
-            z=double(dstruct.OD(ROI(3):ROI(4),ROI(1):ROI(2),rr));
-            nbg=0;
-            if nargin==2
-                zbg=double(dstruct.OD(bgROI(3):bgROI(4),bgROI(1):bgROI(2),rr));
-                nbg=sum(sum(zbg))/(size(zbg,1)*size(zbg,2)); % count density
-            end      
-            Nraw=sum(sum(z));
-            Nbg=nbg*size(z,1)*size(z,2);  
+    for k=1:size(dstruct.ROI,1)
+        ROI=dstruct.ROI(k,:);
+        x=dstruct.X(ROI(1):ROI(2));                 % X vector
+        y=dstruct.Y(ROI(3):ROI(4));                 % Y vector
+        z=double(dstruct.OD(ROI(3):ROI(4),ROI(1):ROI(2)));
+        nbg=0;
+        
+        if nargin==2            
+            if ROI(3)<=1024         
+                zbg=double(dstruct.OD(bgROI(3):bgROI(4),bgROI(1):bgROI(2)));
+            else
+                zbg=double(dstruct.OD(1024+[bgROI(3):bgROI(4)],bgROI(1):bgROI(2)));
+            end
+            nbg=sum(sum(zbg))/(size(zbg,1)*size(zbg,2)); % count density
+        end   
+        
+        Nraw=sum(sum(z));
+        Nbg=nbg*size(z,1)*size(z,2);  
 
-            zNoBg=z-nbg;        
-            Ncounts=sum(sum(zNoBg));   
-            zY=sum(zNoBg,2)';
-            zX=sum(zNoBg,1);
-            
-            zX(zX<0)=0;
-            zY(zY<0)=0;
+        zNoBg=z-nbg;        
+        Ncounts=sum(sum(zNoBg));   
+        zY=sum(zNoBg,2)';
+        zX=sum(zNoBg,1);
 
-            % Calculate center of mass
-            Xc=sum(zX.*x)/sum(zX);
-            Yc=sum(zY.*y)/sum(zY);
+        zX(zX<0)=0;
+        zY(zY<0)=0;
 
-            % Calculate central second moment/variance and the standard
-            % deviation
-            X2=sum(zX.*(x-Xc).^2)/sum(zX); % x variance
-            Xs=sqrt(X2); % standard deviation X
-            Y2=sum(zY.*(y-Yc).^2)/sum(zY); % x variance
-            Ys=sqrt(Y2); % standard deviation Y               
+        % Calculate center of mass
+        Xc=sum(zX.*x)/sum(zX);
+        Yc=sum(zY.*y)/sum(zY);
 
-            BoxCount(rr,k).Ncounts=Ncounts;    % Number of counts (w/ bkgd removed)
-            BoxCount(rr,k).Nraw=Nraw;          % Raw of number of counts
-            BoxCount(rr,k).Nbkgd=Nbg;          % Bakcground number of counts
-            BoxCount(rr,k).nbkgd=nbg;          % Background counts/px
-            BoxCount(rr,k).bgROI=bgROI;        % ROI for calculating bgkd
-            BoxCount(rr,k).Xc=Xc;              % X center of mass
-            BoxCount(rr,k).Yc=Yc;              % Y center of mass
-            BoxCount(rr,k).Xs=Xs;              % X standard deviation
-            BoxCount(rr,k).Ys=Ys;              % Y standard deviation
-        end
+        % Calculate central second moment/variance and the standard
+        % deviation
+        X2=sum(zX.*(x-Xc).^2)/sum(zX); % x variance
+        Xs=sqrt(X2); % standard deviation X
+        Y2=sum(zY.*(y-Yc).^2)/sum(zY); % x variance
+        Ys=sqrt(Y2); % standard deviation Y               
+
+        BoxCount(k).Ncounts=Ncounts;    % Number of counts (w/ bkgd removed)
+        BoxCount(k).Nraw=Nraw;          % Raw of number of counts
+        BoxCount(k).Nbkgd=Nbg;          % Bakcground number of counts
+        BoxCount(k).nbkgd=nbg;          % Background counts/px
+        BoxCount(k).bgROI=bgROI;        % ROI for calculating bgkd
+        BoxCount(k).Xc=Xc;              % X center of mass
+        BoxCount(k).Yc=Yc;              % Y center of mass
+        BoxCount(k).Xs=Xs;              % X standard deviation
+        BoxCount(k).Ys=Ys;              % Y standard deviation
     end
+    
     dstruct.BoxCount=BoxCount;
     
 end
@@ -2018,23 +2003,22 @@ end
 function dstruct=fitGauss(dstruct)
     fits={};
     
-    for rr=1:size(dstruct.PWOA,3)    
-        for n=1:size(dstruct.ROI,1)              
-            ROI=dstruct.ROI(n,:);         
-            disp(['Fitting 2D gaussian on [' num2str(ROI) '].']);
-            t1=now;
-            % Grab data from the data structure
-            x=dstruct.X(ROI(1):ROI(2));                 % X vector
-            y=dstruct.Y(ROI(3):ROI(4));                 % Y vector
-            z=dstruct.OD(ROI(3):ROI(4),ROI(1):ROI(2),rr);  % optical density     
+    for n=1:size(dstruct.ROI,1)              
+        ROI=dstruct.ROI(n,:);         
+        disp(['Fitting 2D gaussian on [' num2str(ROI) '].']);
+        t1=now;
+        % Grab data from the data structure
+        x=dstruct.X(ROI(1):ROI(2));                 % X vector
+        y=dstruct.Y(ROI(3):ROI(4));                 % Y vector
+        z=dstruct.OD(ROI(3):ROI(4),ROI(1):ROI(2));  % optical density     
 
-            % Perform the fit
-            fout=gaussfit2D(x,y,z);
-            t2=now;
-            fits{rr,n}=fout;  
-        end
-        dstruct.GaussFit=fits;
+        % Perform the fit
+        fout=gaussfit2D(x,y,z);
+        t2=now;
+        fits{n}=fout;  
     end
+    dstruct.GaussFit=fits;
+    
 end
   
 function fout=gaussfit2D(Dx,Dy,data)
@@ -2535,7 +2519,7 @@ function camera=initCamStruct
 % camera.CameraMode=33 (0x21 double software trigger)
 
     camera=struct;
-    camera.ExposureTime=374;
+    camera.ExposureTime=350;
     camera.CameraMode=17;
     camera.NumImages=2;
     camera.isConnected=0;

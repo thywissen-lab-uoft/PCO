@@ -9,8 +9,17 @@ atomdata=atomdata(inds);
 
 %% Grab the gaussian fit outputs
 for kk=1:length(atomdata)
-    NWA(kk)=sum(sum(atomdata(kk).PWA,1),2);
-    NWOA(kk)=sum(sum(atomdata(kk).PWOA,1),2);    
+    
+    if size(atomdata(kk).PWA,1)==1024
+        NWA(kk,1)=sum(sum(atomdata(kk).PWA,1),2);
+        NWOA(kk,1)=sum(sum(atomdata(kk).PWOA,1),2);    
+    else
+        NWA(kk,1)=sum(sum(atomdata(kk).PWA(1:1024,:),1),2);
+        NWOA(kk,1)=sum(sum(atomdata(kk).PWOA(1:1024,:),1),2);  
+        
+        NWA(kk,2)=sum(sum(atomdata(kk).PWA(1025:2048,:),1),2);
+        NWOA(kk,2)=sum(sum(atomdata(kk).PWOA(1025:2048,:),1),2);  
+    end
 end
 
 counts=struct;
@@ -63,12 +72,18 @@ hax.Position(4)=hax.Position(4)-20;
 
 co=get(gca,'colororder');
 
-plot(xvals,NWA,'o','color',co(1,:),'linewidth',1,'markersize',8,...
-   'markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5);
-plot(xvals,NWOA,'o','color',co(2,:),'linewidth',1,'markersize',8,...
-   'markerfacecolor',co(2,:),'markeredgecolor',co(2,:)*.5);
+ms={'o','s'};
+legStr={};
+for kk=1:size(NWA,2)
+    plot(xvals,NWA(:,kk),ms{kk},'color',co(1,:),'linewidth',1,'markersize',8,...
+       'markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5);
+    plot(xvals,NWOA(:,kk),ms{kk},'color',co(2,:),'linewidth',1,'markersize',8,...
+       'markerfacecolor',co(2,:),'markeredgecolor',co(2,:)*.5);
+    legStr{end+1}='light + atoms';
+    legStr{end+1}='light';
+end
 
-legend({'light+atoms','light'},'location','best','fontsize',6);
+legend(legStr,'location','best','fontsize',6);
 
 
 
