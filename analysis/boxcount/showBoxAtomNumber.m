@@ -72,6 +72,8 @@ if doExpFit
     end
 end
 
+doExpOffsetFit=opts.NumberExpOffsetFit;
+
 %% Make Figure
 
 

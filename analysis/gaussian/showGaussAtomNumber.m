@@ -66,24 +66,39 @@ if doExpFit
     fout_exp=fit(xvals',Natoms,myfit,opt);
 end
 
-%% 2021/04/20 
-% Addding lorentzian fits, find a better way to put this in the code in
-% the future, future me. Thanks <3
-% THIS WILL BREAK WITH MULTIPLE ROIS
-
-doLorentzianFit=opts.NumberLorentzianFit;
-
-if doLorentzianFit
-    myfit=fittype('A*((x-x0).^2+(G/2).^2).^(-1)','coefficients',{'A','G','x0'},...
-        'independent','x');
+doExpoffsetFit =opts.NumberExpoffsetFit;
+if doExpoffsetFit
+    myfit=fittype('A*exp(-t/tau)+B','coefficients',{'A','tau','B'},...
+        'independent','t');
     opt=fitoptions(myfit);
     A0=max(Natoms);
-    G0=max(xvals)/2;
-    
-    inds=[Natoms>.8*max(Natoms)];
-    x0=mean(xvals(inds));       
-    opt.StartPoint=[A0 G0 x0];    
-    fout_lorentz=fit(xvals',Natoms,myfit,opt);
+    tau0=max(xvals)/2;
+    B0 = min(Natoms);
+    opt.StartPoint=[A0 tau0 B0];
+    fout_expoffset=fit(xvals',Natoms,myfit,opt);
+end
+
+
+%% Lorentzian Fits
+% Addding lorentzian fits, find a better way to put this in the code in
+% the future, future me. Thanks <3
+
+doLorentzianFit=opts.NumberLorentzianFit;
+fouts_lorentz={};
+if doLorentzianFit
+    for rr=1:size(Natoms,2)
+        myfit=fittype('A*((x-x0).^2+(G/2).^2).^(-1).*(G/2)^2','coefficients',{'A','G','x0'},...
+            'independent','x');
+        opt=fitoptions(myfit);
+        A0=max(Natoms(:,rr));
+        G0=range(xvals)/2;
+
+        inds=[Natoms(:,rr)>.8*max(Natoms(:,rr))];
+        x0=mean(xvals(inds));       
+        opt.StartPoint=[A0 G0 x0];    
+        fout_lorentz=fit(xvals',Natoms(:,rr),myfit,opt);
+        fouts_lorentz{rr}=fout_lorentz;
+    end
 end
 
 
@@ -152,14 +167,34 @@ if doExpFit
     hax.YLim(1)=0;
 end
 
+if doExpoffsetFit
+    xx=linspace(0,max(xvals),100);
+    pExp=plot(xx,feval(fout_expoffset,xx),'r-','linewidth',1);
+    
+    str=['$N_0 = ' num2str(round(fout_expoffset.A)) '$' newline ...
+        '$\tau = ' num2str(round(fout_expoffset.tau,3)) 'ms$' newline ...
+        '$N_{1} = ' num2str(round(fout_expoffset.B)) '$'];
+    legend(pExp,{str},'interpreter','latex','location','best');
+    hax.YLim(1)=0;
+end
+
 
 if doLorentzianFit
     xx=linspace(min(xvals),max(xvals),100);
-    pExp=plot(xx,feval(fout_lorentz,xx),'r-','linewidth',1);
+    legStr={};
     
-    str=['$N_0 = ' num2str(round(fout_lorentz.A)) '$' newline ...
-        '$\mathrm{FWHM} = ' num2str(round(fout_lorentz.G,3)) ' $'];
-    legend(pExp,{str},'interpreter','latex','location','best');
+    for rr=1:length(fouts_lorentz)
+        fout_lorentz=fouts_lorentz{rr};
+        pFs(rr)=plot(xx,feval(fout_lorentz,xx),'-','linewidth',2,'color',...
+        co(rr,:)*.8);
+
+        str=['$N_0 = ' num2str(round(fout_lorentz.A),'%.2e') '$' newline ...
+            '$\mathrm{FWHM} = ' num2str(round(fout_lorentz.G,3)) ' $' newline ...
+            '$x_0 = ' num2str(round(fout_lorentz.x0,3)) '$'];
+        legStr{rr}=str;
+    end
+    legend(pFs,legStr,'interpreter','latex','location','best','fontsize',8);
+
     hax.YLim(1)=0;
 end
 

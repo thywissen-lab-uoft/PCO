@@ -65,7 +65,11 @@ outdata.xVar=xVar;
 outdata.X=xvals';
 outdata.Natoms=Natoms;
 outdata.NatomsTot=NatomsTot;
-outdata.NRatio=Natoms./repmat(NatomsTot',[1 2]);
+
+outdata.NRatio=Natoms./repmat(NatomsTot',[1 size(atomdata(1).ROI,1)]);
+% outdata.NRatio=Natoms./repmat(NatomsTot',[1 2 3]);
+
+%% Get average 
 
 %% Fits
 if opts.RatioSineFit

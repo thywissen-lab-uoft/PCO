@@ -107,8 +107,9 @@ doSave=1;
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-xVar= 'rf_freq_HF';
-unit= 'MHz';
+xVar= 'n_sweeps_mix';
+
+unit= '';
 
 %xVar='lens_pos';
 %unit='mm';
@@ -228,6 +229,7 @@ atomdata=atomdata(inds);
 % ROI=[708 1089 377 608];   % XDT  TOF 20 ms evaporation
 
 
+
 % ROI=[713 1015 310 601];
 %  ROI=[780 970 200 1013];   % XDT  TOF analysis
 
@@ -242,14 +244,10 @@ atomdata=atomdata(inds);
 % ROI = [830 925 280 355;    % K 10 ms tof 9 v
 %     830 925 470 545];
 
-% ROI=[852 905 706 767;
-%     852 905 600 706];    %K SG 15ms TOF -9,-7 boxes
 
-
-% ROI = [800 960 330 450]; % BM 10 ms TOF
+% ROI = [801 975 420 577]; % BM 15 ms TOF
 
 % ROI= [830 930 230 430;830 930 430 590];  % BM, SG, 10 ms
-
 % ROI= [820 930 450 550;820 930 350 450];  % BM, SG, 13 ms
 
 % ROI = [820 930 280 510;
@@ -265,17 +263,30 @@ atomdata=atomdata(inds);
 %        830 900 630 695];
 
 
-%%%%%%%%%%%%%%%%%%%%% X CAM DOUBLE SHUTTER %%%%%%%%%%%%%%%%%%%%%
-% ROI=[800 950 670 780;
-%     800 950 1700 1810];   % XDT TOF High Field Double 20 ms evaporation
+% ROI=[661 1036 1556 1916];   % XDT HFF TOF 20 ms
 % 
-ROI=[800 950 182 1011;
-    800 950 1228 2040];   % XDT TOF High Field Double 20 ms evaporation
-
-ROI=[800 950 660 760;
-    800 950 1700 1800];   % XDT TOF High Field Double 20 ms evaporation zoom
+ROI=[820 940 860 950;
+    820 940 770 860];    % K SG 15ms TOF -9,-7 boxes
 
 
+% ROI=[820 940 860 950;
+%     820 940 770 860;
+%     820 940 680 770];    % K SG 15ms TOF -9,-7,-5 boxes
+
+
+%%%%%%%%%%%%%%%%%%%%% X CAM DOUBLE SHUTTER %%%%%%%%%%%%%%%%%%%%%
+
+% ROI=[800 950 182 1011;
+%     800 950 1228 2040];   % XDT full TOF
+
+%  ROI=[800 950 660 760;
+%     800 950 1700 1800];   % XDT 20 ms TOF
+% 
+%  ROI=[800 950 490 600;
+%      800 950 1520 1630];   %  band map 15 ms TOF
+
+ 
+% ROI=[800 950 1700 1800];
 %%%%%%%%%% X CAM AM SPEC
 
 % 10 ms tof am spec 75-200 recoil z
@@ -330,11 +341,14 @@ ODopts=struct;
 
 % Scale probe beam to minimize background offset?
 ODopts.ScaleProbe=1;
-ODopts.ScaleProbeROI=[1 100 900 1000];  % ROI to do the scaling
+ODopts.ScaleProbeROI=[1 1000 900 1000];  % ROI to do the scaling
+
+% ODopts.ScaleProbeROI=[1 100 900 1000];  % ROI to do the scaling
+
 
 % Apply gaussian filter to images?
 ODopts.GaussFilter=0;
-ODopts.GaussFilterSigma=.5;
+ODopts.GaussFilterSigma=1;
 
 % Get the high field flag (this may throw error for old data)
 
@@ -345,8 +359,10 @@ else
 end
 %     ODopts.HighField=0;
 
+
 % Calculate the optical density
 atomdata=computeOD(atomdata,ODopts);
+[atomdata.ODopts]=deal(ODopts);
 
 %% ANALYSIS : Probe Beam
 % Analyze the probe by doing a 2D gaussian fit to extract the size
@@ -370,7 +386,9 @@ doSubBG=1;      % Subtract background based on reference spot?
 bgROI=[400 500 400 500];
 % Box count for small cloud (get close to where the atoms live)
 % bgROI=[750 820 350 450];
-bgROI=[700 800 450 500];
+% bgROI=[700 800 450 500];
+bgROI=[700 800 500 600];
+
 %bgROI=[900 1000 450 500]; % even more zoom in for BM
 % bgROI=[800 1000 600 700]; % for k dfg long tof
 
@@ -510,7 +528,9 @@ end
 
 %% PLOTTING : BOX COUNT
 boxPopts = struct;
-boxPopts.NumberExpFit = 0;       
+boxPopts.NumberExpFit = 0;
+boxPopts.NumberExpOffsetFit = 0;       
+
 
 % NOT IMPLEMETNED YET
 % boxPopts.NumberSineFit = 0;
@@ -518,7 +538,7 @@ boxPopts.NumberExpFit = 0;
 
 boxPopts.RatioSineFit=0;
 
-boxPopts.RatioRabiFit=1;
+boxPopts.RatioRabiFit=0;
 boxPopts.RatioRabiFitGuess=[1 2*pi*1.5 0 0.01]; % Amplitude,frequency,phase,decay
 
 % NOT IMPLEMENTED YET
@@ -545,65 +565,88 @@ end
 % Custom Box Count
 doCustomBox=0;
 if doCustomBox 
-    xx=Ndatabox.X;
+    % Grab Raw data
+    xx=Ndatabox.X;        
+    
+    x0 = 45.9975;  %-7->-5 @195G 
+    x0 = 46.8581; % -7->-5 @ 200 G
+    x0=5.990;
+    
+    f=xx;
+    f=f-x0;
+    
+    X=f*1E3;  
+
+    
+    % For AM Spec you want N2-N1/N2    
     N1=Ndatabox.Natoms(:,1);
-    N2=Ndatabox.Natoms(:,2);
-    dN=N2-N1;
-     dNRel=dN./N2;
+    N2=Ndatabox.Natoms(:,2);          
+    Y=(N2-N1)./N2;
+    
+    % For simple transfer
+%     Y=N2./(N1+N2);
+%     Y=N1./N2;
+     Y=N2./(N1+N2);
+
+    Y(Y<0)=0;
+
     
     hFB=figure;
     hFB.Color='w';
     co=get(gca,'colororder');
-    plot(xx*1E-3,dNRel,'o','markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5,...
+    plot(X,Y,'o','markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5,...
         'linewidth',2,'markersize',10);
-    xlabel('frequency (kHz)');
+    str=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];
+    xlabel(str);
     ylabel('Relative Excited Atoms');
     set(gca,'fontsize',12,'linewidth',1,'box','on');
-    yL=get(gca,'YLim');
-    ylim([0 yL(2)]);
-%     ylim([0 1]);
+%     yL=get(gca,'YLim');
+%     ylim([0 yL(2)]);
+    ylim([0 1.5]);
     hold on
+
     
-    Y=dNRel;
-    X=xx*1E-3;
+    xlim([min(X) max(X)]);
     
 
     if length(atomdata)>4
         % Symmetric Lorentzian
-%         myfit=fittype('A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)+bg','coefficients',{'A','G','x0','bg'},...
-%             'independent','x');
+        myfit=fittype('A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)+bg','coefficients',{'A','G','x0','bg'},...
+            'independent','x');
+        opt=fitoptions(myfit);
+        G0=100;
+        bg=min(Y);
+        A0=(max(Y)-min(Y));
+        inds=[Y>.8*max(Y)];
+        x0=mean(X(inds));     
+        opt.StartPoint=[A0 G0 x0 bg];   
+        opt.Upper=[1 3*G0 x0+range(X) .1];   
+
+        opt.Robust='bisquare';
+
+        % Assymmetric
+%         g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
+%         y=@(x,a,x0,G,A,bg) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1)+bg;        
+%         myfit=fittype(@(a,x0,G,A,bg,x) y(x,a,x0,G,A,bg),'coefficients',{'a','x0','G','A','bg'},...
+%             'independent','x'); 
 %         opt=fitoptions(myfit);
 %         G0=10;
 %         bg=min(Y);
-%         A0=(max(Y)-min(Y));
+%         A0=(max(Y)-min(Y))*(G0/2).^2;
 %         inds=[Y>.8*max(Y)];
 %         x0=mean(X(inds));     
-%         opt.StartPoint=[A0 G0 x0 bg];   
+%         opt.StartPoint=[.2 x0 G0 A0 bg];  
 %         opt.Robust='bisquare';
-
-        % Assymmetric
-        g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
-        y=@(x,a,x0,G,A,bg) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1)+bg;        
-        myfit=fittype(@(a,x0,G,A,bg,x) y(x,a,x0,G,A,bg),'coefficients',{'a','x0','G','A','bg'},...
-            'independent','x'); 
-        opt=fitoptions(myfit);
-        G0=10;
-        bg=min(Y);
-        A0=(max(Y)-min(Y))*(G0/2).^2;
-        inds=[Y>.8*max(Y)];
-        x0=mean(X(inds));     
-        opt.StartPoint=[.2 x0 G0 A0 bg];  
-        opt.Robust='bisquare';
 
         fout_lorentz=fit(X',Y,myfit,opt);
 
         XF=linspace(min(X),max(X),1000);
         pExp=plot(XF,feval(fout_lorentz,XF),'r-','linewidth',2);
 
-        str=['$f_0 = ' num2str(round(fout_lorentz.x0,1)) '$ kHz' newline ...
+        str=['$f_0 = ' num2str(round(fout_lorentz.x0,2)) '$ kHz' newline ...
             '$\mathrm{FWHM} = ' num2str(round(abs(fout_lorentz.G),2)) ' $ kHz'];
         legend(pExp,{str},'interpreter','latex','location','best');        
-        xlim([130 200]);    
+%         xlim([130 200]);    
     end
 %     hax.YLim(1)=0;
     pp=get(gcf,'position');
@@ -620,8 +663,7 @@ gaussPopts.CenterSineFit = 0;       % Fit sine fit to cloud center
 gaussPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
 gaussPopts.CenterParabolaFit = 0;
 gaussPopts.CenterLinearFit = 0;     % Linear fit to cloud center
-
-
+gaussPopts.NumberExpoffsetFit = 0; % Exp decay fit with nonzero offset
 % gaussPopts.
 if doGaussFit  
     % Plot the statistics of gaussian fit
@@ -702,6 +744,7 @@ doLandauZener=0;
 
 
 lz_opts=struct;
+lz_opts.BoxIndex=2;  % 1/2 ratio or 2/1 ratio
 lz_opts.LZ_GUESS=[1 .8]; % Fit guess kHz,ampltidue can omit guess as well
 % Only perform landau zener on two ROI, boxcount, and more than three
 % pictures
@@ -718,8 +761,13 @@ if doLandauZener && size(ROI,1)==2 && doBoxCount && length(atomdata)>3
 %     SweepRangeVar='sweep_range';    %    Variable that defines sweep range
     
 
-    SweepTimeVar='uwave_sweep_time';      % Variable that defines sweep time
-    SweepRangeVar='uwave_delta_freq';    %    Variable that defines sweep range
+%     SweepTimeVar='uwave_sweep_time';      % Variable that defines sweep time
+%     SweepRangeVar='uwave_delta_freq';    %    Variable that defines sweep range
+    
+% Shift Register
+    SweepTimeVar='shift_reg_length';
+    
+    
     
 %     SweepTimeVar='Raman_Time';      % Variable that defines sweep time
 %     SweepRangeVar='Sweep_Range';    %    Variable that defines sweep range
@@ -727,7 +775,8 @@ if doLandauZener && size(ROI,1)==2 && doBoxCount && length(atomdata)>3
     % Convert the parameter into df and dt (add whatever custom processing
     % you want).
     dT=[params.(SweepTimeVar)];
-    dF= 2*[params.(SweepRangeVar)]*1000; % Factor of two for the SRS
+%     dF= 2*[params.(SweepRangeVar)]*1000; % Factor of two for the SRS
+    dF=3.5*1000*ones(length(atomdata),1)';
     
     % Convert to dtdf
     dtdf=dT./dF; 
@@ -747,15 +796,28 @@ end
 doAnimate = 1;
 if doAnimate == 1
     animateOpts=struct;
-    animateOpts.StartDelay=3; % Time to hold on first picture
-    animateOpts.MidDelay=.5;     % Time to hold in middle picutres
+    animateOpts.StartDelay=3;   % Time to hold on first picture
+    animateOpts.MidDelay=1;    % Time to hold in middle picutres
     animateOpts.EndDelay=2;     % Time to hold final picture
+    animateOpts.doAverage=1;    % Average over duplicates?
+    animateOpts.doRotate=0;     % Rotate the image?
+    
+    % Stacking images (applicable only for double exposure)
+    %animateOpts.doubleStack='vertical';
+    animateOpts.doubleStack='horizontal';
 
-    % animateOpts.Order='descend';    % Asceneding or descending
+     % Asceneding or descending
+    % animateOpts.Order='descend';   
     animateOpts.Order='ascend';
-    animateOpts.CLim=[0 3];   % Color limits
-
-    animateCloud(atomdata,xVar,animateOpts);
+    
+    % Color limits
+    animateOpts.CLim=[0 .5];   
+    
+    if size(atomdata(1).PWA,1)<=1024
+        animateCloud(atomdata,xVar,animateOpts);
+    else
+        animateCloudDouble(atomdata,xVar,animateOpts);
+    end
 end
 
 %% Show Atom Number

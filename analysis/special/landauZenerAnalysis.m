@@ -52,8 +52,10 @@ Zs = Zs*pxsize;
 %% Grab the relative atom number to fit
 
 % Which ROI do we plot against?
-% [~,ind]=min(Natoms(1,:));    
-ind=1;
+% [~,ind]=min(Natoms(1,:));  
+
+
+ind=opts.BoxIndex;
 
 % Calculate the normalized atom number
 Nrel=Natoms(:,ind)'./NatomsTot;

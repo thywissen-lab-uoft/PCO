@@ -32,6 +32,7 @@ data2=data;xx2=xx;yy2=yy;
 
 % Elminate data points below a threshold to reduce # points to fit
 th=0.1;
+th=-.1;
 xx2(Zguess<th*N0)=[];yy2(Zguess<th*N0)=[];data2(Zguess<th*N0)=[];
 
 % Calculate the appropriate background
