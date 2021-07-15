@@ -1,4 +1,4 @@
-function [hF]=showBoxAspectRatio(atomdata,xVar)
+function [hF]=showBoxAspectRatio(atomdata,xVar,opts)
 % Grab important global variables
 global camaxis
 global atom
@@ -84,7 +84,7 @@ uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
 hax=axes;
 set(hax,'box','on','linewidth',1,'fontsize',12,'units','pixels');
 hold on
-xlabel(xVar,'interpreter','none');
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 ylabel('box aspect ratio \sigma_y/\sigma_x');
 
 hax.Position(4)=hax.Position(4)-20;

@@ -112,7 +112,7 @@ co=get(gca,'colororder');
 
 set(hax,'box','on','linewidth',1,'fontsize',14,'units','pixels');
 hold on
-xlabel(xVar,'interpreter','none');
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 % xlabel('pulsetime');
 
 ylabel('relative box atom number');

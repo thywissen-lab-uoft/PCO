@@ -71,7 +71,7 @@ t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
 hax1=subplot(221);
 set(hax1,'box','on','linewidth',1,'fontsize',10,'units','pixels');
 hold on
-xlabel(xVar,'interpreter','none','fontsize',10);
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 co=get(gca,'colororder');
 for nn=1:size(atomdata(1).ROI,1)
    plot(xvals,Xc(:,nn),'o','color',co(nn,:),'linewidth',1,'markersize',8,...
@@ -100,7 +100,7 @@ drawnow;
 hax2=subplot(223);
 set(hax2,'box','on','linewidth',1,'fontsize',10,'units','pixels');
 hold on
-xlabel(xVar,'interpreter','none','fontsize',10);
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 co=get(gca,'colororder');
 for nn=1:size(atomdata(1).ROI,1)
    plot(xvals,Yc(:,nn),'o','color',co(nn,:),'linewidth',1,'markersize',8,...

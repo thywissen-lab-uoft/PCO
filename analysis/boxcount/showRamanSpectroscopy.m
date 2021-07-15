@@ -93,7 +93,9 @@ xx=linspace(min(xvals),max(xvals),500);
 hax=subplot(221);
 set(hax,'box','on','linewidth',1,'fontsize',10,'units','pixels');
 hold on
-xlabel(xVar,'interpreter','none');
+
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
+
 ylabel('relative box atom number');
 plot(xvals,N_1_r,'o','markerfacecolor',co(1,:),'linewidth',2,...
     'markeredgecolor',co(1,:)*.5);
@@ -103,7 +105,8 @@ plot(xvals,N_2_r,'o','markerfacecolor',co(2,:),'linewidth',2,...
 hax=subplot(222);
 set(hax,'box','on','linewidth',1,'fontsize',10,'units','pixels');
 hold on
-xlabel(xVar,'interpreter','none');
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
+
 ylabel('relative box atom number');
 
 
@@ -128,7 +131,7 @@ plot(xvals,N_2_C_r,'o','markerfacecolor',[.5 .5 .5],'linewidth',2,...
 hax=subplot(223);
 set(hax,'box','on','linewidth',1,'fontsize',10,'units','pixels');
 hold on
-xlabel(xVar,'interpreter','none');
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 ylabel('relative box atom number');
 
 

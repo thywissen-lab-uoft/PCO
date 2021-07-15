@@ -1,4 +1,4 @@
-function [hF]=showGaussAspectRatio(atomdata,xVar)
+function [hF]=showGaussAspectRatio(atomdata,xVar,opts)
 % Grab important global variables
 global camaxis
 global atom

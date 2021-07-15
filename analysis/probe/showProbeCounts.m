@@ -1,4 +1,4 @@
-function [hF,counts]=showProbeCounts(atomdata,xVar)
+function [hF,counts]=showProbeCounts(atomdata,xVar,opts)
 global imgdir
 %% Sort the data by the parameter given
 params=[atomdata.Params];
@@ -65,7 +65,11 @@ uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
 hax=axes;
 set(hax,'box','on','linewidth',1,'fontsize',12,'units','pixels');
 hold on
-xlabel(xVar,'interpreter','none');
+
+
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
+
+
 ylabel('counts');
 
 hax.Position(4)=hax.Position(4)-20;

@@ -1,4 +1,4 @@
-function [hF,outdata]=showGaussSingleTemperature(atomdata,xVar)
+function [hF,outdata]=showGaussSingleTemperature(atomdata,xVar,opts)
 
 global camaxis
 global atom
@@ -91,7 +91,7 @@ uicontrol('style','text','string',['PCO, ' atom],'units','pixels','backgroundcol
 hax1=subplot(131);
 set(hax1,'box','on','linewidth',1,'fontsize',12,'units','pixels');
 hold on
-xlabel(xVar,'interpreter','none','fontsize',10);
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 co=get(gca,'colororder');
 for nn=1:size(atomdata(1).ROI,1)
    plot(xvals,Tx(:,nn)*1E6,'o-','color',co(nn,:),'linewidth',1,'markersize',8,...
@@ -109,7 +109,7 @@ text(0.02,.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',.
 hax2=subplot(132);
 set(hax2,'box','on','linewidth',1,'fontsize',12,'units','pixels');
 hold on
-xlabel(xVar,'interpreter','none','fontsize',10);
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 co=get(gca,'colororder');
 for nn=1:size(atomdata(1).ROI,1)
    plot(xvals,Ty(:,nn)*1E6,'o-','color',co(nn,:),'linewidth',1,'markersize',8,...
@@ -125,7 +125,7 @@ text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',
 hax3=subplot(133);
 set(hax3,'box','on','linewidth',1,'fontsize',12,'units','pixels');
 hold on
-xlabel(xVar,'interpreter','none','fontsize',10);
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 co=get(gca,'colororder');
 for nn=1:size(atomdata(1).ROI,1)
    plot(xvals,sqrt(Tx(:,nn).*Ty(:,nn))*1E6,'o-','color',co(nn,:),'linewidth',1,'markersize',8,...

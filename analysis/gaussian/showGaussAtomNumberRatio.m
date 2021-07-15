@@ -88,7 +88,7 @@ uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
 hax=axes;
 set(hax,'box','on','linewidth',1,'fontsize',14,'units','pixels');
 hold on
-xlabel(xVar,'interpreter','none');
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 ylabel('gauss relative number');
 
 hax.Position(4)=hax.Position(4)-20;

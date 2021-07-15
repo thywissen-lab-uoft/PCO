@@ -1,4 +1,4 @@
-function [hF,outdata] = showProbeAnalysis(atomdata,xVar)
+function [hF,outdata] = showProbeAnalysis(atomdata,xVar,opts)
 
 global pxsize
 global imgdir
@@ -53,7 +53,7 @@ uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
 hax=axes;
 set(hax,'box','on','linewidth',1,'fontsize',12,'units','pixels');
 hold on
-xlabel(xVar,'interpreter','none');
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 ylabel('1/e^2 radius (um)');
 
 hax.Position(4)=hax.Position(4)-20;

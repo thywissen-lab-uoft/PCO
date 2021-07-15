@@ -1,4 +1,4 @@
-function hF=showGaussSize(atomdata,xVar)
+function hF=showGaussSize(atomdata,xVar,opts)
 
 global camaxis
 global atom
@@ -69,7 +69,7 @@ t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
 hax1=subplot(131);
 set(hax1,'box','on','linewidth',1,'fontsize',12,'units','pixels');
 hold on
-xlabel(xVar,'interpreter','none','fontsize',10);
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 co=get(gca,'colororder');
 for nn=1:size(atomdata(1).ROI,1)
    plot(xvals,Xs(:,nn)*pxsize*1E6,'o-','color',co(nn,:),'linewidth',1,'markersize',8,...
@@ -85,7 +85,7 @@ text(0.02,.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',.
 hax2=subplot(132);
 set(hax2,'box','on','linewidth',1,'fontsize',12,'units','pixels');
 hold on
-xlabel(xVar,'interpreter','none','fontsize',10);
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 co=get(gca,'colororder');
 for nn=1:size(atomdata(1).ROI,1)
    plot(xvals,Ys(:,nn)*pxsize*1E6,'o-','color',co(nn,:),'linewidth',1,'markersize',8,...
@@ -101,7 +101,7 @@ text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',
 hax3=subplot(133);
 set(hax3,'box','on','linewidth',1,'fontsize',12,'units','pixels');
 hold on
-xlabel(xVar,'interpreter','none','fontsize',10);
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 co=get(gca,'colororder');
 for nn=1:size(atomdata(1).ROI,1)
    plot(xvals,pi*(Xs(:,nn)*pxsize).*(Ys(:,nn)*pxsize)*1E12,'o-','color',co(nn,:),'linewidth',1,'markersize',8,...

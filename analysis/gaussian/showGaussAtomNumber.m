@@ -49,35 +49,44 @@ outdata.X=xvals;
 outdata.Natoms=Natoms;
 
 
-%% 2020/01/05 
-% Addding exponential fits, find a better way to put this in the code in
-% the future, future me. Thanks <3
-% THIS WILL BREAK WITH MULTIPLE ROIS
+%% Exponential Decay Fit
 
-doExpFit=opts.NumberExpFit;
-
-if doExpFit
+if opts.NumberExpFit && length(atomdata)>2
     myfit=fittype('A*exp(-t/tau)','coefficients',{'A','tau'},...
-        'independent','t');
+    'independent','t');
     opt=fitoptions(myfit);
-    A0=max(Natoms);
-    tau0=max(xvals)/2;
-    opt.StartPoint=[A0 tau0];
-    fout_exp=fit(xvals',Natoms,myfit,opt);
+    
+    % Get some initial guesses
+    tau0=max(xvals)/2;  
+
+    
+    fout_exp={};
+    for nn=1:size(Natoms,2)  
+        A0=max(Natoms(:,nn));
+        
+        % Assign start point
+        opt.StartPoint=[A0 tau0];
+        fout_exp{nn}=fit(xvals',Natoms(:,nn),myfit,opt);
+    end
 end
 
-doExpoffsetFit =opts.NumberExpoffsetFit;
-if doExpoffsetFit
+if opts.NumberExpOffsetFit && length(atomdata)>3
     myfit=fittype('A*exp(-t/tau)+B','coefficients',{'A','tau','B'},...
-        'independent','t');
+    'independent','t');
     opt=fitoptions(myfit);
-    A0=max(Natoms);
-    tau0=max(xvals)/2;
-    B0 = min(Natoms);
-    opt.StartPoint=[A0 tau0 B0];
-    fout_expoffset=fit(xvals',Natoms,myfit,opt);
+    
+    fout_exp={};
+    
+    for nn=1:size(Natoms,2)
+       A0=range(Natoms(:,nn));
+       B0=min(Natoms(:,nn));
+       tau0=range(xvals)/4;
+       
+       opt.StartPoint=[A0 tau0 B0];
+       opt.Lower=[0 0 0];
+       fout_exp{nn}=fit(xvals',Natoms(:,nn),myfit,opt);       
+    end       
 end
-
 
 %% Lorentzian Fits
 % Addding lorentzian fits, find a better way to put this in the code in
@@ -145,7 +154,7 @@ uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
 hax=axes;
 set(hax,'box','on','linewidth',1,'fontsize',12,'units','pixels');
 hold on
-xlabel(xVar,'interpreter','none');
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 ylabel('gauss atom number');
 
 hax.Position(4)=hax.Position(4)-20;
@@ -157,26 +166,28 @@ for nn=1:size(atomdata(1).ROI,1)
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
 
-if doExpFit
-    xx=linspace(0,max(xvals),100);
-    pExp=plot(xx,feval(fout_exp,xx),'r-','linewidth',1);
+if opts.NumberExpFit || opts.NumberExpOffsetFit
+    strs={};
+    xx=linspace(0,max(xvals),1000);
     
-    str=['$N_0 = ' num2str(round(fout_exp.A)) '$' newline ...
-        '$\tau = ' num2str(round(fout_exp.tau,1)) ' $'];
-    legend(pExp,{str},'interpreter','latex','location','best');
+    for nn=1:size(Natoms,2)
+        pExp(nn)=plot(xx,feval(fout_exp{nn},xx),'-','linewidth',1,...
+            'color',0.8*co(nn,:)); 
+        
+        if opts.NumberExpFit        
+            fstr=['$N_0 = ' num2str(round(fout_exp{nn}.A),'%.2e') '$' newline ...
+                '$\tau = ' num2str(round(fout_exp{nn}.tau,1),'%.2e') ' $'];
+        else
+            fstr=['$\Delta N = ' num2str(round(fout_exp{nn}.A),'%.2e') '$' newline ...
+                '$\tau = ' num2str(round(fout_exp{nn}.tau,1),'%.2e') ' $' newline ...
+                '$N_0 = ' num2str(round(fout_exp{nn}.B),'%.2e') '$'];
+        end
+        strs{nn}=fstr;
+    end       
+    legend(pExp,strs,'interpreter','latex','location','best','fontsize',8);
     hax.YLim(1)=0;
 end
 
-if doExpoffsetFit
-    xx=linspace(0,max(xvals),100);
-    pExp=plot(xx,feval(fout_expoffset,xx),'r-','linewidth',1);
-    
-    str=['$N_0 = ' num2str(round(fout_expoffset.A)) '$' newline ...
-        '$\tau = ' num2str(round(fout_expoffset.tau,3)) 'ms$' newline ...
-        '$N_{1} = ' num2str(round(fout_expoffset.B)) '$'];
-    legend(pExp,{str},'interpreter','latex','location','best');
-    hax.YLim(1)=0;
-end
 
 
 if doLorentzianFit

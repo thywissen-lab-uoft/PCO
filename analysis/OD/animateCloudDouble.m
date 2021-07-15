@@ -258,9 +258,9 @@ drawnow;
 for kk=1:length(xvals)   % Iterate over all unique xvalues
     
     %%%% Update the graphics
-    t.String=[xVar ' = ' num2str(xvals(kk))];          % Variable string
+    t.String=[xVar ' = ' num2str(xvals(kk)) ' (' opts.xUnit ')'];          % Variable string
     
-    
+
     if doubleImage
         if opts.doRotate
             set(hImg1,'XData',Y,'YData',flip(X),...

@@ -12,6 +12,7 @@ global crosssec
 if nargin==2
     opts=struct;
     opts.NumberExpFit = 0;
+    opts.NumberExpOffsetFit=0;
 end
 
 
@@ -50,9 +51,7 @@ outdata.Natoms=Natoms;
 
 %% Exponential Decay Fit
 
-doExpFit=opts.NumberExpFit;
-
-if doExpFit
+if opts.NumberExpFit && length(atomdata)>2
     myfit=fittype('A*exp(-t/tau)','coefficients',{'A','tau'},...
     'independent','t');
     opt=fitoptions(myfit);
@@ -68,11 +67,29 @@ if doExpFit
         
         % Assign start point
         opt.StartPoint=[A0 tau0];
-        fout_exp{nn}=fit(xvals',Natoms,myfit,opt);
+        fout_exp{nn}=fit(xvals',Natoms(:,nn),myfit,opt);
     end
 end
 
-doExpOffsetFit=opts.NumberExpOffsetFit;
+%% Exponential Fit
+
+if opts.NumberExpOffsetFit && length(atomdata)>3
+    myfit=fittype('A*exp(-t/tau)+B','coefficients',{'A','tau','B'},...
+    'independent','t');
+    opt=fitoptions(myfit);
+    
+    fout_exp={};
+    
+    for nn=1:size(Natoms,2)
+       A0=range(Natoms(:,nn));
+       B0=min(Natoms(:,nn));
+       tau0=range(xvals)/4;
+       
+       opt.StartPoint=[A0 tau0 B0];
+       opt.Lower=[0 0 0];
+       fout_exp{nn}=fit(xvals',Natoms(:,nn),myfit,opt);       
+    end       
+end
 
 %% Make Figure
 
@@ -108,7 +125,7 @@ uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
 hax=axes;
 set(hax,'box','on','linewidth',1,'fontsize',12,'units','pixels');
 hold on
-xlabel(xVar,'interpreter','none');
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 ylabel('box atom number');
 
 hax.Position(4)=hax.Position(4)-20;
@@ -120,24 +137,29 @@ for nn=1:size(atomdata(1).ROI,1)
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
 
-% plot(xvals,sum(Natoms,2),'s','color',[.4 .4 .4],'linewidth',1,'markersize',8,...
-%     'markerfacecolor',[.4 .4 .4],'markeredgecolor','k');
-
-if doExpFit
+if opts.NumberExpFit || opts.NumberExpOffsetFit
     strs={};
-    xx=linspace(0,max(xvals),100);
+    xx=linspace(0,max(xvals),1000);
     
     for nn=1:size(Natoms,2)
-        pExp(nn)=plot(xx,feval(fout_exp{nn},xx),'r-','linewidth',1);    
-        str=['$N_0 = ' num2str(round(fout_exp{nn}.A)) '$' newline ...
-            '$\tau = ' num2str(round(fout_exp{nn}.tau,1)) ' $'];
-        strs{nn}=str;
-    end
-    
-    
-    legend(pExp,strs,'interpreter','latex','location','best');
+        pExp(nn)=plot(xx,feval(fout_exp{nn},xx),'-','linewidth',1,...
+            'color',0.8*co(nn,:)); 
+        
+        if opts.NumberExpFit        
+            fstr=['$N_0 = ' num2str(round(fout_exp{nn}.A),'%.2e') '$' newline ...
+                '$\tau = ' num2str(round(fout_exp{nn}.tau,1),'%.2e') ' $'];
+        else
+            fstr=['$\Delta N = ' num2str(round(fout_exp{nn}.A),'%.2e') '$' newline ...
+                '$\tau = ' num2str(round(fout_exp{nn}.tau,1),'%.2e') ' $' newline ...
+                '$N_0 = ' num2str(round(fout_exp{nn}.B),'%.2e') '$'];
+        end
+        strs{nn}=fstr;
+    end       
+    legend(pExp,strs,'interpreter','latex','location','best','fontsize',8);
     hax.YLim(1)=0;
 end
+
+
 
 % Image directory folder string
 t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...

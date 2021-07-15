@@ -1,4 +1,4 @@
-function hF=showGaussDensity(atomdata,xVar)
+function hF=showGaussDensity(atomdata,xVar,opts)
 % Grab important global variables
 global camaxis
 global atom
@@ -80,7 +80,7 @@ uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
 hax=axes;
 set(hax,'box','on','linewidth',1,'fontsize',12,'units','pixels');
 hold on
-xlabel(xVar,'interpreter','none');
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 ylabel('peak density m^{-3}');
 
 hax.Position(4)=hax.Position(4)-20;
