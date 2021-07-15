@@ -4,9 +4,6 @@ function atomdata=boxCount(atomdata,bgROI)
     if nargin==1
         disp(' No background ROI provided, will assume background of zero.');
         bgROI=[];
-        
-        
-        
     else
         disp([' Using background counts from ROI = [' ...
             num2str(bgROI) ']']);        
@@ -42,9 +39,7 @@ function atomdata=boxCount(atomdata,bgROI)
 
             % Calculate center of mass
             Xc=sum(zX.*x)/Ncounts;
-            Yc=sum(zY.*y)/Ncounts;
-            
-
+            Yc=sum(zY.*y)/Ncounts; 
 
             % Calculate central second moment/variance and the standard
             % deviation

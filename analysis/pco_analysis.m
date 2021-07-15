@@ -88,7 +88,7 @@ doSave=1;
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-pco_xVar= 'power_val';
+pco_xVar='power_val';
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit=1;

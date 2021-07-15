@@ -69,22 +69,6 @@ outdata.NatomsTot=NatomsTot;
 outdata.NRatio=Natoms./repmat(NatomsTot',[1 size(atomdata(1).ROI,1)]);
 % outdata.NRatio=Natoms./repmat(NatomsTot',[1 2 3]);
 
-%% Get average 
-
-%% Fits
-if opts.RatioSineFit
-    fouts_sine={};
-% Fit the number ratio to a sine wave.
-    for kk=1:size(atomdata(1).ROI)
-        fouts_sine{kk}=makeSineDecayFit(outdata.X,outdata.NRatio(:,kk));
-    end    
-end
-
-if opts.RatioRabiFit
-% Fit the number ratio to a sine wave.
-    [func_rabi,params_rabi]=makeRabiFit(outdata.X,outdata.NRatio,opts.RatioRabiFitGuess);
-end
-
 %% Make Figure
 
 % Create image directory string name
@@ -120,38 +104,11 @@ ylabel('relative box atom number');
 hax.Position(4)=hax.Position(4)-20;
 
 
-if opts.RatioSineFit
-    xx=linspace(min(xvals),max(xvals),100);
-    for kk=1:length(fouts_sine)
-        ps(kk)=plot(xx,feval(fouts_sine{kk},xx),'-','linewidth',1,...
-            'color',co(kk,:));        
-        str=['A: ' num2str(fouts_sine{kk}.A,3) ', '...
-            'period: ' num2str(fouts_sine{kk}.B,3) ', ' ...
-            'offset: ' num2str(fouts_sine{kk}.D,3) ', ' ...
-            '$1/e$: ' num2str(fouts_sine{kk}.E,2)];
-        fstrs{kk}=str;
-    end    
-end
-
-if opts.RatioRabiFit
-    xx=linspace(min(xvals),max(xvals),100);
-    Nfit=func_rabi(params_rabi,xx');    
-    ps(1)=plot(xx,Nfit(:,1),'-','linewidth',2,...
-            'color',co(1,:)); 
-    ps(2)=plot(xx,Nfit(:,2),'-','linewidth',2,...
-            'color',co(2,:));    
-end
-
-
 for nn=1:size(atomdata(1).ROI,1)
    plot(xvals,Natoms(:,nn)./NatomsTot','o','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
 ylim([0 1.2]);
-
-
-
-
 
 % Right axis for total atom number
 yyaxis right
@@ -161,102 +118,11 @@ yL=get(gca,'YLim');
 ylim([0 yL(2)]);
 set(gca,'YColor',[.4 .4 .4]);
 
-if opts.RatioSineFit
-    legend(ps,fstrs,'fontsize',8,'interpreter','latex');
-end
-
-if opts.RatioRabiFit
-    rabi_freq=params_rabi(1)/(2*pi); % Convert angular frequency to frequency
-    phi=params_rabi(2)/pi; % convert phase to in units of pi
-    A=params_rabi(3); % amplitude;
-    tau=params_rabi(4); % decay time
-    
-    tstr=['$0.5\left(1\pm\cos(\Omega t+\phi)A\exp(-t/\tau)\right)$' newline ...
-        '$\Omega=2\pi\times~' num2str(rabi_freq,3) ',~' ...
-        'A=' num2str(A,2) ',~' ...
-        '\phi=' num2str(phi,2) '\pi,~'  ...
-        '\tau=' num2str(tau,1) '$'];
-    
-    text(.02,.98,tstr,'units','normalized','fontsize',8,...
-        'backgroundcolor',[1 1 1 .8],'interpreter','latex',...
-        'verticalalignment','top','edgecolor','k','margin',1);      
-    
-end
 
 % Image directory folder string
 t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left','fontsize',6);
 t.Position(4)=t.Extent(4);
 t.Position(3)=hF.Position(3);
-t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
-
-
-
-    
+t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];    
 end
-
-function [myfunc,outparams]=makeRabiFit(Tdata,Ndata,pGuess)
-% N is a column matrix of Nx2
-% t is a time column vector Nx1
-
-myfunc=@ (A,Omega,phi,tau,t) [0.5*(1+cos(Omega*t).*A.*exp(-t./tau)) ...
-    0.5*(1-cos(Omega*t).*A.*exp(-t./tau))];
-
-% T=2;
-% fG=1/T;
-
-% Guess of amplitude, rabi frequency, and T2 time
-
-myfunc=@ (p,t) ...
-    [0.5*(1+cos(p(1)*t+p(2)).*p(3).*exp(-t./p(4))) ...
-    0.5*(1-cos(p(1)*t+p(2)).*p(3).*exp(-t./p(4)))];
-
-err_func = @(p) norm(Ndata - myfunc(p,Tdata));
-
-options=optimset('MaxFunEvals', 1000000, ...
-    'MaxIter',1000000, 'Display', 'off', 'TolX', 1e-0012);
-
-[x,fval,exitflag,output] = fminsearch(err_func,pGuess,options);
-
-outparams=x;
-
-
-end
-
-function fitResult=makeSineDecayFit(X,Y)
-
-% Guess the amplitude and offset
-gA=0.5*range(Y);
-
-% Guess offset
-gD=0.5*(max(Y)+min(Y));
-
-% Guess the period
-iHigh=find((Y-gD)/gA>.8,1);
-iLow=find((Y-gD)/gA<-.8,1);
-gB=abs(X(iHigh)-X(iLow))*2;
-
-
-% Guess initial phase (hardest to do)
-gC= 0 ;
-
-
-
-% Guess decay time
-gE = range(X);
-
-cosFit=fittype('A*cos(2*pi*t/B+C)*exp(-t/E)+D','independent',{'t'},...
-    'coefficients',{'A','B','C','D','E'});
-options=fitoptions(cosFit);          
-        set(options, 'TolFun', 1E-14);
-        set(options,'Lower', [0.25*gA,.1*gB,0, 0.75*gD,0]);
-        set(options, 'Upper', [5*gA,20*gB,2*pi,1.5*gD,inf]);            
-        set(options, 'StartPoint', [gA,gB,gC,gD,gE]);     
-        set(options, 'MaxIter',3000);
-        set(options, 'MaxFunEvals',3000);
-        set(options,'TolFun',10^-9); 
-        
-fitResult=fit(X,Y,cosFit,options);
-disp(fitResult)
-end
-
