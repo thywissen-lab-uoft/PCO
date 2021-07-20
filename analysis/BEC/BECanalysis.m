@@ -1,452 +1,222 @@
-function [hF,outdata] = BECanalysis(atomdata,xVar,opts)
+function [hF,data] = BECanalysis(atomdata,xVar,opts)
 
-if nargin==2
-   opts.xUnit='??';
-end
+global camaxis
+global atom
+global m
+global pxsize
+global imgdir
+global doRotate
+global aROI
+global crosssec
 
-
-s1='BECdata.mat';
-
-% s={s1,s2,s3,s4};
-s={s1};
-Tevap=[7.5];
-
-clear data
-
-tof=25;
-
-clear data
-for n=1:length(s)
-    d=load(s{n});
-
-    Natoms=d.Ndata.Natoms;
-    Tx=d.Tdata.Tx;
-    Ty=d.Tdata.Ty;
-    X=d.Tdata.X;    
-    
-    thisdata=struct;
-    thisdata.Power=X';
-    thisdata.Tx=Tx;
-    thisdata.Ty=Ty;
-    thisdata.Natoms=Natoms;
-    thisdata.Time=Tevap(n);
-    
-    data(n)=thisdata;    
-end
-
-% Remove a bad data point
-data(end).Tx(end-2)=[];
-data(end).Ty(end-2)=[];
-data(end).Power(end-2)=[];
-data(end).Natoms(end-2)=[];
-
-%% Trap Frequency
-
-A=180; % Hz/sqrt(W)
-fBar=@(P)  A*sqrt(P);
-
-Pvec=linspace(0,1.5,1E3);
-
-%% process data
+%% Fundamental Consants
 
 amu=1.66064E-27;
 m=87*amu;
 kB=1.38064852E-23;
 h=6.62607E-34;
 hbar=h/(2*pi);
-
-sigmaHO=@(T,P) sqrt((kB*T)./(m*(2*pi*fBar(P)).^2));
-
-debroglie=@(T) h./sqrt(2*pi*m*kB*T);
-
 a0=5.29E-11; % bohr radius
+
+% Rb87 Scattering length and scattering cross section
 a=100*a0;
 sigmaScatter=8*pi*a^2;
 
+% Functions for trap parameters
+sigmaHO=@(T,freq) sqrt((kB*T)./(m*(2*pi*freq).^2));
+debroglie=@(T) h./sqrt(2*pi*m*kB*T);
 gammaScatter=@(n,T) n.*sigmaScatter.*sqrt(kB*T/m);
+T_BEC=@(freq,N) hbar*(2*pi*freq)/kB*0.94.*N.^(1/3);
 
-T_BEC=@(P,N) hbar*(2*pi*fBar(P))/kB*0.94.*N.^(1/3);
+%% Sort the data
+params=[atomdata.Params];
+xvals=[params.(xVar)];
 
-%%
+[xvals,inds]=sort(xvals,'ascend');
+atomdata=atomdata(inds);
 
-legStr={'1.5s','2.5 s','5.0 s','10 s'};
-legStr={'7.5s'};
-hF=figure(1);
-clf
-set(hF,'color','w');
+params=[atomdata.Params];
+tofs=[params.tof];
+
+%% Grab the Data
+for kk=1:length(atomdata)
+   for nn=1:length(atomdata(kk).GaussFit)
+        fout=atomdata(kk).GaussFit{nn};         
+        Xc(kk,nn)=fout.Xc;Yc(kk,nn)=fout.Yc;
+        Xs(kk,nn)=fout.Xs;Ys(kk,nn)=fout.Ys;
+        A(kk,nn)=fout.A;
+        nbg(kk,nn)=fout.nbg;
+
+        N(kk,nn)=2*pi*Xs(kk,nn)*Ys(kk,nn)*A(kk,nn);
+        Natoms(kk,nn)=N(kk,nn)*((pxsize)^2/crosssec);   % gauss number  
+   
+        Tx(kk,nn)=(Xs(kk,nn)*pxsize./(tofs(kk)*1e-3)).^2*m/kB;
+        Ty(kk,nn)=(Ys(kk,nn)*pxsize./(tofs(kk)*1e-3)).^2*m/kB;
+   end        
+end
+
+%% Outdata
+data=struct;
+
+data.xVar=xVar;
+data.X=xvals;
+data.xUnit=opts.xUnit;
+data.TOFs=tofs;
+data.Tx=Tx;
+data.Ty=Ty;
+data.T=sqrt(Tx.*Ty);
+data.Natoms=Natoms;
+data.Freqs=opts.Freqs;
+data.Density=Natoms./(2*pi*sigmaHO(data.T,data.Freqs).^2).^(3/2);    
+data.Gamma=gammaScatter(data.Density,data.T);
+data.TBEC=T_BEC(data.Freqs,data.Natoms);
+data.PSD=data.Density.*debroglie(data.T).^3;
+
+showBECTransition=0;
+if sum(data.T<data.TBEC)
+    showBECTransition=1;
+    ind=find(data.T>data.TBEC,1);    
+end
 
 
-hF.Position=[20 20 600 600];
+%% Figures
+
+hF=figure;
+hF.Color='w';
+hF.Position=[100 100 1000 600];
 co=get(gca,'colororder');
 
-subplot(221)
-set(gca,'FontSize',14,'box','on','Xgrid','on','ygrid','on','linewidth',1);
-xlabel('end power (W)');
-ylabel('atom number');
+subplot(231);
+set(gca,'FontSize',10,'box','on','Xgrid','on','ygrid','on','linewidth',1,...
+    'XScale','log','YScale','log');
+xlabel('gauss number');
+ylabel('gauss temperature (K)');
 hold on
 
-for n=1:length(data)
-    plot(data(n).Power,data(n).Natoms,'o-','markerfacecolor',co(n,:),...
-        'markeredgecolor',co(n,:)*.5,'markersize',8,'linewidth',1,...
-        'color',co(n,:)*.5);
-    hold on
-end
-
-% set(gca,'YScale','log');
-
-xlim([0 1.5]);
-
-subplot(222)
-set(gca,'FontSize',14,'box','on','Xgrid','on','ygrid','on','linewidth',1);
-xlabel('end power (W)');
-ylabel('X Temp. (\muK)');
+pData=plot(data.Natoms,data.T,'o','markerfacecolor',co(1,:),...
+    'markeredgecolor',co(1,:)*.5,'markersize',8,'linewidth',1,...
+    'color',co(1,:)*.5);
+pTheory=plot(data.Natoms,data.TBEC,'s--','markerfacecolor',co(2,:),...
+    'markeredgecolor',co(2,:)*.5,'markersize',8,'linewidth',1,...
+    'color',co(2,:)*.5);
 hold on
-
-for n=1:length(data)
-    plot(data(n).Power,data(n).Tx*1E6,'o-','markerfacecolor',co(n,:),...
-        'markeredgecolor',co(n,:)*.5,'markersize',8,'linewidth',1,...
-        'color',co(n,:)*.5);
-    hold on
-end
-legend(legStr,'fontsize',10,'location','northwest')
-xlim([0 1.5]);
-% set(gca,'YScale','log');
-
-subplot(223)
-set(gca,'FontSize',14,'box','on','Xgrid','on','ygrid','on','linewidth',1);
-xlabel('end power (W)');
-ylabel('Y Temp. (\muK)');
-hold on
-xlim([0 1.5]);
-
-for n=1:length(data)
-    plot(data(n).Power,data(n).Ty*1E6,'o-','markerfacecolor',co(n,:),...
-        'markeredgecolor',co(n,:)*.5,'markersize',8,'linewidth',1,...
-        'color',co(n,:)*.5);
-    hold on
-end
-
-subplot(224)
-set(gca,'FontSize',14,'box','on','Xgrid','on','ygrid','on','linewidth',1);
-xlabel('end power (W)');
-ylabel('trap frequency (Hz)');
-hold on
-xlim([0 1.5]);
-
-plot(Pvec,fBar(Pvec),'k-','linewidth',2);
-
-legend({'180 Hz/W^{1/2}'},'location','southeast');
-
-%%
-
-% legStr={'1.5s','2.5 s','5.0 s','10 s'};
-
-hF2=figure(2);
-clf
-set(hF2,'color','w');
-
-
-hF2.Position=[50 200 350 350];
-co=get(gca,'colororder');
-
-set(gca,'FontSize',14,'box','on','Xgrid','on','ygrid','on','linewidth',1);
-xlabel('atom number');
-ylabel('temperature (K)');
-hold on
-
-clear ps
-for n=1:length(data)
-    ps(n)=plot(data(n).Natoms,sqrt(data(n).Tx.*data(n).Ty),'o','markerfacecolor',co(n,:),...
-        'markeredgecolor',co(n,:)*.5,'markersize',8,'linewidth',1,...
-        'color',co(n,:)*.5);
-    hold on
-end
-
-set(gca,'XScale','Log');
-set(gca,'YScale','Log');
-
-ylim([1E-8 10E-6]);
+ylim([1E-8 2E-6]);
 xlim([5E4 3E6]);
-% Plot TBEC
 
-for n=1:length(data)
-    plot(data(n).Natoms,T_BEC(data(n).Power,data(n).Natoms),'s--','markerfacecolor',co(2,:),...
-        'markeredgecolor',co(2,:)*.5,'markersize',8,'linewidth',1,...
-        'color',co(2,:)*.5);
-    hold on
+if showBECTransition
+   plot(data.Natoms(ind,1)*[1 1],get(gca,'YLim'),'--','color',[.6 .6 .6]);
 end
 
-disp(' ')
-disp('TEMP BEC AND OUR TEMP');
-disp(1E9*T_BEC(data(end).Power(1),data(end).Natoms(1)));
-disp(1E9*sqrt(data(end).Tx(1).*data(end).Ty(1)))
-disp(' ')
-legStr={'data','TBEC'};
+legend([pData pTheory],{'data','T_{BEC}'},'fontsize',8,'location','best');
 
-legend(legStr,'fontsize',10,'location','northwest')
-
-%%
-
-legStr={'1.5s','2.5 s','5.0 s','10 s'};
-
-
-
-hF3=figure(3);
-clf
-set(hF3,'color','w');
-
-
-hF3.Position=[400 200 350 350];
-co=get(gca,'colororder');
-
-set(gca,'FontSize',14,'box','on','Xgrid','on','ygrid','on','linewidth',1);
-xlabel('atom number');
+subplot(232);
+set(gca,'FontSize',10,'box','on','Xgrid','on','ygrid','on','linewidth',1,...
+    'XScale','log','YScale','log');
+xlabel('gauss number');
 ylabel('density (cm^{-3})');
 hold on
 
-for n=1:length(data)
-    Natoms=data(n).Natoms;
-    T=sqrt(data(n).Tx.*data(n).Ty);
-    P=data(n).Power;
-    
-    density=Natoms./(2*pi*sigmaHO(T,P).^2).^(3/2);    
-    plot(Natoms,density*1E-6,'o','markerfacecolor',co(n,:),...
-        'markeredgecolor',co(n,:)*.5,'markersize',8,'linewidth',1,...
-        'color',co(n,:)*.5);
-    hold on
-end
+pData=plot(data.Natoms,data.Density*1E-6,'o','markerfacecolor',co(1,:),...
+    'markeredgecolor',co(1,:)*.5,'markersize',8,'linewidth',1,...
+    'color',co(1,:)*.5);
 
-set(gca,'XScale','Log');
-set(gca,'YScale','Log');
 
-% legend(legStr,'fontsize',10,'location','northwest')
+
+hold on
+ylim([1E13 1E14]);
+xlim([5E4 3E6]);
 
 str='$n = N/(2\pi\overline{\sigma}_{\mathrm{HO}}^2)^{3/2}$';
-
 text(.98,.05,str,'interpreter','latex','units','normalized','fontsize',12,...
     'horizontalalignment','right');
 
-
-%%
-
-legStr={'1.5s','2.5 s','5.0 s','10 s'};
-
-hF4=figure(4);
-clf
-set(hF4,'color','w');
-
-
-hF4.Position=[750 200 350 350];
-co=get(gca,'colororder');
-
-set(gca,'FontSize',14,'box','on','Xgrid','on','ygrid','on','linewidth',1);
-xlabel('atom number');
-ylabel('phase space density');
-hold on
-
-for n=1:length(data)
-    Natoms=data(n).Natoms;
-    T=sqrt(data(n).Tx.*data(n).Ty);
-    P=data(n).Power;
-    
-    density=Natoms./(2*pi*sigmaHO(T,P).^2).^(3/2);   
-    
-    lambda=debroglie(T);
-    
-    psd=density.*lambda.^3;
-    
-    plot(Natoms,psd,'o','markerfacecolor',co(n,:),...
-        'markeredgecolor',co(n,:)*.5,'markersize',8,'linewidth',1,...
-        'color',co(n,:)*.5);
-    hold on
+if showBECTransition
+   plot(data.Natoms(ind,1)*[1 1],get(gca,'YLim'),'--','color',[.6 .6 .6]);
 end
 
-set(gca,'XScale','Log');
-set(gca,'YScale','Log');
-
-% legend(legStr,'fontsize',10,'location','southwest')
-
-str='$\rho = n\lambda_\mathrm{DB}^3(T)$';
-
-text(.98,.05,str,'interpreter','latex','units','normalized','fontsize',12,...
-    'horizontalalignment','right');
-
-%%
-
-legStr={'1.5s','2.5 s','5.0 s','10 s'};
-
-hF5=figure(5);
-clf
-set(hF5,'color','w');
-
-
-hF5.Position=[900 50 350 350];
-co=get(gca,'colororder');
-
-set(gca,'FontSize',14,'box','on','Xgrid','on','ygrid','on','linewidth',1);
-xlabel('atom number');
+subplot(233);
+set(gca,'FontSize',10,'box','on','Xgrid','on','ygrid','on','linewidth',1,...
+    'XScale','log','YScale','log');
+xlabel('gauss number');
 ylabel('scattering rate (Hz)');
 hold on
-
-for n=1:length(data)
-    Natoms=data(n).Natoms;
-    T=sqrt(data(n).Tx.*data(n).Ty);
-    P=data(n).Power;
-    
-    density=Natoms./(2*pi*sigmaHO(T,P).^2).^(3/2);   
-    
-    lambda=debroglie(T);
-    
-    G=gammaScatter(density,T);
-
-
-    plot(Natoms,G,'o','markerfacecolor',co(n,:),...
-        'markeredgecolor',co(n,:)*.5,'markersize',8,'linewidth',1,...
-        'color',co(n,:)*.5);
-    hold on
-end
-
-set(gca,'XScale','Log');
-set(gca,'YScale','Log');
-
-% legend(legStr,'fontsize',10,'location','northwest')
-
+pData=plot(data.Natoms,data.Gamma,'o','markerfacecolor',co(1,:),...
+    'markeredgecolor',co(1,:)*.5,'markersize',8,'linewidth',1,...
+    'color',co(1,:)*.5);
+hold on
+% ylim([1E13 1E14]);
+xlim([5E4 3E6]);
 
 str='$\Gamma = n(8\pi a^2)\sqrt{k_B T/m}$';
 text(.98,.05,str,'interpreter','latex','units','normalized','fontsize',12,...
     'horizontalalignment','right');
 
-%%
+if showBECTransition
+   plot(data.Natoms(ind,1)*[1 1],get(gca,'YLim'),'--','color',[.6 .6 .6]);
+end
 
-s='BEC.mat';
-
-data=load(s);
-atomdata=data.AA;
-%%
-
-hF=figure(10);
-clf
-
-imagesc(atomdata.OD);
-axis equal tight
-colormap parula
-colorbar
-caxis([0 3]);
-
-xlim([800 950]);
-ylim([750 850]);
-
-Xc=atomdata.GaussFit{1}.Xc;
-Yc=atomdata.GaussFit{1}.Yc;
-
-xVec=1:size(atomdata.OD,2);
-yVec=1:size(atomdata.OD,1);
-
-ODy=sum(atomdata.OD((round(Yc)-1):(round(Yc)+1),:),1)/3;
-ODx=sum(atomdata.OD(:,(round(Xc-1):round(Xc)+1)),2)/3;
-
-hF2=figure(11);
-clf
-hF2.Color='w';
-cla
-co=get(gca,'colororder');
-set(gcf,'position',[50 50 1000 400]);
-subplot(121)
-
-plot((xVec-Xc)*6.45,ODy,'-','linewidth',1,'color',co(1,:));
+subplot(234);
+set(gca,'FontSize',10,'box','on','Xgrid','on','ygrid','on','linewidth',1,...
+    'XScale','log','YScale','log');
+xlabel('gauss number');
+ylabel('phase space density');
 hold on
-plot((yVec-Yc)*6.45,ODx,'-','linewidth',1,'color',co(2,:));
+
+pData=plot(data.Natoms,data.PSD,'o','markerfacecolor',co(1,:),...
+    'markeredgecolor',co(1,:)*.5,'markersize',8,'linewidth',1,...
+    'color',co(1,:)*.5);
 
 hold on
-% xlim([800 950]);
+% ylim([1E13 1E14]);
+xlim([5E4 3E6]);
 
-xlim([-200 200]);
+str='$\rho = n\lambda_\mathrm{DB}^3(T)$';
+text(.98,.05,str,'interpreter','latex','units','normalized','fontsize',12,...
+    'horizontalalignment','right');
 
-ylim([0 2.5]);
-xlabel('imaged position (\mum)');
-ylabel('optical density');
+if showBECTransition
+   plot(data.Natoms(ind,1)*[1 1],get(gca,'YLim'),'--','color',[.6 .6 .6]);
+end
 
-legend({'x','z'})
-
-set(gca,'fontsize',14,'box','on','linewidth',1)
-
-
-U0=4*pi*hbar^2*a/m;
-muTF=(33.18E-9)*kB;
-tof=25E-3;
-rho=@(x,f) (muTF - 1/2*m*(2*pi*f)^2.*x.^2)/U0;
-
-rhoTOF=@(x,f) rho(x/(2*pi*f*tof),f);
-
-
-
-
-fx=28.3;
-fy=121;
-
-
-str=['1.5W, 10^5 atoms' newline '25 ms TOF'];
-text(.02,.9,str,'units','normalized','fontsize',12);
-% fx=10;
-% fy=100;
-
-% figure(12)
-% clf
-subplot(122)
-xVec=linspace(-1000,1000,1E4);
-ODxTh=rho(xVec*1E-6,fx);
-ODxTh=ODxTh/max(ODxTh);
-ODxTh(ODxTh<0)=0;
-
-ODyTh=rho(xVec*1E-6,fy);
-ODyTh=ODyTh/max(ODyTh);
-ODyTh(ODyTh<0)=0;
-% ODyTh=real(ODyTh);
-
-plot(xVec,ODxTh,'-','color',co(1,:),'linewidth',1)
+subplot(235);
+set(gca,'FontSize',10,'box','on','Xgrid','on','ygrid','on','linewidth',1,...
+    'XScale','linear','YScale','linear');
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
+ylabel('gauss number');
 hold on
-plot(xVec,ODyTh,'-','color',co(2,:),'linewidth',1)
 
-xlim([-30 30]);
-set(gca,'fontsize',14,'box','on','linewidth',1)
+pData=plot(data.X,data.Natoms,'o','markerfacecolor',co(1,:),...
+    'markeredgecolor',co(1,:)*.5,'markersize',8,'linewidth',1,...
+    'color',co(1,:)*.5);
 
-xlabel('insitu position (\mum)');
-ylabel('density (arb.)');
-
-
-
-legend({'x','z'})
-
-str=[num2str(fx) ' Hz,' num2str(fy) ' Hz' newline '\mu_{TF}=' num2str(muTF*10^9/kB) ' nK'];
-text(.02,.9,str,'units','normalized','fontsize',12);
-
-
-figure(13)
-clf
-% plot(xVec,fft(ODxTh));
 hold on
-Px=fftshift(fft(sqrt(ODxTh)));
-Px=Px.*conj(Px);
-Px=Px/max(Px);
 
 
-Pz=fftshift(fft(sqrt(ODyTh)));
-Pz=Pz.*conj(Pz);
-Pz=Pz/max(Pz);
+if showBECTransition
+   plot(data.X(ind)*[1 1],get(gca,'YLim'),'--','color',[.6 .6 .6]);
+end
 
-plot(xVec/tof,Px);
+subplot(236);
+set(gca,'FontSize',10,'box','on','Xgrid','on','ygrid','on','linewidth',1,...
+    'XScale','linear','YScale','linear');
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
+ylabel('trap frequency (Hz)');
 hold on
-plot(xVec/tof,Pz);
 
-xlim([-3500 3500]);
-% plot(xVec,ODyTh);
+pData=plot(data.X,data.Freqs,'o','markerfacecolor',co(1,:),...
+    'markeredgecolor',co(1,:)*.5,'markersize',8,'linewidth',1,...
+    'color',co(1,:)*.5);
 
 
-xlabel('momentum (arb.');
-ylabel('|\Phi(p)|^2');
+strs=strsplit(imgdir,filesep);
+str=[strs{end-1} filesep strs{end}];
 
-set(gcf,'color','w');
-set(gca,'fontsize',14,'box','on ','linewidth',1);
+% Image directory folder string
+t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+    'w','horizontalalignment','left');
+t.Position(4)=t.Extent(4);
+t.Position(3)=hF.Position(3);
+t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
 
 end
 
