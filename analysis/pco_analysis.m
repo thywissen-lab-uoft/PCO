@@ -684,6 +684,23 @@ if doGaussFit
         hF_Y=[hF_Y; hF_Ys_rNum];
     end        
 end
+
+
+%% BEC Analysis
+if doBEC && isfield(atomdata(1),'GaussFit')
+    % Calculate trap frequencies
+    % Use the K calibration and scale down by mass and polarizability
+    params=[atomdata.Params];
+    powers=[params.Evap_End_Power];
+    foo = @(P) 0.725*61.5*sqrt(P./(0.085)); % Calibrated 2021.02.25
+    freqs=foo(powers);    
+    
+    
+    
+    
+end
+
+
 %% Custom
 if doCustom 
     DATA=Ndatabox;
@@ -883,7 +900,7 @@ if doAnimate == 1
 %     animateOpts.Order='ascend';
     
     % Color limits
-    animateOpts.CLim=[0 5];   
+    animateOpts.CLim=[0 2.5];   
     
   
     animateCloudDouble(atomdata,pco_xVar,animateOpts);
