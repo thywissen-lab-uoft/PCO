@@ -1,7 +1,6 @@
 function animateCloudDouble(atomdata,xVar,opts)
 
 global imgdir
-global doRotate
 
 clim=opts.CLim;
 
@@ -228,27 +227,28 @@ co=get(gca,'colororder');
 
 % Add ROI boxes
 for kk=1:size(ROI,1)
-    if doRotate
-        y0=ROI(1);
-        x0=ROI(3);    
-        W=ROI(4)-ROI(3);
-        H=ROI(2)-ROI(1);
+    if opts.doRotate
+        y0=ROI(kk,1);
+        x0=ROI(kk,3);    
+        W=ROI(kk,4)-ROI(kk,3);
+        H=ROI(kk,2)-ROI(kk,1);
     else
-        x0=ROI(1);
-        y0=ROI(3);
-        H=ROI(4)-ROI(3);
-        W=ROI(2)-ROI(1);
+        x0=ROI(kk,1);
+        y0=ROI(kk,3);
+        H=ROI(kk,4)-ROI(kk,3);
+        W=ROI(kk,2)-ROI(kk,1);
     end    
     
-    if (ROI(3)>=1024) && doubleImage
+    if (ROI(kk,3)>=1024) && doubleImage
         parent=ax2;
     else
         parent=ax1;
     end
         
+    
     rectangle('position',[x0 y0 W H],'edgecolor',co(kk,:),'linewidth',2,...
         'parent',parent);
-    
+    hold on
 end
 drawnow;
 
@@ -286,13 +286,10 @@ for kk=1:length(xvals)   % Iterate over all unique xvalues
             set(hImg1,'XData',X,'YData',Y,'CData',ODs(:,:,kk));  % Image data
             set(gca,'XDir','normal','YDir','Reverse');
         end          
-    end
-    
-    
+    end        
 
     % Update graphcis
-    drawnow 
-    
+    drawnow     
     
     % Write the image data
     frame = getframe(hF);
@@ -308,7 +305,6 @@ for kk=1:length(xvals)   % Iterate over all unique xvalues
             imwrite(A,map,filename,'gif','WriteMode','append','DelayTime',midDelay);
         end
     end
-
 end
 close;
     
