@@ -90,7 +90,7 @@ hax=axes;
 set(hax,'box','on','linewidth',1,'fontsize',14,'units','pixels');
 hold on
 xlabel(xVar,'interpreter','none');
-ylabel('temperautre (nK)');
+ylabel('temperature (nK)');
 
 hax.Position(4)=hax.Position(4)-20;
 
@@ -180,7 +180,7 @@ end
 
 legend([p1 p2 p3],{'T','T_F','gauss'},'location','best','orientation','horizontal','fontsize',8);
 
-ylim([0 .5]);
+ylim([0.1 .4]);
 ylabel('T/TF');
 
 set(gca,'YColor',co(3,:))

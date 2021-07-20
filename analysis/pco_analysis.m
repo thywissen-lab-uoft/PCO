@@ -88,7 +88,7 @@ doSave=1;
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-pco_xVar='power_val';
+pco_xVar='Evap_End_Power';
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit=1;
@@ -101,12 +101,11 @@ pco_overrideUnit='W';
 doProbeFit=0;           % Fit probe beam to 2D Gaussian
 
 % Box Count
-doBoxCount=1;           % Box count analysis
+doBoxCount=0;           % Box count analysis
 doLandauZener=0;        % Landau Zener Analysis on BOX
 doBoxRabi=0;
 
 % Custom Box counts
-doCustomBox=0;          % Custom Box Count
 doRamanSpec=0;          % Raman box count count analyis
 
 % Fermi
@@ -114,6 +113,9 @@ doFermiFitLong=0;       % Fermi Fit for XDT TOF
 
 % Gaussian
 doGaussFit=1;           % Flag for performing the gaussian fit
+
+% Custom in line figure
+doCustom=0;          % Custom Box Count
 
 %Animation
 doAnimate = 1;          % Animate the Cloud
@@ -178,6 +180,7 @@ end
 
 % Sort the data by your given parameter
 disp(['Sorting atomdata by the given ''' pco_xVar '''']);
+x=zeros(length(atomdata),1);
 for kk=1:length(atomdata)
     if isfield(atomdata(kk).Params,pco_xVar)
         x(kk)=atomdata(kk).Params.(pco_xVar);
@@ -203,7 +206,6 @@ atomdata=atomdata(inds);
 %%%%% RF 1B
 % ROI = [533 1323 230 980];   % RF1B 5 ms TOF
 % ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
-% ROI = [700 1050 350 650]; %K RF1B 5ms tof
 
 
 %%%%% XDT 1/2 ONLY
@@ -212,7 +214,8 @@ atomdata=atomdata(inds);
 % ROI = [500 1392 300 500]; % XDT 1/2 TOF 10 ms long X9
 
 %%%%% XDT
-%  ROI=[751 1032 272 408]; %K ODT loading 5ms tof
+% ROI = [700 1050 240 640]; %K XDT 5ms tof
+
 % ROI=[649 1160 580 1024];   % XDT TOF 15 ms
 % ROI=[617 1091 258 385];   % XDT1 only TOF 5 ms
 % ROI=[830 920 320 360];    % XDT  TOF 5 ms
@@ -221,8 +224,10 @@ atomdata=atomdata(inds);
 % ROI=[741 1014 780 1024];  % XDT  TOF 15 ms HF+SG imaging
 % ROI=[708 1089 377 608];   % XDT  TOF 20 ms evaporation
 % ROI=[713 1015 310 601];
-% ROI=[780 970 200 1013];   % XDT  Full TOF analysis
-% ROI=[812 938 701 866];   % XDT  TOF 25 ms evaporation ZOOM
+ROI=[810 970 740 860];   % XDT  Full TOF analysis
+% ROI = [810 970 420 580]; %XDT Rb after evap 15ms 
+
+ % ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 
 % % 12ms tof SG from XDT #850 900 300 560;
 % ROI = [825 900 300 565;
@@ -233,11 +238,13 @@ atomdata=atomdata(inds);
 % ROI=[820 940 860 950;
 %     820 940 770 860];    % K SG 15ms TOF -9,-7 boxes
 
+%  ROI=[820 960 520 620;
+%       820 960 420 520];    % Rb Stern Gerlach 15 ms TOF
 
-% ROI=[820 940 860 950;
-%     820 940 770 860;
-%     820 940 680 770];    % K SG 15ms TOF -9,-7,-5 boxes
-% 
+%  ROI=[820 940 860 950;
+%       820 940 770 860;
+%       820 940 680 770];    % K SG 15ms TOF -9,-7,-5 boxes
+
 
 %%%%% LATTICE
 % ROI = [801 975 420 577]; % BM 15 ms TOF
@@ -261,12 +268,12 @@ atomdata=atomdata(inds);
 
 %  ROI=[800 950 660 760;
 %     800 950 1700 1800];   % XDT 20 ms TOF
-% 
+% % 
 % ROI=[800 950 1700 1800];   % XDT 20 ms TOF
 % 
- ROI=[800 950 490 600;
-     800 950 1520 1630];   %  band map 15 ms TOF
-  
+%  ROI=[800 950 490 600;
+%      800 950 1520 1630];   %  band map 15 ms TOF
+%   
 %  ROI=[800 950 1520 1630];   %  band map 15 ms TOF   -7 box   
 
 
@@ -280,10 +287,17 @@ atomdata=atomdata(inds);
 % ROI = [830 920 370 410;
 %     830 920 330 450];
 
-% 10 ms tof am spec 75-200 recoil y
-% ROI = [855 895 345 430;
-%     810 940 345 430];
+% 10 ms tof am spec 75-200 recoil x lattice y camera
+% ROI = [460 700 600 710;
+%     540 620 600 710];
 
+% 15 ms TOF AMP spec 75-200 Er Y Lattice
+% ROI = [800 970 430 540;
+%     855 905 430 540];
+
+% % 15 ms TOF AMP spec 75-200 Er Z Lattice
+% ROI = [820 940 380 590;
+%     820 940 460 515];
 
 % 7 ms tof am spec 75-200 recoil x, y camera
 % ROI = [556 619 542 634;
@@ -308,6 +322,7 @@ atomdata=atomdata(inds);
 % ROI = [830 940 590 700;
 %     830 940 450 560]; 
 
+% ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 
 
 % Assign the ROI
@@ -316,13 +331,18 @@ atomdata=atomdata(inds);
 %% Calculate the optical density
 ODopts=struct;
 ODopts.ScaleProbe=1;
-ODopts.ScaleProbeROI=[1 100 900 1000];  % ROI to do the scaling
+% ODopts.ScaleProbeROI=[1 100 900 1000];  % ROI to do the scaling
 ODopts.ScaleProbeROI=[1 1000 900 1000];  % ROI to do the scaling
-ODopts.ScaleProbeROI=[700 790 500 600];  % ROI to do the scaling
+% ODopts.ScaleProbeROI=[700 790 500 600];  % ROI to do the scaling
+
+
+
+ODopts.SubtractDark=0;
+ODopts.DarkROI=[700 800 20 100];
 
 % Apply gaussian filter to images?
 ODopts.GaussFilter=1;
-ODopts.GaussFilterSigma=2;
+ODopts.GaussFilterSigma=1;
 
 % Get the high field flag (this may throw error for old data)
 if isfield(data(1).Flags,'High_Field_Imaging')
@@ -354,13 +374,13 @@ end
 % doBoxCount=1;   % Enable box count analysis
 doSubBG=1;      % Subtract background based on reference spot?
 
-bgROI=[400 500 400 500];
+% bgROI=[400 500 400 500];
 % Box count for small cloud (get close to where the atoms live)
 % bgROI=[750 820 350 450];
 % bgROI=[700 800 450 500];
-bgROI=[700 800 500 600];
+% bgROI=[700 800 500 600];
 bgROI=[700 790 500 600];
-%bgROI=[900 1000 450 500]; % even more zoom in for BM
+% bgROI=[900 1000 450 500]; % even more zoom in for BM
 % bgROI=[800 1000 600 700]; % for k dfg long tof
 
 if doBoxCount
@@ -468,154 +488,6 @@ if doLandauZener && size(ROI,1)==2 && doBoxCount && length(atomdata)>3
     end
 end   
     
-%% Custom Box Count
-% Custom Box Count
-if doCustomBox 
-       
-    % Center frequency for expected RF field (if relevant)
-    B = atomdata(1).Params.HF_FeshValue_Initial;
-    x0= (BreitRabiK(B,9/2,-5/2)-BreitRabiK(B,9/2,-7/2))/6.6260755e-34/1E6;
-    
-
-    % Grab Raw data
-    X=Ndatabox.X;   
-    X=X-x0;    
-    X=X*1E3;  
-    X=X';
-    xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];
-
-    % Define Y Data
-    N1=Ndatabox.Natoms(:,1);
-    N2=Ndatabox.Natoms(:,2);     
-    N2=N2/0.7;
-    
-    Y=(N1-N2)./(N1);
-    ystr=['\DeltaN_{97}/N_{9}'];
-
-%     Y=(N1+N2);
-%     ystr=['N_{tot}'];
-%     Y=N1./N2;
-
-    
-%     Y=(N2-N1)./N2;    
-    % For simple transfer
-%     Y=N2./(N1+N2);
-%     Y=N1./N2;
-%      Y=N2./(N1+N2);
-%     Y(Y<0)=0;
-
-
-    ux=unique(X);    
-    Yu=zeros(length(ux),2);
-    
-    for kk=1:length(ux)
-        inds=find(X==ux(kk));
-        Yu(kk,1)=mean(Y(inds));
-        Yu(kk,2)=std(Y(inds));       
-    end
-
-
-    
-    hFB=figure;
-    hFB.Color='w';
-    hFB.Name='box custom';
-    co=get(gca,'colororder');
-    
-    plot(X,Y,'o','markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5,...
-        'linewidth',2,'markersize',8);
-    errorbar(ux,Yu(:,1),Yu(:,2),'o','markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5,...
-        'linewidth',2,'markersize',8);
-    
-    
-    xlabel(xstr);
-    
-    ylabel(ystr);
-    
-    set(gca,'fontsize',12,'linewidth',1,'box','on','xgrid','on','ygrid','on');
-    yL=get(gca,'YLim');
-    ylim([-.1 yL(2)]);
-    hold on
-    
-    xlim([min(X) max(X)]);
-    
-    negLorentz=0;
-    
-    if negLorentz
-        myfit=fittype('bg-A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)',...
-            'coefficients',{'A','G','x0','bg'},...
-            'independent','x');
-        opt=fitoptions(myfit);
-        
-        % Background is max
-        bg=max(Y);
-        
-        % Find center
-        [Ymin,ind]=min(Y);
-        A=bg-Ymin;        
-        xC=X(ind);
-        
-        % Assign guess
-        G=[A range(X)/2 xC bg];
-        opt.StartPoint=G;
-        opt.Robust='bisquare';
-        
-        % Perform the fit
-        fout=fit(X,Y,myfit,opt);
-        disp(fout);
-
-        % Plot the fit
-        tt=linspace(min(X),max(X),1000);
-        plot(tt,feval(fout,tt),'r--');
-    end
-    
-    
-    lorentz1=0;
-    if length(atomdata)>4 && lorentz1
-        % Symmetric Lorentzian
-        myfit=fittype('A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)+bg','coefficients',{'A','G','x0','bg'},...
-            'independent','x');
-        opt=fitoptions(myfit);
-        G0=100;
-        bg=min(Y);
-        A0=(max(Y)-min(Y));
-        inds=[Y>.8*max(Y)];
-        x0=mean(X(inds));     
-        opt.StartPoint=[A0 G0 x0 bg];   
-        opt.Upper=[1 3*G0 x0+range(X) .1];   
-
-        opt.Robust='bisquare';
-
-        % Assymmetric
-%         g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
-%         y=@(x,a,x0,G,A,bg) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1)+bg;        
-%         myfit=fittype(@(a,x0,G,A,bg,x) y(x,a,x0,G,A,bg),'coefficients',{'a','x0','G','A','bg'},...
-%             'independent','x'); 
-%         opt=fitoptions(myfit);
-%         G0=10;
-%         bg=min(Y);
-%         A0=(max(Y)-min(Y))*(G0/2).^2;
-%         inds=[Y>.8*max(Y)];
-%         x0=mean(X(inds));     
-%         opt.StartPoint=[.2 x0 G0 A0 bg];  
-%         opt.Robust='bisquare';
-
-        fout_lorentz=fit(X,Y,myfit,opt);
-
-        XF=linspace(min(X),max(X),1000);
-        pExp=plot(XF,feval(fout_lorentz,XF),'r-','linewidth',2);
-
-        str=['$f_0 = ' num2str(round(fout_lorentz.x0,2)) '$ kHz' newline ...
-            '$\mathrm{FWHM} = ' num2str(round(abs(fout_lorentz.G),2)) ' $ kHz'];
-        legend(pExp,{str},'interpreter','latex','location','best');        
-%         xlim([130 200]);    
-    end
-    
-    
-%     hax.YLim(1)=0;
-    pp=get(gcf,'position');
-    set(gcf,'position',[pp(1) pp(2) 400 400]);    
-    saveFigure(atomdata,hFB,'box_custom');
-end
 
 %% Custom Box Count : Raman Spectroscopy
 
@@ -812,7 +684,186 @@ if doGaussFit
         hF_Y=[hF_Y; hF_Ys_rNum];
     end        
 end
+%% Custom
+if doCustom 
+    DATA=Ndatabox;
+    %     DATA=Ndatagauss;
+
+    %%%%%%%%%%%%%%% RF SPEC %%%%%%%%%%%%%%
+
+    % Center frequency for expected RF field (if relevant)
+    B = atomdata(1).Params.HF_FeshValue_Initial;
+    x0= (BreitRabiK(B,9/2,-5/2)-BreitRabiK(B,9/2,-7/2))/6.6260755e-34/1E6; 
+
+    % Grab Raw data
+    X=DATA.X;   
+    X=X-x0;    
+    X=X*1E3;  
+    X=X';
+    xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];
+    
+    % Define Y Data
+    N1=DATA.Natoms(:,1);
+    N2=DATA.Natoms(:,2);     
+    N2=N2/0.75;
+    
+    Y=(N1-N2)./N1;
+    ystr=['\DeltaN_{97}/N_{9}'];
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    %%%%%%%%%%%%%%% AM SPEC %%%%%%%%%%%%%%
+    X=DATA.X*1e-3;   
+    X=X';
+    xstr=['modulation frequency (kHz)'];
+    
+    % Define Y Data
+    N1=DATA.Natoms(:,1);
+    N2=DATA.Natoms(:,2);     
+    Y=(N1-N2)./N1;
+    ystr='\Delta N/N_{tot}';
+    
+
+    [ux,ia,ib]=unique(X);    
+    Yu=zeros(length(ux),2);    
+    for kk=1:length(ux)
+        inds=find(X==ux(kk));
+        Yu(kk,1)=mean(Y(inds));
+        Yu(kk,2)=std(Y(inds));       
+    end
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%% FIGURE
+    hFB=figure;
+    hFB.Color='w';
+    hFB.Name='box custom';
+    hFB.Position=[400 400 400 400];
+    strs=strsplit(imgdir,filesep);
+    str=[strs{end-1} filesep strs{end}];
+    co=get(gca,'colororder');    
+
+    % Image directory folder string
+    t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+    'w','horizontalalignment','left','fontsize',6);
+    t.Position(4)=t.Extent(4);
+    t.Position(3)=hFB.Position(3);
+    t.Position(1:2)=[5 hFB.Position(4)-t.Position(4)];
+
+    
+    plot(X,Y,'o','markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5,...
+        'linewidth',2,'markersize',8);
+    errorbar(ux,Yu(:,1),Yu(:,2),'o','markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5,...
+        'linewidth',2,'markersize',8);    
+    
+    xlabel(xstr);    
+    ylabel(ystr);
+    
+    set(gca,'fontsize',12,'linewidth',1,'box','on','xgrid','on','ygrid','on');
+    yL=get(gca,'YLim');
+%     ylim([-.1 yL(2)]);
+    hold on    
+    xlim([min(X) max(X)]);
+    
+    negLorentz=0;    
+    if negLorentz
+        myfit=fittype('bg-A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)',...
+            'coefficients',{'A','G','x0','bg'},...
+            'independent','x');
+        opt=fitoptions(myfit);
         
+        % Background is max
+        bg=max(Y);
+        
+        % Find center
+        [Ymin,ind]=min(Y);
+        A=bg-Ymin;        
+        xC=X(ind);
+        
+        % Assign guess
+        G=[A range(X)/2 xC bg];
+        opt.StartPoint=G;
+        opt.Robust='bisquare';
+        
+        % Perform the fit
+        fout=fit(X,Y,myfit,opt);
+        disp(fout);
+
+        % Plot the fit
+        tt=linspace(min(X),max(X),1000);
+        plot(tt,feval(fout,tt),'r--');
+    end
+    
+    % Assymetric lorentzian fit, good for AM spec
+    fit_lorentz_assymetric=1;
+    if length(atomdata)>4 && fit_lorentz_assymetric
+        g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
+        y=@(x,a,x0,G,A,bg) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1)+bg;        
+        myfit=fittype(@(a,x0,G,A,bg,x) y(x,a,x0,G,A,bg),'coefficients',{'a','x0','G','A','bg'},...
+            'independent','x'); 
+        opt=fitoptions(myfit);
+        G0=30;
+        bg=min(Y);
+        A0=(max(Y)-min(Y));
+        inds=[Y>.9*max(Y)];            
+        
+        [~,i]=max(Y);
+        x0=X(i);
+%         x0=mean(X(inds));     
+        opt.StartPoint=[.1 x0 G0 A0 bg];  
+        opt.Robust='bisquare';
+%         opts.Weights=w;
+        
+        fout_lorentz=fit(X,Y,myfit,opt);
+        XF=linspace(0,max(X)+10,1000);
+        xlim([100 max(X)+10]);
+        pExp=plot(XF,feval(fout_lorentz,XF),'r-','linewidth',2);
+        str=['$f_0 = ' num2str(round(fout_lorentz.x0,2)) '$ kHz' newline ...
+            '$\mathrm{FWHM} = ' num2str(round(abs(fout_lorentz.G),2)) ' $ kHz'];
+        legend(pExp,{str},'interpreter','latex','location','best','fontsize',8); 
+        
+%         fout_lorentz.a=opt.StartPoint(1);
+%         fout_lorentz.x0=opt.StartPoint(2);
+%         fout_lorentz.G=opt.StartPoint(3);
+%         fout_lorentz.A=opt.StartPoint(4);
+%         fout_lorentz.bg=opt.StartPoint(5);
+
+    end
+    
+    
+    lorentz1=0;
+    if length(atomdata)>4 && lorentz1
+        % Symmetric Lorentzian
+        myfit=fittype('A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)+bg','coefficients',{'A','G','x0','bg'},...
+            'independent','x');
+        opt=fitoptions(myfit);
+        G0=100;
+        bg=min(Y);
+        A0=(max(Y)-min(Y));
+        inds=[Y>.8*max(Y)];
+        x0=mean(X(inds));     
+        opt.StartPoint=[A0 G0 x0 bg];   
+%         opt.Upper=[1 3*G0 x0+range(X) 0];   
+
+        opt.Robust='bisquare';
+
+
+        fout_lorentz=fit(X,Y,myfit,opt);
+
+        XF=linspace(min(X),max(X),1000);
+        pExp=plot(XF,feval(fout_lorentz,XF),'r-','linewidth',2);
+
+        str=['$f_0 = ' num2str(round(fout_lorentz.x0,2)) '$ kHz' newline ...
+            '$\mathrm{FWHM} = ' num2str(round(abs(fout_lorentz.G),2)) ' $ kHz'];
+        legend(pExp,{str},'interpreter','latex','location','best','fontsize',8);        
+%         xlim([130 200]);    
+    end
+    
+    
+%     hax.YLim(1)=0;
+    pp=get(gcf,'position')
+    set(gcf,'position',[pp(1) pp(2) 400 400]);    
+    saveFigure(atomdata,hFB,'custom');
+end
+
 %% Animate cloud
 if doAnimate == 1
     animateOpts=struct;
@@ -828,11 +879,11 @@ if doAnimate == 1
     animateOpts.doubleStack='horizontal';
 
      % Asceneding or descending
-    % animateOpts.Order='descend';   
-    animateOpts.Order='ascend';
+    animateOpts.Order='descend';   
+%     animateOpts.Order='ascend';
     
     % Color limits
-    animateOpts.CLim=[0 1];   
+    animateOpts.CLim=[0 5];   
     
   
     animateCloudDouble(atomdata,pco_xVar,animateOpts);
