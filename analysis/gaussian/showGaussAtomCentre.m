@@ -55,9 +55,9 @@ hF=figure('Name',[pad('Gauss Centre',20) str],...
     'units','pixels','color','w','Menubar','none','Resize','off',...
     'numbertitle','off');
 hF.Position(1)=1200;
-hF.Position(2)=480;
+hF.Position(2)=280;
 hF.Position(3)=600;
-hF.Position(4)=400;
+hF.Position(4)=600;
 drawnow;
 
 % Image directory folder string
@@ -228,67 +228,68 @@ end
 if opts.CenterParabolaFit && length(xvals)>1
     tVec=linspace(min(xvals),max(xvals),100);   
     
-    D1=Xc(:,nn);    
-    D2=Yc(:,nn);
+    
+    for nn=1:size(Xc,2)
+        D1=Xc(:,nn);    
+        D2=Yc(:,nn);    
+        % X Fit
+        axes(hax1);
+        fit1=polyfit(xvals',D1,2);
+        plot(tVec,polyval(fit1,tVec),'r-','linewidth',1);  
 
-    
-    % X Fit
-    axes(hax1);
-    fit1=polyfit(xvals',D1,2);
-    plot(tVec,polyval(fit1,tVec),'r-','linewidth',1);  
-    
-    sTblX.Data={};
-    data{1,1}='curvature (px^2/var)';
-    data{2,1}='curvature (um^2/var)';
-    data{3,1}='slope (px/var)';
-    data{4,1}='slope (um/var)';
-    data{5,1}='intercept (px)';
-    data{6,1}='intercept (um) ';
+        sTblX.Data={};
+        data{1+6*(nn-1),1}='curvature (px/var^2)';
+        data{2+6*(nn-1),1}='curvature (um/var^2)';
+        data{3+6*(nn-1),1}='slope (px/var)';
+         data{4+6*(nn-1),1}='slope (um/var)';
+        data{5+6*(nn-1),1}='intercept (px)';
+         data{6+6*(nn-1),1}='intercept (um) ';
 
-    data{1,2}=fit1(1);
-    data{2,2}=fit1(1)*pxsize*1e6;
-    data{3,2}=fit1(2);
-    data{4,2}=fit1(2)*pxsize*1e6;
-    data{5,2}=fit1(3);
-    data{6,2}=fit1(3)*pxsize*1e6;    
-    
-%     data{5,1}='<HTML> &Delta;X (px)</HTML>';
-%     data{5,2}=range(Xc(:,nn));
-%     data{6,1}='<HTML> Mean(x) </HTML>';
-%     data{6,2}=mean(Xc(:,nn));
-    
-    sTblX.Data=data;
-    sTblX.Position(3)=sTblX.Extent(3);
-    sTblX.Position(4)=sTblX.Extent(4); 
-    
-    % X Fit
-    axes(hax2);
-    fit2=polyfit(xvals',D2,2);
-    plot(tVec,polyval(fit2,tVec),'r-','linewidth',1);  
-    
-    sTblY.Data={};
-    data{1,1}='curve (px^2/var)';
-    data{2,1}='curve (um^2/var)';
-    data{3,1}='slope (px/var)';
-    data{4,1}='slope (um/var)';
-    data{5,1}='intercept (px)';
-    data{6,1}='intercept (um) ';
+        data{1+6*(nn-1),2}=fit1(1);
+        data{2+6*(nn-1),2}=fit1(1)*pxsize*1e6;
+        data{3+6*(nn-1),2}=fit1(2);
+        data{4+6*(nn-1),2}=fit1(2)*pxsize*1e6;
+        data{5+6*(nn-1),2}=fit1(3);
+        data{6+6*(nn-1),2}=fit1(3)*pxsize*1e6;    
 
-    data{1,2}=fit2(1);
-    data{2,2}=fit2(1)*pxsize*1e6;
-    data{3,2}=fit2(2);
-    data{4,2}=fit2(2)*pxsize*1e6;
-    data{5,2}=fit2(3);
-    data{6,2}=fit2(3)*pxsize*1e6;   
-    
-    data{5,1}='<HTML> &Delta;Y (px)</HTML>';
-    data{5,2}=range(Yc(:,nn));
-    data{6,1}='<HTML> Mean(y) </HTML>';
-    data{6,2}=mean(Yc(:,nn));
-    
-    sTblY.Data=data;
-    sTblY.Position(3)=sTblY.Extent(3);
-    sTblY.Position(4)=sTblY.Extent(4); 
+    %     data{5,1}='<HTML> &Delta;X (px)</HTML>';
+    %     data{5,2}=range(Xc(:,nn));
+    %     data{6,1}='<HTML> Mean(x) </HTML>';
+    %     data{6,2}=mean(Xc(:,nn));
+
+        sTblX.Data=data;
+        sTblX.Position(3)=sTblX.Extent(3);
+        sTblX.Position(4)=sTblX.Extent(4); 
+
+        % X Fit
+        axes(hax2);
+        fit2=polyfit(xvals',D2,2);
+        plot(tVec,polyval(fit2,tVec),'r-','linewidth',1);  
+
+        sTblY.Data={};
+        data{1+6*(nn-1),1}='curve (px/var^2)';
+        data{2+6*(nn-1),1}='curve (um/var^2)';
+        data{3+6*(nn-1),1}='slope (px/var)';
+        data{4+6*(nn-1),1}='slope (um/var)';
+        data{5+6*(nn-1),1}='intercept (px)';
+        data{6+6*(nn-1),1}='intercept (um) ';
+
+        data{1+6*(nn-1),2}=fit2(1);
+        data{2+6*(nn-1),2}=fit2(1)*pxsize*1e6;
+        data{3+6*(nn-1),2}=fit2(2);
+        data{4+6*(nn-1),2}=fit2(2)*pxsize*1e6;
+        data{5+6*(nn-1),2}=fit2(3);
+        data{6+6*(nn-1),2}=fit2(3)*pxsize*1e6;   
+
+        data{5+6*(nn-1),1}='<HTML> &Delta;Y (px)</HTML>';
+        data{5+6*(nn-1),2}=range(Yc(:,nn));
+        data{6+6*(nn-1),1}='<HTML> Mean(y) </HTML>';
+        data{6+6*(nn-1),2}=mean(Yc(:,nn));
+
+        sTblY.Data=data;
+        sTblY.Position(3)=sTblY.Extent(3);
+        sTblY.Position(4)=sTblY.Extent(4); 
+    end
 end
 
 

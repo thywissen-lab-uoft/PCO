@@ -89,10 +89,10 @@ doSave=1;
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-pco_xVar='ExecutionDate';
+pco_xVar='tof';
 
 % Should the analysis attempt to automatically find the unit?
-pco_autoUnit=1;
+pco_autoUnit=0;
 
 % If ixon_autoUnit=0, this will be used.
 pco_overrideUnit='ms';
@@ -102,7 +102,7 @@ pco_overrideUnit='ms';
 doProbeFit=0;           % Fit probe beam to 2D Gaussian
 
 % Box Count
-doBoxCount=0;           % Box count analysis
+doBoxCount=1;           % Box count analysis
 doLandauZener=0;        % Landau Zener Analysis on BOX
 doBoxRabi=0;
 
@@ -110,7 +110,7 @@ doBoxRabi=0;
 doRamanSpec=0;          % Raman box count count analyis
 
 % Fermi
-doFermiFitLong=1;       % Fermi Fit for XDT TOF
+doFermiFitLong=0;       % Fermi Fit for XDT TOF
 
 % Gaussian
 doGaussFit=1;           % Flag for performing the gaussian fit
@@ -289,6 +289,12 @@ atomdata=atomdata(inds);
 
 %  
 % ROI=[800 950 1700 1800];
+
+
+ ROI=[820 950 150 1020;
+     820 950 1174 2044];   %  k_rb double shutter various tof NARROW
+
+
 %%%%%%%%%% X CAM AM SPEC
 
 % 10 ms tof am spec 75-200 recoil z
@@ -330,7 +336,7 @@ atomdata=atomdata(inds);
 % ROI = [830 940 590 700;
 %     830 940 450 560]; 
 
-ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
+% ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 
 
 % Assign the ROI
@@ -340,7 +346,7 @@ ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 ODopts=struct;
 ODopts.ScaleProbe=1;
 % ODopts.ScaleProbeROI=[1 100 900 1000];  % ROI to do the scaling
-ODopts.ScaleProbeROI=[1 1000 900 1000];  % ROI to do the scaling
+ODopts.ScaleProbeROI=[200 400 800 1000];  % ROI to do the scaling
 % ODopts.ScaleProbeROI=[700 790 500 600];  % ROI to do the scaling
 
 
@@ -596,11 +602,11 @@ end
 
 gaussPopts = struct;
 gaussPopts.xUnit=pco_unit;
-gaussPopts.NumberExpFit = 1;        % Fit exponential decay to atom number
+gaussPopts.NumberExpFit = 0;        % Fit exponential decay to atom number
 gaussPopts.NumberLorentzianFit=0;   % Fit atom number to lorentzian
 gaussPopts.CenterSineFit = 0;       % Fit sine fit to cloud center
 gaussPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
-gaussPopts.CenterParabolaFit = 0;
+gaussPopts.CenterParabolaFit = 1;
 gaussPopts.CenterLinearFit = 0;     % Linear fit to cloud center
 gaussPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
 
@@ -908,19 +914,20 @@ if doAnimate == 1
     animateOpts.MidDelay=1;    % Time to hold in middle picutres
     animateOpts.EndDelay=2;     % Time to hold final picture
     animateOpts.doAverage=1;    % Average over duplicates?
-    animateOpts.doRotate=0;     % Rotate the image?
+    animateOpts.doRotate=1;     % Rotate the image?
     animateOpts.xUnit=pco_unit;
     
     % Stacking images (applicable only for double exposure)
-    %animateOpts.doubleStack='vertical';
-    animateOpts.doubleStack='horizontal';
+     animateOpts.doubleStack='vertical';
+%     animateOpts.doubleStack='horizontal';
 
      % Asceneding or descending
-    animateOpts.Order='descend';   
-%     animateOpts.Order='ascend';
+%     animateOpts.Order='descend';   
+     animateOpts.Order='ascend';
     
     % Color limits
-    animateOpts.CLim=[0 1];   
+    animateOpts.CLim=[0 1;
+        0 1.5];   
 
     animateCloudDouble(atomdata,pco_xVar,animateOpts);
     

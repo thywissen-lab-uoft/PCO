@@ -106,7 +106,7 @@ Y=1:size(Z,1);
 %% Determine figure and axis size
 
 % Long dimension of figure
-L=800;
+L=1000;
 
 if doubleImage
     switch opts.doubleStack
@@ -162,7 +162,7 @@ if doubleImage
     ax1=subplot(Nr,Nc,1);
     hImg1=imagesc(X,Y,Z);   
     axis equal tight
-    caxis(clim);
+    caxis(clim(1,:));
     colorbar
 
     if opts.doRotate
@@ -176,7 +176,13 @@ if doubleImage
     ax2=subplot(Nr,Nc,2);
     hImg2=imagesc(X,Y,Z);    
     axis equal tight
-    caxis(clim);
+    
+    if size(clim,1)==2
+        caxis(clim(2,:));
+    else
+        caxis(clim(1,:));
+    end
+
     colorbar
 
     if opts.doRotate
@@ -200,7 +206,7 @@ else
         'fontname','times','fontsize',10);
     hImg1=imagesc(X,Y,Z);   
     axis equal tight
-    caxis(clim);
+    caxis(clim(1,:));
     colorbar
     if opts.doRotate
         ylim(dROI(1:2));
