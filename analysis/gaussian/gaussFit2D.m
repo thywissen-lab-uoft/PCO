@@ -1,5 +1,5 @@
 
-function fout=gaussFit2D(Dx,Dy,data)
+function [fout,gof,output]=gaussFit2D(Dx,Dy,data)
  % Ensure data type is double
 data=double(data);Dx=double(Dx);Dy=double(Dy);
 

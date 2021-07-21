@@ -115,6 +115,10 @@ doFermiFitLong=1;       % Fermi Fit for XDT TOF
 % Gaussian
 doGaussFit=1;           % Flag for performing the gaussian fit
 
+% BEC (requries gaussian)
+doBEC=0;
+
+
 % Custom in line figure
 doCustom=0;          % Custom Box Count
 
@@ -612,8 +616,10 @@ if doGaussFit
             Dx=sROI(1):sROI(2);               % X Vector
             Dy=sROI(3):sROI(4);               % Y Vector
             data=atomdata(kk).OD(Dy,Dx);    % Optical density        
-            fout=gaussFit2D(Dx,Dy,data);    % Perform the fit   
+            [fout,gof,output]=gaussFit2D(Dx,Dy,data);    % Perform the fit   
             atomdata(kk).GaussFit{nn}=fout; % Assign the fit object       
+            atomdata(kk).GaussGOF{nn}=gof; % Assign the fit object       
+
         end
     end    
 end
@@ -657,7 +663,12 @@ if doGaussFit
    
     % Cloud centre
     hF_Centre=showGaussAtomCentre(atomdata,pco_xVar,gaussPopts);    
-    if doSave;saveFigure(atomdata,hF_Centre,'gauss_position');end    
+    if doSave;saveFigure(atomdata,hF_Centre,'gauss_position');end   
+    
+    % Cloud Error
+    hF_Error=showGaussError(atomdata,pco_xVar,gaussPopts);    
+    if doSave;saveFigure(atomdata,hF_Error,'gauss_error');end    
+    
     
     if isequal(pco_xVar,'tof') && length(atomdata)>2
 %         [hF,fitX,fitY]=computeGaussianTemperature(atomdata,xVar);
@@ -673,13 +684,14 @@ if doGaussFit
     for rNum=1:size(ROI,1)
         hF_Xs_rNum=showGaussProfile(atomdata,'X',style,rNum,pco_xVar);        
         hF_Ys_rNum=showGaussProfile(atomdata,'Y',style,rNum,pco_xVar);  
-
+        pause(1);
 %       Save the figures (this can be slow)
         if doSave
-            for kk=1:length(hF_Xs_rNum)            
+            for kk=1:length(hF_Xs_rNum) 
                 saveFigure(atomdata,hF_Xs_rNum(kk),['gauss_profile_X' num2str(rNum) '_' num2str(kk)]);
             end 
-
+            
+            
             for kk=1:length(hF_Ys_rNum)
                 saveFigure(atomdata,hF_Ys_rNum(kk),['gauss_profile_Y' num2str(rNum) '_' num2str(kk)]);
             end
@@ -688,6 +700,27 @@ if doGaussFit
         hF_Y=[hF_Y; hF_Ys_rNum];
     end        
 end
+
+
+%% BEC Analysis
+if doBEC && isfield(atomdata(1),'GaussFit')
+    % Calculate trap frequencies
+    % Use the K calibration and scale down by mass and polarizability
+    params=[atomdata.Params];
+    powers=[params.Evap_End_Power]'; 
+    foo2 = @(P) 0.725*61.5*sqrt(P./(0.085)); % Calibrated 2021.02.25
+    freqs=foo2(powers);    
+    
+    BECopts=struct;
+    BECopts.Freqs=freqs;
+    BECopts.xUnit=pco_unit;    
+    
+    [hF_BEC,BECdata]=BECanalysis(atomdata,pco_xVar,BECopts);    
+    
+    if doSave;saveFigure(atomdata,hF_BEC,'gauss_BEC');end        
+end
+
+
 %% Custom
 if doCustom 
     DATA=Ndatabox;
@@ -888,8 +921,7 @@ if doAnimate == 1
     
     % Color limits
     animateOpts.CLim=[0 1];   
-    
-  
+
     animateCloudDouble(atomdata,pco_xVar,animateOpts);
     
 end
