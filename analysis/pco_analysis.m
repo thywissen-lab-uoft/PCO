@@ -57,8 +57,9 @@ camaxis='X';
 % camaxis='Y';
 
 % Choose your atom
+% atom = 'K';
 atom = 'K';
-% atom = 'Rb';
+
 
 % Load pertinent physical constants
 amu=1.660539E-27; 
@@ -88,13 +89,13 @@ doSave=1;
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-pco_xVar='Evap_End_Power';
+pco_xVar='ExecutionDate';
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit=1;
 
 % If ixon_autoUnit=0, this will be used.
-pco_overrideUnit='W';
+pco_overrideUnit='ms';
 
 
 %% Analysis Flags
@@ -109,7 +110,7 @@ doBoxRabi=0;
 doRamanSpec=0;          % Raman box count count analyis
 
 % Fermi
-doFermiFitLong=0;       % Fermi Fit for XDT TOF
+doFermiFitLong=1;       % Fermi Fit for XDT TOF
 
 % Gaussian
 doGaussFit=1;           % Flag for performing the gaussian fit
@@ -215,6 +216,7 @@ atomdata=atomdata(inds);
 
 %%%%% XDT
 % ROI = [700 1050 240 640]; %K XDT 5ms tof
+% ROI = [700 1050 327 645]; %K XDT 15ms tof rb
 
 % ROI=[649 1160 580 1024];   % XDT TOF 15 ms
 % ROI=[617 1091 258 385];   % XDT1 only TOF 5 ms
@@ -224,7 +226,7 @@ atomdata=atomdata(inds);
 % ROI=[741 1014 780 1024];  % XDT  TOF 15 ms HF+SG imaging
 % ROI=[708 1089 377 608];   % XDT  TOF 20 ms evaporation
 % ROI=[713 1015 310 601];
-ROI=[810 970 740 860];   % XDT  Full TOF analysis
+% ROI=[810 970 740 860];   % XDT  Full TOF analysis
 % ROI = [810 970 420 580]; %XDT Rb after evap 15ms 
 
  % ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
@@ -240,6 +242,8 @@ ROI=[810 970 740 860];   % XDT  Full TOF analysis
 
 %  ROI=[820 960 520 620;
 %       820 960 420 520];    % Rb Stern Gerlach 15 ms TOF
+%  ROI=[750 1050 195 425;
+%       750 1050 550 780];    % Rb Stern Gerlach 17 ms TOF
 
 %  ROI=[820 940 860 950;
 %       820 940 770 860;
@@ -322,7 +326,7 @@ ROI=[810 970 740 860];   % XDT  Full TOF analysis
 % ROI = [830 940 590 700;
 %     830 940 450 560]; 
 
-% ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
+ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 
 
 % Assign the ROI
@@ -465,11 +469,11 @@ if doLandauZener && size(ROI,1)==2 && doBoxCount && length(atomdata)>3
 %     SweepRangeVar='uwave_delta_freq';    %    Variable that defines sweep range
     
 % Shift Register
-    SweepTimeVar='rf75_time_HF';  
+    SweepTimeVar='rb_uwave_sweep_time';  
     
     
 %     SweepTimeVar='Raman_Time';      % Variable that defines sweep time
-    SweepRangeVar='rf75_deltaFreq_HF';    %    Variable that defines sweep range
+    SweepRangeVar='rb_uwave_delta_freq';    %    Variable that defines sweep range
 %     
     % Convert the parameter into df and dt (add whatever custom processing
     % you want).
@@ -588,7 +592,7 @@ end
 
 gaussPopts = struct;
 gaussPopts.xUnit=pco_unit;
-gaussPopts.NumberExpFit = 0;        % Fit exponential decay to atom number
+gaussPopts.NumberExpFit = 1;        % Fit exponential decay to atom number
 gaussPopts.NumberLorentzianFit=0;   % Fit atom number to lorentzian
 gaussPopts.CenterSineFit = 0;       % Fit sine fit to cloud center
 gaussPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
@@ -694,7 +698,7 @@ if doCustom
     % Center frequency for expected RF field (if relevant)
     B = atomdata(1).Params.HF_FeshValue_Initial;
     x0= (BreitRabiK(B,9/2,-5/2)-BreitRabiK(B,9/2,-7/2))/6.6260755e-34/1E6; 
-
+    x0 = 0;
     % Grab Raw data
     X=DATA.X;   
     X=X-x0;    
@@ -707,9 +711,9 @@ if doCustom
     N2=DATA.Natoms(:,2);     
     N2=N2/0.75;
     
-    Y=(N1-N2)./N1;
-    ystr=['\DeltaN_{97}/N_{9}'];
-
+    Y=N2./(N1+N2);
+%     ystr=['\DeltaN_{97}/N_{9}'];
+    ystr=['ratio in 1,1']
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     %%%%%%%%%%%%%%% AM SPEC %%%%%%%%%%%%%%
@@ -883,7 +887,7 @@ if doAnimate == 1
 %     animateOpts.Order='ascend';
     
     % Color limits
-    animateOpts.CLim=[0 5];   
+    animateOpts.CLim=[0 1];   
     
   
     animateCloudDouble(atomdata,pco_xVar,animateOpts);
