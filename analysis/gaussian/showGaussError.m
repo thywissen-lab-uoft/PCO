@@ -27,6 +27,8 @@ for kk=1:length(atomdata)
         
         gof=atomdata(kk).GaussGOF{nn};
         R2(kk,nn)=gof.rsquare;
+        SSE(kk,nn)=gof.sse;
+
    end        
 end
 
@@ -63,8 +65,8 @@ hF=figure('Name',[pad('Gauss Error',20) str],...
     'numbertitle','off');
 hF.Position(1)=0;
 hF.Position(2)=50;
-hF.Position(3)=400;
-hF.Position(4)=400;
+hF.Position(3)=700;
+hF.Position(4)=300;
 clf
 drawnow;
 
@@ -83,7 +85,7 @@ uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
 
 
 % Make axis
-hax=axes;
+hax=subplot(121);
 set(hax,'box','on','linewidth',1,'fontsize',10,'units','pixels');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
@@ -98,6 +100,21 @@ for nn=1:size(atomdata(1).ROI,1)
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
 
+
+hax=subplot(122);
+set(hax,'box','on','linewidth',1,'fontsize',10,'units','pixels');
+hold on
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
+ylabel('R-squared atom number');
+
+hax.Position(4)=hax.Position(4)-20;
+
+co=get(gca,'colororder');
+
+for nn=1:size(atomdata(1).ROI,1)
+   plot(xvals,SSE(:,nn),'o','color',co(nn,:),'linewidth',1,'markersize',8,...
+       'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
+end
 % ylim([0 1.1]);
 
 

@@ -33,21 +33,39 @@ atomdata=atomdata(inds);
 params=[atomdata.Params];
 tofs=[params.tof];
 
-%% Grab the Data
-for kk=1:length(atomdata)
-   for nn=1:length(atomdata(kk).GaussFit)
-        fout=atomdata(kk).GaussFit{nn};         
-        Xc(kk,nn)=fout.Xc;Yc(kk,nn)=fout.Yc;
-        Xs(kk,nn)=fout.Xs;Ys(kk,nn)=fout.Ys;
-        A(kk,nn)=fout.A;
-        nbg(kk,nn)=fout.nbg;
+%%
 
-        N(kk,nn)=2*pi*Xs(kk,nn)*Ys(kk,nn)*A(kk,nn);
-        Natoms(kk,nn)=N(kk,nn)*((pxsize)^2/crosssec);   % gauss number  
-   
-        Tx(kk,nn)=(Xs(kk,nn)*pxsize./(tofs(kk)*1e-3)).^2*m/kB;
-        Ty(kk,nn)=(Ys(kk,nn)*pxsize./(tofs(kk)*1e-3)).^2*m/kB;
-   end        
+if sum(opts.BECinds)>1
+   warning('Code cannot do BEC analysis on multiple valid ROIs'); 
+   return;
+end
+
+ind=find(opts.BECinds,1);
+%% Grab the Data
+Xc=zeros(length(atomdata),1);
+Yc=zeros(length(atomdata),1);
+Xs=zeros(length(atomdata),1);
+Ys=zeros(length(atomdata),1);
+A=zeros(length(atomdata),1);
+nbg=zeros(length(atomdata),1);
+N=zeros(length(atomdata),1);
+Natoms=zeros(length(atomdata),1);
+Tx=zeros(length(atomdata),1);
+Ty=zeros(length(atomdata),1);
+
+for kk=1:length(atomdata)
+
+    fout=atomdata(kk).GaussFit{ind};         
+    Xc(kk)=fout.Xc;Yc(kk)=fout.Yc;
+    Xs(kk)=fout.Xs;Ys(kk)=fout.Ys;
+    A(kk)=fout.A;
+    nbg(kk)=fout.nbg;
+
+    N(kk)=2*pi*Xs(kk)*Ys(kk)*A(kk);
+    Natoms(kk)=N(kk)*((pxsize)^2/crosssec);   % gauss number  
+
+    Tx(kk)=(Xs(kk)*pxsize./(tofs(kk)*1e-3)).^2*m/kB;
+    Ty(kk)=(Ys(kk)*pxsize./(tofs(kk)*1e-3)).^2*m/kB;
 end
 
 %% Outdata

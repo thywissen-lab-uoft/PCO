@@ -51,50 +51,66 @@ end
 Xs=Xs*pxsize;
 Ys=Ys*pxsize;
            
-%% Create Fit object
-
-% Create fit function
-myfit=fittype(@(s0,T,t) sqrt(s0.^2+(kB*T/m)*t.^2),'independent',{'t'},...
-    'coefficients',{'s0','T'});
-opt=fitoptions(myfit);
-opt.TolFun=1E-16;
-opt.Lower=[0 0];
-opt.Upper=[5E-3 1E-3];
 
 %% Performt the fit
-
+mLbl={};
 for nn=1:length(atomdata(1).GaussFit)
    switch atomdata(1).Flags.image_atomtype
        case 0 % Rb only
            m=mRb;
+           mLbl{nn}='Rb';
+           ms(nn)=m;
        case 1 % K only
            m=mK;
+           mLbl{nn}='K';
+              ms(nn)=m;
+
        case 2 % K and Rb
            if atomdata(kk).ROI(nn,3)<=1024
                m=mK;
+               mLbl{nn}='K';
+              ms(nn)=m;
+
+
            else
                m=mRb;
+              mLbl{nn}='Rb';
+             ms(nn)=m;
+
+
            end
         case 3 % Rb and K
            if atomdata(kk).ROI(nn,3)<=1024
                m=mRb;
+            mLbl{nn}='Rb';
+               ms(nn)=m;
+
            else
                m=mK;
+              mLbl{nn}='K';
+             ms(nn)=m;
+
            end
        otherwise
            error(['No atom mass provided. Probably because you ' ...
                'analyzed old data. You may need to specify the mass ' ...
                'with comments in the imaging code']);
-   end        
-    
-    
+   end       
+   
+    myfit=fittype(@(s0,T,t) sqrt(s0.^2+(kB*T/m)*t.^2),'independent',{'t'},...
+    'coefficients',{'s0','T'});
+    opt=fitoptions(myfit);
+    opt.TolFun=1E-16;
+    opt.Lower=[0 0];
+    opt.Upper=[5E-3 1E-3];    
+      
     Tx0=(max(Xs(:,nn))^2-min(Xs(:,nn))^2)/(max(TOFs).^2)*(m/kB);
     set(opt,'StartPoint', [min(Xs(:,nn)), Tx0]);
-    fitX=fit(TOFs',Xs(:,nn),myfit,opt);
+    fitX{nn}=fit(TOFs',Xs(:,nn),myfit,opt);
 
     Ty0=(max(Ys(:,nn))^2-min(Ys(:,nn))^2)/(max(TOFs).^2)*(m/kB);
     set(opt,'StartPoint', [min(Ys(:,nn)), Ty0]);
-    fitY=fit(TOFs',Ys(:,nn),myfit,opt);
+    fitY{nn}=fit(TOFs',Ys(:,nn),myfit,opt);
     
 end
 
@@ -136,81 +152,71 @@ axx=subplot(131);
 set(gca,'box','on','fontsize',12,...
     'XMinorTick','on','YMinorTick','on','YGrid','on','XGrid','on')
 xlabel('time of flight (ms)');
-ylabel('gaussian radius (\mum)');
+% ylabel('gaussian radius (\mum)');
 hold on
 
 % Do the actual plot
-pXF=plot(tVec*1e3,feval(fitX,tVec)*1e6,'-','linewidth',2,'color',co(3,:));
-pX=plot(TOFs*1e3,Xs*1e6,'o','markerfacecolor',co(3,:),'markeredgecolor',co(3,:)*.5,...
-    'markersize',10,'linewidth',2);
+clear pXF
+clear pX
+for nn=1:length(atomdata(1).GaussFit)
+    pXF(nn)=plot(tVec*1e3,feval(fitX{nn},tVec)*1e6,'-','linewidth',2,'color',co(nn,:));
+    plot(TOFs*1e3,Xs(:,nn)*1e6,'o','markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5,...
+        'markersize',8,'linewidth',2);
+    
+    if fitX{nn}.T<1E-6
+        str=[mLbl{nn} ' $' num2str(round(fitX{nn}.T*1E9,2)) ' ~\mathrm{n K},~' ...
+            num2str(round(fitX{nn}.s0*1E6,1)) '~\mu\mathrm{m}$'];
+    else
+        str=[mLbl{nn} ' $' num2str(round(fitX{nn}.T*1E6,2)) ' ~\mathrm{\mu K},~' ...
+            num2str(round(fitX{nn}.s0*1E6,1)) '~\mu\mathrm{m}$'];
+    end
+    xLegStr{nn}=str;    
+end
 
-% Text label for temperature and minimum size
-xStr=['$T_x = ' num2str(round(fitX.T*1E6,2)) '~\mathrm{\mu K}$' newline ...
-    '$\sigma_{0x} = ' num2str(round(fitX.s0*1E6,1)) '~\mu\mathrm{m}$'];
-text(.01,.98,xStr,'units','normalized','fontsize',14,...
-    'verticalalignment','top','interpreter','latex');
-
-% Label the atom
-text(.99,.01,atomStr,'horizontalalignment','right','fontsize',16,...
-    'units','normalized','verticalalignment','bottom');
+legend(pXF,xLegStr,'interpreter','latex','fontsize',8,'location',...
+    'northwest');
 
 % X limits
 xlim([0 max(TOFs)*1e3]);
+
+text(0.98,0.01,'$\sigma_x$','interpreter','latex','fontsize',16,...
+    'units','normalized','verticalalignment','bottom','horizontalalignment','right');
 
 % Ys versus time plot
 axy=subplot(132);
 set(gca,'box','on','fontsize',12,...
     'XMinorTick','on','YMinorTick','on','YGrid','on','XGrid','on')
 xlabel('time of flight (ms)');
-ylabel('gaussian radius (\mum)');
+% ylabel('gaussian radius (\mum)');
 hold on
 
 % Do the plot
-pYF=plot(tVec*1e3,feval(fitY,tVec)*1e6,'-','linewidth',2,'color',co(4,:));
-pY=plot(TOFs*1e3,Ys*1e6,'o','markerfacecolor',co(4,:),'markeredgecolor',co(4,:)*.5,...
-    'markersize',10,'linewidth',2);
+clear pYF
+clear pY
+for nn=1:length(atomdata(1).GaussFit)
+    pYF(nn)=plot(tVec*1e3,feval(fitY{nn},tVec)*1e6,'-','linewidth',2,'color',co(nn,:));
+    plot(TOFs*1e3,Ys(:,nn)*1e6,'o','markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5,...
+        'markersize',8,'linewidth',2);
+    
+    if fitY{nn}.T<1E-6
+        str=[mLbl{nn} ' $' num2str(round(fitY{nn}.T*1E9,2)) ' ~\mathrm{n K},~' ...
+            num2str(round(fitY{nn}.s0*1E6,1)) '~\mu\mathrm{m}$'];
+    else
+        str=[mLbl{nn} ' $' num2str(round(fitY{nn}.T*1E6,2)) ' ~\mathrm{\mu K},~' ...
+            num2str(round(fitY{nn}.s0*1E6,1)) '~\mu\mathrm{m}$'];
+    end
+    yLegStr{nn}=str;    
+end
 
-% Temperature and size test labels
-xStr=['$T_y = ' num2str(round(fitY.T*1E6,2)) '~\mathrm{\mu K}$' newline ...
-    '$\sigma_{0y} = ' num2str(round(fitY.s0*1E6,1)) '~\mu\mathrm{m}$'];
-text(.01,.98,xStr,'units','normalized','fontsize',14,...
-    'verticalalignment','top','interpreter','latex');
-
-% Label the atom used
-text(.99,.01,atomStr,'horizontalalignment','right','fontsize',16,...
-    'units','normalized','verticalalignment','bottom');
-
+legend(pYF,yLegStr,'interpreter','latex','fontsize',8,'location',...
+    'northwest');
 % X limits
 xlim([0 max(TOFs)*1e3]);
 
+text(0.98,0.01,'$\sigma_y$','interpreter','latex','fontsize',16,...
+    'units','normalized','verticalalignment','bottom','horizontalalignment','right');
+
 %%%%%%%%%%%%%%%%%%%%%%%%% TABLE
-
-%Temperatures
-Tx=fitX.T;
-Ty=fitY.T;
-
-% Temperature is geometric mean
-Tbar=sqrt(Tx*Ty); 
-
-% Minimum fitted size
-sy=fitY.s0;
-sx=fitX.s0;
-sz=sy;
-
-% Maximum number of atoms
-N0=max(Natoms);
-
-% Peak 3D density
-n0=N0/(sqrt(2*pi*sx^2)*sqrt(2*pi*sy^2)*sqrt(2*pi*sz^2));     
-
-% Thermal DeBrogile Wavelength
-kB=1.38064852E-23; % boltzmann constant
-hb=1.0545718E-34; % reduced planck constant
-lambda=sqrt(2*pi*hb^2/(m*kB*Tbar));
-
-% Phase space density of counts
-rhoCounts=n0*lambda^3;
-
 tz=subplot(133);
 
 pos=tz.Position;
@@ -224,22 +230,58 @@ tz.Position(1)=axy.Position(1)+axy.Position(3);
 tz.Position(2)=axy.Position(2);
 set(tz,'units','pixels');
 tz.Position(1)=tz.Position(1)+20;
+tz.Data={};
+for nn=1:length(atomdata(1).GaussFit)
 
 
+    %Temperatures
+    Tx=fitX{nn}.T;
+    Ty=fitY{nn}.T;
 
+    % Temperature is geometric mean
+    Tbar=sqrt(Tx*Ty); 
 
+    % Minimum fitted size
+    sy=fitY{nn}.s0;
+    sx=fitX{nn}.s0;
+    sz=sy;
 
-tz.Data={'Tx,Ty,T',[num2str(round(fitX.T*1E6,2)) ' ' char(956) 'K, ' num2str(round(Ty*1E6,2)) ' ' char(956) 'K, ' num2str(round(Tbar*1E6,2)) ' ' char(956) 'K'];
-    [char(963) 'x,' char(963) 'y,' char(963) 'z,'],[num2str(round(sx*1E6)) ' ' char(956) 'm, ' num2str(round(sy*1E6)) ' ' char(956) 'm, ' num2str(round(sz*1E6)) ' ' char(956) 'm'];
-    ['max atoms'],[num2str(N0,'%.3e')];
-    [char(955) 'th'],[num2str(lambda*1E9), ' nm'];
-    ['max density'],[num2str(n0*1E-6,'%.3e'), ' atoms/cm^3'];
-    ['psd'],num2str(rhoCounts,'%.3e') 
-    };
+    % Maximum number of atoms
+    N0=max(Natoms(:,nn));
 
-tz.Position(3:4)=tz.Extent(3:4);
+    % Peak 3D density
+    n0=N0/(sqrt(2*pi*sx^2)*sqrt(2*pi*sy^2)*sqrt(2*pi*sz^2));     
 
+    m=ms(nn);
+    % Thermal DeBrogile Wavelength
+    kB=1.38064852E-23; % boltzmann constant
+    hb=1.0545718E-34; % reduced planck constant
+    lambda=sqrt(2*pi*hb^2/(m*kB*Tbar));
 
+    % Phase space density of counts
+    rhoCounts=n0*lambda^3;
+    
+    if Tbar<1E-6
+        data={'Tx,Ty,T',[num2str(round(Tx*1E9,2)) ' nK, ' num2str(round(Ty*1E9,2)) ' nK, ' num2str(round(Tbar*1E9,2)) ' nK'];
+            [char(963) 'x,' char(963) 'y,' char(963) 'z,'],[num2str(round(sx*1E6)) ' ' char(956) 'm, ' num2str(round(sy*1E6)) ' ' char(956) 'm, ' num2str(round(sz*1E6)) ' ' char(956) 'm'];
+            ['max atoms'],[num2str(N0,'%.3e')];
+            [char(955) 'th'],[num2str(lambda*1E9), ' nm'];
+            ['max density'],[num2str(n0*1E-6,'%.3e'), ' atoms/cm^3'];
+            ['psd'],num2str(rhoCounts,'%.3e') 
+            };
+    else
+        data={'Tx,Ty,T',[num2str(round(Tx*1E6,2)) ' ' char(956) 'K, ' num2str(round(Ty*1E6,2)) ' ' char(956) 'K, ' num2str(round(Tbar*1E6,2)) ' ' char(956) 'K'];
+            [char(963) 'x,' char(963) 'y,' char(963) 'z,'],[num2str(round(sx*1E6)) ' ' char(956) 'm, ' num2str(round(sy*1E6)) ' ' char(956) 'm, ' num2str(round(sz*1E6)) ' ' char(956) 'm'];
+            ['max atoms'],[num2str(N0,'%.3e')];
+            [char(955) 'th'],[num2str(lambda*1E9), ' nm'];
+            ['max density'],[num2str(n0*1E-6,'%.3e'), ' atoms/cm^3'];
+            ['psd'],num2str(rhoCounts,'%.3e') 
+            };
+    end
+    tz.Data=[tz.Data; data];
+    tz.Position(3:4)=tz.Extent(3:4);
+
+end
 
 
 

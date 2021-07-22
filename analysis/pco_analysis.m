@@ -42,8 +42,6 @@ disp(' ');
 disp('Choosing global settings for analysis...');
 
 global camaxis
-global atom
-global m
 global pxsize
 global imgdir
 global crosssec
@@ -55,24 +53,7 @@ crosssec=3/(2*pi)*lambda^2; % ideal cross 2-level cross section
 % Choose your camera
 camaxis='X';
 % camaxis='Y';
-
-% Choose your atom
-% THIS WILL DEPRECIATE BY USING THE FLAG
-% atom = 'K';
-atom = 'K';
-
-
-% Load pertinent physical constants
-amu=1.660539E-27; 
-switch atom
-    case 'K'
-        m=40*amu;
-    case 'Rb'
-        m=87*amu;
-    otherwise   
-        error('You didn''t pick an atom');
-end     
-
+ 
 % Choose the pixel size base on the camera
 switch camaxis
     case 'X'
@@ -90,10 +71,10 @@ doSave=1;
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-pco_xVar='tof';
+pco_xVar='Evap_End_Power';
 
 % Should the analysis attempt to automatically find the unit?
-pco_autoUnit=0;
+pco_autoUnit=1;
 
 % If ixon_autoUnit=0, this will be used.
 pco_overrideUnit='ms';
@@ -103,7 +84,7 @@ pco_overrideUnit='ms';
 doProbeFit=0;           % Fit probe beam to 2D Gaussian
 
 % Box Count
-doBoxCount=1;           % Box count analysis
+doBoxCount=0;           % Box count analysis
 doLandauZener=0;        % Landau Zener Analysis on BOX
 doBoxRabi=0;
 
@@ -117,8 +98,7 @@ doFermiFitLong=0;       % Fermi Fit for XDT TOF
 doGaussFit=1;           % Flag for performing the gaussian fit
 
 % BEC (requries gaussian)
-doBEC=0;
-
+doBEC=1;
 
 % Custom in line figure
 doCustom=0;          % Custom Box Count
@@ -292,10 +272,14 @@ atomdata=atomdata(inds);
 % ROI=[800 950 1700 1800];
 
 
- ROI=[820 950 150 1020;
-     820 950 1174 2044];   %  k_rb double shutter various tof NARROW
+%  ROI=[820 950 150 1020;
+%      820 950 1174 2044];   %  k_rb double shutter various tof NARRO
+%  
+%  ROI=[750 1020 150 1020;
+%      750 1020 1174 2044];   %  k_rb double shutter various tof 
 
-
+ ROI=[760 1000 660 940;
+     760 1000 1684 1964];   %  k_rb 25 ms opevap
 %%%%%%%%%% X CAM AM SPEC
 
 % 10 ms tof am spec 75-200 recoil z
@@ -678,7 +662,7 @@ if doGaussFit
     
     
     if isequal(pco_xVar,'tof') && length(atomdata)>2
-%         [hF,fitX,fitY]=computeGaussianTemperature(atomdata,xVar);
+        [hF,fitX,fitY]=computeGaussianTemperature(atomdata,pco_xVar);
     end       
 
      % Style of profile --> cut or sum?
@@ -710,6 +694,26 @@ end
 
 
 %% BEC Analysis
+
+% Determine which ROIs to perform BEC analysis on (for double shutter)
+if isfield(atomdata(1),'Flags') 
+    switch atomdata(1).Flags.image_atomtype
+        case 0
+            BECinds=ones(size(ROI,1),1);
+        case 1
+            BECinds=zeros(size(ROI,1),1);
+        case 2
+            BECinds=zeros(size(ROI,1),1);
+            for nn=1:size(ROI)
+                if ROI(nn,3)>1024
+                   BECinds(nn)=1; 
+                end                
+            end
+
+    end
+end
+
+
 if doBEC && isfield(atomdata(1),'GaussFit')
     % Calculate trap frequencies
     % Use the K calibration and scale down by mass and polarizability
@@ -720,7 +724,9 @@ if doBEC && isfield(atomdata(1),'GaussFit')
     
     BECopts=struct;
     BECopts.Freqs=freqs;
-    BECopts.xUnit=pco_unit;    
+    BECopts.xUnit=pco_unit;   
+    BECopts.BECinds=BECinds;
+    
     
     [hF_BEC,BECdata]=BECanalysis(atomdata,pco_xVar,BECopts);    
     
@@ -915,16 +921,16 @@ if doAnimate == 1
     animateOpts.MidDelay=1;    % Time to hold in middle picutres
     animateOpts.EndDelay=2;     % Time to hold final picture
     animateOpts.doAverage=1;    % Average over duplicates?
-    animateOpts.doRotate=1;     % Rotate the image?
+    animateOpts.doRotate=0;     % Rotate the image?
     animateOpts.xUnit=pco_unit;
     
     % Stacking images (applicable only for double exposure)
      animateOpts.doubleStack='vertical';
-%     animateOpts.doubleStack='horizontal';
+     animateOpts.doubleStack='horizontal';
 
      % Asceneding or descending
-%     animateOpts.Order='descend';   
-     animateOpts.Order='ascend';
+    animateOpts.Order='descend';   
+     %animateOpts.Order='ascend';
     
     % Color limits
     animateOpts.CLim=[0 1;
