@@ -86,10 +86,10 @@ uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
 
 % Make axis
 hax=subplot(121);
-set(hax,'box','on','linewidth',1,'fontsize',10,'units','pixels');
+set(hax,'box','on','linewidth',1,'fontsize',8,'units','pixels');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
-ylabel('R-squared atom number');
+ylabel('R-squared');
 
 hax.Position(4)=hax.Position(4)-20;
 
@@ -102,10 +102,10 @@ end
 
 
 hax=subplot(122);
-set(hax,'box','on','linewidth',1,'fontsize',10,'units','pixels');
+set(hax,'box','on','linewidth',1,'fontsize',8,'units','pixels');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
-ylabel('R-squared atom number');
+ylabel('see');
 
 hax.Position(4)=hax.Position(4)-20;
 

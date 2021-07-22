@@ -28,6 +28,7 @@ xvals=[params.(xVar)];
 
 % Sort the data by the variable in ascending or descending order
 direction=opts.Order;
+
 if isequal(direction,'ascend')
     [~,inds]=sort(xvals,'ascend');
 else
@@ -64,6 +65,17 @@ else
         ODs(:,:,kk)=atomdata(kk).OD;        
     end       
 end
+%% Reorder
+
+
+if isequal(direction,'ascend')
+    [xvals,inds]=sort(xvals,'ascend');
+else
+    [xvals,inds]=sort(xvals,'descend');
+end
+
+% Reorder the data
+ODs=ODs(:,:,inds);
 
 
 %% Calculate the dispaly ROI(s)

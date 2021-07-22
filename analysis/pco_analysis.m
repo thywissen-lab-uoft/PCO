@@ -92,7 +92,7 @@ doBoxRabi=0;
 doRamanSpec=0;          % Raman box count count analyis
 
 % Fermi
-doFermiFitLong=0;       % Fermi Fit for XDT TOF
+doFermiFitLong=1;       % Fermi Fit for XDT TOF
 
 % Gaussian
 doGaussFit=1;           % Flag for performing the gaussian fit
@@ -539,48 +539,6 @@ if doRamanSpec
     if doSave;saveFigure(atomdata,hF_raman,'raman_spec');end        
 end
 
-%% Fermi-Fitter Long TOF
-% This section of code fits the optical density to the distribution
-% expected from a degenerate cloud of 40K from a harmonic trap.
-%
-% This fitting protocol assumes a long time tof limit. In this limit the
-% temperature and fugacity can be determined without external knowledge of
-% the trap frequencies.
-%
-% However, if the trap frequency is known via an independent measure, it
-% can be used as a check.
-
-fermiFitOpts=struct;
-fermiFitOpts.ShowDetails=1;         % Plot shot-by-shot details?
-fermiFitOpts.SaveDetails=1;         % Save shot-by-shot details?
-fermiFitOpts.AutoROI=1;             % Automatically choose ROI from Gaussian Fit to optimize fitting speed
-
-% Do the analysis
-if doFermiFitLong
-    disp(repmat('-',1,60));    
-    disp('Performing Fermi-Fit long tof');
-    disp(repmat('-',1,60));       
-    atomdata=computeFermiFit(atomdata,fermiFitOpts);      
-end
-
-% Plotting
-if doFermiFitLong
-    hF_fermi_temp=showFermiTemp(atomdata,pco_xVar);    
-    if doSave;saveFigure(atomdata,hF_fermi_temp,'fermi_temperature');end
-    
-    hF_fermi_error=showFermiError(atomdata,pco_xVar);    
-    if doSave;saveFigure(atomdata,hF_fermi_error,'fermi_error');end    
-    
-    % Calculate trap frequencies
-    params=[atomdata.Params];
-    powers=[params.Evap_End_Power];
-    foo = @(P) 61.5*sqrt(P./(0.085)); % Calibrated 2021.02.25
-    freqs=foo(powers);    
-    
-    hF_fermi_temp2=showFermiTempCompare(atomdata,pco_xVar,freqs);    
-    if doSave;saveFigure(atomdata,hF_fermi_temp2,'fermi_compare');end
-end
-
 %% 2D Gaussian Analysis
 % This section of code computes a 2D gaussin fit on all your data and ROIs.
 % Warning, this can take a while.
@@ -692,6 +650,73 @@ if doGaussFit
     end        
 end
 
+
+%% Fermi-Fitter Long TOF
+% This section of code fits the optical density to the distribution
+% expected from a degenerate cloud of 40K from a harmonic trap.
+%
+% This fitting protocol assumes a long time tof limit. In this limit the
+% temperature and fugacity can be determined without external knowledge of
+% the trap frequencies.
+%
+% However, if the trap frequency is known via an independent measure, it
+% can be used as a check.
+
+fermiFitOpts=struct;
+fermiFitOpts.xUnit=pco_unit;
+fermiFitOpts.ShowDetails=1;         % Plot shot-by-shot details?
+fermiFitOpts.SaveDetails=1;         % Save shot-by-shot details?
+fermiFitOpts.AutoROI=1;             % Automatically choose ROI from Gaussian Fit to optimize fitting speed
+
+
+% Determine which ROIs to perform BEC analysis on (for double shutter)
+if isfield(atomdata(1),'Flags') 
+    switch atomdata(1).Flags.image_atomtype
+        case 0
+            DFGinds=zeros(size(ROI,1),1);
+        case 1
+            DFGinds=ones(size(ROI,1),1);
+        case 2
+            DFGinds=zeros(size(ROI,1),1);
+            for nn=1:size(ROI)
+                if ROI(nn,3)<1024
+                   DFGinds(nn)=1; 
+                end                
+            end
+
+    end
+end
+fermiFitOpts.DFGinds=DFGinds;
+
+% Calculate trap frequencies
+params=[atomdata.Params];
+powers=[params.Evap_End_Power];
+foo = @(P) 61.5*sqrt(P./(0.085)); % Calibrated 2021.02.25
+freqs=foo(powers);        
+fermiFitOpts.Freqs=freqs;
+    
+% Do the analysis
+if doFermiFitLong
+    disp(repmat('-',1,60));    
+    disp('Performing Fermi-Fit long tof');
+    disp(repmat('-',1,60));       
+    atomdata=computeFermiFit(atomdata,fermiFitOpts);  
+    
+
+end
+
+% Plotting
+if doFermiFitLong
+    hF_fermi_temp=showFermiTemp(atomdata,pco_xVar,fermiFitOpts);    
+    if doSave;saveFigure(atomdata,hF_fermi_temp,'fermi_temperature');end
+    
+    hF_fermi_error=showFermiError(atomdata,pco_xVar,fermiFitOpts);    
+    if doSave;saveFigure(atomdata,hF_fermi_error,'fermi_error');end       
+
+    
+    hF_fermi_temp2=showFermiTempCompare(atomdata,pco_xVar,fermiFitOpts);    
+    if doSave;saveFigure(atomdata,hF_fermi_temp2,'fermi_compare');end
+end
 
 %% BEC Analysis
 

@@ -1,4 +1,4 @@
-function hF=showFermiError(atomdata,xVar)
+function hF=showFermiError(atomdata,xVar,opts)
 % Grab important global variables
 
 global imgdir
@@ -15,7 +15,7 @@ atomdata=atomdata(inds);
 
 %% Grab the fermi fit outputs
 for kk=1:length(atomdata)
-   for nn=1:length(atomdata(kk).FermiFit)
+    nn=1;
         Natoms(kk,nn)=atomdata(kk).FermiFit{nn}.AtomNumber;
         T(kk,nn)=atomdata(kk).FermiFit{nn}.Temperature;
         Tf(kk,nn)=atomdata(kk).FermiFit{nn}.FermiTemperature;
@@ -24,7 +24,8 @@ for kk=1:length(atomdata)
         Tg(kk,nn)=atomdata(kk).FermiFitGauss{nn}.Temperature;
         sse(kk,nn)=atomdata(kk).FermiFit{nn}.SSE;
         sseg(kk,nn)=atomdata(kk).FermiFitGauss{nn}.SSE;
-        r2(kk,nn)=atomdata(kk).FermiFitGauss{nn}.R2;
+        r2(kk,nn)=atomdata(kk).FermiFit{nn}.R2;
+        r2g(kk,nn)=atomdata(kk).FermiFitGauss{nn}.R2;
 
 %         fout=atomdata(kk).GaussFit{nn};             % Grab the fit
 %         Xc(kk,nn)=fout.Xc;Yc(kk,nn)=fout.Yc;        % X and Y center
@@ -34,7 +35,6 @@ for kk=1:length(atomdata)
 %         nbg(kk,nn)=fout.nbg;                        % Background
 %         N(kk,nn)=2*pi*Xs(kk,nn)*Ys(kk,nn)*A(kk,nn); % Number of counts
 %         Natoms(kk,nn)=N(kk,nn)*(pxsize^2/crosssec);  % Atom number  
-   end        
 end
 % 
 % % Convert sizes in meters
@@ -68,8 +68,8 @@ hF=figure('Name',[pad('Fermi Error',20) str],...
     'units','pixels','color','w','Menubar','none','Resize','off');
 hF.Position(1)=500;
 hF.Position(2)=50;
-hF.Position(3)=400;
-hF.Position(4)=400;
+hF.Position(3)=700;
+hF.Position(4)=300;
 drawnow;
 
 % Image directory folder string
@@ -84,36 +84,41 @@ uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
     'position',[2 2 40 20]);
 
 % Make axis
-hax=axes;
-set(hax,'box','on','linewidth',1,'fontsize',14,'units','pixels');
+hax=subplot(121);
+set(hax,'box','on','linewidth',1,'fontsize',8,'units','pixels',...
+    'xgrid','on','ygrid','on');
 hold on
-xlabel(xVar,'interpreter','none');
-ylabel('sse');
-
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
+ylabel('rsquared');
 hax.Position(4)=hax.Position(4)-20;
-
 co=get(gca,'colororder');
 
+p1=plot(xvals,r2,'o','color',co(1,:),'linewidth',1,'markersize',8,...
+   'markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5);
+p2=plot(xvals,r2g,'v','color',co(4,:),'linewidth',1,'markersize',8,...
+   'markerfacecolor',co(4,:),'markeredgecolor',co(4,:)*.5);
+set(gca,'YScale','Log');
+legend([p1 p2],{'fermi','gauss'},'location','best');
 
+yL=get(gca,'YLim');
+ylim([yL(1) 1]);
 
-for nn=1:size(atomdata(1).ROI,1)
-   p1=plot(xvals,sse(:,nn),'o','color',co(1,:),'linewidth',1,'markersize',8,...
-       'markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5);
-end
+% Make axis
+hax=subplot(122);
+set(hax,'box','on','linewidth',1,'fontsize',8,'units','pixels',...
+    'xgrid','on','ygrid','on');
+hold on
+xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
+ylabel('sse');
+hax.Position(4)=hax.Position(4)-20;
+co=get(gca,'colororder');
 
-for nn=1:size(atomdata(1).ROI,1)
-   p2=plot(xvals,sseg(:,nn),'s','color',co(2,:),'linewidth',1,'markersize',8,...
-       'markerfacecolor',co(2,:),'markeredgecolor',co(2,:)*.5);
-end
-
+p1=plot(xvals,sse,'o','color',co(1,:),'linewidth',1,'markersize',8,...
+   'markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5);
+p2=plot(xvals,sseg,'v','color',co(4,:),'linewidth',1,'markersize',8,...
+   'markerfacecolor',co(4,:),'markeredgecolor',co(4,:)*.5);
 
 set(gca,'YScale','Log');
-
-
-% 
-% yyaxis right
-
-
 legend([p1 p2],{'fermi','gauss'},'location','best');
 
 

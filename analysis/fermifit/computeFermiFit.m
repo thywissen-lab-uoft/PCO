@@ -6,17 +6,26 @@ function atomdata=computeFermiFit(atomdata,inputopts)
 global pxsize
 global imgdir
 
+%%
 
+if sum(inputopts.DFGinds)>1
+   warning('Code cannot do BEC analysis on multiple valid ROIs'); 
+   return;
+end
+
+ind=find(inputopts.DFGinds,1);
+
+%%
 
 for kk=1:length(atomdata)
     disp(repmat('-',1,60));   
     disp(['(' num2str(kk) ') ' atomdata(kk).Name]);
-    for nn=1:size(atomdata(kk).ROI,1)   % Iterate over all ROIs
-        
+    nn=ind;
+%     for nn=1:size(atomdata(kk).ROI,1)   % Iterate over all ROIs        
         if inputopts.AutoROI && isfield(atomdata(kk),'GaussFit')
             gFit=atomdata(kk).GaussFit{nn};
             
-            sROI=[-4*gFit.Xs 4*gFit.Xs -4*gFit.Ys 4*gFit.Ys]+[[1 1]*gFit.Xc [1 1]*gFit.Yc];
+            sROI=[-5*gFit.Xs 5*gFit.Xs -5*gFit.Ys 5*gFit.Ys]+[[1 1]*gFit.Xc [1 1]*gFit.Yc];
             sROI=round(sROI);
             
             sROI(1)=max([sROI(1) 1]);           
@@ -37,8 +46,14 @@ for kk=1:length(atomdata)
         opts=struct;
         opts.PixelSize=pxsize;              % Pixel size in m
         opts.TOF=atomdata(kk).Params.tof*1E-3;  % tof in seconds
-        opts.ShowDetails=inputopts.ShowDetails;     
-
+        opts.ShowDetails=inputopts.ShowDetails;  
+        opts.Freq=inputopts.Freqs(kk);
+        
+        if isfield(atomdata(kk),'GaussFit')
+           opts.GaussFit=atomdata(kk).GaussFit{nn};
+           opts.GaussGOF=atomdata(kk).GaussGOF{nn};
+        end                      
+        
         [fitFermi,fitGauss,hF]=fermiFit(Dx,Dy,data,opts);    % Perform the fit   
         
         if inputopts.ShowDetails
@@ -63,7 +78,7 @@ for kk=1:length(atomdata)
         
         atomdata(kk).FermiFit{nn}=fitFermi; % Assign the fit object       
         atomdata(kk).FermiFitGauss{nn}=fitGauss;
-    end
+%     end
 end    
 
 end

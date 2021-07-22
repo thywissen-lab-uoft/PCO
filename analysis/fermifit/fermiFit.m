@@ -87,32 +87,39 @@ A2 = -A/(polylog(2,-1)*(1E2)^2);
 gg=[Ag W Q Xc Yc];
 
 %% Gauss Fit 2D
-gaussFit=fittype('A*exp(-(X-Xc).^2/(2*Wx^2))*exp(-(Y-Yc).^2/(2*Wy^2))',...
-    'coefficients',{'A','Wx','Wy','Xc','Yc'},'independent',{'X','Y'});
+
+
+gaussFit=fittype('A*exp(-(X-Xc).^2/(2*Wx^2))*exp(-(Y-Yc).^2/(2*Wy^2))+bg',...
+    'coefficients',{'A','Wx','Wy','Xc','Yc','bg'},'independent',{'X','Y'});
 fitGopts=fitoptions(gaussFit);
-
-% Set the fitting parameters bounds
-fitGopts.Start=[A W W Xc Yc];
-fitGopts.Lower=[0 W/5 W/5 Xc-10 Yc-10];
-fitGopts.Upper=[2*A 5*W 5*W Xc+10 Yc+10];
-
 fitGopts.TolFun=1E-9;
 fitGopts.MaxIter=1000;
 fitGopts.DiffMaxChange=0.5;
 fitGopts.MaxFunEvals=1000;
+
+% Set the fitting parameters bounds
+fitGopts.Start=[A W W Xc Yc 0];
+fitGopts.Lower=[0 W/5 W/5 Xc-10 Yc-10 -.05];
+fitGopts.Upper=[2*A 5*W 5*W Xc+10 Yc+10 .05];    
+if isfield(opts,'GaussFit')
+    foutG=opts.GaussFit;
+    fitGopts.Start=[foutG.A foutG.Xs foutG.Ys foutG.Xc foutG.Yc foutG.nbg];
+end  
+
 
 % Perform the fit
 fprintf('Performing gaussian benchmark fit ... ');
 [foutG, gofG, ~]=fit([xx(:),yy(:)],Z(:),gaussFit,fitGopts);
 disp('done');
 
-% Analyze the results
+% Make output structure
 fitGauss=struct;
 fitGauss.Fit=foutG;
 fitGauss.GOF=gofG;
 fitGauss.AtomNumber = (foutG.A*2*pi*foutG.Wx*foutG.Wy)*(opts.PixelSize^2/crosssec);
 fitGauss.Temperature = m/kB*(sqrt(foutG.Wx*foutG.Wy)*opts.PixelSize/opts.TOF)^2;
 fitGauss.SSE=gofG.sse;
+fitGauss.R2=gofG.rsquare;
 fitGauss.AspectRatio=foutG.Wx/foutG.Wy;
 
 disp(['     Gauss Fit Result']);
@@ -123,6 +130,49 @@ disp(['     Temp (uK)       : ' num2str(round(fitGauss.Temperature*1E6,4))]);
 disp(['     Atom Number     : ' num2str(fitGauss.AtomNumber,'%e')]);
 disp(['     sum square err  : ' num2str(gofG.sse)]);
 
+     
+%% Use Gauss Fit to Make Fermi Fit
+
+
+N=2*pi*foutG.Wx*foutG.Wy*foutG.A; % Number of counts
+Natoms=N*(opts.PixelSize^2/crosssec);  % Atom number  
+
+Tfg=hbar*(2*pi*opts.Freq).*(6*Natoms).^(1/3)/kB;     %Fermi temperature
+TTf=fitGauss.Temperature/Tfg;   % Relative temperature
+
+% Find fugacity (z) and the Q
+qVec=linspace(-10,20,100);
+zVec=exp(qVec);
+warning off
+Tfvec=real((-6*polylog3spline(-zVec)).^(-1/3));     % Look up table
+warning on
+
+Qg=interp1(Tfvec,qVec,TTf);
+
+
+% Ag=foutG.A*sqrt(1/TTf);
+
+Ag=foutG.A;
+% warning off
+% 
+% Z=-A*T^2*polylog2spline(-z*zz);
+
+% Z=-A*T^2*polylog2spline(-exp(Qg));
+warning off
+Ag=-foutG.A/(TTf^2*polylog2spline(-exp(Qg)));
+warning on
+
+% Ag=max(max(Z));
+Wg=mean([foutG.Wx foutG.Wy]);
+Xcg=foutG.Xc;
+Ycg=foutG.Yc;
+bg=foutG.bg;
+
+gg=[Ag Wg Qg Xcg Ycg];
+
+
+
+
 
 %% Fermi-Fit Iniitial Guess
 
@@ -130,7 +180,7 @@ disp(' ');
 disp('Initializing guesses for Fermi-Fit ...');
 
 % Make the guess
-Zg=ODfunc(xx,yy,Ag,W,Q,Xc,Yc);
+Zg=ODfunc(xx,yy,gg(1),gg(2),gg(3),gg(4),gg(5))+bg;
 
 disp(' ');
 disp(['     Fermi-Fit Guess']);
@@ -148,15 +198,24 @@ if opts.ShowDetails
     set(hF_guess,'color','w','Name','Fermi-Fit Guess');
 
     % Raw data
-    subplot(121)
+    subplot(131)
     imagesc(X,Y,Z);
     cl=get(gca,'CLim');
     axis equal tight
     colorbar
     set(gca,'box','on','linewidth',1,'fontsize',14);
 
+    % Raw data
+    subplot(132)
+    imagesc(X,Y,Zg);
+%     cl=get(gca,'CLim');
+    axis equal tight
+    colorbar
+    set(gca,'box','on','linewidth',1,'fontsize',14);
+    caxis(cl);
+    
     % Residue of the guess
-    subplot(122)
+    subplot(133)
     imagesc(X,Y,Z-Zg);
     axis equal tight
     caxis([-.1 .1]);
@@ -165,18 +224,36 @@ if opts.ShowDetails
 end
 
 disp(' ');
+
+
+
+
 %% Fermi-Fit 
 
+% % Define the fit object
+% fitFermi=fittype(@(A,W,Q,Xc,Yc,X,Y) ODfunc(X,Y,A,W,Q,Xc,Yc),...
+%     'coefficients',{'A','W','Q','Xc','Yc'},'independent',{'X','Y'});
+% fitopts=fitoptions(fitFermi);
+% 
+% % Make the initial guess
+% fitopts.Start=gg;
+% fitopts.Lower=[0 W/5 -14 Xc-10 Yc-10];
+% fitopts.Upper=[A1 5*W 20 Xc+10 Yc+10];
+% fitopts.TolFun=1E-9;
+% fitopts.MaxIter=1000;
+% fitopts.DiffMaxChange=0.5;
+% fitopts.MaxFunEvals=1000;
+
 % Define the fit object
-fitFermi=fittype(@(A,W,Q,Xc,Yc,X,Y) ODfunc(X,Y,A,W,Q,Xc,Yc),...
-    'coefficients',{'A','W','Q','Xc','Yc'},'independent',{'X','Y'});
+fitFermi=fittype(@(A,W,Q,Xc,Yc,bg,X,Y) ODfunc(X,Y,A,W,Q,Xc,Yc)+bg,...
+    'coefficients',{'A','W','Q','Xc','Yc','bg'},'independent',{'X','Y'});
 fitopts=fitoptions(fitFermi);
 
 % Make the initial guess
-fitopts.Start=gg;
-fitopts.Lower=[0 W/5 -14 Xc-10 Yc-10];
-fitopts.Upper=[A1 5*W 20 Xc+10 Yc+10];
-fitopts.TolFun=1E-9;
+fitopts.Start=[gg fitGauss.Fit.bg];
+fitopts.Lower=[0 W/5 -14 Xc-10 Yc-10 fitGauss.Fit.bg-.02];
+fitopts.Upper=[A1 5*W 20 Xc+10 Yc+10 fitGauss.Fit.bg+.02];
+% fitopts.TolFun=1E-7;
 fitopts.MaxIter=1000;
 fitopts.DiffMaxChange=0.5;
 fitopts.MaxFunEvals=1000;
@@ -193,6 +270,8 @@ disp(' ');
 warning off
 Zfit=feval(fout,xx,yy);
 warning on
+
+
 
 % Confidence Intervals
 c=confint(fout);

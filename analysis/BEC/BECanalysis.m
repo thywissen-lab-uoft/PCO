@@ -68,6 +68,8 @@ for kk=1:length(atomdata)
     Ty(kk)=(Ys(kk)*pxsize./(tofs(kk)*1e-3)).^2*m/kB;
 end
 
+Nlim=[3E4 max(Natoms)*2];
+
 %% Outdata
 data=struct;
 
@@ -88,7 +90,8 @@ data.PSD=data.Density.*debroglie(data.T).^3;
 showBECTransition=0;
 if sum(data.T<data.TBEC)
     showBECTransition=1;
-    ind=find(data.T>data.TBEC,1);    
+    ind=find(flip(data.T<data.TBEC),1);    
+    ind=length(atomdata)-ind+0;
 end
 
 
@@ -114,7 +117,7 @@ pTheory=plot(data.Natoms,data.TBEC,'s--','markerfacecolor',co(2,:),...
     'color',co(2,:)*.5);
 hold on
 ylim([1E-8 2E-6]);
-xlim([5E4 3E6]);
+xlim(Nlim);
 
 if showBECTransition
    plot(data.Natoms(ind,1)*[1 1],get(gca,'YLim'),'--','color',[.6 .6 .6]);
@@ -136,8 +139,8 @@ pData=plot(data.Natoms,data.Density*1E-6,'o','markerfacecolor',co(1,:),...
 
 
 hold on
-ylim([1E13 1E14]);
-xlim([5E4 3E6]);
+% ylim([1E13 1E14]);
+xlim(Nlim);
 
 str='$n = N/(2\pi\overline{\sigma}_{\mathrm{HO}}^2)^{3/2}$';
 text(.98,.05,str,'interpreter','latex','units','normalized','fontsize',12,...
@@ -158,7 +161,7 @@ pData=plot(data.Natoms,data.Gamma,'o','markerfacecolor',co(1,:),...
     'color',co(1,:)*.5);
 hold on
 % ylim([1E13 1E14]);
-xlim([5E4 3E6]);
+xlim(Nlim);
 
 str='$\Gamma = n(8\pi a^2)\sqrt{k_B T/m}$';
 text(.98,.05,str,'interpreter','latex','units','normalized','fontsize',12,...
@@ -181,7 +184,7 @@ pData=plot(data.Natoms,data.PSD,'o','markerfacecolor',co(1,:),...
 
 hold on
 % ylim([1E13 1E14]);
-xlim([5E4 3E6]);
+xlim(Nlim);
 
 str='$\rho = n\lambda_\mathrm{DB}^3(T)$';
 text(.98,.05,str,'interpreter','latex','units','normalized','fontsize',12,...

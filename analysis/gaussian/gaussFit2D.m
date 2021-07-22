@@ -44,7 +44,7 @@ myfit=fittype('A*exp(-(xx-Xc).^2./(2*Xs^2)).*exp(-(yy-Yc).^2./(2*Ys^2))+nbg',...
 opt=fitoptions(myfit);
 opt.StartPoint=[N0 Xc Xs Yc Ys bg];
 opt.Lower=[N0/10 10 1 10 1 -.1];
-opt.Upper=[5*N0 max(Dx) range(Dx) max(Dy) range(Dy) N0];
+opt.Upper=[1.5*N0 1.5*max(Dx) range(Dx) 1.5*max(Dy) range(Dy) 0.1];
 opt.Weights=[];
 
 % Check that the upper and lower bounds make sense
@@ -70,5 +70,18 @@ t1=now;
 [fout,gof,output]=fit([xx2(:) yy2(:)],data2(:),myfit,opt);
 t2=now;
 disp([' done (' num2str(round((t2-t1)*24*60*60,1)) ' sec.).']);
+
+% Perform the fit again if it's bad, assume zero atoms for starting point
+if gof.rsquare<0.5
+    opt.StartPoint=[0 mean(Dx) 10 mean(Dy) 10 mean(data2(:))];  
+    opt.Upper=[std(data2(:)) max(Dx) .3*range(Dy) max(Dy) .3*range(Dy) mean(data2(:))+std(data2(:))];  
+    opt.Lower=[0 min(Dx) 0 min(Dy) 0 mean(data2(:))-std(data2(:))];  
+
+    fprintf(' fitting...');
+    t1=now;
+    [fout,gof,output]=fit([xx2(:) yy2(:)],data2(:),myfit,opt);
+    t2=now;
+    disp([' done (' num2str(round((t2-t1)*24*60*60,1)) ' sec.).']);
+end
 
 end
