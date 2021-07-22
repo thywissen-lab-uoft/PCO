@@ -1,17 +1,26 @@
 function [hF,outdata]=showGaussSingleTemperature(atomdata,xVar,opts)
 
-global camaxis
-global atom
-global m
 global pxsize
 global imgdir
-global doRotate
-global aROI
-
 global crosssec
 
-kB=1.38E-23;
+kB=1.38064852E-23;
+amu=1.66053907E-27;
 
+mK=40*amu;
+mRb=87*amu;
+
+switch atomdata(1).Flags.image_atomtype
+    case 0
+        atomStr='Rb';
+    case 1
+        atomStr='K';
+    case 2
+        atomStr='KRb';
+    case 3
+        atomStr='RbK';
+end
+       
 
 %% Sort the data
 params=[atomdata.Params];
@@ -26,7 +35,33 @@ tofs=[params.tof];
 
 %% Grab the Data
 for kk=1:length(atomdata)
+               
+       
+    
    for nn=1:length(atomdata(kk).GaussFit)
+       switch atomdata(kk).Flags.image_atomtype
+           case 0 % Rb only
+               m=mRb;
+           case 1 % K only
+               m=mK;
+           case 2 % K and Rb
+               if atomdata(kk).ROI(nn,3)<=1024
+                   m=mK;
+               else
+                   m=mRb;
+               end
+            case 3 % Rb and K
+               if atomdata(kk).ROI(nn,3)<=1024
+                   m=mRb;
+               else
+                   m=mK;
+               end
+           otherwise
+               error(['No atom mass provided. Probably because you ' ...
+                   'analyzed old data. You may need to specify the mass ' ...
+                   'with comments in the imaging code']);
+       end               
+                
         fout=atomdata(kk).GaussFit{nn};         
         Xc(kk,nn)=fout.Xc;Yc(kk,nn)=fout.Yc;
         Xs(kk,nn)=fout.Xs;Ys(kk,nn)=fout.Ys;
@@ -38,7 +73,6 @@ for kk=1:length(atomdata)
    
         Tx(kk,nn)=(Xs(kk,nn)*pxsize./(tofs(kk)*1e-3)).^2*m/kB;
         Ty(kk,nn)=(Ys(kk,nn)*pxsize./(tofs(kk)*1e-3)).^2*m/kB;
-
    end        
 end
 
@@ -84,7 +118,7 @@ t.Position(3)=hF.Position(3);
 t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
 
 % PCO camera label
-uicontrol('style','text','string',['PCO, ' atom],'units','pixels','backgroundcolor',...
+uicontrol('style','text','string',['PCO, ' atomStr],'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left','fontsize',12,'fontweight','bold',...
     'position',[2 2 100 20]);
 % Make axis

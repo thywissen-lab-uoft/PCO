@@ -2,16 +2,26 @@ function [hF,fitX,fitY]=computeGaussianTemperature(atomdata,xVar)
 %COMPUTE2DGAUSSIANCLOUDTEMPERATURE Summary of this function goes here
 %   Detailed explanation goes here
 
-global camaxis
-global atom
-global m
 global pxsize
 global imgdir
-global doRotate
-global aROI
-
 global crosssec
+
 kB=1.38064852E-23;
+amu=1.66053907E-27;
+mK=40*amu;
+mRb=87*amu;
+
+switch atomdata(1).Flags.image_atomtype
+    case 0
+        atomStr='Rb';
+    case 1
+        atomStr='K';
+    case 2
+        atomStr='KRb';
+    case 3
+        atomStr='RbK';
+end
+       
 %% Sort the data
 params=[atomdata.Params];
 xvals=[params.(xVar)];
@@ -35,13 +45,13 @@ for kk=1:length(atomdata)
 
         N(kk,nn)=2*pi*Xs(kk,nn)*Ys(kk,nn)*A(kk,nn);
         Natoms(kk,nn)=N(kk,nn)*(pxsize^2/crosssec);   % Atom number  
-
    end        
 end
 
 Xs=Xs*pxsize;
 Ys=Ys*pxsize;
-%% Fit the Data
+           
+%% Create Fit object
 
 % Create fit function
 myfit=fittype(@(s0,T,t) sqrt(s0.^2+(kB*T/m)*t.^2),'independent',{'t'},...
@@ -51,15 +61,43 @@ opt.TolFun=1E-16;
 opt.Lower=[0 0];
 opt.Upper=[5E-3 1E-3];
 
+%% Performt the fit
 
+for nn=1:length(atomdata(1).GaussFit)
+   switch atomdata(1).Flags.image_atomtype
+       case 0 % Rb only
+           m=mRb;
+       case 1 % K only
+           m=mK;
+       case 2 % K and Rb
+           if atomdata(kk).ROI(nn,3)<=1024
+               m=mK;
+           else
+               m=mRb;
+           end
+        case 3 % Rb and K
+           if atomdata(kk).ROI(nn,3)<=1024
+               m=mRb;
+           else
+               m=mK;
+           end
+       otherwise
+           error(['No atom mass provided. Probably because you ' ...
+               'analyzed old data. You may need to specify the mass ' ...
+               'with comments in the imaging code']);
+   end        
+    
+    
+    Tx0=(max(Xs(:,nn))^2-min(Xs(:,nn))^2)/(max(TOFs).^2)*(m/kB);
+    set(opt,'StartPoint', [min(Xs(:,nn)), Tx0]);
+    fitX=fit(TOFs',Xs(:,nn),myfit,opt);
 
-Tx0=(max(Xs)^2-min(Xs)^2)/(max(TOFs).^2)*(m/kB);
-set(opt,'StartPoint', [min(Xs), Tx0]);
-fitX=fit(TOFs',Xs,myfit,opt);
+    Ty0=(max(Ys(:,nn))^2-min(Ys(:,nn))^2)/(max(TOFs).^2)*(m/kB);
+    set(opt,'StartPoint', [min(Ys(:,nn)), Ty0]);
+    fitY=fit(TOFs',Ys(:,nn),myfit,opt);
+    
+end
 
-Ty0=(max(Ys)^2-min(Ys)^2)/(max(TOFs).^2)*(m/kB);
-set(opt,'StartPoint', [min(Ys), Ty0]);
-fitY=fit(TOFs',Ys,myfit,opt);
 
 
 %% Make the graphics objects  
@@ -85,7 +123,7 @@ t.Position(3)=hF.Position(3);
 t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
 
 % PCO camera label
-uicontrol('style','text','string',['PCO, ' atom],'units','pixels','backgroundcolor',...
+uicontrol('style','text','string',['PCO, ' atomStr],'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left','fontsize',12,'fontweight','bold',...
     'position',[2 2 100 20]);
 
@@ -113,7 +151,7 @@ text(.01,.98,xStr,'units','normalized','fontsize',14,...
     'verticalalignment','top','interpreter','latex');
 
 % Label the atom
-text(.99,.01,atom,'horizontalalignment','right','fontsize',16,...
+text(.99,.01,atomStr,'horizontalalignment','right','fontsize',16,...
     'units','normalized','verticalalignment','bottom');
 
 % X limits
@@ -139,7 +177,7 @@ text(.01,.98,xStr,'units','normalized','fontsize',14,...
     'verticalalignment','top','interpreter','latex');
 
 % Label the atom used
-text(.99,.01,atom,'horizontalalignment','right','fontsize',16,...
+text(.99,.01,atomStr,'horizontalalignment','right','fontsize',16,...
     'units','normalized','verticalalignment','bottom');
 
 % X limits

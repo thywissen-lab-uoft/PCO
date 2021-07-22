@@ -1,13 +1,8 @@
 function hF=showFermiError(atomdata,xVar)
 % Grab important global variables
-global camaxis
-global atom
-global m
-global pxsize
+
 global imgdir
-global doRotate
-global aROI
-global crosssec
+
 
 
 
@@ -29,6 +24,7 @@ for kk=1:length(atomdata)
         Tg(kk,nn)=atomdata(kk).FermiFitGauss{nn}.Temperature;
         sse(kk,nn)=atomdata(kk).FermiFit{nn}.SSE;
         sseg(kk,nn)=atomdata(kk).FermiFitGauss{nn}.SSE;
+        r2(kk,nn)=atomdata(kk).FermiFitGauss{nn}.R2;
 
 %         fout=atomdata(kk).GaussFit{nn};             % Grab the fit
 %         Xc(kk,nn)=fout.Xc;Yc(kk,nn)=fout.Yc;        % X and Y center

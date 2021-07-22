@@ -1,13 +1,8 @@
 function hF=showFermiTemp(atomdata,xVar)
 % Grab important global variables
-global camaxis
-global atom
-global m
-global pxsize
+
 global imgdir
-global doRotate
-global aROI
-global crosssec
+
 
 
 
@@ -24,34 +19,10 @@ for kk=1:length(atomdata)
         Natoms(kk,nn)=atomdata(kk).FermiFit{nn}.AtomNumber;
         T(kk,nn)=atomdata(kk).FermiFit{nn}.Temperature;
         Tf(kk,nn)=atomdata(kk).FermiFit{nn}.FermiTemperature;
-        Q(kk,nn)=atomdata(kk).FermiFit{nn}.Fit.Q;
-        
+        Q(kk,nn)=atomdata(kk).FermiFit{nn}.Fit.Q;        
         Tg(kk,nn)=atomdata(kk).FermiFitGauss{nn}.Temperature;
-       
-%         fout=atomdata(kk).GaussFit{nn};             % Grab the fit
-%         Xc(kk,nn)=fout.Xc;Yc(kk,nn)=fout.Yc;        % X and Y center
-%         Xs(kk,nn)=fout.Xs;Ys(kk,nn)=fout.Ys;        % X and Y sigma   
-%         Zs(kk,nn)=fout.Ys;                          % ASSUME sZ=sY;                
-%         A(kk,nn)=fout.A;                            % Amplitude
-%         nbg(kk,nn)=fout.nbg;                        % Background
-%         N(kk,nn)=2*pi*Xs(kk,nn)*Ys(kk,nn)*A(kk,nn); % Number of counts
-%         Natoms(kk,nn)=N(kk,nn)*(pxsize^2/crosssec);  % Atom number  
    end        
 end
-% 
-% % Convert sizes in meters
-% Xs = Xs*pxsize;
-% Ys = Ys*pxsize;
-% Zs = Zs*pxsize;
-
-
-%% Outdata
-% 
-% outdata=struct;
-% outdata.xVar=xVar;
-% outdata.X=xvals;
-% outdata.Natoms=Natoms;
-
 
 %% Make Figure
 

@@ -2,13 +2,10 @@ function atomdata=computeFermiFit(atomdata,inputopts)
 %COMPUTEFERMIFIT Summary of this function goes here
 %   Detailed explanation goes here
 
-global camaxis
-global atom
-global m
+
 global pxsize
 global imgdir
-global doRotate
-global crosssec
+
 
 
 for kk=1:length(atomdata)

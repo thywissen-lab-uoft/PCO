@@ -1,13 +1,8 @@
 function hF=showFermiTempCompare(atomdata,xVar,freqs)
 % Grab important global variables
-global camaxis
-global atom
-global m
-global pxsize
+
 global imgdir
-global doRotate
-global aROI
-global crosssec
+
 
 kB=1.38064852E-23;
 amu=1.66053907E-27 ;
@@ -29,28 +24,10 @@ for kk=1:length(atomdata)
         Natoms(kk,nn)=atomdata(kk).FermiFit{nn}.AtomNumber;
         T(kk,nn)=atomdata(kk).FermiFit{nn}.Temperature;
         Tf(kk,nn)=atomdata(kk).FermiFit{nn}.FermiTemperature;
-        Q(kk,nn)=atomdata(kk).FermiFit{nn}.Fit.Q;
-        
+        Q(kk,nn)=atomdata(kk).FermiFit{nn}.Fit.Q;        
         Tffreq(kk,nn)=hbar*(2*pi*freqs(kk)).*(6*Natoms(kk,nn)).^(1/3)/kB;
-
    end        
 end
-
-
-% 
-% % Convert sizes in meters
-% Xs = Xs*pxsize;
-% Ys = Ys*pxsize;
-% Zs = Zs*pxsize;
-
-
-%% Outdata
-% 
-% outdata=struct;
-% outdata.xVar=xVar;
-% outdata.X=xvals;
-% outdata.Natoms=Natoms;
-
 
 %% Make Figure
 

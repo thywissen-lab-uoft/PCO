@@ -1,12 +1,9 @@
-function [hF,outdata]=showGaussAtomNumber(atomdata,xVar,opts)
+function [hF,outdata]=showGaussAtomNumberRatio(atomdata,xVar,opts)
 % Grab important global variables
-global camaxis
-global atom
-global m
+
 global pxsize
 global imgdir
-global doRotate
-global aROI
+
 global crosssec
 
 

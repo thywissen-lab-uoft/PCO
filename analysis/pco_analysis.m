@@ -57,6 +57,7 @@ camaxis='X';
 % camaxis='Y';
 
 % Choose your atom
+% THIS WILL DEPRECIATE BY USING THE FLAG
 % atom = 'K';
 atom = 'K';
 

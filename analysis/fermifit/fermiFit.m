@@ -213,6 +213,7 @@ fitFermi.AtomNumber=real(1/crosssec*2*pi*(fout.W*opts.PixelSize)^2*fout.A/6^(2/3
 warning on
 
 fitFermi.SSE=gof.sse;
+fitFermi.R2=gof.rsquare;
 
 %% Display Fermi Fit Result
 

@@ -1,13 +1,9 @@
 function hF=showGaussStats(atomdata)
 
 
-global camaxis
-global atom
-global m
+
 global pxsize
 global imgdir
-global doRotate
-global aROI
 global crosssec
 
 

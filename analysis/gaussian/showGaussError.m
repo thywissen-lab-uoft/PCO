@@ -1,12 +1,8 @@
 function [hF,outdata]=showGaussError(atomdata,xVar,opts)
 % Grab important global variables
-global camaxis
-global atom
-global m
+
 global pxsize
 global imgdir
-global doRotate
-global aROI
 global crosssec
 
 

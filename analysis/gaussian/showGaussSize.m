@@ -1,13 +1,8 @@
 function hF=showGaussSize(atomdata,xVar,opts)
 
-global camaxis
-global atom
-global m
+
 global pxsize
 global imgdir
-global doRotate
-global aROI
-
 global crosssec
 
 
