@@ -27,8 +27,21 @@ for kk=1:length(atomdata)
         Xs(kk,nn)=BC.Xs;Ys(kk,nn)=BC.Ys;        % X and Y sigma   
         Zs(kk,nn)=BC.Ys;                          % ASSUME sZ=sY;                
         nbg(kk,nn)=BC.Nbkgd;                        % Background
+        
+        
+    
+        
         N(kk,nn)=BC.Ncounts;
+        
+        if BC.Ncounts<0
+            warning(['Negative box count detected atomdata(' num2str(kk) ')' ...
+               ' ROI : ' num2str(nn) '. Setting to 0']);
+           N(kk,nn)=0;
+        end
+        
         Natoms(kk,nn)=N(kk,nn)*(pxsize^2/crosssec);  % Atom number  
+        
+        
    end        
 end
 

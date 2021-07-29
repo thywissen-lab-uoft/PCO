@@ -53,6 +53,7 @@ crosssec=3/(2*pi)*lambda^2; % ideal cross 2-level cross section
 % Choose your camera
 camaxis='X';
 % camaxis='Y';
+
  
 % Choose the pixel size base on the camera
 switch camaxis
@@ -71,20 +72,20 @@ doSave=1;
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-pco_xVar='Evap_End_Power';
+pco_xVar='DMD_power_val';
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit=1;
 
 % If ixon_autoUnit=0, this will be used.
-pco_overrideUnit='ms';
+pco_overrideUnit='V';
 
 
 %% Analysis Flags
 doProbeFit=0;           % Fit probe beam to 2D Gaussian
 
 % Box Count
-doBoxCount=0;           % Box count analysis
+doBoxCount=1;           % Box count analysis
 doLandauZener=0;        % Landau Zener Analysis on BOX
 doBoxRabi=0;
 
@@ -92,16 +93,16 @@ doBoxRabi=0;
 doRamanSpec=0;          % Raman box count count analyis
 
 % Fermi
-doFermiFitLong=1;       % Fermi Fit for XDT TOF
+doFermiFitLong=0;       % Fermi Fit for XDT TOF
 
 % Gaussian
-doGaussFit=1;           % Flag for performing the gaussian fit
+doGaussFit=0;           % Flag for performing the gaussian fit
 
 % BEC (requries gaussian)
-doBEC=1;
+doBEC=0;
 
 % Custom in line figure
-doCustom=0;          % Custom Box Count
+doCustom=1;          % Custom Box Count
 
 %Animation
 doAnimate = 1;          % Animate the Cloud
@@ -214,7 +215,7 @@ atomdata=atomdata(inds);
 % ROI=[810 970 740 860];   % XDT  Full TOF analysis
 % ROI = [810 970 420 580]; %XDT Rb after evap 15ms 
 
- % ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
+%  ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 
 % % 12ms tof SG from XDT #850 900 300 560;
 % ROI = [825 900 300 565;
@@ -236,7 +237,7 @@ atomdata=atomdata(inds);
 
 
 %%%%% LATTICE
-% ROI = [801 975 420 577]; % BM 15 ms TOF
+ROI = [801 975 420 577]; % BM 15 ms TOF
 % ROI= [830 930 230 430;830 930 430 590];  % BM, SG, 10 ms
 % ROI= [820 930 450 550;820 930 350 450];  % BM, SG, 13 ms
 
@@ -248,6 +249,8 @@ atomdata=atomdata(inds);
 % ROI = [830 900 695 760;
 %        830 900 630 695];
 
+ROI = [860 902 468 510;
+       838 927 442 537];
 
 
 %%%%%%%%%%%%%%%%%%%%% X CAM DOUBLE SHUTTER %%%%%%%%%%%%%%%%%%%%%
@@ -262,7 +265,7 @@ atomdata=atomdata(inds);
 % 
 %  ROI=[800 950 490 600;
 %      800 950 1520 1630];   %  band map 15 ms TOF
-%   
+% %   
 %  ROI=[800 950 1520 1630];   %  band map 15 ms TOF   -7 box   
 
 
@@ -278,8 +281,13 @@ atomdata=atomdata(inds);
 %  ROI=[750 1020 150 1020;
 %      750 1020 1174 2044];   %  k_rb double shutter various tof 
 
- ROI=[760 1000 660 940;
-     760 1000 1684 1964];   %  k_rb 25 ms opevap
+%  ROI=[760 1000 660 940;
+%      760 1000 1684 1964];   %  k_rb 25 ms opevap
+
+%  ROI=[700 1050 280 680;
+%      700 1050 1504 1904];   %  k 5ms rb 15 ms double shutter
+
+
 %%%%%%%%%% X CAM AM SPEC
 
 % 10 ms tof am spec 75-200 recoil z
@@ -340,7 +348,7 @@ ODopts.SubtractDark=0;
 ODopts.DarkROI=[700 800 20 100];
 
 % Apply gaussian filter to images?
-ODopts.GaussFilter=1;
+ODopts.GaussFilter=0;
 ODopts.GaussFilterSigma=1;
 
 % Get the high field flag (this may throw error for old data)
@@ -549,7 +557,7 @@ gaussPopts.NumberExpFit = 0;        % Fit exponential decay to atom number
 gaussPopts.NumberLorentzianFit=0;   % Fit atom number to lorentzian
 gaussPopts.CenterSineFit = 0;       % Fit sine fit to cloud center
 gaussPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
-gaussPopts.CenterParabolaFit = 1;
+gaussPopts.CenterParabolaFit = 0;
 gaussPopts.CenterLinearFit = 0;     % Linear fit to cloud center
 gaussPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
 
@@ -690,7 +698,14 @@ fermiFitOpts.DFGinds=DFGinds;
 
 % Calculate trap frequencies
 params=[atomdata.Params];
+
+% Evaporation end power
 powers=[params.Evap_End_Power];
+
+% For ODT ramp back up
+% powers=[params.power_val];
+
+
 foo = @(P) 61.5*sqrt(P./(0.085)); % Calibrated 2021.02.25
 freqs=foo(powers);        
 fermiFitOpts.Freqs=freqs;
@@ -767,45 +782,56 @@ if doCustom
     %%%%%%%%%%%%%%% RF SPEC %%%%%%%%%%%%%%
 
     % Center frequency for expected RF field (if relevant)
-    B = atomdata(1).Params.HF_FeshValue_Initial;
-    x0= (BreitRabiK(B,9/2,-5/2)-BreitRabiK(B,9/2,-7/2))/6.6260755e-34/1E6; 
-    x0 = 0;
-    % Grab Raw data
+%     B = atomdata(1).Params.HF_FeshValue_Initial;
+%     x0= (BreitRabiK(B,9/2,-5/2)-BreitRabiK(B,9/2,-7/2))/6.6260755e-34/1E6; 
+%     %x0 = 0;
+%     % Grab Raw data
     X=DATA.X;   
-    X=X-x0;    
-    X=X*1E3;  
-    X=X';
-    xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];
-    
+%     X=X-x0;    
+%     X=X*1E3;  
+%     X=X';
+%     xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];    
+      xstr=['DMD Power (V)']; 
     % Define Y Data
-    N1=DATA.Natoms(:,1);
-    N2=DATA.Natoms(:,2);     
-    N2=N2/0.75;
-    
-    Y=N2./(N1+N2);
-%     ystr=['\DeltaN_{97}/N_{9}'];
-    ystr=['ratio in 1,1']
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    %%%%%%%%%%%%%%% AM SPEC %%%%%%%%%%%%%%
-    X=DATA.X*1e-3;   
-    X=X';
-    xstr=['modulation frequency (kHz)'];
-    
-    % Define Y Data
-    N1=DATA.Natoms(:,1);
-    N2=DATA.Natoms(:,2);     
-    Y=(N1-N2)./N1;
-    ystr='\Delta N/N_{tot}';
-    
-
-    [ux,ia,ib]=unique(X);    
+     N1=DATA.Natoms(:,1);
+     N2=DATA.Natoms(:,2);     
+%      N2=N2/0.5;
+     
+     Y=(N2-N1)./(N1);
+     %Y=(N1-N2)./(N1+N2);
+     
+%      Y=N1+N2;
+     ystr=['\N_{p}/N_{s}'];
+     
+       [ux,ia,ib]=unique(X);    
     Yu=zeros(length(ux),2);    
     for kk=1:length(ux)
         inds=find(X==ux(kk));
         Yu(kk,1)=mean(Y(inds));
         Yu(kk,2)=std(Y(inds));       
     end
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+%     %%%%%%%%%%%%%%% AM SPEC %%%%%%%%%%%%%%
+%      X=DATA.X*1e-3;   
+%      X=X';
+%      xstr=['modulation frequency (kHz)'];
+%      
+%      % Define Y Data
+%      N1=DATA.Natoms(:,1);
+%      N2=DATA.Natoms(:,2);     
+%      Y=(N1-N2)./N1;
+%      ystr='\Delta N/N_{tot}';
+%      
+% 
+%     [ux,ia,ib]=unique(X);    
+%     Yu=zeros(length(ux),2);    
+%     for kk=1:length(ux)
+%         inds=find(X==ux(kk));
+%         Yu(kk,1)=mean(Y(inds));
+%         Yu(kk,2)=std(Y(inds));       
+%     end
     
     %%%%%%%%%%%%%%%%%%%%%%%%% FIGURE
     hFB=figure;
@@ -868,7 +894,7 @@ if doCustom
     end
     
     % Assymetric lorentzian fit, good for AM spec
-    fit_lorentz_assymetric=1;
+    fit_lorentz_assymetric=0;
     if length(atomdata)>4 && fit_lorentz_assymetric
         g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
         y=@(x,a,x0,G,A,bg) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1)+bg;        
@@ -934,7 +960,7 @@ if doCustom
     
     
 %     hax.YLim(1)=0;
-    pp=get(gcf,'position')
+    pp=get(gcf,'position');
     set(gcf,'position',[pp(1) pp(2) 400 400]);    
     saveFigure(atomdata,hFB,'custom');
 end

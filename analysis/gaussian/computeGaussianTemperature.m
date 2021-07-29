@@ -70,14 +70,10 @@ for nn=1:length(atomdata(1).GaussFit)
                m=mK;
                mLbl{nn}='K';
               ms(nn)=m;
-
-
            else
                m=mRb;
               mLbl{nn}='Rb';
              ms(nn)=m;
-
-
            end
         case 3 % Rb and K
            if atomdata(kk).ROI(nn,3)<=1024
