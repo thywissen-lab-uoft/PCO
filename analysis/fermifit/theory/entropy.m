@@ -33,8 +33,16 @@ Li32=data.Li32;
 T2z=@(T) spline(Li32.T,Li32.Z,T);
 polylog32spline=@(z) spline(Li32.Z,Li32.Y,-z);
 
+data=load('li3.mat','Li3');
+Li3=data.Li3;
+polylog3spline=@(z) spline(Li3.Z,Li3.Y,-z);
+
+data=load('li4.mat','Li4');
+Li4=data.Li4;
+polylog4spline=@(z) spline(Li4.Z,Li4.Y,-z);
+
 % Entropy per particle
-z2S=@(z) (3+1)*polylog4spline(z)./polylog3spline(z)-log(z);
+z2S=@(z) (3+1)*polylog4spline(-z)./polylog3spline(-z)-log(z);
 %% Functions
 
 % debroigle wavelength
@@ -117,7 +125,7 @@ text(.02,.98,tStr,'interpreter','latex','fontsize',12,...
 
 % Parameter Value
 P=0.1;               % Power
-T=linspace(20,300,1000)*1E-9;    % Temperature in nK
+T=linspace(20,500,1000)*1E-9;    % Temperature in nK
 N=2E5;                 % Atom Number
 
 freqV=freqs(P);
@@ -129,8 +137,9 @@ hF2=figure(2);
 clf
 hF2.Color='w';
 
-subplot(221);
-plot(T/Tf,T2z(T/Tf),'k-','linewidth',2);
+subplot(131);
+z=T2z(T/Tf);
+plot(T/Tf,z,'k-','linewidth',2);
 set(gca,'yscale','log','xgrid','on','ygrid','on','linewidth',1,...
     'box','on','fontname','times','fontsize',10);
 xlabel('temperature $T/T_F$','interpreter','latex');
@@ -138,10 +147,60 @@ ylabel('fugacity $\zeta$','interpreter','latex');
 
 
 n0=density_position_spline(N,T,omegaV,0,0,0);
-subplot(222);
+subplot(132);
 plot(T/Tf,n0*1e-6,'k-','linewidth',2);
 set(gca,'yscale','linear','xgrid','on','ygrid','on','linewidth',1,...
     'box','on','fontname','times','fontsize',10);
 xlabel('temperature $T/T_F$','interpreter','latex');
 ylabel('peak density cm$^{-3}$','interpreter','latex');
+
+S=z2S(z);
+subplot(133);
+plot(T/Tf,S,'k-','linewidth',2);
+set(gca,'yscale','linear','xgrid','on','ygrid','on','linewidth',1,...
+    'box','on','fontname','times','fontsize',10);
+xlabel('temperature $T/T_F$','interpreter','latex');
+ylabel('$S/(N k_B)$','interpreter','latex');
+
+%% Lattice System
+
+% The square lattice is formed from 3 1D retroreflected lattice. For
+% simplicity, we shall assumed that each lattice is 1054nm which we know
+% not be true.
+%
+% Along any lattice direction (x) the other two lattices (y and z) will
+% contribute an overall chemical potential.
+%
+% The beam waists are approximately 60um for x and y and 85 um for z. We
+% have found that our lattice depths are slightly off.
+%
+% The trap frequency associated with the waists is
+U0=15;
+
+omega_latt_gauss = @(U0,w0) sqrt(4*U0*Er/(m*w0^2));
+
+omega_latt = @(U0) Er/hb*sqrt(4*U0);
+
+pot_latt = @(U0,x) U0*Er*sin(k_odt*x).^2;
+
+pot_env = @(U0,w0,x) 1/2*m*omega_latt_gauss(U0,w0).^2.*x.^2;
+
+pot_XDT = @(omega,x) 1/2*m*omega.^2.*x.^2;
+
+w0=80E-6;
+
+aL=lambda_odt/2;
+
+xVec=linspace(-50,50,1e5)*aL;
+
+fxdt=200;
+
+figure(2);
+clf
+
+plot(xVec/aL,(pot_latt(U0,xVec)+pot_env(U0,w0,xVec)+pot_XDT(2*pi*fxdt,xVec))/Er,'k-');
+hold on
+
+plot(xVec/aL,(0.5*omega_latt(U0)*hb+pot_env(U0,w0,xVec)+pot_XDT(2*pi*fxdt,xVec))/Er,'r-');
+plot(xVec/aL,(1.5*omega_latt(U0)*hb+pot_env(U0,w0,xVec)+pot_XDT(2*pi*fxdt,xVec))/Er,'b-');
 
