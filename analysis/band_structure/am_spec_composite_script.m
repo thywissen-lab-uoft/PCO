@@ -28,7 +28,6 @@ data=[0.4153 0.2738 0.20298 1.4769;
 opts=Yopts;
 [hF_bands,hF_HO]=am_spec_composite(data,opts);
 
-% filename='am_sec';
 
 doSave=1;
 if doSave
