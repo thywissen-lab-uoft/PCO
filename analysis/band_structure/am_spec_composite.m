@@ -1,4 +1,4 @@
-function am_specb(data,direction)
+function am_spec_composite(data,direction)
 
 if nargin==0
     % Raw data, adwin and trap frequency measured (trap is resonance/2)
