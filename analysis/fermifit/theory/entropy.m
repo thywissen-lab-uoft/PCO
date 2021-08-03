@@ -95,6 +95,8 @@ kFa0pow=floor(log10(kFa0));
 
 tStr=['$N='  num2str(round(N*10^-Npow,2),'%.2f') '\times 10^{' num2str(Npow) '}$' ...
     newline ...
+    '$f = (' num2str(round(freqV(1))) ',' num2str(round(freqV(2))) ',' num2str(round(freqV(3))) ')~\mathrm{Hz}$' ...
+    newline ...    
     '$T_F = ' num2str(round(Tf*1E9,1)) '~\mathrm{nK}$' ...
     newline ...
     '$T = ' num2str(round(T*1E9,1)) '~\mathrm{nK}~(' num2str(round(T/Tf,3)) '~T_F)$' ...
@@ -128,14 +130,21 @@ P=0.1;               % Power
 T=linspace(20,500,1000)*1E-9;    % Temperature in nK
 N=2E5;                 % Atom Number
 
+
+
 freqV=freqs(P);
 omegaV=2*pi*freqV;
+sTrap=['(' num2str(round(omegaV(1)/(2*pi))) ', ' num2str(round(omegaV(2)/(2*pi))) ', ' ...
+    num2str(round(omegaV(3)/(2*pi))) ') Hz, ' num2str(N,'%.1e') ' atoms'];
 
 Tf=T_fermi(omegaV,N);
 
 hF2=figure(2);
 clf
 hF2.Color='w';
+hF2.Position(3:4)=[800 250];
+
+% uicontrol(
 
 subplot(131);
 z=T2z(T/Tf);
@@ -195,7 +204,7 @@ xVec=linspace(-50,50,1e5)*aL;
 
 fxdt=200;
 
-figure(2);
+figure(3);
 clf
 
 plot(xVec/aL,(pot_latt(U0,xVec)+pot_env(U0,w0,xVec)+pot_XDT(2*pi*fxdt,xVec))/Er,'k-');
