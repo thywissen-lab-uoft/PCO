@@ -72,7 +72,7 @@ doSave=1;
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-pco_xVar='ExecutionDate';
+pco_xVar='lat_mod_freq';
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit=1;
@@ -102,7 +102,7 @@ doGaussFit=1;           % Flag for performing the gaussian fit
 doBEC=0;
 
 % Custom in line figure
-doCustom=0;          % Custom Box Count
+doCustom=1;          % Custom Box Count
 
 %Animation
 doAnimate = 1;          % Animate the Cloud
@@ -192,7 +192,7 @@ atomdata=atomdata(inds);
 
 %%%%% RF 1B
 % ROI = [533 1323 230 980];   % RF1B 5 ms TOF
-% ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
+ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
 
 
 %%%%% XDT 1/2 ONLY
@@ -237,7 +237,7 @@ atomdata=atomdata(inds);
 
 
 %%%%% LATTICE
-ROI = [801 975 420 577]; % BM 15 ms TOF
+ROI = [600 1150 450 950]; % BM 15 ms TOF
 % ROI= [830 930 230 430;830 930 430 590];  % BM, SG, 10 ms
 % ROI= [820 930 450 550;820 930 350 450];  % BM, SG, 13 ms
 
@@ -249,8 +249,6 @@ ROI = [801 975 420 577]; % BM 15 ms TOF
 % ROI = [830 900 695 760;
 %        830 900 630 695];
 % 
-ROI = [860 902 468 510;
-       838 927 442 537];
 
 
 %%%%%%%%%%%%%%%%%%%%% X CAM DOUBLE SHUTTER %%%%%%%%%%%%%%%%%%%%%
@@ -283,9 +281,9 @@ ROI = [860 902 468 510;
 
 %  ROI=[760 1000 660 940;
 %      760 1000 1684 1964];   %  k_rb 25 ms opevap
-
- ROI=[700 1050 280 680;
-     700 1050 1504 1904];   %  k 5ms rb 15 ms double shutter
+% 
+%  ROI=[700 1050 280 680;
+%      700 1050 1504 1904];   %  k 5ms rb 15 ms double shutter
 
 
 %%%%%%%%%% X CAM AM SPEC
@@ -299,12 +297,12 @@ ROI = [860 902 468 510;
 %     540 620 600 710];
 
 % 15 ms TOF AMP spec 75-200 Er Y Lattice
-% ROI = [800 970 430 540;
-%     855 905 430 540];
+ROI = [800 970 430 540;
+    855 905 430 540];
 
 % % 15 ms TOF AMP spec 75-200 Er Z Lattice
-% ROI = [820 940 380 590;
-%     820 940 460 515];
+ROI = [820 940 380 590;
+    820 940 460 515];
 
 % 7 ms tof am spec 75-200 recoil x, y camera
 % ROI = [556 619 542 634;
@@ -786,59 +784,59 @@ if doCustom
 
     %%%%%%%%%%%%%%% RF SPEC %%%%%%%%%%%%%%
 
-    % Center frequency for expected RF field (if relevant)
-%     B = atomdata(1).Params.HF_FeshValue_Initial;
-%     x0= (BreitRabiK(B,9/2,-5/2)-BreitRabiK(B,9/2,-7/2))/6.6260755e-34/1E6; 
-%     %x0 = 0;
-%     % Grab Raw data
-    X=DATA.X;   
-%     X=X-x0;    
-%     X=X*1E3;  
-%     X=X';
-%     xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];    
-      xstr=pco_xVar; 
-    % Define Y Data
-     N1=DATA.Natoms(:,1);
-     N2=DATA.Natoms(:,2);     
-%      N2=N2/0.5;
-     
-%      Y=(N2-N1)./(N1);
-     Y=(N2-N1)./(N2);
-
-     %Y=(N1-N2)./(N1+N2);
-     
-%      Y=N1+N2;
-     ystr=['N_{p}/N_{s}'];
-     
-       [ux,ia,ib]=unique(X);    
-    Yu=zeros(length(ux),2);    
-    for kk=1:length(ux)
-        inds=find(X==ux(kk));
-        Yu(kk,1)=mean(Y(inds));
-        Yu(kk,2)=std(Y(inds));       
-    end
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-%     %%%%%%%%%%%%%%% AM SPEC %%%%%%%%%%%%%%
-%      X=DATA.X*1e-3;   
-%      X=X';
-%      xstr=['modulation frequency (kHz)'];
-%      
-%      % Define Y Data
+%     % Center frequency for expected RF field (if relevant)
+% %     B = atomdata(1).Params.HF_FeshValue_Initial;
+% %     x0= (BreitRabiK(B,9/2,-5/2)-BreitRabiK(B,9/2,-7/2))/6.6260755e-34/1E6; 
+% %     %x0 = 0;
+% %     % Grab Raw data
+%     X=DATA.X;   
+% %     X=X-x0;    
+% %     X=X*1E3;  
+% %     X=X';
+% %     xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];    
+%       xstr=pco_xVar; 
+%     % Define Y Data
 %      N1=DATA.Natoms(:,1);
 %      N2=DATA.Natoms(:,2);     
-%      Y=(N1-N2)./N1;
-%      ystr='\Delta N/N_{tot}';
+% %      N2=N2/0.5;
 %      
+% %      Y=(N2-N1)./(N1);
+%      Y=(N2-N1)./(N2);
 % 
-%     [ux,ia,ib]=unique(X);    
+%      %Y=(N1-N2)./(N1+N2);
+%      
+% %      Y=N1+N2;
+%      ystr=['N_{p}/N_{s}'];
+%      
+%        [ux,ia,ib]=unique(X);    
 %     Yu=zeros(length(ux),2);    
 %     for kk=1:length(ux)
 %         inds=find(X==ux(kk));
 %         Yu(kk,1)=mean(Y(inds));
 %         Yu(kk,2)=std(Y(inds));       
 %     end
+%     
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+%     %%%%%%%%%%%%%%% AM SPEC %%%%%%%%%%%%%%
+     X=DATA.X*1e-3;   
+     X=X';
+     xstr=['modulation frequency (kHz)'];
+     
+     % Define Y Data
+     N1=DATA.Natoms(:,1);
+     N2=DATA.Natoms(:,2);     
+     Y=(N1-N2)./N1;
+     ystr='\Delta N/N_{tot}';
+     
+
+    [ux,ia,ib]=unique(X);    
+    Yu=zeros(length(ux),2);    
+    for kk=1:length(ux)
+        inds=find(X==ux(kk));
+        Yu(kk,1)=mean(Y(inds));
+        Yu(kk,2)=std(Y(inds));       
+    end
     
     %%%%%%%%%%%%%%%%%%%%%%%%% FIGURE
     hFB=figure;
@@ -901,7 +899,7 @@ if doCustom
     end
     
     % Assymetric lorentzian fit, good for AM spec
-    fit_lorentz_assymetric=0;
+    fit_lorentz_assymetric=1;
     if length(atomdata)>4 && fit_lorentz_assymetric
         g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
         y=@(x,a,x0,G,A,bg) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1)+bg;        
@@ -922,7 +920,7 @@ if doCustom
         
         fout_lorentz=fit(X,Y,myfit,opt);
         XF=linspace(0,max(X)+10,1000);
-        xlim([100 max(X)+10]);
+        xlim([60 max(X)+20]);
         pExp=plot(XF,feval(fout_lorentz,XF),'r-','linewidth',2);
         str=['$f_0 = ' num2str(round(fout_lorentz.x0,2)) '$ kHz' newline ...
             '$\mathrm{FWHM} = ' num2str(round(abs(fout_lorentz.G),2)) ' $ kHz'];
