@@ -72,7 +72,7 @@ doSave=1;
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-pco_xVar='DMD_power_val';
+pco_xVar='ExecutionDate';
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit=1;
@@ -96,13 +96,13 @@ doRamanSpec=0;          % Raman box count count analyis
 doFermiFitLong=0;       % Fermi Fit for XDT TOF
 
 % Gaussian
-doGaussFit=0;           % Flag for performing the gaussian fit
+doGaussFit=1;           % Flag for performing the gaussian fit
 
 % BEC (requries gaussian)
 doBEC=0;
 
 % Custom in line figure
-doCustom=1;          % Custom Box Count
+doCustom=0;          % Custom Box Count
 
 %Animation
 doAnimate = 1;          % Animate the Cloud
@@ -248,7 +248,7 @@ ROI = [801 975 420 577]; % BM 15 ms TOF
 % 12ms tof SG from lattice #850 900 300 560;
 % ROI = [830 900 695 760;
 %        830 900 630 695];
-
+% 
 ROI = [860 902 468 510;
        838 927 442 537];
 
@@ -284,8 +284,8 @@ ROI = [860 902 468 510;
 %  ROI=[760 1000 660 940;
 %      760 1000 1684 1964];   %  k_rb 25 ms opevap
 
-%  ROI=[700 1050 280 680;
-%      700 1050 1504 1904];   %  k 5ms rb 15 ms double shutter
+ ROI=[700 1050 280 680;
+     700 1050 1504 1904];   %  k 5ms rb 15 ms double shutter
 
 
 %%%%%%%%%% X CAM AM SPEC
@@ -694,24 +694,29 @@ if isfield(atomdata(1),'Flags')
 
     end
 end
-fermiFitOpts.DFGinds=DFGinds;
 
-% Calculate trap frequencies
-params=[atomdata.Params];
-
-% Evaporation end power
-powers=[params.Evap_End_Power];
-
-% For ODT ramp back up
-% powers=[params.power_val];
-
-
-foo = @(P) 61.5*sqrt(P./(0.085)); % Calibrated 2021.02.25
-freqs=foo(powers);        
-fermiFitOpts.Freqs=freqs;
     
 % Do the analysis
 if doFermiFitLong
+    
+    fermiFitOpts.DFGinds=DFGinds;
+
+    % Calculate trap frequencies
+    params=[atomdata.Params];
+
+    % Evaporation end power
+    powers=[params.Evap_End_Power];
+
+    % For ODT ramp back up
+    % powers=[params.power_val];
+
+
+    foo = @(P) 61.5*sqrt(P./(0.085)); % Calibrated 2021.02.25
+    freqs=foo(powers);        
+    fermiFitOpts.Freqs=freqs;
+    
+    
+    
     disp(repmat('-',1,60));    
     disp('Performing Fermi-Fit long tof');
     disp(repmat('-',1,60));       
@@ -791,17 +796,19 @@ if doCustom
 %     X=X*1E3;  
 %     X=X';
 %     xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];    
-      xstr=['DMD Power (V)']; 
+      xstr=pco_xVar; 
     % Define Y Data
      N1=DATA.Natoms(:,1);
      N2=DATA.Natoms(:,2);     
 %      N2=N2/0.5;
      
-     Y=(N2-N1)./(N1);
+%      Y=(N2-N1)./(N1);
+     Y=(N2-N1)./(N2);
+
      %Y=(N1-N2)./(N1+N2);
      
 %      Y=N1+N2;
-     ystr=['\N_{p}/N_{s}'];
+     ystr=['N_{p}/N_{s}'];
      
        [ux,ia,ib]=unique(X);    
     Yu=zeros(length(ux),2);    
@@ -980,8 +987,8 @@ if doAnimate == 1
      animateOpts.doubleStack='horizontal';
 
      % Asceneding or descending
-    animateOpts.Order='descend';   
-     %animateOpts.Order='ascend';
+    %animateOpts.Order='descend';   
+     animateOpts.Order='ascend';
     
     % Color limits
     animateOpts.CLim=[0 1;
