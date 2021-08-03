@@ -1,37 +1,22 @@
-function am_spec_composite(data,direction)
+function [hF_BANDS,hF_HO]=am_spec_composite(data,opts)
 
-if nargin==0
-    % Raw data, adwin and trap frequency measured (trap is resonance/2)
-    data=[0.4153 0.2738 0.20298 1.4769;
-       128.08 98.46 80.3 249.74;
-        .404 .264 .193 1.47];
-    direction='Y';
-end
-
-switch direction
+switch opts.Direction
     case 'Y'
         % Y LATTICE
         xstr='Y Lattice Adwin (V)';
-        V2P=@(V) 0.4163*V;      % 2021/04/23
-        mPD=0.4163; % V/W
-        V0_adwin = 0.0155;      % 2021/08/03
-        V0_monitor = -0.0016;   % 2021/08/03
     case 'X'
 %       X LATTICE
         xstr='X Lattice Adwin (V)';
-        V2P=@(V) 0.6373*V;      % ??
-        mPD=0.6373; % V/W
-        V0_adwin = 0.0155;      % 2021/08/03
-        V0_monitor = -0.0016;   % 2021/08/03
     case 'Z'
         % Z LATTICE
         xstr='Y Lattice Adwin (V)';
-        V2P=@(V) 0.6373*V;      % ??
-        mPD=0.6373; % V/W
-        V0_adwin = 0.0155;      % 2021/08/03
-        V0_monitor = -0.0016;   % 2021/08/03
 end
 
+V0_monitor=opts.V0_monitor;
+V0_adwin=opts.V0_adwin;
+mPD=opts.mPD;
+
+%%
 % Trap frequency to recoil energy
 fR=4.48989; % 1054nm recoil frequency in kHz
 
@@ -67,7 +52,6 @@ U_ho_data=(Fresdata/2/fR).^(2)/4;
 Ftrapdata=data(2,:)/2;
 ftoU=@(f) (f/fR).^2/4;
 U_HO_data=ftoU(Ftrapdata);
-Pdata=V2P(data(3,:)-V0_monitor);
 
 
 %% Band Structure Fit
@@ -109,11 +93,15 @@ fout_pow_free=fit(U_pi_data',PDdata',fit_pow_free,opt_free);
 fout_pow_fixed=fit(U_pi_data',PDdata',fit_pow_fixed,opt_fixed);
 
 
-% Plot results
-hF=figure;
+% outdata=struct;
+% outdata.Data=data;
+% outdata.fout_pow_free=fout_pow_free;
+
+%% Plot results
+hF_BANDS=figure;
 clf
-hF.Color='w';
-hF.Position=[100 100 1200 300];
+hF_BANDS.Color='w';
+hF_BANDS.Position=[100 100 1200 300];
 co=get(gca,'colororder');
 
 % Plot Resonant Frequency
@@ -208,7 +196,7 @@ fout_pow_HO_fixed=fit(U_ho_data',PDdata',fit_pow_fixed,opt_fixed);
 
 %%%%%%%%%%% PLOTTING
 
-hF2=figure;
+hF_HO=figure;
 clf
 set(gcf,'color','w');
 co=get(gca,'colororder');
