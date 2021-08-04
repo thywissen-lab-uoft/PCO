@@ -72,7 +72,7 @@ doSave=1;
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-pco_xVar='lat_mod_freq';
+pco_xVar='latt_mod_freq';
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit=1;
@@ -85,7 +85,7 @@ pco_overrideUnit='V';
 doProbeFit=0;           % Fit probe beam to 2D Gaussian
 
 % Box Count
-doBoxCount=1;           % Box count analysis
+doBoxCount=0;           % Box count analysis
 doLandauZener=0;        % Landau Zener Analysis on BOX
 doBoxRabi=0;
 
@@ -93,7 +93,7 @@ doBoxRabi=0;
 doRamanSpec=0;          % Raman box count count analyis
 
 % Fermi
-doFermiFitLong=0;       % Fermi Fit for XDT TOF
+doFermiFitLong=1;       % Fermi Fit for XDT TOF
 
 % Gaussian
 doGaussFit=1;           % Flag for performing the gaussian fit
@@ -102,7 +102,7 @@ doGaussFit=1;           % Flag for performing the gaussian fit
 doBEC=0;
 
 % Custom in line figure
-doCustom=1;          % Custom Box Count
+doCustom=0;          % Custom Box Count
 
 %Animation
 doAnimate = 1;          % Animate the Cloud
@@ -293,16 +293,16 @@ ROI = [600 1150 450 950]; % BM 15 ms TOF
 %     830 920 330 450];
 
 % 10 ms tof am spec 75-200 recoil x lattice y camera
-% ROI = [460 700 600 710;
-%     540 620 600 710];
+ROI = [460 700 600 710;
+    540 620 600 710];
 
-% 15 ms TOF AMP spec 75-200 Er Y Lattice
-ROI = [800 970 430 540;
-    855 905 430 540];
+% % 15 ms TOF AMP spec 75-200 Er Y Lattice
+% ROI = [800 970 430 540;
+%     855 905 430 540];
 
 % % 15 ms TOF AMP spec 75-200 Er Z Lattice
-ROI = [820 940 380 590;
-    820 940 460 515];
+% ROI = [820 940 380 590;
+%     820 940 460 515];
 
 % 7 ms tof am spec 75-200 recoil x, y camera
 % ROI = [556 619 542 634;
@@ -327,7 +327,7 @@ ROI = [820 940 380 590;
 % ROI = [830 940 590 700;
 %     830 940 450 560]; 
 
-% ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
+ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 
 
 % Assign the ROI

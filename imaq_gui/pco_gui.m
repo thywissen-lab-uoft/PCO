@@ -496,9 +496,25 @@ hbhistoryRight.Position(3:4)=[12 20];
             
             [~,inds] = sort(lower(fieldnames(dstruct.Params)));
             params = orderfields(dstruct.Params,inds);  
-           tbl_params.Data=[fieldnames(params), ...
-                    struct2cell(params)];     
-                
+%             keyboard
+            
+            
+            fnames=fieldnames(params);
+            for nn=1:length(fnames)
+                  tbl_params.Data{nn,1}=fnames{nn};
+                    val=dstruct.Params.(fnames{nn});
+                    if isa(val,'double')
+                        tbl_params.Data{nn,2}=num2str(val);
+                    end
+                    
+                    if isa(val,'struct')
+                       tbl_params.Data{nn,2}='[struct]'; 
+                    end  
+            end
+%             
+%            tbl_params.Data=[fieldnames(params), ...
+%                     struct2cell(params)];     
+%                 
             fnames=fieldnames(dstruct.Flags);
                 for nn=1:length(fnames)
                     tbl_flags.Data{nn,1}=fnames{nn};
@@ -515,6 +531,7 @@ hbhistoryRight.Position(3:4)=[12 20];
         catch ME
             warning(ME.message);
             warning('Unable to load image. Reverting to previous');
+            
             dstruct=olddata;
             dstruct=computeOD(dstruct);
             updateImages(dstruct);
@@ -522,8 +539,22 @@ hbhistoryRight.Position(3:4)=[12 20];
             
              [~,inds] = sort(lower(fieldnames(dstruct.Params)));
             params = orderfields(dstruct.Params,inds);  
-           tbl_params.Data=[fieldnames(params), ...
-                    struct2cell(params)];    
+            
+            fnames=fieldnames(params);
+            for nn=1:length(fnames)
+                  tbl_params.Data{nn,1}=fnames{nn};
+                    val=dstruct.Params.(fnames{nn});
+                    if isa(val,'double')
+                        tbl_params.Data{nn,2}=num2str(val);
+                    end
+                    
+                    if isa(val,'struct')
+                       tbl_params.Data{nn,2}='[struct]'; 
+                    end  
+            end
+            
+%            tbl_params.Data=[fieldnames(params), ...
+%                     struct2cell(params)];    
             
    
             fnames=fieldnames(dstruct.Flags);
@@ -1834,8 +1865,23 @@ end
                 % Update parameters table                            
                 [~,inds] = sort(lower(fieldnames(dstruct.Params)));
                     params = orderfields(dstruct.Params,inds);  
-                tbl_params.Data=[fieldnames(params), ...
-                        struct2cell(params)];    
+                    
+                    fnames=fieldnames(params);
+                    for nn=1:length(fnames)
+                      tbl_params.Data{nn,1}=fnames{nn};
+                        val=dstruct.Params.(fnames{nn});
+                        if isa(val,'double')
+                            tbl_params.Data{nn,2}=num2str(val);
+                        end
+
+                        if isa(val,'struct')
+                           tbl_params.Data{nn,2}='[struct]'; 
+                        end  
+                    end
+                    
+%                     
+%                 tbl_params.Data=[fieldnames(params), ...     
+%                         struct2cell(params)];    
                 
                 % Update flags table
                 fnames=fieldnames(dstruct.Flags);

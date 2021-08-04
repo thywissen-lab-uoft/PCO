@@ -9,7 +9,7 @@ switch opts.Direction
         xstr='X Lattice Adwin (V)';
     case 'Z'
         % Z LATTICE
-        xstr='Y Lattice Adwin (V)';
+        xstr='Z Lattice Adwin (V)';
 end
 
 V0_monitor=opts.V0_monitor;
@@ -35,7 +35,7 @@ func_E_HO=@(Uin) fR*2*sqrt(4*Uin);
 %% Simpify the data
 
 % For fit plotting
-xx=linspace(0,2,1E3);
+xx=linspace(0,max(data(1,:))+.1,1E3);
 
 % Measured optical power
 PDdata=data(3,:);
@@ -111,8 +111,12 @@ plot(Vdata,Fresdata,'o','markerfacecolor',[.6 .6 .6],...
 ylabel('resonant frequency (kHz)');
 xlabel(xstr);
 set(gca,'fontsize',10,'box','on','linewidth',1,'xgrid','on','ygrid','on')
-% ylim([0 140]);
+yL=get(gca,'YLim');
+xL=get(gca,'XLim');
+ylim([0 yL(2)]);
+xlim([0 xL(2)]);
 hold on
+
 p1=plot(xx,feval(fout_adwinV_pi_free,xx),'-','linewidth',2,'color',co(1,:));
 p2=plot(xx,feval(fout_adwinV_pi_fixed,xx),'-','linewidth',2,'color',co(2,:));
 
