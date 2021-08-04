@@ -164,3 +164,27 @@ if doSave
     output.E21_pi=bandsStatic1(:,2)-bandsStatic1(:,1);
     save('am_spec_data','output');
 end
+
+%% Tunneling
+
+fR=4.49;
+
+Js=(bandsStatic1(:,1)-bandsStatic0(:,1))/4;
+Jp=(bandsStatic1(:,2)-bandsStatic0(:,2))/4;
+
+hF=figure;
+clf
+hF.Position=[100 100 400 300];
+set(gcf,'color','w');
+
+axes
+set(gca,'fontsize',10,'xgrid','on','ygrid','on','box','on','linewidth',1,...
+    'fontname','times');
+hold on
+xlabel('lattice depth');
+ylabel('tunneling rate \Delta/4 (kHz)');
+plot(U,fR*Js,'-','linewidth',2,'color',co(1,:))
+hold on
+plot(U,fR*abs(Jp),'-','linewidth',2,'color',co(2,:))
+
+xlim([0 10]);
