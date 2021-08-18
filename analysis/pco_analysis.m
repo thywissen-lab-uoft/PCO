@@ -72,31 +72,32 @@ doSave=1;
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-pco_xVar='latt_mod_freq';
+pco_xVar='rf_freq_HF';
+% pco_xVar='ExecutionDate';
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit=1;
 
 % If ixon_autoUnit=0, this will be used.
-pco_overrideUnit='V';
+pco_overrideUnit='ms';
 
 
 %% Analysis Flags
-doProbeFit=0;           % Fit probe beam to 2D Gaussian
+doProbeFit=0;        % Fit probe beam to 2D Gaussian
 
 % Box Count
-doBoxCount=0;           % Box count analysis
-doLandauZener=0;        % Landau Zener Analysis on BOX
+doBoxCount=1;        % Box count analysis
+doLandauZener=0;     % Landau Zener Analysis on BOX
 doBoxRabi=0;
 
 % Custom Box counts
-doRamanSpec=0;          % Raman box count count analyis
+doRamanSpec=0;       % Raman box count count analyis
 
 % Fermi
-doFermiFitLong=1;       % Fermi Fit for XDT TOF
+doFermiFitLong=0;    % Fermi Fit for XDT TOF
 
 % Gaussian
-doGaussFit=1;           % Flag for performing the gaussian fit
+doGaussFit=1;        % Flag for performing the gaussian fit
 
 % BEC (requries gaussian)
 doBEC=0;
@@ -105,7 +106,7 @@ doBEC=0;
 doCustom=0;          % Custom Box Count
 
 %Animation
-doAnimate = 1;          % Animate the Cloud
+doAnimate = 0;       % Animate the Cloud
 
 %% Select image directory
 % Choose the directory where the images to analyze are stored
@@ -192,7 +193,7 @@ atomdata=atomdata(inds);
 
 %%%%% RF 1B
 % ROI = [533 1323 230 980];   % RF1B 5 ms TOF
-ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
+% ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
 
 
 %%%%% XDT 1/2 ONLY
@@ -215,7 +216,7 @@ ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
 % ROI=[810 970 740 860];   % XDT  Full TOF analysis
 % ROI = [810 970 420 580]; %XDT Rb after evap 15ms 
 
-%  ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
+%   ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 
 % % 12ms tof SG from XDT #850 900 300 560;
 % ROI = [825 900 300 565;
@@ -237,7 +238,11 @@ ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
 
 
 %%%%% LATTICE
-ROI = [600 1150 450 950]; % BM 15 ms TOF
+% 
+%  ROI = [830 940 230 300;
+%      830 940 540 610];
+
+% ROI = [826 953 425 555]; % BM 15 ms TOF
 % ROI= [830 930 230 430;830 930 430 590];  % BM, SG, 10 ms
 % ROI= [820 930 450 550;820 930 350 450];  % BM, SG, 13 ms
 
@@ -261,12 +266,12 @@ ROI = [600 1150 450 950]; % BM 15 ms TOF
 % % 
 % ROI=[800 950 1700 1800];   % XDT 20 ms TOF
 % 
-%  ROI=[800 950 490 600;
-%      800 950 1520 1630];   %  band map 15 ms TOF
+ ROI=[800 950 490 600;
+     800 950 1520 1630];   %  band map 15 ms TOF
 % %   
 %  ROI=[800 950 1520 1630];   %  band map 15 ms TOF   -7 box   
-
-
+% 
+% 
 %  ROI=[800 950 490 600];   %  band map 15 ms TOF   -9 box   
 
 %  
@@ -293,8 +298,8 @@ ROI = [600 1150 450 950]; % BM 15 ms TOF
 %     830 920 330 450];
 
 % 10 ms tof am spec 75-200 recoil x lattice y camera
-ROI = [460 700 600 710;
-    540 620 600 710];
+% ROI = [460 700 600 710;
+%     540 620 600 710];
 
 % % 15 ms TOF AMP spec 75-200 Er Y Lattice
 % ROI = [800 970 430 540;
@@ -327,7 +332,7 @@ ROI = [460 700 600 710;
 % ROI = [830 940 590 700;
 %     830 940 450 560]; 
 
-ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
+% ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 
 
 % Assign the ROI
@@ -784,31 +789,54 @@ if doCustom
 
     %%%%%%%%%%%%%%% RF SPEC %%%%%%%%%%%%%%
 
-%     % Center frequency for expected RF field (if relevant)
-% %     B = atomdata(1).Params.HF_FeshValue_Initial;
-% %     x0= (BreitRabiK(B,9/2,-5/2)-BreitRabiK(B,9/2,-7/2))/6.6260755e-34/1E6; 
-% %     %x0 = 0;
-% %     % Grab Raw data
-%     X=DATA.X;   
-% %     X=X-x0;    
-% %     X=X*1E3;  
-% %     X=X';
-% %     xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];    
+    % Center frequency for expected RF field (if relevant)
+    B = atomdata(1).Params.HF_FeshValue_Initial;
+    x0= (BreitRabiK(B,9/2,-5/2)-BreitRabiK(B,9/2,-7/2))/6.6260755e-34/1E6; 
+%     %x0 = 0;
+%     % Grab Raw data
+    X=DATA.X;   
+    X=X-x0;    
+    X=X*1E3;  
+%     X=X';
+    xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];    
 %       xstr=pco_xVar; 
-%     % Define Y Data
+    % Define Y Data
+     N1=DATA.Natoms(:,1);
+     N2=DATA.Natoms(:,2);     
+     N2=N2/0.5;
+     
+%      Y=(N2)./(N1);
+     Y=(N2);
+     Y=(N1-N2)./(N1);
+
+     %Y=(N1-N2)./(N1+N2);
+     
+%      Y=N1+N2;
+     ystr=['\Delta N_{97}/N{9}'];
+     
+       [ux,ia,ib]=unique(X);    
+    Yu=zeros(length(ux),2);    
+    for kk=1:length(ux)
+        inds=find(X==ux(kk));
+        Yu(kk,1)=mean(Y(inds));
+        Yu(kk,2)=std(Y(inds));       
+    end
+%     
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+%     %%%%%%%%%%%%%%% AM SPEC %%%%%%%%%%%%%%
+%      X=DATA.X*1e-3;   
+%      X=X';
+%      xstr=['modulation frequency (kHz)'];
+%      
+%      % Define Y Data
 %      N1=DATA.Natoms(:,1);
 %      N2=DATA.Natoms(:,2);     
-% %      N2=N2/0.5;
+%      Y=(N1-N2)./N1;
+%      ystr='\Delta N/N_{tot}';
 %      
-% %      Y=(N2-N1)./(N1);
-%      Y=(N2-N1)./(N2);
 % 
-%      %Y=(N1-N2)./(N1+N2);
-%      
-% %      Y=N1+N2;
-%      ystr=['N_{p}/N_{s}'];
-%      
-%        [ux,ia,ib]=unique(X);    
+%     [ux,ia,ib]=unique(X);    
 %     Yu=zeros(length(ux),2);    
 %     for kk=1:length(ux)
 %         inds=find(X==ux(kk));
@@ -816,28 +844,6 @@ if doCustom
 %         Yu(kk,2)=std(Y(inds));       
 %     end
 %     
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-%     %%%%%%%%%%%%%%% AM SPEC %%%%%%%%%%%%%%
-     X=DATA.X*1e-3;   
-     X=X';
-     xstr=['modulation frequency (kHz)'];
-     
-     % Define Y Data
-     N1=DATA.Natoms(:,1);
-     N2=DATA.Natoms(:,2);     
-     Y=(N1-N2)./N1;
-     ystr='\Delta N/N_{tot}';
-     
-
-    [ux,ia,ib]=unique(X);    
-    Yu=zeros(length(ux),2);    
-    for kk=1:length(ux)
-        inds=find(X==ux(kk));
-        Yu(kk,1)=mean(Y(inds));
-        Yu(kk,2)=std(Y(inds));       
-    end
-    
     %%%%%%%%%%%%%%%%%%%%%%%%% FIGURE
     hFB=figure;
     hFB.Color='w';
@@ -899,7 +905,7 @@ if doCustom
     end
     
     % Assymetric lorentzian fit, good for AM spec
-    fit_lorentz_assymetric=1;
+    fit_lorentz_assymetric=0;
     if length(atomdata)>4 && fit_lorentz_assymetric
         g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
         y=@(x,a,x0,G,A,bg) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1)+bg;        
@@ -971,7 +977,7 @@ if doCustom
 end
 
 %% Animate cloud
-if doAnimate == 1
+if doAnimate
     animateOpts=struct;
     animateOpts.StartDelay=3;   % Time to hold on first picture
     animateOpts.MidDelay=1;    % Time to hold in middle picutres
