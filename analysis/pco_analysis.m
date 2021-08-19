@@ -65,7 +65,7 @@ switch camaxis
         error('You didn''t pick a camera');
 end
 
-doSave=1;
+doSave=0;
 %% Analysis Variable
 % This section of code chooses the variable to plot against for aggregate
 % plots.  The chosen variable MUST match a variable provided in the params
@@ -97,13 +97,13 @@ doRamanSpec=0;       % Raman box count count analyis
 doFermiFitLong=0;    % Fermi Fit for XDT TOF
 
 % Gaussian
-doGaussFit=1;        % Flag for performing the gaussian fit
+doGaussFit=0;        % Flag for performing the gaussian fit
 
 % BEC (requries gaussian)
 doBEC=0;
 
 % Custom in line figure
-doCustom=0;          % Custom Box Count
+doCustom=1;          % Custom Box Count
 
 %Animation
 doAnimate = 0;       % Animate the Cloud
@@ -351,7 +351,7 @@ ODopts.SubtractDark=0;
 ODopts.DarkROI=[700 800 20 100];
 
 % Apply gaussian filter to images?
-ODopts.GaussFilter=0;
+ODopts.GaussFilter=1;
 ODopts.GaussFilterSigma=1;
 
 % Get the high field flag (this may throw error for old data)
@@ -794,7 +794,7 @@ if doCustom
     x0= (BreitRabiK(B,9/2,-5/2)-BreitRabiK(B,9/2,-7/2))/6.6260755e-34/1E6; 
 %     %x0 = 0;
 %     % Grab Raw data
-    X=DATA.X;   
+    X=DATA.X; X=X';  
     X=X-x0;    
     X=X*1E3;  
 %     X=X';
@@ -805,15 +805,28 @@ if doCustom
      N2=DATA.Natoms(:,2);     
      N2=N2/0.5;
      
-%      Y=(N2)./(N1);
-     Y=(N2);
-     Y=(N1-N2)./(N1);
+     dataMode=1;
+     
+     switch dataMode
+         case 0     
+             Y=(N1-N2)./(N1);
+             ystr=['\Delta N97/N9'];
+             fstr='custom';
+         case 1
+            Y= N2;
+            ystr=['N_7'];
+            fstr=ystr;
+         case 2     
+            Y= N1;
+            ystr=['N_9'];
+            fstr=ystr;
+         case 3
+            Y=N1+N2;
+            ystr=['N_9+N_7'];
+            fstr=ystr;
+     end
 
-     %Y=(N1-N2)./(N1+N2);
-     
-%      Y=N1+N2;
-     ystr=['\Delta N_{97}/N{9}'];
-     
+
        [ux,ia,ib]=unique(X);    
     Yu=zeros(length(ux),2);    
     for kk=1:length(ux)
@@ -821,6 +834,7 @@ if doCustom
         Yu(kk,1)=mean(Y(inds));
         Yu(kk,2)=std(Y(inds));       
     end
+    
 %     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
@@ -848,6 +862,8 @@ if doCustom
     hFB=figure;
     hFB.Color='w';
     hFB.Name='box custom';
+    
+    hFB.Name=ystr;
     hFB.Position=[400 400 400 400];
     strs=strsplit(imgdir,filesep);
     str=[strs{end-1} filesep strs{end}];
@@ -875,10 +891,11 @@ if doCustom
     hold on    
     xlim([min(X) max(X)]);
     
-    negLorentz=0;    
-    if negLorentz
-        myfit=fittype('bg-A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)',...
-            'coefficients',{'A','G','x0','bg'},...
+    
+    negLorentz_double=0;    
+    if negLorentz_double
+        myfit=fittype('bg-A1*(G1/2).^2*((x-x1).^2+(G1/2).^2).^(-1)-A2*(G2/2).^2*((x-x2).^2+(G2/2).^2).^(-1)',...
+            'coefficients',{'A1','G1','x1','A2','G2','x2','bg'},...
             'independent','x');
         opt=fitoptions(myfit);
         
@@ -891,9 +908,12 @@ if doCustom
         xC=X(ind);
         
         % Assign guess
-        G=[A range(X)/2 xC bg];
+        G=[A 30 xC A 30 xC-100 bg];
+        
+        
         opt.StartPoint=G;
         opt.Robust='bisquare';
+        opt.Lower=[0 0 -inf 0 0 -inf 0];
         
         % Perform the fit
         fout=fit(X,Y,myfit,opt);
@@ -901,7 +921,46 @@ if doCustom
 
         % Plot the fit
         tt=linspace(min(X),max(X),1000);
-        plot(tt,feval(fout,tt),'r--');
+        pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
+        lStr=['xC=(' num2str(round(fout.x1,1)) ',' num2str(round(fout.x2,1)) ')' ...
+            ' FWHM=(' num2str(round(fout.G1,1)) ',' num2str(round(fout.G2,1)) ')' ];
+        legend(pF,lStr,'location','best');
+    end
+    
+    negLorentz=1;    
+    if negLorentz
+        myfit=fittype('bg-A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)',...
+            'coefficients',{'A','G','x0','bg'},...
+            'independent','x');
+        opt=fitoptions(myfit);
+        
+        % Background is max
+        bg=max(Y);
+        
+        % Find center
+        [Ymin,ind]=min(Y);
+        A=bg-Ymin;   
+        A=range(Y);
+        xC=X(ind);
+        
+        % Assign guess
+        G=[A 30 xC bg];
+        opt.StartPoint=G;
+        opt.Robust='bisquare';
+        opt.Lower=[0 0 -inf 0];
+
+        opt.Upper=[A range(X) inf A];
+
+        % Perform the fit
+        fout=fit(X,Y,myfit,opt);
+        disp(fout);
+
+        % Plot the fit
+        tt=linspace(min(X),max(X),1000);
+        pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
+          lStr=['xC=(' num2str(round(fout.x0,1)) ')' ...
+            ' FWHM=(' num2str(round(fout.G,1)) ')' ];
+        legend(pF,lStr,'location','best');
     end
     
     % Assymetric lorentzian fit, good for AM spec
@@ -973,7 +1032,9 @@ if doCustom
 %     hax.YLim(1)=0;
     pp=get(gcf,'position');
     set(gcf,'position',[pp(1) pp(2) 400 400]);    
-    saveFigure(atomdata,hFB,'custom');
+    if doSave
+    saveFigure(atomdata,hFB,fstr);
+    end
 end
 
 %% Animate cloud
