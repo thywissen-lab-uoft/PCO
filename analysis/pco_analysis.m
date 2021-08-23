@@ -65,15 +65,17 @@ switch camaxis
         error('You didn''t pick a camera');
 end
 
-doSave=0;
+
 %% Analysis Variable
 % This section of code chooses the variable to plot against for aggregate
 % plots.  The chosen variable MUST match a variable provided in the params
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-pco_xVar='rf_freq_HF';
+pco_xVar='Raman_AOM3_freq';
 % pco_xVar='ExecutionDate';
+
+doSave=1;
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit=1;
@@ -97,7 +99,7 @@ doRamanSpec=0;       % Raman box count count analyis
 doFermiFitLong=0;    % Fermi Fit for XDT TOF
 
 % Gaussian
-doGaussFit=0;        % Flag for performing the gaussian fit
+doGaussFit=1;        % Flag for performing the gaussian fit
 
 % BEC (requries gaussian)
 doBEC=0;
@@ -106,7 +108,7 @@ doBEC=0;
 doCustom=1;          % Custom Box Count
 
 %Animation
-doAnimate = 0;       % Animate the Cloud
+doAnimate = 1;       % Animate the Cloud
 
 %% Select image directory
 % Choose the directory where the images to analyze are stored
@@ -475,17 +477,19 @@ if doLandauZener && size(ROI,1)==2 && doBoxCount && length(atomdata)>3
 %     SweepRangeVar='uwave_delta_freq';    %    Variable that defines sweep range
     
 % Shift Register
-    SweepTimeVar='rb_uwave_sweep_time';  
+    SweepTimeVar='HF_Raman_sweep_time';  
     
     
 %     SweepTimeVar='Raman_Time';      % Variable that defines sweep time
-    SweepRangeVar='rb_uwave_delta_freq';    %    Variable that defines sweep range
+    SweepRangeVar='HF_Raman_sweep_range';    %    Variable that defines sweep range
 %     
     % Convert the parameter into df and dt (add whatever custom processing
     % you want).
     dT=[params.(SweepTimeVar)];
     dF=[params.(SweepRangeVar)]*1000; % Factor of two for the SRS
-%     dF=3.5*1000*ones(length(atomdata),1)';
+%     dF=40*ones(length(atomdata),1)';
+
+
     
     % Convert to dtdf
     dtdf=dT./dF; 
@@ -784,18 +788,20 @@ end
 
 %% Custom
 if doCustom 
-    DATA=Ndatabox;
-    %     DATA=Ndatagauss;
+%     DATA=Ndatabox;
+    DATA=Ndatagauss;
 
     %%%%%%%%%%%%%%% RF SPEC %%%%%%%%%%%%%%
 
     % Center frequency for expected RF field (if relevant)
     B = atomdata(1).Params.HF_FeshValue_Initial;
-    x0= (BreitRabiK(B,9/2,-5/2)-BreitRabiK(B,9/2,-7/2))/6.6260755e-34/1E6; 
+    x0= (BreitRabiK(B,9/2,-7/2)-BreitRabiK(B,9/2,-9/2))/6.6260755e-34/1E6; 
 %     %x0 = 0;
 %     % Grab Raw data
-    X=DATA.X; X=X';  
+    X=DATA.X; X=X';
+    X = 2*X - 80  %Raman AOM condition
     X=X-x0;    
+
     X=X*1E3;  
 %     X=X';
     xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];    
@@ -805,7 +811,7 @@ if doCustom
      N2=DATA.Natoms(:,2);     
      N2=N2/0.5;
      
-     dataMode=1;
+     dataMode=4;
      
      switch dataMode
          case 0     
@@ -823,6 +829,10 @@ if doCustom
          case 3
             Y=N1+N2;
             ystr=['N_9+N_7'];
+            fstr=ystr;
+         case 4
+            Y=N1./(N1+N2);
+            ystr=['Transfer Fraction'];
             fstr=ystr;
      end
 
@@ -893,7 +903,7 @@ if doCustom
     
     
     negLorentz_double=0;    
-    if negLorentz_double
+    if length(atomdata)>4 && negLorentz_double
         myfit=fittype('bg-A1*(G1/2).^2*((x-x1).^2+(G1/2).^2).^(-1)-A2*(G2/2).^2*((x-x2).^2+(G2/2).^2).^(-1)',...
             'coefficients',{'A1','G1','x1','A2','G2','x2','bg'},...
             'independent','x');
@@ -904,11 +914,12 @@ if doCustom
         
         % Find center
         [Ymin,ind]=min(Y);
-        A=bg-Ymin;        
+        A=5E4;bg-Ymin;        
         xC=X(ind);
         
         % Assign guess
-        G=[A 30 xC A 30 xC-100 bg];
+        G=[A 30 xC A 30 xC-50 bg];
+        G=[A 30 xC A 30 xC-50 bg];
         
         
         opt.StartPoint=G;
@@ -927,8 +938,8 @@ if doCustom
         legend(pF,lStr,'location','best');
     end
     
-    negLorentz=1;    
-    if negLorentz
+    negLorentz=0;    
+    if length(atomdata)>4 && negLorentz
         myfit=fittype('bg-A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)',...
             'coefficients',{'A','G','x0','bg'},...
             'independent','x');
@@ -960,6 +971,77 @@ if doCustom
         pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
           lStr=['xC=(' num2str(round(fout.x0,1)) ')' ...
             ' FWHM=(' num2str(round(fout.G,1)) ')' ];
+        legend(pF,lStr,'location','best');
+    end
+    
+    
+    Lorentz_double=1;    
+    if length(atomdata)>4 && Lorentz_double
+        myfit=fittype('bg+A1*(G1/2).^2*((x-x1).^2+(G1/2).^2).^(-1)+A2*(G2/2).^2*((x-x2).^2+(G2/2).^2).^(-1)',...
+            'coefficients',{'A1','G1','x1','A2','G2','x2','bg'},...
+            'independent','x');
+        opt=fitoptions(myfit);
+        
+        % Background is max
+        bg=max(Y);
+        
+        % Find center
+        [Ymin,ind]=min(Y);
+        A=bg-Ymin;        
+        xC=X(ind);
+        
+        % Assign guess
+        G=[A 30 -250 A 30 -175 bg];
+        
+        
+        opt.StartPoint=G;
+        opt.Robust='bisquare';
+        opt.Lower=[0 0 -inf 0 0 -inf 0];
+        
+        % Perform the fit
+        fout=fit(X,Y,myfit,opt);
+        disp(fout);
+
+        % Plot the fit
+        tt=linspace(min(X),max(X),1000);
+        pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
+        lStr=['xC=(' num2str(round(fout.x1,1)) ',' num2str(round(fout.x2,1)) ')' ...
+            ' FWHM=(' num2str(round(fout.G1,1)) ',' num2str(round(fout.G2,1)) ')' ];
+        legend(pF,lStr,'location','best');
+    end
+    
+    Lorentz_triple=0;    
+    if length(atomdata)>4 && Lorentz_triple
+        myfit=fittype('bg+A1*(G1/2).^2*((x-x1).^2+(G1/2).^2).^(-1)+A2*(G2/2).^2*((x-x2).^2+(G2/2).^2).^(-1)+A3*(G3/2).^2*((x-x3).^2+(G3/2).^2).^(-1)',...
+            'coefficients',{'A1','G1','x1','A2','G2','x2','A3','G3','x3','bg'},...
+            'independent','x');
+        opt=fitoptions(myfit);
+        
+        % Background is max
+        bg=max(Y);
+        
+        % Find center
+        [Ymin,ind]=min(Y);
+        A=bg-Ymin;        
+        xC=X(ind);
+        
+        % Assign guess
+        G=[0.7 100 -220 0.7 100 -165 0.75 30 -90 bg];
+        
+        
+        opt.StartPoint=G;
+        opt.Robust='bisquare';
+        opt.Lower=[0 0 -inf 0 0 -inf 0];
+        
+        % Perform the fit
+        fout=fit(X,Y,myfit,opt);
+        disp(fout);
+
+        % Plot the fit
+        tt=linspace(min(X),max(X),1000);
+        pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
+        lStr=['xC=(' num2str(round(fout.x1,1)) ',' num2str(round(fout.x2,1)) ',' num2str(round(fout.x3,1)) ')' ...
+            ' FWHM=(' num2str(round(fout.G1,1)) ',' num2str(round(fout.G2,1)) ',' num2str(round(fout.G3,1)) ')' ];
         legend(pF,lStr,'location','best');
     end
     
@@ -1006,11 +1088,11 @@ if doCustom
         myfit=fittype('A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)+bg','coefficients',{'A','G','x0','bg'},...
             'independent','x');
         opt=fitoptions(myfit);
-        G0=100;
+        G0=1;
         bg=min(Y);
         A0=(max(Y)-min(Y));
         inds=[Y>.8*max(Y)];
-        x0=mean(X(inds));     
+        x0=mean(X(inds));
         opt.StartPoint=[A0 G0 x0 bg];   
 %         opt.Upper=[1 3*G0 x0+range(X) 0];   
 
