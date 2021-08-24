@@ -73,7 +73,7 @@ end
 % display properties.
 
 pco_xVar='Raman_AOM3_freq';
-% pco_xVar='ExecutionDate';
+pco_xVar='ExecutionDate';
 
 doSave=1;
 
@@ -105,7 +105,7 @@ doGaussFit=1;        % Flag for performing the gaussian fit
 doBEC=0;
 
 % Custom in line figure
-doCustom=1;          % Custom Box Count
+doCustom=0;          % Custom Box Count
 
 %Animation
 doAnimate = 1;       % Animate the Cloud
@@ -270,6 +270,19 @@ atomdata=atomdata(inds);
 % 
  ROI=[800 950 490 600;
      800 950 1520 1630];   %  band map 15 ms TOF
+ 
+%  ROI = [855 900 525 570;
+%         830 925 500 595;
+%         855 900 1555 1600;
+%         830 925 1530 1625]; %  band map 15 ms TOF x vs y-z bands 
+
+ ROI = [855 900 525 570;
+        830 925 525 570;
+        855 900 500 595;
+        855 900 525+1030 570+1030;
+        830 925 525+1030 570+1030;
+        855 900 500+1030 595+1030]; %  band map 15 ms TOF x vs y-z bands 
+
 % %   
 %  ROI=[800 950 1520 1630];   %  band map 15 ms TOF   -7 box   
 % 
@@ -353,7 +366,7 @@ ODopts.SubtractDark=0;
 ODopts.DarkROI=[700 800 20 100];
 
 % Apply gaussian filter to images?
-ODopts.GaussFilter=1;
+ODopts.GaussFilter=0;
 ODopts.GaussFilterSigma=1;
 
 % Get the high field flag (this may throw error for old data)
@@ -991,7 +1004,7 @@ if doCustom
         xC=X(ind);
         
         % Assign guess
-        G=[A 30 -250 A 30 -175 bg];
+        G=[A 30 -350 A 30 -175 bg];
         
         
         opt.StartPoint=G;
@@ -1118,6 +1131,97 @@ if doCustom
     saveFigure(atomdata,hFB,fstr);
     end
 end
+
+
+doCustom_BM = 0;
+if doCustom_BM
+    DATA=Ndatabox;
+%     DATA=Ndatagauss;
+
+
+    % Center frequency for expected RF field (if relevant)
+    B = atomdata(1).Params.HF_FeshValue_Initial;
+    x0= (BreitRabiK(B,9/2,-7/2)-BreitRabiK(B,9/2,-9/2))/6.6260755e-34/1E6; 
+%     %x0 = 0;
+%     % Grab Raw data
+    X=DATA.X; X=X';
+    X = 2*X - 80;  %Raman AOM condition
+    X=X-x0;    
+
+    X=X*1E3;  
+%     X=X';
+    xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];    
+%       xstr=pco_xVar; 
+    % Define Y Data
+     N1=DATA.Natoms(:,1); % atoms in the x box -9/2
+     N2=DATA.Natoms(:,2); %  atoms in the x,y box -9/2
+     N3=DATA.Natoms(:,3); % atoms in the x,z box -9/2
+     N4=DATA.Natoms(:,4); % atoms in the x box -7/2
+     N5=DATA.Natoms(:,5); %  atoms in the x,y box -7/2
+     N6=DATA.Natoms(:,6); % atoms in the x,z box -7/2
+     
+     
+     N4=N4/0.5;
+     N5=N5/0.5;
+     N6=N6/0.5;
+
+     
+     
+%      Y=(N2-N1)./(N3+N2-N1);
+      Y= N1;
+     ystr=['Excited state transfer'];
+     fstr='custom BM';
+
+     
+       [ux,ia,ib]=unique(X);    
+    Yu=zeros(length(ux),2);    
+    for kk=1:length(ux)
+        inds=find(X==ux(kk));
+        Yu(kk,1)=mean(Y(inds));
+        Yu(kk,2)=std(Y(inds));       
+    end
+    
+    hFB=figure;
+    hFB.Color='w';
+    hFB.Name='box custom';
+    
+    hFB.Name=ystr;
+    hFB.Position=[400 400 400 400];
+    strs=strsplit(imgdir,filesep);
+    str=[strs{end-1} filesep strs{end}];
+    co=get(gca,'colororder');    
+
+    % Image directory folder string
+    t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+    'w','horizontalalignment','left','fontsize',6);
+    t.Position(4)=t.Extent(4);
+    t.Position(3)=hFB.Position(3);
+    t.Position(1:2)=[5 hFB.Position(4)-t.Position(4)];
+
+    
+    plot(X,Y,'o','markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5,...
+        'linewidth',2,'markersize',8);
+    errorbar(ux,Yu(:,1),Yu(:,2),'o','markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5,...
+        'linewidth',2,'markersize',8);    
+    
+    xlabel(xstr);    
+    ylabel(ystr);
+    
+    set(gca,'fontsize',12,'linewidth',1,'box','on','xgrid','on','ygrid','on');
+    yL=get(gca,'YLim');
+%     ylim([-.1 yL(2)]);
+    hold on    
+    xlim([min(X) max(X)]);
+    
+    %     hax.YLim(1)=0;
+    pp=get(gcf,'position');
+    set(gcf,'position',[pp(1) pp(2) 400 400]);    
+    if doSave
+    saveFigure(atomdata,hFB,fstr);
+    end
+    
+end
+
 
 %% Animate cloud
 if doAnimate
