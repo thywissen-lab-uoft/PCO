@@ -73,7 +73,7 @@ end
 % display properties.
 
 pco_xVar='Raman_AOM3_freq';
-pco_xVar='ExecutionDate';
+% pco_xVar='ExecutionDate';
 
 doSave=1;
 
@@ -275,13 +275,21 @@ atomdata=atomdata(inds);
 %         830 925 500 595;
 %         855 900 1555 1600;
 %         830 925 1530 1625]; %  band map 15 ms TOF x vs y-z bands 
-
- ROI = [855 900 525 570;
-        830 925 525 570;
-        855 900 500 595;
-        855 900 525+1030 570+1030;
-        830 925 525+1030 570+1030;
-        855 900 500+1030 595+1030]; %  band map 15 ms TOF x vs y-z bands 
+% 
+ ROI = [850 900 525 580;
+        815 940 525 580;
+        850 900 500 605;
+        850 900 525+1030 580+1030;
+        825 930 525+1030 580+1030;
+        850 900 500+1030 605+1030]; %  band map 15 ms TOF x vs y-z bands 
+    
+    
+ROI = [840 910 515 590;
+        815 940 515 590;
+        840 910 490 615;
+        840 910 515+1030 590+1030;
+        815 940 515+1030 590+1030;
+        840 910 490+1030 615+1030]; %  band map 15 ms TOF x vs y-z bands 
 
 % %   
 %  ROI=[800 950 1520 1630];   %  band map 15 ms TOF   -7 box   
@@ -366,7 +374,7 @@ ODopts.SubtractDark=0;
 ODopts.DarkROI=[700 800 20 100];
 
 % Apply gaussian filter to images?
-ODopts.GaussFilter=0;
+ODopts.GaussFilter=1;
 ODopts.GaussFilterSigma=1;
 
 % Get the high field flag (this may throw error for old data)
@@ -801,8 +809,8 @@ end
 
 %% Custom
 if doCustom 
-%     DATA=Ndatabox;
-    DATA=Ndatagauss;
+    DATA=Ndatabox;
+%     DATA=Ndatagauss;
 
     %%%%%%%%%%%%%%% RF SPEC %%%%%%%%%%%%%%
 
@@ -1095,8 +1103,8 @@ if doCustom
     end
     
     
-    lorentz1=0;
-    if length(atomdata)>4 && lorentz1
+    lorentz=0;
+    if length(atomdata)>4 && lorentz
         % Symmetric Lorentzian
         myfit=fittype('A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)+bg','coefficients',{'A','G','x0','bg'},...
             'independent','x');
@@ -1133,7 +1141,7 @@ if doCustom
 end
 
 
-doCustom_BM = 0;
+doCustom_BM = 1;
 if doCustom_BM
     DATA=Ndatabox;
 %     DATA=Ndatagauss;
@@ -1167,10 +1175,10 @@ if doCustom_BM
 
      
      
-%      Y=(N2-N1)./(N3+N2-N1);
-      Y= N1;
-     ystr=['Excited state transfer'];
-     fstr='custom BM';
+     Y= (N2-N1)./((N2-N1) + (N4));
+%       Y= N1;
+     ystr=['Y Transfer fraction'];
+     fstr='Y Transfer';
 
      
        [ux,ia,ib]=unique(X);    
@@ -1210,8 +1218,140 @@ if doCustom_BM
     set(gca,'fontsize',12,'linewidth',1,'box','on','xgrid','on','ygrid','on');
     yL=get(gca,'YLim');
 %     ylim([-.1 yL(2)]);
-    hold on    
+    hold on 
+    %     xlim([-400 60]);
     xlim([min(X) max(X)]);
+    
+     Lorentz_triple=0;    
+    if length(atomdata)>4 && Lorentz_triple
+        myfit=fittype('bg+A1*(G1/2).^2*((x-x1).^2+(G1/2).^2).^(-1)+A2*(G2/2).^2*((x-x2).^2+(G2/2).^2).^(-1)+A3*(G3/2).^2*((x-x3).^2+(G3/2).^2).^(-1)',...
+            'coefficients',{'A1','G1','x1','A2','G2','x2','A3','G3','x3','bg'},...
+            'independent','x');
+        opt=fitoptions(myfit);
+        
+        % Background is max
+        bg=max(Y);
+        
+        % Find center
+        [Ymin,ind]=min(Y);
+        A=bg-Ymin;        
+        xC=X(ind);
+        
+        % Assign guess
+        G=[A 30 -250 A 30 -150 A 30 -90 bg];
+        
+        
+        opt.StartPoint=G;
+        opt.Robust='bisquare';
+        opt.Lower=[0 0 -inf 0 0 -inf 0];
+        
+        % Perform the fit
+        fout=fit(X,Y,myfit,opt);
+        disp(fout);
+
+        % Plot the fit
+        tt=linspace(min(X),max(X),1000);
+        pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
+        lStr=['xC=(' num2str(round(fout.x1,1)) ',' num2str(round(fout.x2,1)) ',' num2str(round(fout.x3,1)) ')' ...
+            ' FWHM=(' num2str(round(fout.G1,1)) ',' num2str(round(fout.G2,1)) ',' num2str(round(fout.G3,1)) ')' ];
+        legend(pF,lStr,'location','best');
+    end
+    
+    
+    
+    %     hax.YLim(1)=0;
+    pp=get(gcf,'position');
+    set(gcf,'position',[pp(1) pp(2) 400 400]);    
+    if doSave
+    saveFigure(atomdata,hFB,fstr);
+    end
+    
+    
+    
+    
+    Y= (N3-N1)./((N3-N1) + (N4));
+%       Y= N1;
+     ystr=['Z Transfer fraction'];
+     fstr='Z Transfer';
+
+     
+       [ux,ia,ib]=unique(X);    
+    Yu=zeros(length(ux),2);    
+    for kk=1:length(ux)
+        inds=find(X==ux(kk));
+        Yu(kk,1)=mean(Y(inds));
+        Yu(kk,2)=std(Y(inds));       
+    end
+    
+    hFB=figure;
+    hFB.Color='w';
+    hFB.Name='box custom';
+    
+    hFB.Name=ystr;
+    hFB.Position=[400 400 400 400];
+    strs=strsplit(imgdir,filesep);
+    str=[strs{end-1} filesep strs{end}];
+    co=get(gca,'colororder');    
+
+    % Image directory folder string
+    t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+    'w','horizontalalignment','left','fontsize',6);
+    t.Position(4)=t.Extent(4);
+    t.Position(3)=hFB.Position(3);
+    t.Position(1:2)=[5 hFB.Position(4)-t.Position(4)];
+
+    
+    plot(X,Y,'o','markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5,...
+        'linewidth',2,'markersize',8);
+    errorbar(ux,Yu(:,1),Yu(:,2),'o','markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5,...
+        'linewidth',2,'markersize',8);    
+    
+    xlabel(xstr);    
+    ylabel(ystr);
+    
+    set(gca,'fontsize',12,'linewidth',1,'box','on','xgrid','on','ygrid','on');
+    yL=get(gca,'YLim');
+%     ylim([-.1 yL(2)]);
+    hold on  
+    xlim([min(X) max(X)]);
+%     xlim([-400 60]);
+    
+     Lorentz_triple1=0;    
+    if length(atomdata)>4 && Lorentz_triple1
+        myfit=fittype('bg+A1*(G1/2).^2*((x-x1).^2+(G1/2).^2).^(-1)+A2*(G2/2).^2*((x-x2).^2+(G2/2).^2).^(-1)+A3*(G3/2).^2*((x-x3).^2+(G3/2).^2).^(-1)',...
+            'coefficients',{'A1','G1','x1','A2','G2','x2','A3','G3','x3','bg'},...
+            'independent','x');
+        opt=fitoptions(myfit);
+        
+        % Background is max
+        bg=max(Y);
+        
+        % Find center
+        [Ymin,ind]=min(Y);
+        A=bg-Ymin;        
+        xC=X(ind);
+        
+        % Assign guess
+        G=[A 30 -250 A 30 -150 A 30 -90 bg];
+        
+        
+        opt.StartPoint=G;
+        opt.Robust='bisquare';
+        opt.Lower=[0 0 -inf 0 0 -inf 0];
+        
+        % Perform the fit
+        fout=fit(X,Y,myfit,opt);
+        disp(fout);
+
+        % Plot the fit
+        tt=linspace(min(X),max(X),1000);
+        pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
+        lStr=['xC=(' num2str(round(fout.x1,1)) ',' num2str(round(fout.x2,1)) ',' num2str(round(fout.x3,1)) ')' ...
+            ' FWHM=(' num2str(round(fout.G1,1)) ',' num2str(round(fout.G2,1)) ',' num2str(round(fout.G3,1)) ')' ];
+        legend(pF,lStr,'location','best');
+    end
+    
+    
     
     %     hax.YLim(1)=0;
     pp=get(gcf,'position');
