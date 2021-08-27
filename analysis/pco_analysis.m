@@ -105,7 +105,9 @@ doGaussFit=1;        % Flag for performing the gaussian fit
 doBEC=0;
 
 % Custom in line figure
-doCustom=0;          % Custom Box Count
+doCustom=1;          % Custom Box Count
+doCustom_BM = 0;    % Custom Band map
+
 
 %Animation
 doAnimate = 1;       % Animate the Cloud
@@ -276,20 +278,20 @@ atomdata=atomdata(inds);
 %         855 900 1555 1600;
 %         830 925 1530 1625]; %  band map 15 ms TOF x vs y-z bands 
 % 
- ROI = [850 900 525 580;
-        815 940 525 580;
-        850 900 500 605;
-        850 900 525+1030 580+1030;
-        825 930 525+1030 580+1030;
-        850 900 500+1030 605+1030]; %  band map 15 ms TOF x vs y-z bands 
-    
-    
-ROI = [840 910 515 590;
-        815 940 515 590;
-        840 910 490 615;
-        840 910 515+1030 590+1030;
-        815 940 515+1030 590+1030;
-        840 910 490+1030 615+1030]; %  band map 15 ms TOF x vs y-z bands 
+%  ROI = [850 900 525 580;
+%         815 940 525 580;
+%         850 900 500 605;
+%         850 900 525+1030 580+1030;
+%         825 930 525+1030 580+1030;
+%         850 900 500+1030 605+1030]; %  band map 15 ms TOF x vs y-z bands 
+%     
+%     
+% ROI = [850 900 520 570;
+%         810 940 520 570;
+%         850 900 480 615;
+%         850 900 520+1030 570+1030;
+%         810 940 520+1030 570+1030;
+%         850 900 480+1030 615+1030]; %  band map 15 ms TOF x vs y-z bands 
 
 % %   
 %  ROI=[800 950 1520 1630];   %  band map 15 ms TOF   -7 box   
@@ -581,7 +583,7 @@ end
 
 gaussPopts = struct;
 gaussPopts.xUnit=pco_unit;
-gaussPopts.NumberExpFit = 0;        % Fit exponential decay to atom number
+gaussPopts.NumberExpFit = 1;        % Fit exponential decay to atom number
 gaussPopts.NumberLorentzianFit=0;   % Fit atom number to lorentzian
 gaussPopts.CenterSineFit = 0;       % Fit sine fit to cloud center
 gaussPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
@@ -809,18 +811,18 @@ end
 
 %% Custom
 if doCustom 
-    DATA=Ndatabox;
-%     DATA=Ndatagauss;
+%     DATA=Ndatabox;
+    DATA=Ndatagauss;
 
     %%%%%%%%%%%%%%% RF SPEC %%%%%%%%%%%%%%
 
     % Center frequency for expected RF field (if relevant)
     B = atomdata(1).Params.HF_FeshValue_Initial;
-    x0= (BreitRabiK(B,9/2,-7/2)-BreitRabiK(B,9/2,-9/2))/6.6260755e-34/1E6; 
+    x0= (BreitRabiK(B,9/2,-5/2)-BreitRabiK(B,9/2,-7/2))/6.6260755e-34/1E6; 
 %     %x0 = 0;
 %     % Grab Raw data
     X=DATA.X; X=X';
-    X = 2*X - 80  %Raman AOM condition
+%     X = 2*X - 80  %Raman AOM condition
     X=X-x0;    
 
     X=X*1E3;  
@@ -832,7 +834,7 @@ if doCustom
      N2=DATA.Natoms(:,2);     
      N2=N2/0.5;
      
-     dataMode=4;
+     dataMode=1;
      
      switch dataMode
          case 0     
@@ -935,12 +937,12 @@ if doCustom
         
         % Find center
         [Ymin,ind]=min(Y);
-        A=5E4;bg-Ymin;        
+        A=bg-Ymin;        
         xC=X(ind);
         
         % Assign guess
-        G=[A 30 xC A 30 xC-50 bg];
-        G=[A 30 xC A 30 xC-50 bg];
+%         G=[A 30 xC A 30 50 bg];
+        G=[A 20 -45 A/2 10 11 bg];
         
         
         opt.StartPoint=G;
@@ -996,7 +998,7 @@ if doCustom
     end
     
     
-    Lorentz_double=1;    
+    Lorentz_double=0;    
     if length(atomdata)>4 && Lorentz_double
         myfit=fittype('bg+A1*(G1/2).^2*((x-x1).^2+(G1/2).^2).^(-1)+A2*(G2/2).^2*((x-x2).^2+(G2/2).^2).^(-1)',...
             'coefficients',{'A1','G1','x1','A2','G2','x2','bg'},...
@@ -1141,7 +1143,6 @@ if doCustom
 end
 
 
-doCustom_BM = 1;
 if doCustom_BM
     DATA=Ndatabox;
 %     DATA=Ndatagauss;
@@ -1179,8 +1180,9 @@ if doCustom_BM
 %       Y= N1;
      ystr=['Y Transfer fraction'];
      fstr='Y Transfer';
-
-     
+    
+ 
+    
        [ux,ia,ib]=unique(X);    
     Yu=zeros(length(ux),2);    
     for kk=1:length(ux)
@@ -1221,6 +1223,39 @@ if doCustom_BM
     hold on 
     %     xlim([-400 60]);
     xlim([min(X) max(X)]);
+    
+    lorentz_assymetric_double=0;
+    if length(atomdata)>4 && lorentz_assymetric_double
+        g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
+        y=@(x,a,x0,G,A,bg) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1)+bg;        
+        myfit=fittype(@(a1,x01,G1,A1,a2,x02,G2,A2,bg,x) y(x,a1,x01,G1,A1,bg)+y(x,a2,x02,G2,A2,bg),...
+            'coefficients',{'a1','x01','G1','A1','a2','x02','G2','A2','bg'},...
+            'independent','x'); 
+        opt=fitoptions(myfit);
+        G0=30;
+        bg=min(Y);
+        A0=(max(Y)-min(Y));
+        inds=[Y>.9*max(Y)];            
+        
+        [~,i]=max(Y);
+        x0=X(i);
+%         x0=mean(X(inds));     
+        opt.StartPoint=[.05 x0 G0 A0,...
+                        .05 x0-150 G0 A0/50 bg];  
+        opt.Robust='bisquare';
+%         opts.Weights=w;
+        
+        fout_lorentz=fit(X,Y,myfit,opt);
+        XF=linspace(min(X),max(X),1000);
+%         xlim([60 max(X)+20]);
+        pExp=plot(XF,feval(fout_lorentz,XF),'r-','linewidth',2);
+        str=['$f_{01} = ' num2str(round(fout_lorentz.x01,2)) '$ kHz' newline ...
+            '$\mathrm{FWHM_1} = ' num2str(round(abs(fout_lorentz.G1),2)) ' $ kHz' newline ...
+            '$f_{02} = ' num2str(round(fout_lorentz.x02,2)) '$ kHz' newline ...
+            '$\mathrm{FWHM_2} = ' num2str(round(abs(fout_lorentz.G2),2)) ' $ kHz'];
+        legend(pExp,{str},'interpreter','latex','location','best','fontsize',8);
+    end
+    
     
      Lorentz_triple=0;    
     if length(atomdata)>4 && Lorentz_triple
@@ -1315,6 +1350,38 @@ if doCustom_BM
     hold on  
     xlim([min(X) max(X)]);
 %     xlim([-400 60]);
+
+    lorentz_assymetric_double=0;
+    if length(atomdata)>4 && lorentz_assymetric_double
+        g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
+        y=@(x,a,x0,G,A,bg) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1)+bg;        
+        myfit=fittype(@(a1,x01,G1,A1,a2,x02,G2,A2,bg,x) y(x,a1,x01,G1,A1,bg)+y(x,a2,x02,G2,A2,bg),...
+            'coefficients',{'a1','x01','G1','A1','a2','x02','G2','A2','bg'},...
+            'independent','x'); 
+        opt=fitoptions(myfit);
+        G0=30;
+        bg=min(Y);
+        A0=(max(Y)-min(Y));
+        inds=[Y>.9*max(Y)];            
+        
+        [~,i]=max(Y);
+        x0=X(i);
+%         x0=mean(X(inds));     
+        opt.StartPoint=[.05 x0 G0 A0,...
+                        .05 x0-140 G0 A0 bg];  
+        opt.Robust='bisquare';
+%         opts.Weights=w;
+        
+        fout_lorentz=fit(X,Y,myfit,opt);
+        XF=linspace(min(X),max(X),1000);
+%         xlim([60 max(X)+20]);
+        pExp=plot(XF,feval(fout_lorentz,XF),'r-','linewidth',2);
+        str=['$f_{01} = ' num2str(round(fout_lorentz.x01,2)) '$ kHz' newline ...
+            '$\mathrm{FWHM_1} = ' num2str(round(abs(fout_lorentz.G1),2)) ' $ kHz' newline ...
+            '$f_{02} = ' num2str(round(fout_lorentz.x02,2)) '$ kHz' newline ...
+            '$\mathrm{FWHM_2} = ' num2str(round(abs(fout_lorentz.G2),2)) ' $ kHz'];
+        legend(pExp,{str},'interpreter','latex','location','best','fontsize',8);
+    end
     
      Lorentz_triple1=0;    
     if length(atomdata)>4 && Lorentz_triple1
