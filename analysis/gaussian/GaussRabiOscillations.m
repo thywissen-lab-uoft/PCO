@@ -1,4 +1,4 @@
-function [hF,outdata]=boxRabiOscillations(atomdata,xVar,opts)
+function [hF,outdata]=GaussRabiOscillations(atomdata,xVar,opts)
 % Grab important global variables
 global pxsize
 global imgdir
@@ -19,23 +19,32 @@ xvals=[params.(xVar)];
 [xvals,inds]=sort(xvals,'ascend');
 atomdata=atomdata(inds);
 
-%% Grab the box count outputs
+%% Grab the Gaussfit outputs
 Natoms=zeros(length(atomdata),size(atomdata(1).ROI,1));
 
 for kk=1:length(atomdata)
    for nn=1:size(atomdata(kk).ROI,1)
-        BC=atomdata(kk).BoxCount(nn);           % Grab the box count
-        Xc(kk,nn)=BC.Xc;Yc(kk,nn)=BC.Yc;        % X and Y center
-        Xs(kk,nn)=BC.Xs;Ys(kk,nn)=BC.Ys;        % X and Y sigma   
-        Zs(kk,nn)=BC.Ys;                        % ASSUME sZ=sY;                
-        nbg(kk,nn)=BC.Nbkgd;                    % Background
-        N(kk,nn)=BC.Ncounts;
+%         GF=atomdata(kk).GaussFit(nn);           % Grab the box count
+%         Xc(kk,nn)=GF.Xc;Yc(kk,nn)=GF.Yc;        % X and Y center
+%         Xs(kk,nn)=GF.Xs;Ys(kk,nn)=GF.Ys;        % X and Y sigma   
+%         Zs(kk,nn)=GF.Ys;                        % ASSUME sZ=sY;                
+%         nbg(kk,nn)=GF.Nbkgd;                    % Background
+%         N(kk,nn)=GF.Ncounts;
         
-        if BC.Ncounts<0
-           warning(['Negative box count detected atomdata(' num2str(kk) ')' ...
-               ' ROI : ' num2str(nn) '. Setting to 0']);
-           N(kk,nn)=0;
-        end        
+        fout=atomdata(kk).GaussFit{nn};         
+        Xc(kk,nn)=fout.Xc;Yc(kk,nn)=fout.Yc;
+        Xs(kk,nn)=fout.Xs;Ys(kk,nn)=fout.Ys;
+        A(kk,nn)=fout.A;
+        nbg(kk,nn)=fout.nbg;
+
+        N(kk,nn)=2*pi*Xs(kk,nn)*Ys(kk,nn)*A(kk,nn);
+%         Natoms(kk,nn)=N(kk,nn)*((pxsize)^2/crosssec);   % Atom number  
+        
+%         if fout.Ncounts<0
+%            warning(['Negative box count detected atomdata(' num2str(kk) ')' ...
+%                ' ROI : ' num2str(nn) '. Setting to 0']);
+%            N(kk,nn)=0;
+%         end        
         Natoms(kk,nn)=N(kk,nn)*(pxsize^2/crosssec);  % Atom number  
    end   
     Natoms(Natoms<0)=0;
@@ -127,7 +136,7 @@ strs=strsplit(imgdir,filesep);
 str=[strs{end-1} filesep strs{end}];
 
 % Create teh figure
-hF=figure('Name',[pad('Box Rabi Oscillations',20) str],...
+hF=figure('Name',[pad('Gauss Rabi Oscillations',20) str],...
     'units','pixels','color','w','Menubar','none','Resize','off',...
     'numbertitle','off');
 hF.Position(1)=0;
@@ -152,7 +161,7 @@ xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 
 % xlabel('pulsetime');
 
-ylabel('relative box atom number');
+ylabel('relative Gauss atom number');
 hax.Position(4)=hax.Position(4)-20;
 
 for nn=1:size(atomdata(1).ROI,1)
@@ -164,7 +173,7 @@ ylim([0 1.2]);
 % Right axis for total atom number
 yyaxis right
 plot(xvals,NatomsTot','-','linewidth',1,'color',[.4 .4 .4]);
-ylabel('scaled total box atom number','fontsize',8);
+ylabel('scaled total Gauss atom number','fontsize',8);
 yL=get(gca,'YLim');
 ylim([0 yL(2)]);
 set(gca,'YColor',[.4 .4 .4]);

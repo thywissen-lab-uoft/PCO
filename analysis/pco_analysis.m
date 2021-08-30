@@ -72,7 +72,8 @@ end
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-pco_xVar='Raman_AOM3_freq';
+pco_xVar='Pulse_Time';
+% pco_xVar='Raman_AOM3_freq';
 % pco_xVar='ExecutionDate';
 
 doSave=1;
@@ -90,7 +91,8 @@ doProbeFit=0;        % Fit probe beam to 2D Gaussian
 % Box Count
 doBoxCount=1;        % Box count analysis
 doLandauZener=0;     % Landau Zener Analysis on BOX
-doBoxRabi=0;
+doBoxRabi=1;
+
 
 % Custom Box counts
 doRamanSpec=0;       % Raman box count count analyis
@@ -100,17 +102,18 @@ doFermiFitLong=0;    % Fermi Fit for XDT TOF
 
 % Gaussian
 doGaussFit=1;        % Flag for performing the gaussian fit
+doGaussRabi=1;
 
 % BEC (requries gaussian)
 doBEC=0;
 
 % Custom in line figure
-doCustom=1;          % Custom Box Count
+doCustom=0;          % Custom Box Count
 doCustom_BM = 0;    % Custom Band map
 
 
 %Animation
-doAnimate = 1;       % Animate the Cloud
+doAnimate = 0;       % Animate the Cloud
 
 %% Select image directory
 % Choose the directory where the images to analyze are stored
@@ -270,8 +273,11 @@ atomdata=atomdata(inds);
 % % 
 % ROI=[800 950 1700 1800];   % XDT 20 ms TOF
 % 
- ROI=[800 950 490 600;
-     800 950 1520 1630];   %  band map 15 ms TOF
+ ROI=[800 950 1520 1630;
+     800 950 490 600];   %  band map 15 ms TOF
+%  ROI=[
+%      800 950 490 600;
+%      800 950 1520 1630];   %  band map 15 ms TOF
  
 %  ROI = [855 900 525 570;
 %         830 925 500 595;
@@ -455,7 +461,7 @@ end
 %% Box Count : Rabi oscilations
 boxRabiopts=struct;
 boxRabiopts.xUnit=pco_unit;
-boxRabiopts.Ratio_79=0.66;
+boxRabiopts.Ratio_79=0.5;0.66;
 
 boxRabiopts.Guess=[.9 10 1]; % [probability transfer, freq, t2 time,]
 boxRabiopts.Guess=[.5 4 10]; % [probability transfer, freq, t2 time,]
@@ -583,7 +589,7 @@ end
 
 gaussPopts = struct;
 gaussPopts.xUnit=pco_unit;
-gaussPopts.NumberExpFit = 1;        % Fit exponential decay to atom number
+gaussPopts.NumberExpFit = 0;        % Fit exponential decay to atom number
 gaussPopts.NumberLorentzianFit=0;   % Fit atom number to lorentzian
 gaussPopts.CenterSineFit = 0;       % Fit sine fit to cloud center
 gaussPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
@@ -688,6 +694,29 @@ if doGaussFit
     end        
 end
 
+%% Gauss fit : Rabi oscilations
+GaussRabiopts=struct;
+GaussRabiopts.xUnit=pco_unit;
+GaussRabiopts.Ratio_79=0.5;0.66;
+
+GaussRabiopts.Guess=[.9 10 1]; % [probability transfer, freq, t2 time,]
+boxRabiopts.Guess=[.5 4 10]; % [probability transfer, freq, t2 time,]
+
+
+GaussRabiopts.Sign=1; % N1-N2 (+1) or N2-N1 (-1)
+
+if doGaussFit && doGaussRabi 
+    if size(ROI,1)==2
+        % For normalized rabi oscillations
+        [hF_rabi_gauss]=GaussRabiOscillations(atomdata,pco_xVar,GaussRabiopts);
+    else
+        % For un-normalized rabi oscillations
+        [hF_rabi_gauss]=GaussRabiOscillations_raw(atomdata,pco_xVar,GaussRabiopts);
+    end
+    
+    if doSave;saveFigure(atomdata,hF_rabi_gauss,'gauss_rabi_oscillate');end
+
+end
 
 %% Fermi-Fitter Long TOF
 % This section of code fits the optical density to the distribution
@@ -818,14 +847,15 @@ if doCustom
 
     % Center frequency for expected RF field (if relevant)
     B = atomdata(1).Params.HF_FeshValue_Initial;
-    x0= (BreitRabiK(B,9/2,-5/2)-BreitRabiK(B,9/2,-7/2))/6.6260755e-34/1E6; 
+    x0= (BreitRabiK(B,9/2,-7/2)-BreitRabiK(B,9/2,-9/2))/6.6260755e-34/1E6; 
 %     %x0 = 0;
 %     % Grab Raw data
     X=DATA.X; X=X';
-%     X = 2*X - 80  %Raman AOM condition
-    X=X-x0;    
-
+    X = 2*X - 80;  %Raman AOM condition
+    X=X-x0;  
     X=X*1E3;  
+    
+    
 %     X=X';
     xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];    
 %       xstr=pco_xVar; 
@@ -834,7 +864,7 @@ if doCustom
      N2=DATA.Natoms(:,2);     
      N2=N2/0.5;
      
-     dataMode=1;
+     dataMode=4;
      
      switch dataMode
          case 0     
@@ -854,7 +884,7 @@ if doCustom
             ystr=['N_9+N_7'];
             fstr=ystr;
          case 4
-            Y=N1./(N1+N2);
+            Y=N2./(N1+N2);
             ystr=['Transfer Fraction'];
             fstr=ystr;
      end
@@ -1069,7 +1099,7 @@ if doCustom
     end
     
     % Assymetric lorentzian fit, good for AM spec
-    fit_lorentz_assymetric=0;
+    fit_lorentz_assymetric=1;
     if length(atomdata)>4 && fit_lorentz_assymetric
         g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
         y=@(x,a,x0,G,A,bg) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1)+bg;        
@@ -1083,14 +1113,14 @@ if doCustom
         
         [~,i]=max(Y);
         x0=X(i);
-%         x0=mean(X(inds));     
+        x0=mean(X(inds));     
         opt.StartPoint=[.1 x0 G0 A0 bg];  
         opt.Robust='bisquare';
 %         opts.Weights=w;
         
         fout_lorentz=fit(X,Y,myfit,opt);
-        XF=linspace(0,max(X)+10,1000);
-        xlim([60 max(X)+20]);
+        XF=linspace(min(X)-5,max(X)+5,1000);
+        xlim([min(X)-5 max(X)+5]);
         pExp=plot(XF,feval(fout_lorentz,XF),'r-','linewidth',2);
         str=['$f_0 = ' num2str(round(fout_lorentz.x0,2)) '$ kHz' newline ...
             '$\mathrm{FWHM} = ' num2str(round(abs(fout_lorentz.G),2)) ' $ kHz'];
