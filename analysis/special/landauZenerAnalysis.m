@@ -9,68 +9,77 @@ global crosssec
 if nargin==2
     opts=struct;
     opts.LZ_GUESS = [3 .8]; % If not provided, this is the original LZ guess (kHz,amplitude)
-    
+    opts.Mode='auto';
+    opts.BoxIndex=1;
 end
 
-%% Grab the box counts analysis
-for kk=1:length(atomdata)
-   for ind=1:size(atomdata(kk).ROI,1)
-        BC=atomdata(kk).BoxCount(ind);           % Grab the box count
-        Xc(kk,ind)=BC.Xc;Yc(kk,ind)=BC.Yc;        % X and Y center
-        Xs(kk,ind)=BC.Xs;Ys(kk,ind)=BC.Ys;        % X and Y sigma   
-        Zs(kk,ind)=BC.Ys;                        % ASSUME sZ=sY;                
-        nbg(kk,ind)=BC.Nbkgd;                    % Background
-        N(kk,ind)=BC.Ncounts;
-        
-        if BC.Ncounts<0
-           warning(['Negative box count detected atomdata(' num2str(kk) ')' ...
-               ' ROI : ' num2str(ind) '. Setting to 0']);
-           N(kk,ind)=0;
-        end
-        
-        Natoms(kk,ind)=N(kk,ind)*(pxsize^2/crosssec);  % Atom number  
-   end  
-   
-   
-   
-  NatomsTot(kk)=sum(Natoms(kk,:));                 % Total Atom number over all boxes
-
-end
+if isequal(opts.Mode,'custom')   
+    Nrel=atomdata;
+    ind=1;
+else    
 
 
+    %% Grab the box counts analysis
+    for kk=1:length(atomdata)
+       for ind=1:size(atomdata(kk).ROI,1)
+            BC=atomdata(kk).BoxCount(ind);           % Grab the box count
+            Xc(kk,ind)=BC.Xc;Yc(kk,ind)=BC.Yc;        % X and Y center
+            Xs(kk,ind)=BC.Xs;Ys(kk,ind)=BC.Ys;        % X and Y sigma   
+            Zs(kk,ind)=BC.Ys;                        % ASSUME sZ=sY;                
+            nbg(kk,ind)=BC.Nbkgd;                    % Background
+            N(kk,ind)=BC.Ncounts;
+
+            if BC.Ncounts<0
+               warning(['Negative box count detected atomdata(' num2str(kk) ')' ...
+                   ' ROI : ' num2str(ind) '. Setting to 0']);
+               N(kk,ind)=0;
+            end
+
+            Natoms(kk,ind)=N(kk,ind)*(pxsize^2/crosssec);  % Atom number  
+       end  
 
 
-% Convert sizes in meters
-Xs = Xs*pxsize;
-Ys = Ys*pxsize;
-Zs = Zs*pxsize;
 
-%% Grab the relative atom number to fit
+      NatomsTot(kk)=sum(Natoms(kk,:));                 % Total Atom number over all boxes
 
-% Which ROI do we plot against?
-% [~,ind]=min(Natoms(1,:));  
-
-
-ind=opts.BoxIndex;
-
-% Calculate the normalized atom number
-Nrel=Natoms(:,ind)'./NatomsTot;
-
-%% Ignore Bad Data Points
-badInds=[NatomsTot<1E4];
-
-if sum(badInds)
-   warning('Low atom number detected. Check your images and delete bad data'); 
-end
-
-for kk=1:length(badInds)
-    if badInds(kk)
-       warning([' atomdata(' num2str(kk) ') total atoms <1E4. Ignoring in analysis.']);
     end
-end
+    disp(Natoms)
 
-Nrel(badInds)=[];
-dtdf(badInds)=[];
+
+
+    % Convert sizes in meters
+    Xs = Xs*pxsize;
+    Ys = Ys*pxsize;
+    Zs = Zs*pxsize;
+
+    %% Grab the relative atom number to fit
+
+    % Which ROI do we plot against?
+    % [~,ind]=min(Natoms(1,:));  
+
+
+    ind=opts.BoxIndex;
+
+    % Calculate the normalized atom number
+    Nrel=Natoms(:,ind)'./NatomsTot;
+
+    %% Ignore Bad Data Points
+    badInds=[NatomsTot<1E4];
+
+    if sum(badInds)
+       warning('Low atom number detected. Check your images and delete bad data'); 
+    end
+
+    for kk=1:length(badInds)
+        if badInds(kk)
+           warning([' atomdata(' num2str(kk) ') total atoms <1E4. Ignoring in analysis.']);
+        end
+    end
+
+    Nrel(badInds)=[];
+    dtdf(badInds)=[];
+
+end
 %% Analyze the data
 
 % Peform the fit
