@@ -61,6 +61,8 @@ else
     ind=opts.BoxIndex;
 
     % Calculate the normalized atom number
+    scale = opts.num_scale;
+    Natoms(:,2) = Natoms(:,ind)./scale;
     Nrel=Natoms(:,ind)'./NatomsTot;
 
     %% Ignore Bad Data Points

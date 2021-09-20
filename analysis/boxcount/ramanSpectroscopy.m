@@ -6,11 +6,8 @@ global crosssec
 
 fprintf('performing box count raman...');
 
-for kk=1:length(atomdata)
-    
-    
-    OD=double(atomdata(kk).OD);
-    
+for kk=1:length(atomdata)       
+    OD=double(atomdata(kk).OD);    
     nbg=0;
     
     % Subtract off background
@@ -28,8 +25,7 @@ for kk=1:length(atomdata)
     % Calculate 
     N_2_Ha=sum(sum(OD(opt.ROI_2_H(1,3):opt.ROI_2_H(1,4),opt.ROI_2_H(1,1):opt.ROI_2_H(1,2))))*(pxsize^2/crosssec);
     N_2_Hb=sum(sum(OD(opt.ROI_2_H(2,3):opt.ROI_2_H(2,4),opt.ROI_2_H(2,1):opt.ROI_2_H(2,2))))*(pxsize^2/crosssec);
-    
-    
+      
     
     N_2_H=N_2_Ha+N_2_Hb;
 

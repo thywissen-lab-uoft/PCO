@@ -1,4 +1,4 @@
-function [hF,outdata]=boxRabiOscillations(atomdata,xVar,opts)
+function [hF,outdata]=boxRabiOscillationsContrast(atomdata,xVar,opts)
 % Grab important global variables
 global pxsize
 global imgdir
@@ -41,15 +41,13 @@ for kk=1:length(atomdata)
     Natoms(Natoms<0)=0;
 end
 
-
-
 %% Scale atom number for 79 Ratio if HF
 doScale=[0 0];
 for kk=1:size(atomdata(1).ROI,1)
-   if atomdata(1).ROI(kk,3)>1024      
-    doScale(kk)=1;
-    Natoms(:,kk)=Natoms(:,kk)/opts.Ratio_79; 
-   end
+    if atomdata(1).ROI(kk,3)>1024      
+        doScale(kk)=1;
+        Natoms(:,kk)=Natoms(:,kk)/opts.Ratio_79; 
+    end
 end
 
 NatomsTot=sum(Natoms,2)';
@@ -69,10 +67,16 @@ end
 
 %% Formulate into Contrast
 
+C=(Natoms(:,1)-Natoms(:,2))./(Natoms(:,1)+Natoms(:,2));
+
+
+if isequal(opts.Sign,'auto')
+    C=sign(C(1))*C;
+else
+    C=opts.Sign*C;
+end
+
 T=xvals';
-
-C=opts.Sign*(Natoms(:,1)-Natoms(:,2))./(Natoms(:,1)+Natoms(:,2));
-
 G=opts.Guess;
 
 
@@ -94,6 +98,8 @@ opt=fitoptions(myfit);
 
 opt.StartPoint=G;
 opt.Lower=[0 .1 0];
+opt.Upper=[1 100 100];
+
 opt.Robust='bisquare';
 
 
@@ -127,8 +133,8 @@ strs=strsplit(imgdir,filesep);
 str=[strs{end-1} filesep strs{end}];
 
 % Create teh figure
-hF=figure('Name',[pad('Box Rabi Oscillations',20) str],...
-    'units','pixels','color','w','Menubar','none','Resize','off',...
+hF=figure('Name',[pad('Box Rabi',20) str],...
+    'units','pixels','color','w','Menubar','figure','Resize','on',...
     'numbertitle','off');
 hF.Position(1)=0;
 hF.Position(2)=50;
@@ -175,16 +181,23 @@ for kk=1:length(doScale)
         
         mystr=['$N_' num2str(kk) '\rightarrow N_' num2str(kk) '/' ...
             num2str(opts.Ratio_79) '$'];
-       text(.02,.85,mystr,'units','normalized','interpreter','latex',...
-           'verticalalignment','bottom');
+       text(.98,.02,mystr,'units','normalized','interpreter','latex',...
+           'verticalalignment','bottom','horizontalalignment','right');
+       
+
     end
 end
+xlim([0 max(T)]);
+
+set(gca,'units','normalized','xgrid','on','ygrid','on');
 
 hax2=subplot(212);
-set(hax2,'box','on','linewidth',1,'fontsize',14,'fontname','times');
+set(hax2,'box','on','linewidth',1,'fontsize',14,'fontname','times',...
+    'xgrid','on','ygrid','on');
 hold on
 
 pF=plot(tt,feval(fout,tt),'r-','linewidth',2);
+xlim([0 max(T)]);
 
 plot(T,C,'o','color','k','linewidth',1,'markersize',8,...
     'markerfacecolor',[.5 .5 .5],'markeredgecolor','k');
@@ -202,6 +215,7 @@ text(0.98,0.02,rabiStr,'units','normalized','verticalalignment','bottom',...
 ll=legend(pF,{paramStr},'interpreter','latex','location','northeast');
 ll.Units='normalized';
 ll.Position(2)=hax2.Position(2)+hax2.Position(4)-ll.Position(4);
+ll.Position(1)=hax2.Position(1)+hax2.Position(3)-ll.Position(3);
 
 % Image directory folder string
 t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
@@ -210,6 +224,13 @@ t.Position(4)=t.Extent(4);
 t.Position(3)=hF.Position(3);
 t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
 
+    function myresize(~,~)
+       t.Position(2)=t.Parent.Position(4)-t.Position(4); 
+       ll.Position(2)=hax2.Position(2)+hax2.Position(4)-ll.Position(4);
+        ll.Position(1)=hax2.Position(1)+hax2.Position(3)-ll.Position(3);
+
+    end
+hF.SizeChangedFcn=@myresize;
 
 
     
