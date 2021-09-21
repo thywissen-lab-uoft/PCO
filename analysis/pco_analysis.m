@@ -72,12 +72,12 @@ end
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-pco_xVar='Raman_AOM3_freq';
-pco_xVar='Pulse_Time';
+% pco_xVar='Raman_AOM3_freq';
+% pco_xVar='Pulse_Time';
 
 
-pco_xVar='HF_Raman_sweep_time';
-pco_xVar = 'ExecutionDate';
+% pco_xVar='HF_Raman_sweep_time';
+% pco_xVar = 'ExecutionDate';
 % pco_xVar = 'Pulse_Time';
 % pco_xVar = 'rf_rabi_time_HF';
 % 
@@ -85,7 +85,7 @@ pco_xVar = 'ExecutionDate';
 % pco_xVar = 'power_val';
 % pco_xVar = 'Lattice_loading_field';
 % pco_xVar = 'rf_rabi_freq_HF';
-% pco_xVar = 'rf_freq_HF';
+pco_xVar = 'rf_freq_HF';
 % 
 
 
@@ -102,7 +102,7 @@ pco_overrideUnit='ms';
 doProbeFit=0;        % Fit probe beam to 2D Gaussian
 
 % Box Count
-doBoxCount= 0;        % Box count analysis
+doBoxCount= 1;        % Box count analysis
 doLandauZener=0;     % Landau Zener Analysis on BOX
 doBoxRabi=0;
 
@@ -111,7 +111,7 @@ doBoxRabi=0;
 doRamanSpec=0;       % Raman box count count analyis
 
 % Fermi
-doFermiFitLong=1;    % Fermi Fit for XDT TOF
+doFermiFitLong=0;    % Fermi Fit for XDT TOF
 
 % Gaussian
 doGaussFit= 1;        % Flag for performing the gaussian fit
@@ -121,7 +121,7 @@ doGaussRabi=0;
 doBEC=0;
 
 % Custom in line figure
-doCustom= 0;          % Custom Box Count
+doCustom= 1;          % Custom Box Count
 doCustom_BM = 0;    % Custom Band map
 
 
@@ -884,7 +884,7 @@ end
 
 %% Custom
 if doCustom 
-    DATA=Ndatabox;
+%     DATA=Ndatabox;
     DATA=Ndatagauss;
 
     %%%%%%%%%%%%%%% RF SPEC %%%%%%%%%%%%%%
@@ -907,7 +907,7 @@ if doCustom
     
 %     X=X';
      xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];    
-%     xstr=['Fesh field (G)'] ;
+% %     xstr=['Fesh field (G)'] ;
 %     xstr=['Pulse Time (ms)']; 
     
 %     xstr=['2 Pulse Time (ms)']; 
