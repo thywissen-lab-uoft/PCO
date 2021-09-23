@@ -922,7 +922,7 @@ if doCustom
     %%%%%%%%%%%%%%% RF SPEC %%%%%%%%%%%%%%
 
     % Center frequency for expected RF field (if relevant)
-    B = atomdata(1).Params.HF_FeshValue_Initial;
+%     B = atomdata(1).Params.HF_FeshValue_Initial;
     B = 204.5;
 
 %     B=201;
@@ -966,7 +966,7 @@ if doCustom
     custom_outdata.N7=N2;
     custom_outdata.Ntot=N1+N2;
      
-     dataMode=3;         
+     dataMode=6;         
      switch dataMode
          case 0     
              Y=(N1-N2)./(N1);
