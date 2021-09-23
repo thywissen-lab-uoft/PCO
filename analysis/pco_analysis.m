@@ -649,11 +649,7 @@ if doGaussFit
             Dx=sROI(1):sROI(2);               % X Vector
             Dy=sROI(3):sROI(4);               % Y Vector
             data=atomdata(kk).OD(Dy,Dx);    % Optical density        
-            [fout,gof,output]=gaussFit2D(Dx,Dy,data);    % Perform the fit   
-            
-            % Atom Number
-%             N=2*pi*fout.Xs*fout.Ys*fout.A*(pxsize^2/crosssec); 
-            
+            [fout,gof,output]=gaussFit2D(Dx,Dy,data);    % Perform the fit               
             atomdata(kk).GaussFit{nn}=fout; % Assign the fit object       
             atomdata(kk).GaussGOF{nn}=gof; % Assign the fit object  
         end
@@ -661,6 +657,32 @@ if doGaussFit
     gauss_data=getGaussData(atomdata,pco_xVar);  
 end
 
+%% Gauss OD Cut
+% Style of profile --> cut or sum?
+style='cut';
+%style='sum';
+clear hF_X;    
+clear hF_Y;
+hF_X=[];
+hF_Y=[];
+for rNum=1:size(ROI,1)
+    hF_Xs_rNum=showProfile(atomdata,'GaussFit','X',style,rNum,pco_xVar);        
+    hF_Ys_rNum=showProfile(atomdata,'GaussFit','Y',style,rNum,pco_xVar);  
+    pause(1);
+    
+%  Save th figures (this can be slow)
+    if doSave
+        for kk=1:length(hF_Xs_rNum) 
+            saveFigure(atomdata,hF_Xs_rNum(kk),['gauss_profile_X' num2str(rNum) '_' num2str(kk)]);
+        end             
+
+        for kk=1:length(hF_Ys_rNum)
+            saveFigure(atomdata,hF_Ys_rNum(kk),['gauss_profile_Y' num2str(rNum) '_' num2str(kk)]);
+        end
+    end
+    hF_X=[hF_X; hF_Xs_rNum];
+    hF_Y=[hF_Y; hF_Ys_rNum];
+end   
 
 %% 2D Gauss Analysis
 
@@ -677,8 +699,7 @@ if doGaussFit
     
     % Plot the statistics of gaussian fit
     hF_stats=showGaussStats(atomdata);     
-    if doSave;saveFigure(atomdata,hF_stats,'gauss_stats');end
-       
+    if doSave;saveFigure(atomdata,hF_stats,'gauss_stats');end       
     
     hF_number_gauss = showAtomNumber(gauss_data,pco_xVar,gaussPopts);  
     ylim([0 max(get(gca,'YLim'))]);    
@@ -686,16 +707,16 @@ if doGaussFit
     
     % Plot the ratios if there are more than one ROI.
     if size(ROI,1)>1    
-        hF_numbergaussratio=showNumberRatio(gauss_data,pco_xVar,gaussPopts);
-        if doSave;saveFigure(atomdata,hF_numbergaussratio,'gauss_number_ratio');end
+        hF_number_gauss_ratio=showNumberRatio(gauss_data,pco_xVar,gaussPopts);
+        if doSave;saveFigure(atomdata,hF_number_gauss_ratio,'gauss_number_ratio');end
     end
     
-    % Gaussian radii
-    hF_size=showGaussSize(atomdata,pco_xVar,gaussPopts);    
+    % Gauss Size
+    hF_size=showSize(gauss_data,pco_xVar,gaussPopts);    
     if doSave;saveFigure(atomdata,hF_size,'gauss_size');end
         
     % Aspect ratio
-    hF_ratio=showGaussAspectRatio(atomdata,pco_xVar,gaussPopts);    
+    hF_ratio=showAspectRatio(gauss_data,pco_xVar,gaussPopts);    
     if doSave;saveFigure(atomdata,hF_ratio,'gauss_ratio');end
     
     % Peak gaussian density
@@ -712,38 +733,14 @@ if doGaussFit
     
     % Cloud Error
     hF_Error=showGaussError(atomdata,pco_xVar,gaussPopts);    
-    if doSave;saveFigure(atomdata,hF_Error,'gauss_error');end    
+    if doSave;saveFigure(atomdata,hF_Error,'gauss_error');end   
     
     
     if isequal(pco_xVar,'tof') && length(atomdata)>2
         [hF,fitX,fitY]=computeGaussianTemperature(atomdata,pco_xVar);
     end       
 
-     % Style of profile --> cut or sum?
-    style='cut';
-%     style='sum';
-    clear hF_X;    
-    clear hF_Y;
-    hF_X=[];
-    hF_Y=[];
-    for rNum=1:size(ROI,1)
-        hF_Xs_rNum=showProfile(atomdata,'GaussFit','X',style,rNum,pco_xVar);        
-        hF_Ys_rNum=showProfile(atomdata,'GaussFit','Y',style,rNum,pco_xVar);  
-        pause(1);
-%       Save the figures (this can be slow)
-        if doSave
-            for kk=1:length(hF_Xs_rNum) 
-                saveFigure(atomdata,hF_Xs_rNum(kk),['gauss_profile_X' num2str(rNum) '_' num2str(kk)]);
-            end 
-            
-            
-            for kk=1:length(hF_Ys_rNum)
-                saveFigure(atomdata,hF_Ys_rNum(kk),['gauss_profile_Y' num2str(rNum) '_' num2str(kk)]);
-            end
-        end
-        hF_X=[hF_X; hF_Xs_rNum];
-        hF_Y=[hF_Y; hF_Ys_rNum];
-    end        
+      
 end
 
 %% Erf Fit
@@ -773,6 +770,31 @@ if doErfFit
     erf_data=getErfData(atomdata,pco_xVar);    
 end
 
+%% Erf OD Cuts
+% Style of profile --> cut or sum?
+style='cut';
+%  style='sum';
+clear hF_X_erf;clear hF_Y_erf;
+hF_X_erf=[];hF_Y_erf=[];
+for rNum=1:size(ROI,1)
+    hF_Xs_rNum_erf=showProfile(atomdata,'ErfFit','X',style,rNum,pco_xVar);        
+    hF_Ys_rNum_erf=showProfile(atomdata,'ErfFit','Y',style,rNum,pco_xVar);  
+    pause(1);
+    
+%   Save the figures (this can be slow)
+    if doSave
+        for kk=1:length(hF_Xs_rNum) 
+            saveFigure(atomdata,hF_Xs_rNum_erf(kk),['erf_profile_X' num2str(rNum) '_' num2str(kk)]);
+        end 
+        for kk=1:length(hF_Ys_rNum)
+            saveFigure(atomdata,hF_Xs_rNum_erf(kk),['erf_profile_Y' num2str(rNum) '_' num2str(kk)]);
+        end
+    end
+    hF_X_erf=[hF_X_erf; hF_Xs_rNum];
+    hF_Y_erf=[hF_Y_erf; hF_Ys_rNum];
+end  
+
+%% Erf Analysis
 % Plot the fit results
 if doErfFit
 
@@ -784,27 +806,13 @@ if doErfFit
     hF_number_erf=showAtomNumber(erf_data,pco_xVar,gaussPopts);  
 %     ylim([0 max(get(gca,'YLim'))]);
     
-    % Style of profile --> cut or sum?
-    style='cut';
-    %  style='sum';
-    clear hF_X_erf;clear hF_Y_erf;
-    hF_X_erf=[];hF_Y_erf=[];
-    for rNum=1:size(ROI,1)
-        hF_Xs_rNum_erf=showProfile(atomdata,'ErfFit','X',style,rNum,pco_xVar);        
-        hF_Ys_rNum_erf=showProfile(atomdata,'ErfFit','Y',style,rNum,pco_xVar);  
-        pause(1);
-    %       Save the figures (this can be slow)
-        if doSave
-            for kk=1:length(hF_Xs_rNum) 
-                saveFigure(atomdata,hF_Xs_rNum_erf(kk),['erf_profile_X' num2str(rNum) '_' num2str(kk)]);
-            end 
-            for kk=1:length(hF_Ys_rNum)
-                saveFigure(atomdata,hF_Xs_rNum_erf(kk),['erf_profile_Y' num2str(rNum) '_' num2str(kk)]);
-            end
-        end
-        hF_X_erf=[hF_X_erf; hF_Xs_rNum];
-        hF_Y_erf=[hF_Y_erf; hF_Ys_rNum];
-    end  
+    % Size
+    hF_size_erf=showSize(erf_data,pco_xVar,gaussPopts);    
+    if doSave;saveFigure(atomdata,hF_size_erf,'gauss_size');end
+    
+    % Aspect ratio
+    hF_ratio=showAspectRatio(erf_data,pco_xVar,gaussPopts);    
+    if doSave;saveFigure(atomdata,hF_ratio,'gauss_ratio');end
     
 end
 

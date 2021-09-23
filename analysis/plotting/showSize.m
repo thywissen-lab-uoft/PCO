@@ -1,50 +1,22 @@
-function hF=showGaussSize(atomdata,xVar,opts)
+function hF=showSize(data,xVar,opts)
 
-
-global pxsize
 global imgdir
-global crosssec
-
-
-%% Sort the data
-params=[atomdata.Params];
-xvals=[params.(xVar)];
-
-[xvals,inds]=sort(xvals,'ascend');
-atomdata=atomdata(inds);
-
-%% Grab the Data
-for kk=1:length(atomdata)
-   for nn=1:length(atomdata(kk).GaussFit)
-        fout=atomdata(kk).GaussFit{nn};         
-        Xc(kk,nn)=fout.Xc;Yc(kk,nn)=fout.Yc;
-        Xs(kk,nn)=fout.Xs;Ys(kk,nn)=fout.Ys;
-        A(kk,nn)=fout.A;
-        nbg(kk,nn)=fout.nbg;
-
-        N(kk,nn)=2*pi*Xs(kk,nn)*Ys(kk,nn)*A(kk,nn);
-        Natoms(kk,nn)=N(kk,nn)*((pxsize)^2/crosssec);   % Atom number  
-   end        
-end
-
-%% Make Filename
-filename='gaussSize'; 
-
-% Create the name of the figure
-[filepath,name,~]=fileparts(imgdir);
-
-figDir=fullfile(imgdir,'figures');
-if ~exist(figDir,'dir')
-   mkdir(figDir); 
-end
-
-
-%% Make Figure
-
 strs=strsplit(imgdir,filesep);
 str=[strs{end-1} filesep strs{end}];
 
-hF=figure('Name',[pad('Gauss Size',20) str],...
+%% Grab Data
+
+params=[data.Params];
+xvals=[params.(xVar)];
+
+PixelSize = data.PixelSize;
+Xs = data.Xs*PixelSize;
+Ys = data.Ys*PixelSize;
+A  = pi*Xs.*Ys;
+
+%% Make Figure
+
+hF=figure('Name',[pad([data.FitType ' size'],20) str],...
     'units','pixels','color','w','Menubar','none','Resize','off',...
     'numbertitle','off');
 hF.Position(1)=400;
@@ -66,11 +38,11 @@ set(hax1,'box','on','linewidth',1,'fontsize',12,'units','pixels');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 co=get(gca,'colororder');
-for nn=1:size(atomdata(1).ROI,1)
-   plot(xvals,Xs(:,nn)*pxsize*1E6,'o-','color',co(nn,:),'linewidth',1,'markersize',8,...
+for nn=1:size(Xs,2)
+   plot(xvals,Xs(:,nn)*1E6,'o-','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
-str='$\sigma_X (\mu \mathrm{m})$';
+str=[data.FitType newline ' $\sigma_X (\mu \mathrm{m})$'];
 text(0.02,.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',...
     'interpreter','latex');
 
@@ -82,11 +54,11 @@ set(hax2,'box','on','linewidth',1,'fontsize',12,'units','pixels');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 co=get(gca,'colororder');
-for nn=1:size(atomdata(1).ROI,1)
-   plot(xvals,Ys(:,nn)*pxsize*1E6,'o-','color',co(nn,:),'linewidth',1,'markersize',8,...
+for nn=1:size(Ys,2)
+   plot(xvals,Ys(:,nn)*1E6,'o-','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
-str='$\sigma_Y (\mu \mathrm{m})$';
+str=[data.FitType newline ' $\sigma_Y (\mu \mathrm{m})$'];
 text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',...
     'interpreter','latex');
 
@@ -98,11 +70,11 @@ set(hax3,'box','on','linewidth',1,'fontsize',12,'units','pixels');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 co=get(gca,'colororder');
-for nn=1:size(atomdata(1).ROI,1)
-   plot(xvals,pi*(Xs(:,nn)*pxsize).*(Ys(:,nn)*pxsize)*1E12,'o-','color',co(nn,:),'linewidth',1,'markersize',8,...
+for nn=1:size(A,2)
+   plot(xvals,A*1E12,'o-','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
-str='$\pi \sigma_X \sigma_Y (\mu \mathrm{m}^2)$';
+str=[data.FitType newline '$\pi \sigma_X \sigma_Y (\mu \mathrm{m}^2)$'];
 text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',...
     'interpreter','latex');
 

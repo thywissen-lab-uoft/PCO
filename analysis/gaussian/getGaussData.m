@@ -53,8 +53,8 @@ output.FitGOFs      = GOFs;
 output.Natoms       = Natoms;
 output.Xc           = Xc;
 output.Yc           = Yc;
-output.Xw           = Xs;
-output.Yw           = Ys;
+output.Xs           = Xs;
+output.Ys           = Ys;
 output.A            = A;
 output.nbg          = nbg;
 
