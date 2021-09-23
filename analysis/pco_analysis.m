@@ -93,7 +93,7 @@ pco_xVar = 'rf_freq_HF';
 
 
 
-doSave=1;
+doSave=0;
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit=1;
@@ -169,11 +169,12 @@ for kk=1:length(files)
     if isequal(pco_xVar,'ExecutionDate')
         data.Params.(pco_xVar)=datenum(data.Params.(pco_xVar))*24*60*60;
     end  
-    atomdata(kk)=data;   
     
-    % Append PixelSize, Cross Section
-    atomdata(kk).PixelSize = pxsize;
-    atomdata(kk).CrossSection = crosssec;    
+    % Append pixel size and resonant cross section
+    data.PixelSize = pxsize;
+    data.CrossSection = crosssec;
+    
+    atomdata(kk)=data;             
 end
 disp(' ');
 
