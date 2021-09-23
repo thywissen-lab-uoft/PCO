@@ -1,8 +1,11 @@
 function hF=showSize(data,xVar,opts)
 
-global imgdir
-strs=strsplit(imgdir,filesep);
-str=[strs{end-1} filesep strs{end}];
+if nargin == 3 && isfield(opts,'FigLabel') 
+    FigLabel = opts.FigLabel;
+else
+    FigLabel = '';
+    opts = struct;
+end
 
 %% Grab Data
 
@@ -16,7 +19,7 @@ A  = pi*Xs.*Ys;
 
 %% Make Figure
 
-hF=figure('Name',[pad([data.FitType ' size'],20) str],...
+hF=figure('Name',[pad([data.FitType ' size'],20) FigLabel],...
     'units','pixels','color','w','numbertitle','off');
 hF.Position(1)=1015;
 hF.Position(2)=50;
@@ -25,7 +28,7 @@ hF.Position(4)=300;
 drawnow;
 
 % Image directory folder string
-t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left');
 t.Position(4)=t.Extent(4);
 t.Position(3)=hF.Position(3);

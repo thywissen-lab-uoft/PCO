@@ -1,5 +1,12 @@
 function [hF,counts]=showProbeCounts(atomdata,xVar,opts)
-global imgdir
+if nargin == 3 && isfield(opts,'FigLabel') 
+    FigLabel = opts.FigLabel;
+else
+    FigLabel = '';
+    opts = struct;
+end
+
+
 %% Sort the data by the parameter given
 params=[atomdata.Params];
 xvals=[params.(xVar)];
@@ -30,18 +37,7 @@ counts.PWOA=NWOA;
 
 %% Make Figure
 
-% Create the name of the figure
-[filepath,name,~]=fileparts(imgdir);
-
-figDir=fullfile(imgdir,'figures');
-if ~exist(figDir,'dir')
-   mkdir(figDir); 
-end
-
-strs=strsplit(imgdir,filesep);
-str=[strs{end-1} filesep strs{end}];
-
-hF=figure('Name',[pad('Probe Counts',20) str],...
+hF=figure('Name',[pad('Probe Counts',20) FigLabel],...
     'units','pixels','color','w','Menubar','none','Resize','off',...
     'numbertitle','off');
 hF.Position(1)=0;
@@ -51,7 +47,7 @@ hF.Position(4)=300;
 drawnow;
 
 % Image directory folder string
-t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left','fontsize',6);
 t.Position(4)=t.Extent(4);
 t.Position(3)=hF.Position(3);

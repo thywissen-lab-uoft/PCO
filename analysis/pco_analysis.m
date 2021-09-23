@@ -43,9 +43,7 @@ disp('Setting global settings for analysis...');
 
 global camaxis
 global pxsize
-
 global imgdir
-
 global crosssec
 
 lambdaRb=780E-9;lambdaK=770E-9;   % Rb and K wavelengths             
@@ -148,7 +146,7 @@ if isequal(newdir,0)
 else
     imgdir = newdir;
     strs=strsplit(imgdir,filesep);
-    figLabel=[strs{end-1} filesep strs{end}];
+    FigLabel=[strs{end-1} filesep strs{end}];
 end
 
 %% Load the data
@@ -460,6 +458,8 @@ atomdata=computeOD(atomdata,ODopts);
 %% Probe Beam
 probe_opts=struct;
 probe_opts.xUnit=pco_unit;
+probe_opts.PixelSize = PixelSizes;
+probe_opts.FigLabel = FigLabel;
 
 [hF_probe,counts]=showProbeCounts(atomdata,pco_xVar,probe_opts);
 saveFigure(atomdata,hF_probe,'probe')
@@ -498,6 +498,7 @@ if doBoxCount
 end
     
 boxPopts = struct;
+boxPopts.FigLabel = FigLabel;
 boxPopts.xUnit=pco_unit;
 boxPopts.NumberExpFit = 0;      
 boxPopts.NumberExpOffsetFit = 0; 
@@ -698,6 +699,7 @@ end
 
 if doGaussFit  
     gaussPopts = struct;
+    gaussPopts.FigLabel = FigLabel;
     gaussPopts.xUnit=pco_unit;
     gaussPopts.NumberExpFit = 0;        % Fit exponential decay to atom number
     gaussPopts.NumberLorentzianFit=0;   % Fit atom number to lorentzian
@@ -747,7 +749,7 @@ if doGaussFit
 
     % Gaussian Temperature Analysis
     if isequal(pco_xVar,'tof') && size(gauss_data.Natoms,2)>2
-        [hF_temp,fitX,fitY]=computeGaussianTemperature(gauss_data,pco_xVar);
+        [hF_temp,fitX,fitY]=computeGaussianTemperature(gauss_data,gaussPopts);
         if doSave;saveFigure(atomdata,hF_temp,'gauss_temp');end    
     end      
       
@@ -770,7 +772,7 @@ if doErfFit
             Dy=sROI(3):sROI(4);               % Y Vector
             data=atomdata(kk).OD(Dy,Dx);    % Optical density        
             [fout,gof,output,N]=erfFit2D(Dx,Dy,data);    % Perform the fit  
-            Natoms = N*(pxsize^2/crosssec);
+            Natoms = N*(PixelSize^2/CrossSection);
             atomdata(kk).ErfFit{nn} = fout; % Assign the fit object       
             atomdata(kk).ErfGOF{nn} = gof; % Assign the fit object
             atomdata(kk).ErfNum{nn} = Natoms;
@@ -808,6 +810,7 @@ end
 
 if doErfFit  
     ErfPopts = struct;
+    ErfPopts.FigLabel = FigLabel;
     ErfPopts.xUnit=pco_unit;
     ErfPopts.NumberExpFit = 0;        % Fit exponential decay to atom number
     ErfPopts.NumberLorentzianFit=0;   % Fit atom number to lorentzian
@@ -818,7 +821,7 @@ if doErfFit
     ErfPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
     
     % Plot the statistics of erfian fit
-    hF_stats_erf=showErfStats(erf_data);     
+    hF_stats_erf=showErfStats(erf_data,ErfPopts);     
     if doSave;saveFigure(atomdata,hF_stats_erf,'erf_stats');end       
     
     hF_number_erf = showAtomNumber(erf_data,pco_xVar,ErfPopts);  

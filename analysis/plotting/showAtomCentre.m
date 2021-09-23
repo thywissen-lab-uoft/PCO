@@ -1,12 +1,10 @@
 function hF=showAtomCentre(data,xVar,opts)
 
-global imgdir
-
-% Create the name of the figure
-[filepath,name,~]=fileparts(imgdir);
-figDir=fullfile(imgdir,'figures');
-if ~exist(figDir,'dir')
-   mkdir(figDir); 
+if nargin == 3 && isfield(opts,'FigLabel') 
+    FigLabel = opts.FigLabel;
+else
+    FigLabel = '';
+    opts = struct;
 end
 
 %% Default options
@@ -25,13 +23,12 @@ Yc = data.Yc;
 params = [data.Params];
 xvals = [params.(xVar)];
 
+PixelSize = data.PixelSize;
+
 
 %% Make Figure
 
-strs=strsplit(imgdir,filesep);
-str=[strs{end-1} filesep strs{end}];
-
-hF=figure('Name',[pad([data.FitType ' centre'],20) str],...
+hF=figure('Name',[pad([data.FitType ' centre'],20) FigLabel],...
     'units','pixels','color','w','numbertitle','off');
 hF.Position(1)=510;
 hF.Position(2)=380;
@@ -40,7 +37,7 @@ hF.Position(4)=600;
 drawnow;
 
 % Image directory folder string
-t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left','fontsize',6);
 t.Position(4)=t.Extent(4);
 t.Position(3)=hF.Position(3);
@@ -233,11 +230,11 @@ if opts.CenterParabolaFit && length(xvals)>1
          data{6+6*(nn-1),1}='intercept (um) ';
 
         data{1+6*(nn-1),2}=fit1(1);
-        data{2+6*(nn-1),2}=fit1(1)*pxsize*1e6;
+        data{2+6*(nn-1),2}=fit1(1)*PixelSize*1e6;
         data{3+6*(nn-1),2}=fit1(2);
-        data{4+6*(nn-1),2}=fit1(2)*pxsize*1e6;
+        data{4+6*(nn-1),2}=fit1(2)*PixelSize*1e6;
         data{5+6*(nn-1),2}=fit1(3);
-        data{6+6*(nn-1),2}=fit1(3)*pxsize*1e6;    
+        data{6+6*(nn-1),2}=fit1(3)*PixelSize*1e6;    
 
     %     data{5,1}='<HTML> &Delta;X (px)</HTML>';
     %     data{5,2}=range(Xc(:,nn));
@@ -262,11 +259,11 @@ if opts.CenterParabolaFit && length(xvals)>1
         data{6+6*(nn-1),1}='intercept (um) ';
 
         data{1+6*(nn-1),2}=fit2(1);
-        data{2+6*(nn-1),2}=fit2(1)*pxsize*1e6;
+        data{2+6*(nn-1),2}=fit2(1)*PixelSize*1e6;
         data{3+6*(nn-1),2}=fit2(2);
-        data{4+6*(nn-1),2}=fit2(2)*pxsize*1e6;
+        data{4+6*(nn-1),2}=fit2(2)*PixelSize*1e6;
         data{5+6*(nn-1),2}=fit2(3);
-        data{6+6*(nn-1),2}=fit2(3)*pxsize*1e6;   
+        data{6+6*(nn-1),2}=fit2(3)*PixelSize*1e6;   
 
         data{5+6*(nn-1),1}='<HTML> &Delta;Y (px)</HTML>';
         data{5+6*(nn-1),2}=range(Yc(:,nn));
@@ -300,9 +297,9 @@ if opts.CenterLinearFit && length(xvals)>1
     data{4,1}='intercept (um) ';
 
     data{1,2}=fit1(1);
-    data{2,2}=fit1(1)*pxsize*1e6;
+    data{2,2}=fit1(1)*PixelSize*1e6;
     data{3,2}=fit1(2);
-    data{4,2}=fit1(2)*pxsize*1e6;
+    data{4,2}=fit1(2)*PixelSize*1e6;
     
     data{5,1}='<HTML> &Delta;X (px)</HTML>';
     data{5,2}=range(Xc(:,nn));
@@ -325,9 +322,9 @@ if opts.CenterLinearFit && length(xvals)>1
     data{4,1}='intercept (um) ';
 
     data{1,2}=fit2(1);
-    data{2,2}=fit2(1)*pxsize*1e6;
+    data{2,2}=fit2(1)*PixelSize*1e6;
     data{3,2}=fit2(2);
-    data{4,2}=fit2(2)*pxsize*1e6;
+    data{4,2}=fit2(2)*PixelSize*1e6;
     
     data{5,1}='<HTML> &Delta;Y (px)</HTML>';
     data{5,2}=range(Yc(:,nn));

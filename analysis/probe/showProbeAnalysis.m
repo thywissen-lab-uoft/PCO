@@ -1,7 +1,14 @@
 function [hF,outdata] = showProbeAnalysis(atomdata,xVar,opts)
 
-global pxsize
-global imgdir
+if nargin == 3 && isfield(opts,'FigLabel') 
+    FigLabel = opts.FigLabel;
+else
+    FigLabel = '';
+    opts = struct;
+end
+
+PixelSize=opts.PixelSize;
+
 %% Sort the data by the parameter given
 params=[atomdata.Params];
 xvals=[params.(xVar)];
@@ -18,24 +25,12 @@ for kk=1:length(atomdata)
 end
 
 % Convert sizes in meters
-w0=w0*pxsize;
+w0=w0*PixelSize;
 
 
 %% Make Figure
 
-
-% Create the name of the figure
-[filepath,name,~]=fileparts(imgdir);
-
-figDir=fullfile(imgdir,'figures');
-if ~exist(figDir,'dir')
-   mkdir(figDir); 
-end
-
-strs=strsplit(imgdir,filesep);
-str=[strs{end-1} filesep strs{end}];
-
-hF=figure('Name',[pad('Probe Waist',20) str],...
+hF=figure('Name',[pad('Probe Waist',20) FigLabel],...
     'units','pixels','color','w','Menubar','none','Resize','off',...
     'numbertitle','off');
 hF.Position(1)=300;
@@ -67,7 +62,7 @@ plot(xvals,w0*1E6,'o','color','k','linewidth',1,'markersize',8,...
 
 
 % Image directory folder string
-t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left','fontsize',6);
 t.Position(4)=t.Extent(4);
 t.Position(3)=hF.Position(3);

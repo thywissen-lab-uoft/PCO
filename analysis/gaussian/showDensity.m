@@ -1,10 +1,12 @@
 function hF=showDensity(data,xVar,opts)
 % Grab important global variables
 %%
-global imgdir
-strs=strsplit(imgdir,filesep);
-str=[strs{end-1} filesep strs{end}];
-
+if nargin == 3 && isfield(opts,'FigLabel') 
+    FigLabel = opts.FigLabel;
+else
+    FigLabel = '';
+    opts = struct;
+end
 %%
 if nargin==2
     opts=struct;
@@ -29,7 +31,7 @@ nPeak   = Natoms./(sqrt(2*pi*Xs.^2).*sqrt(2*pi*Ys.^2).*sqrt(2*pi*Zs.^2));
 %% Make Figure
 
 
-hF=figure('Name',[pad([data.FitType ' density'],20) str],...
+hF=figure('Name',[pad([data.FitType ' density'],20) FigLabel],...
     'units','pixels','color','w','numbertitle','off');
 hF.Position(1)=1015;
 hF.Position(2)=700;
@@ -38,7 +40,7 @@ hF.Position(4)=300;
 drawnow;
 
 % Image directory folder string
-t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left','fontsize',6);
 t.Position(4)=t.Extent(4);
 t.Position(3)=hF.Position(3);

@@ -1,9 +1,12 @@
 function hF = showError(data,xVar,opts)
 % Grab important global variables
 
-global imgdir
-strs=strsplit(imgdir,filesep);
-str=[strs{end-1} filesep strs{end}];
+if nargin == 3 && isfield(opts,'FigLabel') 
+    FigLabel = opts.FigLabel;
+else
+    FigLabel = '';
+    opts = struct;
+end
 
 %% Grab the Data
 params=[data.Params];
@@ -15,7 +18,7 @@ SSE = data.FitSSE;
 %% Make Figure
 
 
-hF=figure('Name',[pad([data.FitType ' error'],20) str],...
+hF=figure('Name',[pad([data.FitType ' error'],20) FigLabel],...
     'units','pixels','color','w','numbertitle','off');
 hF.Position(1)=510;
 hF.Position(2)=50;
@@ -25,7 +28,7 @@ clf
 drawnow;
 
 % Image directory folder string
-t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left','fontsize',6);
 drawnow;
 t.Position(4)=t.Extent(4);

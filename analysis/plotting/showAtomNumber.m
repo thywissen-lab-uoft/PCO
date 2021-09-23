@@ -1,23 +1,10 @@
 function hF = showAtomNumber(data,xVar,opts)
-% Grab important global variables
 
-global imgdir
-% Create the name of the figure
-[filepath,name,~]=fileparts(imgdir);
-
-figDir=fullfile(imgdir,'figures');
-if ~exist(figDir,'dir')
-   mkdir(figDir); 
-end
-
-strs=strsplit(imgdir,filesep);
-str=[strs{end-1} filesep strs{end}];
-
-%%
-
-if nargin==2
-    opts=struct;
-    opts.NumberExpFit = 0;
+if nargin == 3 && isfield(opts,'FigLabel') 
+    FigLabel = opts.FigLabel;
+else
+    FigLabel = '';
+    opts = struct;
 end
 
 %% Sort the data by the parameter given
@@ -28,7 +15,7 @@ Natoms = data.Natoms;
 
 %% Exponential Decay Fit
 
-if opts.NumberExpFit && size(Natoms,1)>2
+if isfield(opts,'NumberExpFit') && opts.NumberExpFit && size(Natoms,1)>2
     myfit=fittype('A*exp(-t/tau)','coefficients',{'A','tau'},...
     'independent','t');
     opt=fitoptions(myfit);
@@ -46,7 +33,7 @@ if opts.NumberExpFit && size(Natoms,1)>2
     end
 end
 
-if opts.NumberExpOffsetFit && size(Natoms,1)>3
+if isfield(opts,'NumberExpOffsetFit') && opts.NumberExpOffsetFit && size(Natoms,1)>3
     myfit=fittype('A*exp(-t/tau)+B','coefficients',{'A','tau','B'},...
     'independent','t');
     opt=fitoptions(myfit);
@@ -89,13 +76,13 @@ end
 
 %% Make Figure
 
-hF=figure('Name',[pad([data.FitType ' number'],20) str],...
+hF=figure('Name',[pad([data.FitType ' number'],20) FigLabel],...
     'units','pixels','color','w','Menubar','figure','Resize','on',...
     'numbertitle','off');
 hF.Position=[5 380 500 300];clf;
 
 % Image directory folder string
-t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left','fontsize',6);
 drawnow;
 t.Position(4)=t.Extent(4);

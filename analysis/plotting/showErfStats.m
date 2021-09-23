@@ -1,23 +1,16 @@
-function hF=showErfStats(erfdata)
+function hF=showErfStats(erfdata,opts)
 
-global imgdir
-
-%% Make Filename
-% Create the name of the figure
-[filepath,name,~]=fileparts(imgdir);
-
-figDir=fullfile(imgdir,'figures');
-if ~exist(figDir,'dir')
-   mkdir(figDir); 
+if nargin == 2 && isfield(opts,'FigLabel') 
+    FigLabel = opts.FigLabel;
+else
+    FigLabel = '';
+    opts = struct;
 end
 
 %% Make Figure
 
 for nn=1:size(erfdata.Natoms,2)
-    strs=strsplit(imgdir,filesep);
-    str=[strs{end-1} filesep strs{end}];
-
-    hF=figure('Name',[pad(['Erf Stats ' num2str(nn)],20) str],...
+    hF=figure('Name',[pad(['Erf Stats ' num2str(nn)],20) FigLabel],...
         'units','pixels','color','w','Menubar','none','Resize','on',...
         'numbertitle','off');
     hF.Position(1)=5;
@@ -28,7 +21,7 @@ for nn=1:size(erfdata.Natoms,2)
     drawnow;
 
     % Image directory folder string
-    t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+    t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
         'w','horizontalalignment','left','fontsize',6);
     t.Position(4)=t.Extent(4);
     t.Position(3)=hF.Position(3);

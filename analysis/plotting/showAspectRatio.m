@@ -1,11 +1,11 @@
-function hF=showGaussAspectRatio(data,xVar,opts)
+function hF=showAspectRatio(data,xVar,opts)
 
-% Create the name of the figure
-global imgdir
-strs=strsplit(imgdir,filesep);
-str=[strs{end-1} filesep strs{end}];
-
-
+if nargin == 3 && isfield(opts,'FigLabel') 
+    FigLabel = opts.FigLabel;
+else
+    FigLabel = '';
+    opts = struct;
+end
 %% Grab Data
 
 params = [data.Params];
@@ -18,7 +18,7 @@ R  = Ys./Xs;
 
 %% Make Figure
 
-hF=figure('Name',[pad([data.FitType ' Aspect Ratio'],20) str],...
+hF=figure('Name',[pad([data.FitType ' Aspect Ratio'],20) FigLabel],...
     'units','pixels','color','w','numbertitle','off');
 hF.Position(1)=1015;
 hF.Position(2)=380;
@@ -27,7 +27,7 @@ hF.Position(4)=300;
 drawnow;
 
 % Image directory folder string
-t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left','fontsize',6);
 t.Position(4)=t.Extent(4);
 t.Position(3)=hF.Position(3);

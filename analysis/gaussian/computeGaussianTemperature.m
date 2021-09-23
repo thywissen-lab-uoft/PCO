@@ -1,10 +1,13 @@
-function [hF,fitX,fitY]=computeGaussianTemperature(gauss_data)
+function [hF,fitX,fitY]=computeGaussianTemperature(gauss_data,opts)
 %COMPUTE2DGAUSSIANCLOUDTEMPERATURE Summary of this function goes here
 %   Detailed explanation goes here
 
-global imgdir
-strs=strsplit(imgdir,filesep);
-str=[strs{end-1} filesep strs{end}];
+if nargin == 2 && isfield(opts,'FigLabel') 
+    FigLabel = opts.FigLabel;
+else
+    FigLabel = '';
+    opts = struct;
+end
 
 kB=1.38064852E-23;
 amu=1.66053907E-27;
@@ -97,7 +100,7 @@ end
 %% Make the graphics objects  
 
 
-hF=figure('Name', [pad('Gauss Temp',20) str],...
+hF=figure('Name', [pad('Gauss Temp',20) FigLabel],...
     'NumberTitle','off','menubar','none','toolbar','none','color','w',...
     'numbertitle','off'); 
 clf;
@@ -109,7 +112,7 @@ hF.Resize='Off';
 set(gcf,'Color','w');
 
 % Image directory string
-t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left');
 t.Position(4)=t.Extent(4);
 t.Position(3)=hF.Position(3);
