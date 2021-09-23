@@ -37,7 +37,7 @@ uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
 
 % Make axis
 hax1=subplot(131);
-set(hax1,'box','on','linewidth',1,'fontsize',10,'units','pixels',...
+set(hax1,'box','on','linewidth',1,'fontsize',10,...
     'xgrid','on','ygrid','on');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
@@ -54,7 +54,7 @@ text(0.02,.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',.
 % Make axis
 
 hax2=subplot(132);
-set(hax2,'box','on','linewidth',1,'fontsize',10,'units','pixels',...
+set(hax2,'box','on','linewidth',1,'fontsize',10,...
     'ygrid','on','xgrid','on');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
@@ -71,7 +71,7 @@ text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',
 
 % Make axis
 hax3=subplot(133);
-set(hax3,'box','on','linewidth',1,'fontsize',10,'units','pixels',...
+set(hax3,'box','on','linewidth',1,'fontsize',10,...
     'xgrid','on','ygrid','on');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');

@@ -43,7 +43,9 @@ disp('Setting global settings for analysis...');
 
 global camaxis
 global pxsize
+
 global imgdir
+
 global crosssec
 
 lambdaRb=780E-9;lambdaK=770E-9;   % Rb and K wavelengths             
@@ -54,13 +56,16 @@ crosssec=3/(2*pi)*lambda^2; % ideal cross 2-level cross section
 camaxis='X';
 % camaxis='Y';
 
- 
+CrossSection = 3/(2*pi)*lambda^2; 
+
 % Choose the pixel size base on the camera
 switch camaxis
     case 'X'
         pxsize=6.45E-6;
+        PixelSize = 6.45E-6;        
     case 'Y'
         pxsize=3.225E-6;
+        PixelSize = 3.225E-6;
     otherwise
         error('You didn''t pick a camera');
 end
@@ -119,7 +124,7 @@ doGaussFit= 1;        % Flag for performing the gaussian fit
 doGaussRabi=0;
 
 % Erf Fit
-doErfFit = 0;
+doErfFit = 1;
 
 % BEC (requries gaussian)
 doBEC=0;
@@ -136,10 +141,14 @@ doAnimate = 0;       % Animate the Cloud
 % Choose the directory where the images to analyze are stored
 disp([datestr(now,13) ' Choose an image analysis folder...']);
 dialog_title='Choose the root dire ctory of the images';
-imgdir=uigetdir(getImageDir(datevec(now)),dialog_title);
-if isequal(imgdir,0)
-    disp('Canceling.');
+newdir=uigetdir(getImageDir(datevec(now)),dialog_title);
+if isequal(newdir,0)
+    disp('Canceling.');    
     return 
+else
+    imgdir = newdir;
+    strs=strsplit(imgdir,filesep);
+    figLabel=[strs{end-1} filesep strs{end}];
 end
 
 %% Load the data
@@ -168,8 +177,8 @@ for kk=1:length(files)
     end  
     
     % Append pixel size and resonant cross section
-    data.PixelSize = pxsize;
-    data.CrossSection = crosssec;
+    data.PixelSize = PixelSize;
+    data.CrossSection = CrossSection;
     
     atomdata(kk)=data;             
 end
@@ -725,7 +734,7 @@ if doGaussFit
     if doSave;saveFigure(atomdata,hF_size,'gauss_size');end
     
     % Single shot temperature analysis
-    [hF_tempsingle,Tdata]=showGaussSingleTemperature(atomdata,pco_xVar,gaussPopts);    
+    [hF_tempsingle,Tdata]=showGaussSingleTemperature(gauss_data,pco_xVar,gaussPopts);    
     if doSave;saveFigure(atomdata,hF_tempsingle,'gauss_tempsingle');end     
         
     % Aspect ratio
@@ -733,12 +742,13 @@ if doGaussFit
     if doSave;saveFigure(atomdata,hF_ratio,'gauss_ratio');end   
 
     % Peak gaussian density
-    hF_density=showGaussDensity(atomdata,pco_xVar,gaussPopts);    
+    hF_density=showDensity(gauss_data,pco_xVar,gaussPopts);    
     if doSave;saveFigure(atomdata,hF_density,'gauss_density');end    
 
     % Gaussian Temperature Analysis
-    if isequal(pco_xVar,'tof') && length(atomdata)>2
-        [hF,fitX,fitY]=computeGaussianTemperature(atomdata,pco_xVar);
+    if isequal(pco_xVar,'tof') && size(gauss_data.Natoms,2)>2
+        [hF_temp,fitX,fitY]=computeGaussianTemperature(gauss_data,pco_xVar);
+        if doSave;saveFigure(atomdata,hF_temp,'gauss_temp');end    
     end      
       
 end
@@ -795,41 +805,52 @@ if doErfFit
         hF_Y_erf=[hF_Y_erf; hF_Ys_rNum];
     end  
 end
-%% 2D Erf Analysis
-% Plot the fit results
-if doErfFit
 
-
-    % Plot the statistics of gaussian fit
+if doErfFit  
+    ErfPopts = struct;
+    ErfPopts.xUnit=pco_unit;
+    ErfPopts.NumberExpFit = 0;        % Fit exponential decay to atom number
+    ErfPopts.NumberLorentzianFit=0;   % Fit atom number to lorentzian
+    ErfPopts.CenterSineFit = 0;       % Fit sine fit to cloud center
+    ErfPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
+    ErfPopts.CenterParabolaFit = 0;
+    ErfPopts.CenterLinearFit = 0;     % Linear fit to cloud center
+    ErfPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
+    
+    % Plot the statistics of erfian fit
     hF_stats_erf=showErfStats(erf_data);     
     if doSave;saveFigure(atomdata,hF_stats_erf,'erf_stats');end       
     
-    hF_number_erf = showAtomNumber(erf_data,pco_xVar,gaussPopts);  
+    hF_number_erf = showAtomNumber(erf_data,pco_xVar,ErfPopts);  
     ylim([0 max(get(gca,'YLim'))]);    
     if doSave;saveFigure(atomdata,hF_number_erf,'erf_number');end
     
     % Plot the ratios if there are more than one ROI.
     if size(ROI,1)>1    
-        hF_number_gauss_ratio=showNumberRatio(erf_data,pco_xVar,gaussPopts);
-        if doSave;saveFigure(atomdata,hF_number_gauss_ratio,'erf_number_ratio');end
+        hF_number_erf_ratio=showNumberRatio(erf_data,pco_xVar,ErfPopts);
+        if doSave;saveFigure(atomdata,hF_number_erf_ratio,'erf_number_ratio');end
     end
     
-    % Gauss Size
-    hF_size=showSize(erf_data,pco_xVar,gaussPopts);    
-    if doSave;saveFigure(atomdata,hF_size,'erf_size');end
-        
-    % Aspect ratio
-    hF_ratio=showAspectRatio(erf_data,pco_xVar,gaussPopts);    
-    if doSave;saveFigure(atomdata,hF_ratio,'erf_ratio');end
-    
-    % Cloud centre
-    hF_Centre=showAtomCentre(erf_data,pco_xVar,gaussPopts);    
-    if doSave;saveFigure(atomdata,hF_Centre,'erf_position');end 
-    
     % Cloud Error
-    hF_Error=showError(erf_data,pco_xVar,gaussPopts);    
+    hF_Error=showError(erf_data,pco_xVar,ErfPopts);    
     if doSave;saveFigure(atomdata,hF_Error,'erf_error');end  
+   
+    % Cloud centre
+    hF_Centre=showAtomCentre(erf_data,pco_xVar,ErfPopts);    
+    if doSave;saveFigure(atomdata,hF_Centre,'erf_position');end 
+        
+    % erf Size
+    hF_size=showSize(erf_data,pco_xVar,ErfPopts);    
+    if doSave;saveFigure(atomdata,hF_size,'erf_size');end
     
+    % Aspect ratio
+    hF_ratio=showAspectRatio(erf_data,pco_xVar,ErfPopts);    
+    if doSave;saveFigure(atomdata,hF_ratio,'erf_ratio');end   
+
+    % Peak erfian density
+    hF_density=showDensity(erf_data,pco_xVar,ErfPopts);    
+    if doSave;saveFigure(atomdata,hF_density,'erf_density');end 
+      
 end
 
 %% Gauss fit : Rabi oscilations

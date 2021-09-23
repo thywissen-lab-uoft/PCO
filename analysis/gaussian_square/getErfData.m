@@ -41,6 +41,7 @@ end
 output = struct;
 
 output.FileNames    = {atomdata.Name}';
+output.Atom         = atomdata(1).Flags.image_atomtype;
 output.PixelSize    = atomdata(1).PixelSize;
 output.CrossSection = atomdata(1).CrossSection;
 output.xVar         = xVar;
@@ -58,6 +59,7 @@ output.Xc           = Xc;
 output.Yc           = Yc;
 output.Xs           = Xs;
 output.Ys           = Ys;
+output.Zs           = Zs;
 output.Xr           = Xr;
 output.Yr           = Yr;
 output.A            = A;

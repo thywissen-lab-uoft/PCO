@@ -39,7 +39,7 @@ uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
 
 % Make axis
 hax=axes;
-set(hax,'box','on','linewidth',1,'fontsize',10,'units','pixels',...
+set(hax,'box','on','linewidth',1,'fontsize',10,...
     'xgrid','on','ygrid','on');
 hold on
 xlabel(xVar,'interpreter','none');
@@ -48,8 +48,6 @@ xlabel(xVar,'interpreter','none');
 str=[data.FitType ' $\sigma_y / \sigma_x$'];
 text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',...
     'interpreter','latex');
-
-hax.Position(4)=hax.Position(4)-20;
 
 co=get(gca,'colororder');
 

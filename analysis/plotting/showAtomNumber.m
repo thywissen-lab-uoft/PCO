@@ -114,7 +114,6 @@ hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 ylabel([data.FitType ' atom number']);
 
-resizeFig(hF,t,[hax]);
 
         
 co=get(gca,'colororder');
@@ -167,6 +166,7 @@ end
 
 
 
+resizeFig(hF,t,[hax]);
 
 end
 

@@ -1,17 +1,17 @@
-function [hF,fitX,fitY]=computeGaussianTemperature(atomdata,xVar)
+function [hF,fitX,fitY]=computeGaussianTemperature(gauss_data)
 %COMPUTE2DGAUSSIANCLOUDTEMPERATURE Summary of this function goes here
 %   Detailed explanation goes here
 
-global pxsize
 global imgdir
-global crosssec
+strs=strsplit(imgdir,filesep);
+str=[strs{end-1} filesep strs{end}];
 
 kB=1.38064852E-23;
 amu=1.66053907E-27;
 mK=40*amu;
 mRb=87*amu;
 
-switch atomdata(1).Flags.image_atomtype
+switch gauss_data.Atom
     case 0
         atomStr='Rb';
     case 1
@@ -22,40 +22,22 @@ switch atomdata(1).Flags.image_atomtype
         atomStr='RbK';
 end
        
-%% Sort the data
-params=[atomdata.Params];
-xvals=[params.(xVar)];
+%% Grab the Data
+params=[gauss_data.Params];
 
-[xvals,inds]=sort(xvals,'ascend');
-atomdata=atomdata(inds);
-
-params=[atomdata.Params];
 TOFs=[params.tof];
-
 TOFs=TOFs*1E-3;
 
-%% Grab the Data
-for kk=1:length(atomdata)
-   for nn=1:length(atomdata(kk).GaussFit)
-        fout=atomdata(kk).GaussFit{nn};         
-        Xc(kk,nn)=fout.Xc;Yc(kk,nn)=fout.Yc;
-        Xs(kk,nn)=fout.Xs;Ys(kk,nn)=fout.Ys;
-        A(kk,nn)=fout.A;
-        nbg(kk,nn)=fout.nbg;
+PixelSize = gauss_data.PixelSize;
 
-        N(kk,nn)=2*pi*Xs(kk,nn)*Ys(kk,nn)*A(kk,nn);
-        Natoms(kk,nn)=N(kk,nn)*(pxsize^2/crosssec);   % Atom number  
-   end        
-end
-
-Xs=Xs*pxsize;
-Ys=Ys*pxsize;
+Xs = gauss_data.Xs*PixelSize;
+Ys = gauss_data.Ys*PixelSize;
            
-
+Natoms = gauss_data.Natoms;
 %% Performt the fit
 mLbl={};
-for nn=1:length(atomdata(1).GaussFit)
-   switch atomdata(1).Flags.image_atomtype
+for nn=1:size(Xs,2)
+   switch gauss_data.Atom
        case 0 % Rb only
            m=mRb;
            mLbl{nn}='Rb';
@@ -66,7 +48,7 @@ for nn=1:length(atomdata(1).GaussFit)
               ms(nn)=m;
 
        case 2 % K and Rb
-           if atomdata(kk).ROI(nn,3)<=1024
+           if gauss_data.Yc(kk,nn)<=1024
                m=mK;
                mLbl{nn}='K';
               ms(nn)=m;
@@ -76,7 +58,7 @@ for nn=1:length(atomdata(1).GaussFit)
              ms(nn)=m;
            end
         case 3 % Rb and K
-           if atomdata(kk).ROI(nn,3)<=1024
+           if gauss_data.Yc(kk,nn)<=1024
                m=mRb;
             mLbl{nn}='Rb';
                ms(nn)=m;
@@ -113,8 +95,7 @@ end
 
 
 %% Make the graphics objects  
-strs=strsplit(imgdir,filesep);
-str=[strs{end-1} filesep strs{end}];
+
 
 hF=figure('Name', [pad('Gauss Temp',20) str],...
     'NumberTitle','off','menubar','none','toolbar','none','color','w',...
@@ -154,7 +135,7 @@ hold on
 % Do the actual plot
 clear pXF
 clear pX
-for nn=1:length(atomdata(1).GaussFit)
+for nn=1:size(Xs,2)
     pXF(nn)=plot(tVec*1e3,feval(fitX{nn},tVec)*1e6,'-','linewidth',2,'color',co(nn,:));
     plot(TOFs*1e3,Xs(:,nn)*1e6,'o','markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5,...
         'markersize',8,'linewidth',2);
@@ -189,7 +170,7 @@ hold on
 % Do the plot
 clear pYF
 clear pY
-for nn=1:length(atomdata(1).GaussFit)
+for nn=1:size(Ys,2)
     pYF(nn)=plot(tVec*1e3,feval(fitY{nn},tVec)*1e6,'-','linewidth',2,'color',co(nn,:));
     plot(TOFs*1e3,Ys(:,nn)*1e6,'o','markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5,...
         'markersize',8,'linewidth',2);
@@ -227,7 +208,7 @@ tz.Position(2)=axy.Position(2);
 set(tz,'units','pixels');
 tz.Position(1)=tz.Position(1)+20;
 tz.Data={};
-for nn=1:length(atomdata(1).GaussFit)
+for nn=1:size(Xs,2)
 
 
     %Temperatures
@@ -240,7 +221,7 @@ for nn=1:length(atomdata(1).GaussFit)
     % Minimum fitted size
     sy=fitY{nn}.s0;
     sx=fitX{nn}.s0;
-    sz=sy;
+    sz=sx;
 
     % Maximum number of atoms
     N0=max(Natoms(:,nn));
@@ -281,14 +262,5 @@ end
 
 
 
-
-% sx=fitY.
-% keyboard
-
-
-
-%% Save the figure to file
-
-saveFigure(atomdata, hF, 'gauss_temperature');
 
 end
