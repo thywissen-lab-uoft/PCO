@@ -69,7 +69,7 @@ for nn=1:size(erfdata.Natoms,2)
     xlabel('y center (px)','fontsize',8)
 
     subplot(245);
-    histogram(erfdata.Xw(:,nn),20,'FaceColor',co(nn,:))
+    histogram(erfdata.Xs(:,nn),20,'FaceColor',co(nn,:))
     set(gca,'box','on','linewidth',1,'fontsize',12)
     % text(5,5,'$\sigma_X ~(\mu\mathrm{m})$','interpreter','latex',...
     %     'units','pixels','backgroundcolor',[1 1 1],'verticalalignment','bottom',...
@@ -77,7 +77,7 @@ for nn=1:size(erfdata.Natoms,2)
     xlabel('x W (px)','fontsize',8)
 
     subplot(246);
-    histogram(erfdata.Xw(:,nn),20,'FaceColor',co(nn,:))
+    histogram(erfdata.Ys(:,nn),20,'FaceColor',co(nn,:))
     set(gca,'box','on','linewidth',1,'fontsize',12)
     % text(5,5,'$\sigma_Y ~(\mu\mathrm{m})$','interpreter','latex',...
     %     'units','pixels','backgroundcolor',[1 1 1],'verticalalignment','bottom',...

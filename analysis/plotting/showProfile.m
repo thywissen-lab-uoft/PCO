@@ -1,4 +1,4 @@
-function hFs=showErfProfile(atomdata,direction,style,rNum,xVar)
+function hFs=showProfile(atomdata,FitType,direction,style,rNum,xVar)
 global imgdir
 
 pMax=36;
@@ -82,7 +82,7 @@ for kk=1:(ceil(length(atomdata)/pMax))
         z=z(ROI(3):ROI(4),ROI(1):ROI(2));
 
         % Get the gaussian fit
-        fout=atomdataSUB(ii).ErfFit{rNum};
+        fout=atomdataSUB(ii).(FitType){rNum};
 
 
         % Evaluvate the fit for doing numerical projection
@@ -121,7 +121,14 @@ for kk=1:(ceil(length(atomdata)/pMax))
                     Y=sum(z,2); % Z(Xc,x)
                     YF=sum(zzF,2);
             end
-            X=y;         
+            X=y;   
+            y1=max([min(y) fout.Yc-6*fout.Ys]);
+            y2=min([max(y) fout.Yc+6*fout.Ys]);
+
+            str=['{\bf y_c: }'  num2str(round(fout.Yc)) ...
+                'px  ' ...
+                '{\bf \sigma_y: }' num2str(round(fout.Ys)) ...
+                'px'];  
         end
 
         % Plot the data
@@ -132,7 +139,12 @@ for kk=1:(ceil(length(atomdata)/pMax))
         % Set the limits
         xlim([X(1) X(end)]);   
         thisAxes.YLim(1)=min([0 min(Y)]);
-        thisAxes.YLim(2)=max([max(Y)*1.5 0]);       
+        thisAxes.YLim(2)=max([max(Y)*1.5 0]);   
+        
+        % Draw the analysis string box
+        text(thisAxes.Position(3)-1, thisAxes.Position(4), str, 'Units', 'pixels',...
+            'FontSize', 8,...
+            'verticalalignment','cap','horizontalalignment','right'); 
 
 
         % Draw the analysis string box

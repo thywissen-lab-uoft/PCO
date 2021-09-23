@@ -65,7 +65,6 @@ switch camaxis
         error('You didn''t pick a camera');
 end
 
-
 %% Analysis Variable
 % This section of code chooses the variable to plot against for aggregate
 % plots.  The chosen variable MUST match a variable provided in the params
@@ -90,8 +89,6 @@ end
 % pco_xVar = 'rf_rabi_freq_HF';
 pco_xVar = 'rf_freq_HF';
 % pco_xVar = 'HF_FeshValue_Final_ODT';
-
-
 
 doSave=0;
 
@@ -213,10 +210,6 @@ end
 % Sort it
 [~, inds]=sort(x);
 atomdata=atomdata(inds);
-
-params=[atomdata.Params];
-X=[params.(pco_xVar)];
-
 
 %% Analysis ROI
 % Analysis ROI is an Nx4 matrix of [X1 X2 Y1 Y2] which specifies a region
@@ -418,7 +411,6 @@ X=[params.(pco_xVar)];
 %     ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 
 if doFermiFitLong
-
     ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 end
 
@@ -432,8 +424,6 @@ ODopts.ScaleProbe=1;
 % ODopts.ScaleProbeROI=[1 100 900 1000];  % ROI to do the scaling
 ODopts.ScaleProbeROI=[200 400 800 1000];  % ROI to do the scaling
 % ODopts.ScaleProbeROI=[700 790 500 600];  % ROI to do the scaling
-
-
 
 ODopts.SubtractDark=0;
 ODopts.DarkROI=[700 800 20 100];
@@ -580,8 +570,6 @@ if doLandauZener && size(ROI,1)==2 && doBoxCount && length(atomdata)>3
     dF=[params.(SweepRangeVar)]*1000*2; % Factor of two for the AOM DP
 
 %     dF=40*ones(length(atomdata),1)';
-
-
     
     % Convert to dtdf
     dtdf=dT./dF; 
@@ -664,7 +652,7 @@ if doGaussFit
             [fout,gof,output]=gaussFit2D(Dx,Dy,data);    % Perform the fit   
             
             % Atom Number
-            N=2*pi*fout.Xs*fout.Ys*fout.A*(pxsize^2/crosssec); 
+%             N=2*pi*fout.Xs*fout.Ys*fout.A*(pxsize^2/crosssec); 
             
             atomdata(kk).GaussFit{nn}=fout; % Assign the fit object       
             atomdata(kk).GaussGOF{nn}=gof; % Assign the fit object  
@@ -692,22 +680,13 @@ if doGaussFit
     if doSave;saveFigure(atomdata,hF_stats,'gauss_stats');end
        
     
-    hF_numbergauss2 = showAtomNumber(gauss_data,pco_xVar,gaussPopts);  
-
-    
-    % Atom number
-    [hF_numbergauss,Ndatagauss]=showGaussAtomNumber(atomdata,pco_xVar,gaussPopts);  
-%      ylim([0 max(get(gca,'YLim'))]);
-    ylim([0 max(get(gca,'YLim'))]);
-
-     %ylim([3.5E6 4.5E6]);
-%      xlim([190,210]);    
-     
-    if doSave;saveFigure(atomdata,hF_numbergauss,'gauss_number');end
+    hF_number_gauss = showAtomNumber(gauss_data,pco_xVar,gaussPopts);  
+    ylim([0 max(get(gca,'YLim'))]);    
+    if doSave;saveFigure(atomdata,hF_number_gauss,'gauss_number');end
     
     % Plot the ratios if there are more than one ROI.
     if size(ROI,1)>1    
-        hF_numbergaussratio=showGaussAtomNumberRatio(atomdata,pco_xVar,gaussPopts);
+        hF_numbergaussratio=showNumberRatio(gauss_data,pco_xVar,gaussPopts);
         if doSave;saveFigure(atomdata,hF_numbergaussratio,'gauss_number_ratio');end
     end
     
@@ -748,8 +727,8 @@ if doGaussFit
     hF_X=[];
     hF_Y=[];
     for rNum=1:size(ROI,1)
-        hF_Xs_rNum=showGaussProfile(atomdata,'X',style,rNum,pco_xVar);        
-        hF_Ys_rNum=showGaussProfile(atomdata,'Y',style,rNum,pco_xVar);  
+        hF_Xs_rNum=showProfile(atomdata,'GaussFit','X',style,rNum,pco_xVar);        
+        hF_Ys_rNum=showProfile(atomdata,'GaussFit','Y',style,rNum,pco_xVar);  
         pause(1);
 %       Save the figures (this can be slow)
         if doSave
@@ -811,8 +790,8 @@ if doErfFit
     clear hF_X_erf;clear hF_Y_erf;
     hF_X_erf=[];hF_Y_erf=[];
     for rNum=1:size(ROI,1)
-        hF_Xs_rNum_erf=showErfProfile(atomdata,'X',style,rNum,pco_xVar);        
-        hF_Ys_rNum_erf=showErfProfile(atomdata,'Y',style,rNum,pco_xVar);  
+        hF_Xs_rNum_erf=showProfile(atomdata,'ErfFit','X',style,rNum,pco_xVar);        
+        hF_Ys_rNum_erf=showProfile(atomdata,'ErfFit','Y',style,rNum,pco_xVar);  
         pause(1);
     %       Save the figures (this can be slow)
         if doSave
@@ -982,7 +961,7 @@ if doCustom
     end    
     
     if doBoxCount
-        custom_outdata.BoxCount=Ndatagauss;    
+        custom_outdata.BoxCount=Ndatabox;    
     end
     
     if doErfFit
@@ -1039,7 +1018,7 @@ if doCustom
     custom_outdata.N7=N2;
     custom_outdata.Ntot=N1+N2;
      
-     dataMode=6;         
+     dataMode=3;         
      switch dataMode
          case 0     
              Y=(N1-N2)./(N1);

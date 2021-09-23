@@ -24,8 +24,8 @@ for kk=1:length(atomdata)
         GOFs{kk,nn}=atomdata(kk).ErfGOF{nn};
         Xc(kk,nn)=fout.Xc;Yc(kk,nn)=fout.Yc;        % X and Y center
         Xr(kk,nn)=fout.Xr;Yr(kk,nn)=fout.Yr;        % X and Y smooth radius
-        Xw(kk,nn)=fout.Xw;Yw(kk,nn)=fout.Yw;        % X and Y widths
-        Zw(kk,nn)=fout.Xw;                          % ASSUME wZ=wX;    
+        Xs(kk,nn)=fout.Xs;Ys(kk,nn)=fout.Ys;        % X and Y widths
+        Zs(kk,nn)=fout.Xs;                          % ASSUME wZ=wX;    
         Zr(kk,nn)=fout.Xr;                          % ASSUME wZ=wX;                
         A(kk,nn)=fout.A;                            % Amplitude
         nbg(kk,nn)=fout.nbg;                        % Background
@@ -51,8 +51,8 @@ output.FitGOFs      = GOFs;
 output.Natoms       = Natoms;
 output.Xc           = Xc;
 output.Yc           = Yc;
-output.Xw           = Xw;
-output.Yw           = Yw;
+output.Xs           = Xs;
+output.Ys           = Ys;
 output.Xr           = Xr;
 output.Yr           = Yr;
 output.A            = A;
