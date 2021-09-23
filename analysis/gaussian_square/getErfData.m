@@ -22,6 +22,9 @@ for kk=1:length(atomdata)
         fout=atomdata(kk).ErfFit{nn};               % Grab the fit
         fits{kk,nn}=fout;
         GOFs{kk,nn}=atomdata(kk).ErfGOF{nn};
+        R2s(kk,nn) = GOFs{kk,nn}.rsquare;
+        SSEs(kk,nn) = GOFs{kk,nn}.sse;
+        
         Xc(kk,nn)=fout.Xc;Yc(kk,nn)=fout.Yc;        % X and Y center
         Xr(kk,nn)=fout.Xr;Yr(kk,nn)=fout.Yr;        % X and Y smooth radius
         Xs(kk,nn)=fout.Xs;Ys(kk,nn)=fout.Ys;        % X and Y widths
@@ -46,6 +49,8 @@ output.Params       = params;
 output.FitType      = 'erf';
 output.Fits         = fits;
 output.FitGOFs      = GOFs;
+output.FitR2        = R2s;
+output.FitSSE       = SSEs;
 
 % Assign fit outputs
 output.Natoms       = Natoms;

@@ -19,11 +19,10 @@ R  = Ys./Xs;
 %% Make Figure
 
 hF=figure('Name',[pad([data.FitType ' Aspect Ratio'],20) str],...
-    'units','pixels','color','w','Menubar','none','Resize','off',...
-    'numbertitle','off');
-hF.Position(1)=0;
-hF.Position(2)=480;
-hF.Position(3)=400;
+    'units','pixels','color','w','numbertitle','off');
+hF.Position(1)=1015;
+hF.Position(2)=380;
+hF.Position(3)=500;
 hF.Position(4)=300;
 drawnow;
 
@@ -40,13 +39,13 @@ uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
 
 % Make axis
 hax=axes;
-set(hax,'box','on','linewidth',1,'fontsize',12,'units','pixels',...
+set(hax,'box','on','linewidth',1,'fontsize',10,'units','pixels',...
     'xgrid','on','ygrid','on');
 hold on
 xlabel(xVar,'interpreter','none');
 % ylabel([data.FitType ' \sigma_y/\sigma_x']);
 
-str=[data.FitType ' $\sigma_X / \sigma_Y$'];
+str=[data.FitType ' $\sigma_y / \sigma_x$'];
 text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',...
     'interpreter','latex');
 

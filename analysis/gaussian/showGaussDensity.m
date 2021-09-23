@@ -53,12 +53,11 @@ strs=strsplit(imgdir,filesep);
 str=[strs{end-1} filesep strs{end}];
 
 hF=figure('Name',[pad('Gauss Density',20) str],...
-    'units','pixels','color','w','Menubar','none','Resize','off',...
-    'numbertitle','off');
-hF.Position(1)=1200;
-hF.Position(2)=50;
-hF.Position(3)=400;
-hF.Position(4)=400;
+    'units','pixels','color','w','numbertitle','off');
+hF.Position(1)=1015;
+hF.Position(2)=700;
+hF.Position(3)=500;
+hF.Position(4)=300;
 drawnow;
 
 % Image directory folder string
@@ -74,7 +73,8 @@ uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
 
 % Make axis
 hax=axes;
-set(hax,'box','on','linewidth',1,'fontsize',12,'units','pixels');
+set(hax,'box','on','linewidth',1,'fontsize',10,'units','pixels',...
+    'xgrid','on','ygrid','on');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 ylabel('peak density m^{-3}');
@@ -84,7 +84,7 @@ hax.Position(4)=hax.Position(4)-20;
 co=get(gca,'colororder');
 
 for nn=1:size(atomdata(1).ROI,1)
-   plot(xvals,nPeak(:,nn),'o','color',co(nn,:),'linewidth',2,'markersize',8,...
+   plot(xvals,nPeak(:,nn),'o','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
 

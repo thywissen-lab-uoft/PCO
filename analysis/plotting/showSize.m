@@ -19,10 +19,10 @@ A  = pi*Xs.*Ys;
 hF=figure('Name',[pad([data.FitType ' size'],20) str],...
     'units','pixels','color','w','Menubar','none','Resize','off',...
     'numbertitle','off');
-hF.Position(1)=400;
+hF.Position(1)=1015;
 hF.Position(2)=50;
 hF.Position(3)=800;
-hF.Position(4)=400;
+hF.Position(4)=300;
 drawnow;
 
 % Image directory folder string
@@ -34,7 +34,8 @@ t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
 
 % Make axis
 hax1=subplot(131);
-set(hax1,'box','on','linewidth',1,'fontsize',12,'units','pixels');
+set(hax1,'box','on','linewidth',1,'fontsize',10,'units','pixels',...
+    'xgrid','on','ygrid','on');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 co=get(gca,'colororder');
@@ -50,7 +51,8 @@ text(0.02,.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',.
 % Make axis
 
 hax2=subplot(132);
-set(hax2,'box','on','linewidth',1,'fontsize',12,'units','pixels');
+set(hax2,'box','on','linewidth',1,'fontsize',10,'units','pixels',...
+    'ygrid','on','xgrid','on');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 co=get(gca,'colororder');
@@ -66,7 +68,8 @@ text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',
 
 % Make axis
 hax3=subplot(133);
-set(hax3,'box','on','linewidth',1,'fontsize',12,'units','pixels');
+set(hax3,'box','on','linewidth',1,'fontsize',10,'units','pixels',...
+    'xgrid','on','ygrid','on');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 co=get(gca,'colororder');

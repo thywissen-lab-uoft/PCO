@@ -92,7 +92,7 @@ end
 hF=figure('Name',[pad([data.FitType ' number'],20) str],...
     'units','pixels','color','w','Menubar','figure','Resize','on',...
     'numbertitle','off');
-hF.Position=[5 400 500 300];clf;
+hF.Position=[5 380 500 300];clf;
 
 % Image directory folder string
 t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
@@ -108,20 +108,23 @@ uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
 
 % Make axis
 hax=axes;
-set(hax,'box','on','linewidth',1,'fontsize',12);
+set(hax,'box','on','linewidth',1,'fontsize',10,'xgrid','on',...
+    'ygrid','on');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 ylabel([data.FitType ' atom number']);
 
     function chSize(~,~)
-        t.Position(3)=hF.Position(3);
-        t.Position(4)=t.Extent(4);
-        t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
-        
-        hax.Units='pixels';
-        hax.Position(2)=55;
-        hax.Position(4)=(hF.Position(4)-25-t.Position(4))-hax.Position(2);
-        hax.Units='normalized';        
+        try
+            t.Position(3)=hF.Position(3);
+            t.Position(4)=t.Extent(4);
+            t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
+
+            hax.Units='pixels';
+            hax.Position(2)=55;
+            hax.Position(4)=(hF.Position(4)-25-t.Position(4))-hax.Position(2);
+            hax.Units='normalized';        
+        end 
     end
 chSize;
 

@@ -26,6 +26,9 @@ for kk=1:length(atomdata)
         fout=atomdata(kk).GaussFit{nn};               % Grab the fit
         fits{kk,nn}=fout;
         GOFs{kk,nn}=atomdata(kk).GaussGOF{nn};
+        R2s(kk,nn) = GOFs{kk,nn}.rsquare;
+        SSEs(kk,nn) = GOFs{kk,nn}.sse;
+        
         Xc(kk,nn)=fout.Xc;Yc(kk,nn)=fout.Yc;        % X and Y center
         Xs(kk,nn)=fout.Xs;Ys(kk,nn)=fout.Ys;        % X and Y sigma
         Zs(kk,nn)=fout.Xs;                          % ASSUME wZ=wX;    
@@ -48,6 +51,8 @@ output.Params       = params;
 output.FitType      = 'gauss';
 output.Fits         = fits;
 output.FitGOFs      = GOFs;
+output.FitR2        = R2s;
+output.FitSSE       = SSEs;
 
 % Assign fit outputs
 output.Natoms       = Natoms;

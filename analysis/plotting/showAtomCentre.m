@@ -33,9 +33,9 @@ str=[strs{end-1} filesep strs{end}];
 
 hF=figure('Name',[pad([data.FitType ' centre'],20) str],...
     'units','pixels','color','w','numbertitle','off');
-hF.Position(1)=1200;
-hF.Position(2)=280;
-hF.Position(3)=600;
+hF.Position(1)=510;
+hF.Position(2)=380;
+hF.Position(3)=500;
 hF.Position(4)=600;
 drawnow;
 
@@ -46,6 +46,9 @@ t.Position(4)=t.Extent(4);
 t.Position(3)=hF.Position(3);
 t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
 
+uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
+    'w','horizontalalignment','left','fontsize',12,'fontweight','bold',...
+    'position',[2 2 40 20]);
 
     function chSize(~,~)
         t.Position(3)=hF.Position(3);
@@ -56,7 +59,8 @@ hF.SizeChangedFcn = @chSize;
 
 %% Track X
 hax1=subplot(221);
-set(hax1,'box','on','linewidth',1,'fontsize',10,'units','pixels');
+set(hax1,'box','on','linewidth',1,'fontsize',10,'units','pixels',...
+    'xgrid','on','ygrid','on');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 co=get(gca,'colororder');
@@ -85,7 +89,8 @@ drawnow;
 %% Track Y
 
 hax2=subplot(223);
-set(hax2,'box','on','linewidth',1,'fontsize',10,'units','pixels');
+set(hax2,'box','on','linewidth',1,'fontsize',10,'units','pixels',...
+    'xgrid','on','ygrid','on');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 co=get(gca,'colororder');

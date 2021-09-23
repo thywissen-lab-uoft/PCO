@@ -4,35 +4,25 @@ function hF=showNumberRatio(data,xVar,opts)
 
 %% Directory string
 global imgdir
-
-% Create the name of the figure
-[filepath,name,~]=fileparts(imgdir);
-
-figDir=fullfile(imgdir,'figures');
-if ~exist(figDir,'dir')
-   mkdir(figDir); 
-end
-
 strs=strsplit(imgdir,filesep);
 str=[strs{end-1} filesep strs{end}];
 
 
 %% Grab Data
+
 params=[data.Params];
 xvals=[params.(xVar)];
-
 Natoms = data.Natoms;
 
 %% Make Figure
-
 
 hF=figure('Name',[pad([data.FitType ' Number Ratio'],20) str],...
     'units','pixels','color','w',...
     'numbertitle','off');
 hF.Position(1)=0;
-hF.Position(2)=50;
+hF.Position(2)=700;
 hF.Position(3)=500;
-hF.Position(4)=400;
+hF.Position(4)=300;
 drawnow;
 
 % Image directory folder string
@@ -48,12 +38,28 @@ uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
 
 % Make axis
 hax=axes;
-set(hax,'box','on','linewidth',1,'fontsize',14,'units','pixels');
+set(hax,'box','on','linewidth',1,'fontsize',10,'units','pixels',...
+    'xgrid','on','ygrid','on');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
-ylabel('gauss relative number');
+ylabel([data.FitType ' relative number']);
 hax.Position(4)=hax.Position(4)-20;
 co=get(gca,'colororder');
+
+function chSize(~,~)
+    try
+        t.Position(3)=hF.Position(3);
+        t.Position(4)=t.Extent(4);
+        t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
+
+        hax.Units='pixels';
+        hax.Position(2)=55;
+        hax.Position(4)=(hF.Position(4)-25-t.Position(4))-hax.Position(2);
+        hax.Units='normalized';        
+    end 
+end
+chSize;
+hF.SizeChangedFcn=@chSize;
 
 for nn=1:size(Natoms,2)
    plot(xvals,Natoms(:,nn)./sum(Natoms,2),'o','color',co(nn,:),'linewidth',1,'markersize',8,...

@@ -119,7 +119,7 @@ doGaussFit= 1;        % Flag for performing the gaussian fit
 doGaussRabi=0;
 
 % Erf Fit
-doErfFit = 1;
+doErfFit = 0;
 
 % BEC (requries gaussian)
 doBEC=0;
@@ -634,7 +634,7 @@ if doRamanSpec
     if doSave;saveFigure(atomdata,hF_raman,'raman_spec');end        
 end
 
-%% 2D Gaussian Fitting
+%% 2D Gaussian Fit
 % This section of code computes a 2D gaussin fit on all your data and ROIs.
 
 if doGaussFit   
@@ -657,7 +657,7 @@ if doGaussFit
     gauss_data=getGaussData(atomdata,pco_xVar);  
 end
 
-%% Gauss OD Cut
+%% 2D Gauss OD Profile
 % Style of profile --> cut or sum?
 style='cut';
 %style='sum';
@@ -711,39 +711,43 @@ if doGaussFit
         if doSave;saveFigure(atomdata,hF_number_gauss_ratio,'gauss_number_ratio');end
     end
     
+    % Cloud Error
+    hF_Error=showError(gauss_data,pco_xVar,gaussPopts);    
+    if doSave;saveFigure(atomdata,hF_Error,'gauss_error');end  
+   
+    % Cloud centre
+    hF_Centre=showAtomCentre(gauss_data,pco_xVar,gaussPopts);    
+    if doSave;saveFigure(atomdata,hF_Centre,'gauss_position');end 
+        
     % Gauss Size
     hF_size=showSize(gauss_data,pco_xVar,gaussPopts);    
     if doSave;saveFigure(atomdata,hF_size,'gauss_size');end
+    
+    % Single shot temperature analysis
+    [hF_tempsingle,Tdata]=showGaussSingleTemperature(atomdata,pco_xVar,gaussPopts);    
+    if doSave;saveFigure(atomdata,hF_tempsingle,'gauss_tempsingle');end     
         
     % Aspect ratio
     hF_ratio=showAspectRatio(gauss_data,pco_xVar,gaussPopts);    
     if doSave;saveFigure(atomdata,hF_ratio,'gauss_ratio');end
+  
+
     
+
+
     % Peak gaussian density
     hF_density=showGaussDensity(atomdata,pco_xVar,gaussPopts);    
     if doSave;saveFigure(atomdata,hF_density,'gauss_density');end
     
-    % Single shot temperature analysis
-    [hF_tempsingle,Tdata]=showGaussSingleTemperature(atomdata,pco_xVar,gaussPopts);    
-    if doSave;saveFigure(atomdata,hF_tempsingle,'gauss_tempsingle');end    
-   
-    % Cloud centre
-    hF_Centre=showAtomCentre(gauss_data,pco_xVar,gaussPopts);    
-    if doSave;saveFigure(atomdata,hF_Centre,'gauss_position');end   
-    
-    % Cloud Error
-    hF_Error=showGaussError(atomdata,pco_xVar,gaussPopts);    
-    if doSave;saveFigure(atomdata,hF_Error,'gauss_error');end   
-    
-    
+
+    % Gaussian Temperature Analysis
     if isequal(pco_xVar,'tof') && length(atomdata)>2
         [hF,fitX,fitY]=computeGaussianTemperature(atomdata,pco_xVar);
-    end       
-
+    end      
       
 end
 
-%% Erf Fit
+%% 2D Erf Fit
 
 % Perform the Erf Fit
 if doErfFit
@@ -770,7 +774,8 @@ if doErfFit
     erf_data=getErfData(atomdata,pco_xVar);    
 end
 
-%% Erf OD Cuts
+%% 2D Erf OD Profile
+
 % Style of profile --> cut or sum?
 style='cut';
 %  style='sum';
@@ -794,25 +799,40 @@ for rNum=1:size(ROI,1)
     hF_Y_erf=[hF_Y_erf; hF_Ys_rNum];
 end  
 
-%% Erf Analysis
+%% 2D Erf Analysis
 % Plot the fit results
 if doErfFit
 
-    % Plot the statistics of erf fit
+
+    % Plot the statistics of gaussian fit
     hF_stats_erf=showErfStats(erf_data);     
-    if doSave;saveFigure(atomdata,hF_stats_erf,'erf_stats');end
-       
-    % Atom number
-    hF_number_erf=showAtomNumber(erf_data,pco_xVar,gaussPopts);  
-%     ylim([0 max(get(gca,'YLim'))]);
+    if doSave;saveFigure(atomdata,hF_stats_erf,'erf_stats');end       
     
-    % Size
-    hF_size_erf=showSize(erf_data,pco_xVar,gaussPopts);    
-    if doSave;saveFigure(atomdata,hF_size_erf,'gauss_size');end
+    hF_number_erf = showAtomNumber(erf_data,pco_xVar,gaussPopts);  
+    ylim([0 max(get(gca,'YLim'))]);    
+    if doSave;saveFigure(atomdata,hF_number_erf,'erf_number');end
     
+    % Plot the ratios if there are more than one ROI.
+    if size(ROI,1)>1    
+        hF_number_gauss_ratio=showNumberRatio(erf_data,pco_xVar,gaussPopts);
+        if doSave;saveFigure(atomdata,hF_number_gauss_ratio,'erf_number_ratio');end
+    end
+    
+    % Gauss Size
+    hF_size=showSize(erf_data,pco_xVar,gaussPopts);    
+    if doSave;saveFigure(atomdata,hF_size,'erf_size');end
+        
     % Aspect ratio
     hF_ratio=showAspectRatio(erf_data,pco_xVar,gaussPopts);    
-    if doSave;saveFigure(atomdata,hF_ratio,'gauss_ratio');end
+    if doSave;saveFigure(atomdata,hF_ratio,'erf_ratio');end
+    
+    % Cloud centre
+    hF_Centre=showAtomCentre(erf_data,pco_xVar,gaussPopts);    
+    if doSave;saveFigure(atomdata,hF_Centre,'erf_position');end 
+    
+    % Cloud Error
+    hF_Error=showError(erf_data,pco_xVar,gaussPopts);    
+    if doSave;saveFigure(atomdata,hF_Error,'erf_error');end  
     
 end
 
@@ -1539,7 +1559,7 @@ if doCustom
     end
 end
 
-%% 
+%% Custom BM
 if doCustom_BM
     customBM_script;
 end
