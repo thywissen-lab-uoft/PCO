@@ -1,6 +1,9 @@
 function hFs=showProfile(atomdata,FitType,direction,style,rNum,xVar)
 global imgdir
-
+strs=strsplit(imgdir,filesep);
+str=[strs{end-1} filesep strs{end}];
+    
+    
 pMax=36;
 
 switch nargin
@@ -23,21 +26,18 @@ end
     
 %% Make Fgiure
 
-
 clear hFs
-for kk=1:(ceil(length(atomdata)/pMax))
-    
+for kk=1:(ceil(length(atomdata)/pMax))    
     nStart=(kk-1)*pMax+1;
     nEnd=min([pMax*kk length(atomdata)]);
-    fprintf(['Showing gauss profile ' direction ' ' num2str(nStart) ' to ' num2str(nEnd) ' ... ']);
+    fprintf(['Showing ' FitType ' profile ' direction ' ROI ' ...
+        num2str(rNum) ' ' num2str(nStart) ' to ' num2str(nEnd) ' ... ']);
 
-    atomdataSUB=atomdata(nStart:nEnd);
+    atomdataSUB=atomdata(nStart:nEnd);    
     
+
     
-    strs=strsplit(imgdir,filesep);
-    str=[strs{end-1} filesep strs{end}];
-    
-    hFs(kk)=figure('Name', [pad(['OD Cut ' direction ' ' num2str(kk)],20) str], 'Visible', 'On', ...
+    hFs(kk)=figure('Name', [pad(['OD Cut ' direction ' R' num2str(rNum) ' ' num2str(kk)],20) str], 'Visible', 'On', ...
         'NumberTitle','off','color','w','MenuBar','none','units','pixels',...
         'Resize','off'); 
     hF=hFs(kk);
