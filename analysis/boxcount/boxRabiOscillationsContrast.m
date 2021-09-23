@@ -125,6 +125,9 @@ outdata.X=xvals';
 outdata.Natoms=Natoms;
 outdata.NatomsTot=NatomsTot;
 outdata.NRatio=Natoms./repmat(NatomsTot',[1 size(atomdata(1).ROI,1)]);
+outdata.Contrast=C;
+outdata.Fit=fout;
+outdata.Ratio_79=opts.Ratio_79;
 
 %% Make Figure
 

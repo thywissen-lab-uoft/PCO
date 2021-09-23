@@ -73,9 +73,15 @@ end
 % display properties.
 
 % pco_xVar='Raman_AOM3_freq';
+<<<<<<< Updated upstream
 % pco_xVar='Pulse_Time';
 
 
+=======
+%  pco_xVar='Pulse_Time';
+% pco_xVar='ExecutionDate';
+
+>>>>>>> Stashed changes
 % pco_xVar='HF_Raman_sweep_time';
 % pco_xVar = 'ExecutionDate';
 % pco_xVar = 'Pulse_Time';
@@ -86,11 +92,15 @@ end
 % pco_xVar = 'Lattice_loading_field';
 % pco_xVar = 'rf_rabi_freq_HF';
 pco_xVar = 'rf_freq_HF';
+<<<<<<< Updated upstream
 % pco_xVar = 'HF_FeshValue_Final_ODT';
 
+=======
+% 
+>>>>>>> Stashed changes
 
 
-doSave=1;
+doSave=0;
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit=1;
@@ -127,7 +137,7 @@ doCustom_BM = 0;    % Custom Band map
 
 
 %Animation
-doAnimate = 1;       % Animate the Cloud
+doAnimate = 0;       % Animate the Cloud
 
 %% Select image directory
 % Choose the directory where the images to analyze are stored
@@ -167,6 +177,7 @@ for kk=1:length(files)
 end
 disp(' ');
 
+
 if isequal(pco_xVar,'ExecutionDate')
    p=[atomdata.Params] ;
    tmin=min([p.ExecutionDate]);
@@ -202,6 +213,9 @@ end
 [~, inds]=sort(x);
 atomdata=atomdata(inds);
 
+params=[atomdata.Params];
+X=[params.(pco_xVar)];
+
 
 %% Analysis ROI
 % Analysis ROI is an Nx4 matrix of [X1 X2 Y1 Y2] which specifies a region
@@ -213,7 +227,8 @@ atomdata=atomdata(inds);
 
 
 %%%%% RF 1B
-% ROI = [533 1323 230 980];   % RF1B 5 ms TOF
+%ROI = [533 1323 230 980];   % RF1B 5 ms TOF
+% ROI =  [700 1100 300 600];
 % ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
 
 
@@ -643,7 +658,10 @@ gaussPopts.CenterParabolaFit = 0;
 gaussPopts.CenterLinearFit = 0;     % Linear fit to cloud center
 gaussPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
 
+
 if doGaussFit
+    out_gauss = struct;
+    
     disp(repmat('-',1,60));    
     disp('Performing 2D gauss fit');
     disp(repmat('-',1,60));    
@@ -656,6 +674,15 @@ if doGaussFit
             Dy=sROI(3):sROI(4);               % Y Vector
             data=atomdata(kk).OD(Dy,Dx);    % Optical density        
             [fout,gof,output]=gaussFit2D(Dx,Dy,data);    % Perform the fit   
+            
+            % Atom Number
+            N=2*pi*fout.Xs*fout.Ys*fout.A*(pxsize^2/crosssec); 
+            
+            out_gauss(kk,nn).Fit = fout;
+            out_gauss(kk,nn).GOF = gof;
+            out_gauss(kk,nn).Natoms=N;  
+            out_gauss(kk,nn).X=X(kk);
+            
             atomdata(kk).GaussFit{nn}=fout; % Assign the fit object       
             atomdata(kk).GaussGOF{nn}=gof; % Assign the fit object       
 
@@ -720,24 +747,24 @@ if doGaussFit
     clear hF_Y;
     hF_X=[];
     hF_Y=[];
-    for rNum=1:size(ROI,1)
-        hF_Xs_rNum=showGaussProfile(atomdata,'X',style,rNum,pco_xVar);        
-        hF_Ys_rNum=showGaussProfile(atomdata,'Y',style,rNum,pco_xVar);  
-        pause(1);
-%       Save the figures (this can be slow)
-        if doSave
-            for kk=1:length(hF_Xs_rNum) 
-                saveFigure(atomdata,hF_Xs_rNum(kk),['gauss_profile_X' num2str(rNum) '_' num2str(kk)]);
-            end 
-            
-            
-            for kk=1:length(hF_Ys_rNum)
-                saveFigure(atomdata,hF_Ys_rNum(kk),['gauss_profile_Y' num2str(rNum) '_' num2str(kk)]);
-            end
-        end
-        hF_X=[hF_X; hF_Xs_rNum];
-        hF_Y=[hF_Y; hF_Ys_rNum];
-    end        
+%     for rNum=1:size(ROI,1)
+%         hF_Xs_rNum=showGaussProfile(atomdata,'X',style,rNum,pco_xVar);        
+%         hF_Ys_rNum=showGaussProfile(atomdata,'Y',style,rNum,pco_xVar);  
+%         pause(1);
+% %       Save the figures (this can be slow)
+%         if doSave
+%             for kk=1:length(hF_Xs_rNum) 
+%                 saveFigure(atomdata,hF_Xs_rNum(kk),['gauss_profile_X' num2str(rNum) '_' num2str(kk)]);
+%             end 
+%             
+%             
+%             for kk=1:length(hF_Ys_rNum)
+%                 saveFigure(atomdata,hF_Ys_rNum(kk),['gauss_profile_Y' num2str(rNum) '_' num2str(kk)]);
+%             end
+%         end
+%         hF_X=[hF_X; hF_Xs_rNum];
+%         hF_Y=[hF_Y; hF_Ys_rNum];
+%     end        
 end
 
 %% Gauss fit : Rabi oscilations
@@ -886,14 +913,30 @@ end
 
 %% Custom
 if doCustom 
-    DATA=Ndatabox;
-    DATA=Ndatagauss;
-
+    custom_outdata=struct;
+    
+    if doGaussFit
+        custom_outdata.GaussData=Ndatagauss;     
+    end    
+    
+    if doBoxCount
+        custom_outdata.BoxCount=Ndatagauss;    
+    end
+    
+     DATA=custom_outdata.BoxCount;
+      DATA=custom_outdata.GaussData;
+%       DATA=Ndataerf;
     %%%%%%%%%%%%%%% RF SPEC %%%%%%%%%%%%%%
 
     % Center frequency for expected RF field (if relevant)
+<<<<<<< Updated upstream
 %     B = atomdata(1).Params.HF_FeshValue_Initial;
     B=204.5;
+=======
+    B = atomdata(1).Params.HF_FeshValue_Initial;
+%     B=201;
+%     B=200;
+>>>>>>> Stashed changes
     x0= (BreitRabiK(B,9/2,-5/2)-BreitRabiK(B,9/2,-7/2))/6.6260755e-34/1E6; 
 %     %x0 = 0;
 %     % Grab Raw data
@@ -905,9 +948,12 @@ if doCustom
 %     X = 2*X - 80;  %Raman AOM condition
     X=X-x0;  
     X=X*1E3;  
+<<<<<<< Updated upstream
      
+=======
+>>>>>>> Stashed changes
     
-%     X=X';
+
      xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];    
 %     xstr=['Fesh field (G)'] ;
 %     xstr=['Pulse Time (ms)']; 
@@ -916,6 +962,9 @@ if doCustom
 
 %     xstr = pco_xVar;
 
+    custom_outdata.X=X;
+    custom_outdata.Xstr=xstr;
+
     % Define Y Data
      N1=DATA.Natoms(:,1);
      N2=DATA.Natoms(:,2);     
@@ -923,10 +972,17 @@ if doCustom
      Ratio_79=0.6;
      N2=N2/Ratio_79;
      
+<<<<<<< Updated upstream
      dataMode=1;
+=======
+     custom_outdata.Ratio_79=Ratio_79;
+>>>>>>> Stashed changes
      
-
+     custom_outdata.N9=N1;
+     custom_outdata.N7=N2;
+     custom_outdata.Ntot=N1+N2;
      
+     dataMode=3;         
      switch dataMode
          case 0     
              Y=(N1-N2)./(N1);
@@ -1140,7 +1196,7 @@ if doCustom
     
     negLorentz_double=0;    
     if length(atomdata)>4 && negLorentz_double
-        X= reshape(X,size(X,2),1);
+        X= reshape(X,length(X),1);
         myfit=fittype('bg-A1*(G1/2).^2*((x-x1).^2+(G1/2).^2).^(-1)-A2*(G2/2).^2*((x-x2).^2+(G2/2).^2).^(-1)',...
             'coefficients',{'A1','G1','x1','A2','G2','x2','bg'},...
             'independent','x');
@@ -1156,7 +1212,7 @@ if doCustom
         
         % Assign guess
 %         G=[A 30 xC A 30 50 bg];
-        G=[A 30 15 A/10 -50 90 bg];
+        G=[A 30 15 A/10 30 -90 bg];
         
         
         opt.StartPoint=G;
@@ -1173,9 +1229,11 @@ if doCustom
         lStr=['xC=(' num2str(round(fout.x1,1)) ',' num2str(round(fout.x2,1)) ')' ...
             ' FWHM=(' num2str(round(fout.G1,1)) ',' num2str(round(fout.G2,1)) ')' ];
         legend(pF,lStr,'location','best');
+        
+        custom_outdata.Fit=fout;
     end
     
-    negLorentz=0;    
+    negLorentz=1;    
     if length(atomdata)>4 && negLorentz
         myfit=fittype('bg-A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)',...
             'coefficients',{'A','G','x0','bg'},...
@@ -1192,12 +1250,12 @@ if doCustom
         xC=X(ind);
         
         % Assign guess
-        G=[A 30 202 bg];
+        G=[A 35 -50 bg];
         opt.StartPoint=G;
-        opt.Robust='bisquare';
-        opt.Lower=[0 0 -inf 0];
+%         opt.Robust='bisquare';
+%         opt.Lower=[0 0 -inf 0];
 
-        opt.Upper=[A range(X) inf A];
+%         opt.Upper=[A range(X) inf A];
 
         % Perform the fit
         fout=fit(X,Y,myfit,opt);
@@ -1443,7 +1501,7 @@ if doCustom_BM
 end
 
 %% Animate cloud
-if doAnimate
+if doAnimate && doSave
     animateOpts=struct;
     animateOpts.StartDelay=3;   % Time to hold on first picture
     animateOpts.MidDelay=1;    % Time to hold in middle picutres

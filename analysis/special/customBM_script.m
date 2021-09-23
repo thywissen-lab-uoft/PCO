@@ -12,6 +12,9 @@
 
     
 [atomdata.ROI]=deal(ROI);
+
+
+outdata=struct;
      
 %% Box count analysis
 
@@ -94,8 +97,27 @@ end
 %  Ntot = (N3+N2-2*N1)+(N6+N5-2*N4);
 Ntot = (N3+N2-2*N1)+N4;
 
+outdata.N1=N1;
+outdata.N2=N2;
+outdata.N3=N3;
+outdata.N4=N4;
+outdata.N5=N5;
+outdata.N6=N6;
+outdata.X=X;
+outdata.xVar=pco_xVar;
+outdata.Ratio_79=0.5;
+
+
+outdata.Ntot = Ntot;
+
+outdata.RelCenter9=N1./Ntot;
+outdata.RelCenter7=N4./Ntot;
+outdata.RelExciteY9=(N2-N1)./Ntot;
+outdata.RelExciteZ9=(N3-N1)./Ntot;
+
+
  %% Choose Data to Plot
- dataMode = 0;
+ dataMode = 1;
  
  % Select the data to plot
  switch dataMode
@@ -182,6 +204,9 @@ if length(atomdata)>4 && fit_RabiOscillation
     guess_tau = 0.5;
     
         myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t))/2;
+        
+        
+        
         fitFuncStr = '$0.5N_0\left(1-\exp(-\pi t / \tau)\cos(2 \pi f t)\right)$';
 
     
@@ -225,7 +250,7 @@ if length(atomdata)>4 && fit_RabiOscillation
     ylim([0 yL(2)+.1]);
 
     legend(pF,paramStr,'location','northeast','interpreter','latex');
-
+    outdata.Fit=fout;
 end
 
     
