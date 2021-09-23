@@ -2,6 +2,9 @@ function output = getErfData(atomdata,xVar)
 %GETERFDATA Summary of this function goes here
 %   Detailed explanation goes here
 
+if nargin == 1
+   xVar = 'ExecutionDate'; 
+end
 
 %% Sort the data by the parameter given
 params=[atomdata.Params];
@@ -9,6 +12,9 @@ X=[params.(xVar)];
 
 [X,inds]=sort(X,'ascend');
 atomdata=atomdata(inds);
+
+% Make sure its Nx1
+X = reshape(X,[length(X) 1]);
 
 %% Grab the Erf Fit outputs
 for kk=1:length(atomdata)
@@ -30,8 +36,10 @@ for kk=1:length(atomdata)
 end
 
 output = struct;
+output.FileNames    = {atomdata.Name}';
 output.PixelSize    = atomdata(1).PixelSize;
 output.CrossSection = atomdata(1).CrossSection;
+output.xVar         = xVar;
 output.X            = X;
 output.Params       = params;
 output.Fits         = fits;

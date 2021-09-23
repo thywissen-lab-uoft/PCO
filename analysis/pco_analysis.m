@@ -796,7 +796,11 @@ if doErfFit
             atomdata(kk).ErfGOF{nn} = gof; % Assign the fit object
             atomdata(kk).ErfNum{nn} = Natoms;
         end
-    end   
+    end
+    
+    % Get a summary of the erf fit data
+    erf_data=getErfData(atomdata,pco_xVar);    
+
 
        % Style of profile --> cut or sum?
     style='cut';
@@ -822,20 +826,6 @@ if doErfFit
         hF_Y_erf=[hF_Y_erf; hF_Ys_rNum];
     end  
     
-    erf_data=getErfData(atomdata,pco_xVar);
-
-    params=[atomdata.Params];
-    xvals=[params.(pco_xVar)];
-    [xvals,inds]=sort(xvals,'ascend');
-    atomdata=atomdata(inds);
-
-    Ndataerf=struct;
-    Ndataerf.xVar=pco_xVar;
-    Ndataerf.X=xvals;
-
-    N1=[out_erf(:,1).Natoms]';
-    N2=[out_erf(:,2).Natoms]';
-    Ndataerf.Natoms=[N1 N2];  
 end
 
 %% Gauss fit : Rabi oscilations
@@ -995,7 +985,7 @@ if doCustom
     end
     
     if doErfFit
-        custom_outdata.ErfData=Ndataerf;    
+        custom_outdata.ErfData=erf_data;    
     end
 
 %     DATA=custom_outdata.BoxCount;
