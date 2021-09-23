@@ -769,12 +769,12 @@ if doGaussFit
 end
 
 %% Erf Fit
+
+% Perform the Erf Fit
 if doErfFit
     disp(repmat('-',1,60));    
     disp('Performing 2D erf fit');
     disp(repmat('-',1,60)); 
-
-    out_erf=struct;
 
     for kk=1:length(atomdata)
         disp(repmat('-',1,60));   
@@ -786,22 +786,28 @@ if doErfFit
             data=atomdata(kk).OD(Dy,Dx);    % Optical density        
             [fout,gof,output,N]=erfFit2D(Dx,Dy,data);    % Perform the fit  
             Natoms = N*(pxsize^2/crosssec);
-
-            out_erf(kk,nn).Fit = fout;
-            out_erf(kk,nn).GOF = gof;
-            out_erf(kk,nn).Natoms = Natoms;
-            out_erf(kk,nn).X=X(kk);
-
             atomdata(kk).ErfFit{nn} = fout; % Assign the fit object       
             atomdata(kk).ErfGOF{nn} = gof; % Assign the fit object
             atomdata(kk).ErfNum{nn} = Natoms;
         end
-    end
-    
+    end    
     % Get a summary of the erf fit data
     erf_data=getErfData(atomdata,pco_xVar);    
+end
 
+% Plot the fit results
+if doErfFit
 
+    % Plot the statistics of gaussian fit
+    hF_stats_erf=showErfStats(erf_data);     
+    if doSave;saveFigure(atomdata,hF_stats,'gauss_stats');end
+       
+    % Atom number
+    [hF_numbergauss,Ndatagauss]=showGaussAtomNumber(atomdata,pco_xVar,gaussPopts);  
+%      ylim([0 max(get(gca,'YLim'))]);
+    ylim([0 max(get(gca,'YLim'))]);
+    
+    
        % Style of profile --> cut or sum?
     style='cut';
     %  style='sum';
