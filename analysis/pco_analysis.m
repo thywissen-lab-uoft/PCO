@@ -73,15 +73,12 @@ end
 % display properties.
 
 % pco_xVar='Raman_AOM3_freq';
-<<<<<<< Updated upstream
 % pco_xVar='Pulse_Time';
 
 
-=======
 %  pco_xVar='Pulse_Time';
 % pco_xVar='ExecutionDate';
 
->>>>>>> Stashed changes
 % pco_xVar='HF_Raman_sweep_time';
 % pco_xVar = 'ExecutionDate';
 % pco_xVar = 'Pulse_Time';
@@ -92,12 +89,8 @@ end
 % pco_xVar = 'Lattice_loading_field';
 % pco_xVar = 'rf_rabi_freq_HF';
 pco_xVar = 'rf_freq_HF';
-<<<<<<< Updated upstream
 % pco_xVar = 'HF_FeshValue_Final_ODT';
 
-=======
-% 
->>>>>>> Stashed changes
 
 
 doSave=0;
@@ -923,20 +916,17 @@ if doCustom
         custom_outdata.BoxCount=Ndatagauss;    
     end
     
-     DATA=custom_outdata.BoxCount;
-      DATA=custom_outdata.GaussData;
-%       DATA=Ndataerf;
+    DATA=custom_outdata.BoxCount;
+    DATA=custom_outdata.GaussData;
+    %       DATA=Ndataerf;
     %%%%%%%%%%%%%%% RF SPEC %%%%%%%%%%%%%%
 
     % Center frequency for expected RF field (if relevant)
-<<<<<<< Updated upstream
-%     B = atomdata(1).Params.HF_FeshValue_Initial;
-    B=204.5;
-=======
     B = atomdata(1).Params.HF_FeshValue_Initial;
+    B = 204.5;
+
 %     B=201;
 %     B=200;
->>>>>>> Stashed changes
     x0= (BreitRabiK(B,9/2,-5/2)-BreitRabiK(B,9/2,-7/2))/6.6260755e-34/1E6; 
 %     %x0 = 0;
 %     % Grab Raw data
@@ -948,10 +938,7 @@ if doCustom
 %     X = 2*X - 80;  %Raman AOM condition
     X=X-x0;  
     X=X*1E3;  
-<<<<<<< Updated upstream
-     
-=======
->>>>>>> Stashed changes
+    
     
 
      xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];    
@@ -962,8 +949,6 @@ if doCustom
 
 %     xstr = pco_xVar;
 
-    custom_outdata.X=X;
-    custom_outdata.Xstr=xstr;
 
     % Define Y Data
      N1=DATA.Natoms(:,1);
@@ -972,15 +957,14 @@ if doCustom
      Ratio_79=0.6;
      N2=N2/Ratio_79;
      
-<<<<<<< Updated upstream
-     dataMode=1;
-=======
-     custom_outdata.Ratio_79=Ratio_79;
->>>>>>> Stashed changes
      
-     custom_outdata.N9=N1;
-     custom_outdata.N7=N2;
-     custom_outdata.Ntot=N1+N2;
+     
+    custom_outdata.X=X;
+    custom_outdata.Xstr=xstr;
+    custom_outdata.Ratio_79=Ratio_79;     
+    custom_outdata.N9=N1;
+    custom_outdata.N7=N2;
+    custom_outdata.Ntot=N1+N2;
      
      dataMode=3;         
      switch dataMode
