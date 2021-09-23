@@ -86,7 +86,8 @@ end
 % pco_xVar = 'Lattice_loading_field';
 % pco_xVar = 'rf_rabi_freq_HF';
 pco_xVar = 'rf_freq_HF';
-% 
+% pco_xVar = 'HF_FeshValue_Final_ODT';
+
 
 
 doSave=1;
@@ -398,6 +399,7 @@ atomdata=atomdata(inds);
 %%% Raman transfers SG bandmapping 18ms tof
 % ROI = [830 940 590 700;
 %     830 940 450 560]; 
+%     ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 
 if doFermiFitLong
 
@@ -884,30 +886,30 @@ end
 
 %% Custom
 if doCustom 
-%     DATA=Ndatabox;
+    DATA=Ndatabox;
     DATA=Ndatagauss;
 
     %%%%%%%%%%%%%%% RF SPEC %%%%%%%%%%%%%%
 
     % Center frequency for expected RF field (if relevant)
-    B = atomdata(1).Params.HF_FeshValue_Initial;
-%     B=200;
+%     B = atomdata(1).Params.HF_FeshValue_Initial;
+    B=204.5;
     x0= (BreitRabiK(B,9/2,-5/2)-BreitRabiK(B,9/2,-7/2))/6.6260755e-34/1E6; 
 %     %x0 = 0;
 %     % Grab Raw data
     X=DATA.X; 
-    X=X';
+%     X=X';
     
 %     X=2*X;
 
 %     X = 2*X - 80;  %Raman AOM condition
     X=X-x0;  
     X=X*1E3;  
-%     
+     
     
 %     X=X';
      xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];    
-% %     xstr=['Fesh field (G)'] ;
+%     xstr=['Fesh field (G)'] ;
 %     xstr=['Pulse Time (ms)']; 
     
 %     xstr=['2 Pulse Time (ms)']; 
@@ -921,7 +923,7 @@ if doCustom
      Ratio_79=0.6;
      N2=N2/Ratio_79;
      
-     dataMode=2;
+     dataMode=1;
      
 
      
@@ -957,6 +959,7 @@ if doCustom
          case 6
              Y=N2./N1;
              ystr=['N_7/N_9'];
+             fstr='79 ratio';
      end
 
 
@@ -1067,7 +1070,7 @@ if doCustom
     
     negGauss_double=0;
     if length(atomdata)>4 && negGauss_double
-        X= reshape(X,size(X,2),1);
+%         X= reshape(X,size(X,2),1);
         myfit=fittype('bg-A1*exp(-(x-x1).^2/(2*s1.^2))-A2*exp(-(x-x2).^2/(2*s2^2))',...
             'coefficients',{'A1','s1','x1','A2','s2','x2','bg'},...
             'independent','x');
@@ -1082,7 +1085,7 @@ if doCustom
         G=[A 15 xC A 15 xC-50 bg];
         
         
-        G=[A 15 15 A 15 -50 bg];
+        G=[A 15 15 A 15 80 bg];
         
         opt.StartPoint=G;
         opt.Robust='bisquare';
@@ -1095,6 +1098,7 @@ if doCustom
         % Plot the fit
         tt=linspace(min(X),max(X),1000);
         pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
+%         ylim([-0.1 2])
         lStr=['xC=(' num2str(round(fout.x1,2)) '±' num2str(abs(round(ci(1,3)-fout.x1,2))) ','...
             num2str(round(fout.x2,2)) '±' num2str(abs(round(ci(1,6)-fout.x2,2))) ')' ...
             ' \sigma=(' num2str(round(fout.s1,1)) ',' num2str(round(fout.s2,1)) ')' ];
