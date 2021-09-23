@@ -93,7 +93,7 @@ pco_xVar = 'rf_freq_HF';
 
 
 
-doSave=0;
+doSave=1;
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit=1;
@@ -743,94 +743,93 @@ if doGaussFit
     clear hF_Y;
     hF_X=[];
     hF_Y=[];
-%     for rNum=1:size(ROI,1)
-%         hF_Xs_rNum=showGaussProfile(atomdata,'X',style,rNum,pco_xVar);        
-%         hF_Ys_rNum=showGaussProfile(atomdata,'Y',style,rNum,pco_xVar);  
-%         pause(1);
-% %       Save the figures (this can be slow)
-%         if doSave
-%             for kk=1:length(hF_Xs_rNum) 
-%                 saveFigure(atomdata,hF_Xs_rNum(kk),['gauss_profile_X' num2str(rNum) '_' num2str(kk)]);
-%             end 
-%             
-%             
-%             for kk=1:length(hF_Ys_rNum)
-%                 saveFigure(atomdata,hF_Ys_rNum(kk),['gauss_profile_Y' num2str(rNum) '_' num2str(kk)]);
-%             end
-%         end
-%         hF_X=[hF_X; hF_Xs_rNum];
-%         hF_Y=[hF_Y; hF_Ys_rNum];
-%     end        
+    for rNum=1:size(ROI,1)
+        hF_Xs_rNum=showGaussProfile(atomdata,'X',style,rNum,pco_xVar);        
+        hF_Ys_rNum=showGaussProfile(atomdata,'Y',style,rNum,pco_xVar);  
+        pause(1);
+%       Save the figures (this can be slow)
+        if doSave
+            for kk=1:length(hF_Xs_rNum) 
+                saveFigure(atomdata,hF_Xs_rNum(kk),['gauss_profile_X' num2str(rNum) '_' num2str(kk)]);
+            end 
+            
+            
+            for kk=1:length(hF_Ys_rNum)
+                saveFigure(atomdata,hF_Ys_rNum(kk),['gauss_profile_Y' num2str(rNum) '_' num2str(kk)]);
+            end
+        end
+        hF_X=[hF_X; hF_Xs_rNum];
+        hF_Y=[hF_Y; hF_Ys_rNum];
+    end        
 end
 
 %% Erf Fit
+if doErfFit
+    disp(repmat('-',1,60));    
+    disp('Performing 2D erf fit');
+    disp(repmat('-',1,60)); 
 
-disp(repmat('-',1,60));    
-disp('Performing 2D erf fit');
-disp(repmat('-',1,60)); 
+    out_erf=struct;
 
-out_erf=struct;
+    for kk=1:length(atomdata)
+        disp(repmat('-',1,60));   
+        disp(['(' num2str(kk) ') ' atomdata(kk).Name]);
+        for nn=1:size(atomdata(kk).ROI,1)   % Iterate over all ROIs
+            sROI=atomdata(kk).ROI(nn,:);     % Grab the analysis ROI
+            Dx=sROI(1):sROI(2);               % X Vector
+            Dy=sROI(3):sROI(4);               % Y Vector
+            data=atomdata(kk).OD(Dy,Dx);    % Optical density        
+            [fout,gof,output,N]=erfFit2D(Dx,Dy,data);    % Perform the fit  
+            Natoms = N*(pxsize^2/crosssec);
 
-for kk=1:length(atomdata)
-    disp(repmat('-',1,60));   
-    disp(['(' num2str(kk) ') ' atomdata(kk).Name]);
-    for nn=1:size(atomdata(kk).ROI,1)   % Iterate over all ROIs
-        sROI=atomdata(kk).ROI(nn,:);     % Grab the analysis ROI
-        Dx=sROI(1):sROI(2);               % X Vector
-        Dy=sROI(3):sROI(4);               % Y Vector
-        data=atomdata(kk).OD(Dy,Dx);    % Optical density        
-        [fout,gof,output,N]=erfFit2D(Dx,Dy,data);    % Perform the fit  
-        Natoms = N*(pxsize^2/crosssec);
+            out_erf(kk,nn).Fit = fout;
+            out_erf(kk,nn).GOF = gof;
+            out_erf(kk,nn).Natoms = Natoms;
+            out_erf(kk,nn).X=X(kk);
 
-        out_erf(kk,nn).Fit = fout;
-        out_erf(kk,nn).GOF = gof;
-        out_erf(kk,nn).Natoms = Natoms;
-        out_erf(kk,nn).X=X(kk);
-
-        atomdata(kk).ErfFit{nn} = fout; % Assign the fit object       
-        atomdata(kk).ErfGOF{nn} = gof; % Assign the fit object
-        atomdata(kk).ErfNum{nn} = Natoms;
-    end
-end   
-    
-   % Style of profile --> cut or sum?
-style='cut';
-%     style='sum';
-clear hF_X;    
-clear hF_Y;
-hF_X_erf=[];
-hF_Y_erf=[];
-for rNum=1:size(ROI,1)
-    hF_Xs_rNum_erf=showErfProfile(atomdata,'X',style,rNum,pco_xVar);        
-    hF_Ys_rNum_erf=showErfProfile(atomdata,'Y',style,rNum,pco_xVar);  
-    pause(1);
-%       Save the figures (this can be slow)
-    if doSave
-        for kk=1:length(hF_Xs_rNum) 
-            saveFigure(atomdata,hF_Xs_rNum(kk),['erf_profile_X' num2str(rNum) '_' num2str(kk)]);
-        end 
-
-
-        for kk=1:length(hF_Ys_rNum)
-            saveFigure(atomdata,hF_Ys_rNum(kk),['erf_profile_Y' num2str(rNum) '_' num2str(kk)]);
+            atomdata(kk).ErfFit{nn} = fout; % Assign the fit object       
+            atomdata(kk).ErfGOF{nn} = gof; % Assign the fit object
+            atomdata(kk).ErfNum{nn} = Natoms;
         end
-    end
-    hF_X_erf=[hF_X_erf; hF_Xs_rNum];
-    hF_Y_erf=[hF_Y_erf; hF_Ys_rNum];
-end  
-    
-params=[atomdata.Params];
-xvals=[params.(pco_xVar)];
-[xvals,inds]=sort(xvals,'ascend');
-atomdata=atomdata(inds);
+    end   
 
-Ndataerf=struct;
-Ndataerf.xVar=pco_xVar;
-Ndataerf.X=xvals;
+       % Style of profile --> cut or sum?
+    style='cut';
+    %     style='sum';
+    clear hF_X_erf;    
+    clear hF_Y_erf;
+    hF_X_erf=[];
+    hF_Y_erf=[];
+    for rNum=1:size(ROI,1)
+        hF_Xs_rNum_erf=showErfProfile(atomdata,'X',style,rNum,pco_xVar);        
+        hF_Ys_rNum_erf=showErfProfile(atomdata,'Y',style,rNum,pco_xVar);  
+        pause(1);
+    %       Save the figures (this can be slow)
+        if doSave
+            for kk=1:length(hF_Xs_rNum) 
+                saveFigure(atomdata,hF_Xs_rNum_erf(kk),['erf_profile_X' num2str(rNum) '_' num2str(kk)]);
+            end 
+            for kk=1:length(hF_Ys_rNum)
+                saveFigure(atomdata,hF_Xs_rNum_erf(kk),['erf_profile_Y' num2str(rNum) '_' num2str(kk)]);
+            end
+        end
+        hF_X_erf=[hF_X_erf; hF_Xs_rNum];
+        hF_Y_erf=[hF_Y_erf; hF_Ys_rNum];
+    end  
 
-N1=[out_erf(:,1).Natoms]';
-N2=[out_erf(:,2).Natoms]';
-Ndataerf.Natoms=[N1 N2];  
+    params=[atomdata.Params];
+    xvals=[params.(pco_xVar)];
+    [xvals,inds]=sort(xvals,'ascend');
+    atomdata=atomdata(inds);
+
+    Ndataerf=struct;
+    Ndataerf.xVar=pco_xVar;
+    Ndataerf.X=xvals;
+
+    N1=[out_erf(:,1).Natoms]';
+    N2=[out_erf(:,2).Natoms]';
+    Ndataerf.Natoms=[N1 N2];  
+end
 
 %% Gauss fit : Rabi oscilations
 GaussRabiopts=struct;
@@ -989,12 +988,12 @@ if doCustom
     end
     
     if doErfFit
-        custom_outdata.Ndataerf=Ndataerf;    
+        custom_outdata.ErfData=Ndataerf;    
     end
 
-    DATA=custom_outdata.BoxCount;
+%     DATA=custom_outdata.BoxCount;
     DATA=custom_outdata.GaussData;
-    DATA=custom_outdata.Ndataerf;
+%     DATA=custom_outdata.ErfData;
     %%%%%%%%%%%%%%% RF SPEC %%%%%%%%%%%%%%
 
     % Center frequency for expected RF field (if relevant)
@@ -1007,7 +1006,7 @@ if doCustom
 %     %x0 = 0;
 %     % Grab Raw data
     X=DATA.X; 
-%     X=X';
+    X=X';
     
 %     X=2*X;
 
