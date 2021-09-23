@@ -282,7 +282,7 @@ if doLandauZener && length(atomdata)>3
     [hF_LandauZener,frabi]=landauZenerAnalysis(Y',dtdf,lz_opts); 
 
     if doSave
-        saveFigure(hF_LandauZener,'Custom_landau_zener');
+        saveFigure(hF_LandauZener,'Custom_landau_zener',saveOpts);
     end
 end   
 %% Assymetric lorentzian fit, good for AM spec
@@ -394,6 +394,6 @@ end
 %% Save the figure
     
 if doSave
-    saveFigure(hFB,fstr);
+    saveFigure(hFB,fstr,saveOpts);
 end
 

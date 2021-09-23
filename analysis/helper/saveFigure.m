@@ -1,18 +1,9 @@
-function saveFigure(hF,filename)
-global imgdir
+function saveFigure(hF,filename,opts)
 ext='.png';
 save_qual='-r120';
 
 
-% The directory where the figures are saved
-figDir=fullfile(imgdir,'figures');
-if ~exist(figDir,'dir')
-   mkdir(figDir); 
-end
-
-% Create the name of the figure
-[filepath,name,~]=fileparts(imgdir);
-
+figDir = opts.saveDir;
 
 % Make the figure name with the location
 saveLocation=fullfile(figDir,[filename ext]);

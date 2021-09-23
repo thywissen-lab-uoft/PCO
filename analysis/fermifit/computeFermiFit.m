@@ -69,7 +69,7 @@ for kk=1:length(atomdata)
             
             if inputopts.SaveDetails                
                 fName=['fermilong_' atomdata(kk).Name];
-                saveFigure(hF,fName)
+%                 saveFigure(hF,fName)
             end
                
             

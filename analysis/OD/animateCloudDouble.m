@@ -1,6 +1,12 @@
 function animateCloudDouble(atomdata,xVar,opts)
 
-global imgdir
+
+if isfield(opts,'saveDir') 
+    FigLabel = opts.FigLabel;
+else
+    FigLabel = '';
+end
+
 
 clim=opts.CLim;
 
@@ -12,14 +18,13 @@ endDelay=opts.EndDelay;     % End picture hold time
 %% Filename
 
 % Check to make figure directory
-figDir=fullfile(imgdir,'figures');
-if ~exist(figDir,'dir')
-   mkdir(figDir); 
+if ~exist(opts.saveDir,'dir')
+   mkdir(opts.saveDir); 
 end
 
 % Make the figure name with the location
 filename='animate';
-filename=fullfile(figDir,[filename '.gif']);
+filename=fullfile(opts.saveDir,[filename '.gif']);
 
 %% Sort the Data
 % Get the x variable
@@ -143,22 +148,19 @@ end
 %% Initialize Graphics
 
 % Figure Name
-strs=strsplit(imgdir,filesep);
-str=[strs{end-1} filesep strs{end}];
 
-
-hF=figure('Name',[str ' : Animate Cloud'],...
+hF=figure('Name',[FigLabel ' : Animate Cloud'],...
     'units','pixels','color','w','Menubar','none','Resize','off',...
     'WindowStyle','modal');
 hF.Position=[10 5 W H];
 colormap(whitejet);
 
 % Image directory folder string
-t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
-    'w','horizontalalignment','left');
-t.Position(4)=t.Extent(4);
-t.Position(3)=hF.Position(3);
-t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
+% t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+%     'w','horizontalalignment','left');
+% t.Position(4)=t.Extent(4);
+% t.Position(3)=hF.Position(3);
+% t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
 
 % Axes for data
 
@@ -230,11 +232,11 @@ else
 end
 
 axes(ax1);
-% Text label for folder name
-text(0,.98,str,'units','normalized','fontsize',8,'color','r',...
-    'interpreter','none','verticalalignment','cap',...
-    'fontweight','bold','margin',1,'backgroundcolor',[1 1 1 .5]);
 
+% Text label for folder name
+t0=text(0,1.01,FigLabel,'units','normalized','fontsize',8,'color','k',...
+    'interpreter','none','verticalalignment','bottom',...
+    'fontweight','bold','margin',1);
 % Text label for variable name
 t=text(5,5,'hi','units','pixels','fontsize',14,'color','r',...
     'interpreter','none','verticalalignment','bottom',...

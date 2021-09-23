@@ -93,7 +93,7 @@ end
 pco_xVar = 'rf_freq_HF';
 % pco_xVar = 'HF_FeshValue_Final_ODT';
 
-doSave=0;
+doSave=1;
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit=1;
@@ -133,18 +133,28 @@ doCustom_BM = 0;    % Custom Band map
 
 
 %Animation
-doAnimate = 0;       % Animate the Cloud
+doAnimate = 1;       % Animate the Cloud
 
 %% Select image directory
 % Choose the directory where the images to analyze are stored
 disp([datestr(now,13) ' Choose an image analysis folder...']);
 dialog_title='Choose the root dire ctory of the images';
 newdir=uigetdir(getImageDir(datevec(now)),dialog_title);
+
+saveOpts = struct;
+
 if isequal(newdir,0)
     disp('Canceling.');    
     return 
 else
     imgdir = newdir;
+    saveDir = [imgdir filesep 'figures'];
+    
+    if ~exist(saveDir,'dir'); mkdir(saveDir);end    
+        
+    saveOpts.saveDir=saveDir;
+    saveOpts.Quality = 'auto';
+
     strs=strsplit(imgdir,filesep);
     FigLabel=[strs{end-1} filesep strs{end}];
 end
@@ -462,12 +472,12 @@ probe_opts.PixelSize = PixelSize;
 probe_opts.FigLabel = FigLabel;
 
 [hF_probe,counts]=showProbeCounts(atomdata,pco_xVar,probe_opts);
-saveFigure(hF_probe,'probe')
+saveFigure(hF_probe,'probe',saveOpts)
 
 if doProbeFit
    atomdata=analyzeProbeBeam(atomdata);
    [hF_probe]=showProbeAnalysis(atomdata,pco_xVar,probe_opts);   
-   if doSave;saveFigure(hF_probe,'probe_details');end
+   if doSave;saveFigure(hF_probe,'probe_details',saveOpts);end
 end
 
 %% Box Count
@@ -507,17 +517,17 @@ boxPopts.RatioSineFit=0;
 if doBoxCount  
     % Plot the atom number
     [hF_numberbox,Ndatabox]=showBoxAtomNumber(atomdata,pco_xVar,boxPopts); 
-    if doSave;saveFigure(hF_numberbox,'box_number');end
+    if doSave;saveFigure(hF_numberbox,'box_number',saveOpts);end
     
     % Plot the ratios if there are more than one ROI.
     if size(ROI,1)>1    
         [hF_numberratio,Ndataratio]=showBoxAtomNumberRatio(atomdata,pco_xVar,boxPopts);
-        if doSave;saveFigure(hF_numberratio,'box_number_ratio');end          
+        if doSave;saveFigure(hF_numberratio,'box_number_ratio',saveOpts);end          
     end     
     
     % Plot the box aspect ratio
     hF_box_ratio=showBoxAspectRatio(atomdata,pco_xVar,boxPopts);
-    if doSave;saveFigure(hF_box_ratio,'box_ratio');end
+    if doSave;saveFigure(hF_box_ratio,'box_ratio',saveOpts);end
 end   
     
 %% Box Count : Rabi oscillations
@@ -533,10 +543,10 @@ boxRabiopts.Sign='auto'; % Automatic fit sign
 
 if doBoxCount && doBoxRabi && size(ROI,1)>1 
     [hF_rabi_contrast,rabi_contrast]=boxRabiOscillationsContrast(atomdata,pco_xVar,boxRabiopts);
-    if doSave;saveFigure(hF_rabi_contrast,'box_rabi_oscillate_contrast');end
+    if doSave;saveFigure(hF_rabi_contrast,'box_rabi_oscillate_contrast',saveOpts);end
         
     [hF_rabi_raw,rabi_absolute]=boxRabiOscillationsAbsolute(atomdata,pco_xVar,boxRabiopts);
-    if doSave;saveFigure(hF_rabi_raw,'box_rabi_oscillate_raw');end    
+    if doSave;saveFigure(hF_rabi_raw,'box_rabi_oscillate_raw',saveOpts);end    
 end
 
 %% Box Count : Landau Zener
@@ -588,7 +598,7 @@ if doLandauZener && size(ROI,1)==2 && doBoxCount && length(atomdata)>3
     [hF_LandauZener,frabi]=landauZenerAnalysis(atomdata,dtdf,lz_opts); 
     
     if doSave
-        saveFigure(hF_LandauZener,'box_landau_zener');
+        saveFigure(hF_LandauZener,'box_landau_zener',saveOpts);
     end
 end   
     
@@ -641,7 +651,7 @@ if doRamanSpec
     disp(repmat('-',1,60));
     atomdata=ramanSpectroscopy(atomdata,raman);
     hF_raman=showRamanSpectroscopy(atomdata,pco_xVar,raman);      
-    if doSave;saveFigure(hF_raman,'raman_spec');end        
+    if doSave;saveFigure(hF_raman,'raman_spec',saveOpts);end        
 end
 
 %% 2D Gaussian Fit
@@ -684,11 +694,11 @@ if doGaussFit
     %  Save th figures (this can be slow)
         if doSave
             for kk=1:length(hF_Xs_rNum) 
-                saveFigure(hF_Xs_rNum(kk),['gauss_profile_X' num2str(rNum) '_' num2str(kk)]);
+                saveFigure(hF_Xs_rNum(kk),['gauss_profile_X' num2str(rNum) '_' num2str(kk)],saveOpts);
             end             
 
             for kk=1:length(hF_Ys_rNum)
-                saveFigure(hF_Ys_rNum(kk),['gauss_profile_Y' num2str(rNum) '_' num2str(kk)]);
+                saveFigure(hF_Ys_rNum(kk),['gauss_profile_Y' num2str(rNum) '_' num2str(kk)],saveOpts);
             end
         end
         hF_X=[hF_X; hF_Xs_rNum];
@@ -711,46 +721,46 @@ if doGaussFit
     
     % Plot the statistics of gaussian fit
     hF_stats=showGaussStats(atomdata);     
-    if doSave;saveFigure(hF_stats,'gauss_stats');end       
+    if doSave;saveFigure(hF_stats,'gauss_stats',saveOpts);end       
     
     hF_number_gauss = showAtomNumber(gauss_data,pco_xVar,gaussPopts);  
     ylim([0 max(get(gca,'YLim'))]);    
-    if doSave;saveFigure(hF_number_gauss,'gauss_number');end
+    if doSave;saveFigure(hF_number_gauss,'gauss_number',saveOpts);end
     
     % Plot the ratios if there are more than one ROI.
     if size(ROI,1)>1    
         hF_number_gauss_ratio=showNumberRatio(gauss_data,pco_xVar,gaussPopts);
-        if doSave;saveFigure(hF_number_gauss_ratio,'gauss_number_ratio');end
+        if doSave;saveFigure(hF_number_gauss_ratio,'gauss_number_ratio',saveOpts);end
     end
     
     % Cloud Error
     hF_Error=showError(gauss_data,pco_xVar,gaussPopts);    
-    if doSave;saveFigure(hF_Error,'gauss_error');end  
+    if doSave;saveFigure(hF_Error,'gauss_error',saveOpts);end  
    
     % Cloud centre
     hF_Centre=showAtomCentre(gauss_data,pco_xVar,gaussPopts);    
-    if doSave;saveFigure(hF_Centre,'gauss_position');end 
+    if doSave;saveFigure(hF_Centre,'gauss_position',saveOpts);end 
         
     % Gauss Size
     hF_size=showSize(gauss_data,pco_xVar,gaussPopts);    
-    if doSave;saveFigure(hF_size,'gauss_size');end
+    if doSave;saveFigure(hF_size,'gauss_size',saveOpts);end
     
     % Single shot temperature analysis
     [hF_tempsingle,Tdata]=showGaussSingleTemperature(gauss_data,pco_xVar,gaussPopts);    
-    if doSave;saveFigure(hF_tempsingle,'gauss_tempsingle');end     
+    if doSave;saveFigure(hF_tempsingle,'gauss_tempsingle',saveOpts);end     
         
     % Aspect ratio
     hF_ratio=showAspectRatio(gauss_data,pco_xVar,gaussPopts);    
-    if doSave;saveFigure(hF_ratio,'gauss_ratio');end   
+    if doSave;saveFigure(hF_ratio,'gauss_ratio',saveOpts);end   
 
     % Peak gaussian density
     hF_density=showDensity(gauss_data,pco_xVar,gaussPopts);    
-    if doSave;saveFigure(hF_density,'gauss_density');end    
+    if doSave;saveFigure(hF_density,'gauss_density',saveOpts);end    
 
     % Gaussian Temperature Analysis
     if isequal(pco_xVar,'tof') && size(gauss_data.Natoms,2)>2
         [hF_temp,fitX,fitY]=computeGaussianTemperature(gauss_data,gaussPopts);
-        if doSave;saveFigure(hF_temp,'gauss_temp');end    
+        if doSave;saveFigure(hF_temp,'gauss_temp',saveOpts);end    
     end      
       
 end
@@ -797,10 +807,10 @@ if doErfFit
     %   Save the figures (this can be slow)
         if doSave
             for kk=1:length(hF_Xs_rNum) 
-                saveFigure(hF_Xs_rNum_erf(kk),['erf_profile_X' num2str(rNum) '_' num2str(kk)]);
+                saveFigure(hF_Xs_rNum_erf(kk),['erf_profile_X' num2str(rNum) '_' num2str(kk)],saveOpts);
             end 
             for kk=1:length(hF_Ys_rNum)
-                saveFigure(hF_Xs_rNum_erf(kk),['erf_profile_Y' num2str(rNum) '_' num2str(kk)]);
+                saveFigure(hF_Xs_rNum_erf(kk),['erf_profile_Y' num2str(rNum) '_' num2str(kk)],saveOpts);
             end
         end
         hF_X_erf=[hF_X_erf; hF_Xs_rNum];
@@ -822,37 +832,37 @@ if doErfFit
     
     % Plot the statistics of erfian fit
     hF_stats_erf=showErfStats(erf_data,ErfPopts);     
-    if doSave;saveFigure(hF_stats_erf,'erf_stats');end       
+    if doSave;saveFigure(hF_stats_erf,'erf_stats',saveOpts);end       
     
     hF_number_erf = showAtomNumber(erf_data,pco_xVar,ErfPopts);  
     ylim([0 max(get(gca,'YLim'))]);    
-    if doSave;saveFigure(hF_number_erf,'erf_number');end
+    if doSave;saveFigure(hF_number_erf,'erf_number',saveOpts);end
     
     % Plot the ratios if there are more than one ROI.
     if size(ROI,1)>1    
         hF_number_erf_ratio=showNumberRatio(erf_data,pco_xVar,ErfPopts);
-        if doSave;saveFigure(hF_number_erf_ratio,'erf_number_ratio');end
+        if doSave;saveFigure(hF_number_erf_ratio,'erf_number_ratio',saveOpts);end
     end
     
     % Cloud Error
     hF_Error=showError(erf_data,pco_xVar,ErfPopts);    
-    if doSave;saveFigure(hF_Error,'erf_error');end  
+    if doSave;saveFigure(hF_Error,'erf_error',saveOpts);end  
    
     % Cloud centre
     hF_Centre=showAtomCentre(erf_data,pco_xVar,ErfPopts);    
-    if doSave;saveFigure(hF_Centre,'erf_position');end 
+    if doSave;saveFigure(hF_Centre,'erf_position',saveOpts);end 
         
     % erf Size
     hF_size=showSize(erf_data,pco_xVar,ErfPopts);    
-    if doSave;saveFigure(hF_size,'erf_size');end
+    if doSave;saveFigure(hF_size,'erf_size',saveOpts);end
     
     % Aspect ratio
     hF_ratio=showAspectRatio(erf_data,pco_xVar,ErfPopts);    
-    if doSave;saveFigure(hF_ratio,'erf_ratio');end   
+    if doSave;saveFigure(hF_ratio,'erf_ratio',saveOpts);end   
 
     % Peak erfian density
     hF_density=showDensity(erf_data,pco_xVar,ErfPopts);    
-    if doSave;saveFigure(hF_density,'erf_density');end 
+    if doSave;saveFigure(hF_density,'erf_density',saveOpts);end 
       
 end
 
@@ -876,7 +886,7 @@ if doGaussFit && doGaussRabi
         [hF_rabi_gauss]=GaussRabiOscillations_raw(atomdata,pco_xVar,GaussRabiopts);
     end
     
-    if doSave;saveFigure(hF_rabi_gauss,'gauss_rabi_oscillate');end
+    if doSave;saveFigure(hF_rabi_gauss,'gauss_rabi_oscillate',saveOpts);end
 
 end
 
@@ -949,14 +959,14 @@ end
 % Plotting
 if doFermiFitLong
     hF_fermi_temp=showFermiTemp(atomdata,pco_xVar,fermiFitOpts);    
-    if doSave;saveFigure(hF_fermi_temp,'fermi_temperature');end
+    if doSave;saveFigure(hF_fermi_temp,'fermi_temperature',saveOpts);end
     
     hF_fermi_error=showFermiError(atomdata,pco_xVar,fermiFitOpts);    
-    if doSave;saveFigure(hF_fermi_error,'fermi_error');end       
+    if doSave;saveFigure(hF_fermi_error,'fermi_error',saveOpts);end       
 
     
     hF_fermi_temp2=showFermiTempCompare(atomdata,pco_xVar,fermiFitOpts);    
-    if doSave;saveFigure(hF_fermi_temp2,'fermi_compare');end
+    if doSave;saveFigure(hF_fermi_temp2,'fermi_compare',saveOpts);end
 end
 
 %% BEC Analysis
@@ -996,7 +1006,7 @@ if doBEC && isfield(atomdata(1),'GaussFit')
     
     [hF_BEC,BECdata]=BECanalysis(atomdata,pco_xVar,BECopts);    
     
-    if doSave;saveFigure(hF_BEC,'gauss_BEC');end        
+    if doSave;saveFigure(hF_BEC,'gauss_BEC',saveOpts);end        
 end
 
 
@@ -1575,7 +1585,7 @@ if doCustom
     pp=get(gcf,'position');
     set(gcf,'position',[pp(1) pp(2) 800 400]);    
     if doSave
-        saveFigure(hFB,fstr);
+        saveFigure(hFB,fstr,saveOpts);
     end
 end
 
@@ -1587,6 +1597,8 @@ end
 %% Animate cloud
 if doAnimate && doSave
     animateOpts=struct;
+    animateOpts.FigLabel = FigLabel;
+    animateOpts.saveDir = saveDir;
     animateOpts.StartDelay=3;   % Time to hold on first picture
     animateOpts.MidDelay=1;    % Time to hold in middle picutres
     animateOpts.EndDelay=2;     % Time to hold final picture

@@ -1,7 +1,14 @@
 function animateCloud(atomdata,xVar,opts)
 
 clim=opts.CLim;
-global imgdir
+
+if nargin == 3 && isfield(opts,'FigLabel') 
+    FigLabel = opts.FigLabel;
+else
+    FigLabel = '';
+    opts = struct;
+end
+
 global doRotate
 
 % Default is to snap to minimum ROI
@@ -13,8 +20,6 @@ startDelay=opts.StartDelay;   % First picture hold time
 midDelay=opts.MidDelay;   % Middle pictures hold time
 endDelay=opts.EndDelay;     % End picture hold time
 
-strs=strsplit(imgdir,filesep);
-str=[strs{end-1} filesep strs{end}];
 %% Make Filename
 filename='animate';
 
