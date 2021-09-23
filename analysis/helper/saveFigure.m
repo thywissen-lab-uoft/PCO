@@ -1,4 +1,4 @@
-function saveFigure(atomdata,hF,filename)
+function saveFigure(hF,filename)
 global imgdir
 ext='.png';
 save_qual='-r120';
