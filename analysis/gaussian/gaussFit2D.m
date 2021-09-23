@@ -65,7 +65,7 @@ str2=['(Xs0,Ys0)=(' num2str(round(Xs)) ',' num2str(round(Ys)) ')'];
 fprintf([str1 str2 ';']);
 
 % Perform the fit
-fprintf(' fitting...');
+fprintf(' gauss fitting...');
 t1=now;
 [fout,gof,output]=fit([xx2(:) yy2(:)],data2(:),myfit,opt);
 t2=now;

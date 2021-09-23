@@ -646,24 +646,10 @@ if doRamanSpec
     if doSave;saveFigure(atomdata,hF_raman,'raman_spec');end        
 end
 
-%% 2D Gaussian Analysis
+%% 2D Gaussian Fitting
 % This section of code computes a 2D gaussin fit on all your data and ROIs.
-% Warning, this can take a while.
 
-gaussPopts = struct;
-gaussPopts.xUnit=pco_unit;
-gaussPopts.NumberExpFit = 0;        % Fit exponential decay to atom number
-gaussPopts.NumberLorentzianFit=0;   % Fit atom number to lorentzian
-gaussPopts.CenterSineFit = 0;       % Fit sine fit to cloud center
-gaussPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
-gaussPopts.CenterParabolaFit = 0;
-gaussPopts.CenterLinearFit = 0;     % Linear fit to cloud center
-gaussPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
-
-
-if doGaussFit
-    out_gauss = struct;
-    
+if doGaussFit   
     disp(repmat('-',1,60));    
     disp('Performing 2D gauss fit');
     disp(repmat('-',1,60));    
@@ -680,23 +666,35 @@ if doGaussFit
             % Atom Number
             N=2*pi*fout.Xs*fout.Ys*fout.A*(pxsize^2/crosssec); 
             
-            out_gauss(kk,nn).Fit = fout;
-            out_gauss(kk,nn).GOF = gof;
-            out_gauss(kk,nn).Natoms=N;  
-            out_gauss(kk,nn).X=X(kk);
-            
             atomdata(kk).GaussFit{nn}=fout; % Assign the fit object       
-            atomdata(kk).GaussGOF{nn}=gof; % Assign the fit object       
-
+            atomdata(kk).GaussGOF{nn}=gof; % Assign the fit object  
         end
-    end    
+    end
+    gauss_data=getGaussData(atomdata,pco_xVar);  
 end
 
+
+%% 2D Gauss Analysis
+
 if doGaussFit  
+    gaussPopts = struct;
+    gaussPopts.xUnit=pco_unit;
+    gaussPopts.NumberExpFit = 0;        % Fit exponential decay to atom number
+    gaussPopts.NumberLorentzianFit=0;   % Fit atom number to lorentzian
+    gaussPopts.CenterSineFit = 0;       % Fit sine fit to cloud center
+    gaussPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
+    gaussPopts.CenterParabolaFit = 0;
+    gaussPopts.CenterLinearFit = 0;     % Linear fit to cloud center
+    gaussPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
+    
     % Plot the statistics of gaussian fit
     hF_stats=showGaussStats(atomdata);     
     if doSave;saveFigure(atomdata,hF_stats,'gauss_stats');end
        
+    
+    hF_numbergauss2 = showAtomNumber(gauss_data,pco_xVar,gaussPopts);  
+
+    
     % Atom number
     [hF_numbergauss,Ndatagauss]=showGaussAtomNumber(atomdata,pco_xVar,gaussPopts);  
 %      ylim([0 max(get(gca,'YLim'))]);
@@ -730,7 +728,7 @@ if doGaussFit
     if doSave;saveFigure(atomdata,hF_tempsingle,'gauss_tempsingle');end    
    
     % Cloud centre
-    hF_Centre=showGaussAtomCentre(atomdata,pco_xVar,gaussPopts);    
+    hF_Centre=showAtomCentre(gauss_data,pco_xVar,gaussPopts);    
     if doSave;saveFigure(atomdata,hF_Centre,'gauss_position');end   
     
     % Cloud Error
@@ -799,23 +797,19 @@ end
 % Plot the fit results
 if doErfFit
 
-    % Plot the statistics of gaussian fit
+    % Plot the statistics of erf fit
     hF_stats_erf=showErfStats(erf_data);     
-    if doSave;saveFigure(atomdata,hF_stats,'gauss_stats');end
+    if doSave;saveFigure(atomdata,hF_stats_erf,'erf_stats');end
        
     % Atom number
-    [hF_numbergauss,Ndatagauss]=showGaussAtomNumber(atomdata,pco_xVar,gaussPopts);  
-%      ylim([0 max(get(gca,'YLim'))]);
-    ylim([0 max(get(gca,'YLim'))]);
+    hF_number_erf=showAtomNumber(erf_data,pco_xVar,gaussPopts);  
+%     ylim([0 max(get(gca,'YLim'))]);
     
-    
-       % Style of profile --> cut or sum?
+    % Style of profile --> cut or sum?
     style='cut';
     %  style='sum';
-    clear hF_X_erf;    
-    clear hF_Y_erf;
-    hF_X_erf=[];
-    hF_Y_erf=[];
+    clear hF_X_erf;clear hF_Y_erf;
+    hF_X_erf=[];hF_Y_erf=[];
     for rNum=1:size(ROI,1)
         hF_Xs_rNum_erf=showErfProfile(atomdata,'X',style,rNum,pco_xVar);        
         hF_Ys_rNum_erf=showErfProfile(atomdata,'Y',style,rNum,pco_xVar);  
@@ -984,7 +978,7 @@ if doCustom
     custom_outdata=struct;
     
     if doGaussFit
-        custom_outdata.GaussData=Ndatagauss;     
+        custom_outdata.GaussData=gauss_data;     
     end    
     
     if doBoxCount
@@ -996,8 +990,8 @@ if doCustom
     end
 
 %     DATA=custom_outdata.BoxCount;
-    DATA=custom_outdata.GaussData;
-%     DATA=custom_outdata.ErfData;
+%     DATA=custom_outdata.GaussData;
+    DATA=custom_outdata.ErfData;
     %%%%%%%%%%%%%%% RF SPEC %%%%%%%%%%%%%%
 
     % Center frequency for expected RF field (if relevant)
@@ -1010,7 +1004,7 @@ if doCustom
 %     %x0 = 0;
 %     % Grab Raw data
     X=DATA.X; 
-    X=X';
+%     X=X';
     
 %     X=2*X;
 

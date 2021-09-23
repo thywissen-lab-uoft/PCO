@@ -1,4 +1,4 @@
-function output = getErfData(atomdata,xVar)
+function output = getGaussData(atomdata,xVar)
 %GETERFDATA Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -17,33 +17,35 @@ atomdata=atomdata(inds);
 X = reshape(X,[length(X) 1]);
 
 %% Grab the Erf Fit outputs
+
+PixelSize = atomdata(1).PixelSize;
+CrossSection = atomdata(1).CrossSection;
+
 for kk=1:length(atomdata)
-   for nn=1:length(atomdata(kk).ErfFit)
-        fout=atomdata(kk).ErfFit{nn};               % Grab the fit
+   for nn=1:length(atomdata(kk).GaussFit)
+        fout=atomdata(kk).GaussFit{nn};               % Grab the fit
         fits{kk,nn}=fout;
-        GOFs{kk,nn}=atomdata(kk).ErfGOF{nn};
+        GOFs{kk,nn}=atomdata(kk).GaussGOF{nn};
         Xc(kk,nn)=fout.Xc;Yc(kk,nn)=fout.Yc;        % X and Y center
-        Xr(kk,nn)=fout.Xr;Yr(kk,nn)=fout.Yr;        % X and Y smooth radius
-        Xw(kk,nn)=fout.Xw;Yw(kk,nn)=fout.Yw;        % X and Y widths
-        Zw(kk,nn)=fout.Xw;                          % ASSUME wZ=wX;    
-        Zr(kk,nn)=fout.Xr;                          % ASSUME wZ=wX;                
+        Xs(kk,nn)=fout.Xs;Ys(kk,nn)=fout.Ys;        % X and Y sigma
+        Zs(kk,nn)=fout.Xs;                          % ASSUME wZ=wX;    
         A(kk,nn)=fout.A;                            % Amplitude
         nbg(kk,nn)=fout.nbg;                        % Background
 
-        % Atom Number
-        Natoms(kk,nn)=atomdata(kk).ErfNum{nn};        
+        N(kk,nn)=2*pi*Xs(kk,nn)*Ys(kk,nn)*A(kk,nn);     % Number of counts
+        Natoms(kk,nn)=N(kk,nn)*(PixelSize^2/CrossSection);  % Atom number      
    end        
 end
 
 output = struct;
 
 output.FileNames    = {atomdata.Name}';
-output.PixelSize    = atomdata(1).PixelSize;
-output.CrossSection = atomdata(1).CrossSection;
+output.PixelSize    = PixelSize;
+output.CrossSection = CrossSection;
 output.xVar         = xVar;
 output.X            = X;
 output.Params       = params;
-output.FitType      = 'erf';
+output.FitType      = 'gauss';
 output.Fits         = fits;
 output.FitGOFs      = GOFs;
 
@@ -51,10 +53,8 @@ output.FitGOFs      = GOFs;
 output.Natoms       = Natoms;
 output.Xc           = Xc;
 output.Yc           = Yc;
-output.Xw           = Xw;
-output.Yw           = Yw;
-output.Xr           = Xr;
-output.Yr           = Yr;
+output.Xw           = Xs;
+output.Yw           = Ys;
 output.A            = A;
 output.nbg          = nbg;
 

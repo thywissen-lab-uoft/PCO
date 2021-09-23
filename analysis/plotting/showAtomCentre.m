@@ -1,10 +1,15 @@
-function hF=showGaussAtomCentre(atomdata,xVar,opts)
+function hF=showAtomCentre(data,xVar,opts)
 
-
-global pxsize
 global imgdir
 
+% Create the name of the figure
+[filepath,name,~]=fileparts(imgdir);
+figDir=fullfile(imgdir,'figures');
+if ~exist(figDir,'dir')
+   mkdir(figDir); 
+end
 
+%% Default options
 if nargin==2
     opts=struct;
     opts.CenterSineFit = 0;
@@ -13,32 +18,12 @@ if nargin==2
     opts.CenterLinearFit = 0;
 end
 
-%% Sort the data
-params=[atomdata.Params];
-xvals=[params.(xVar)];
+%% Get Data
+Xc = data.Xc;
+Yc = data.Yc;
 
-[xvals,inds]=sort(xvals,'ascend');
-atomdata=atomdata(inds);
-
-%% Grab the Data
-for kk=1:length(atomdata)
-   for nn=1:length(atomdata(kk).GaussFit)
-        fout=atomdata(kk).GaussFit{nn};         
-        Xc(kk,nn)=fout.Xc;Yc(kk,nn)=fout.Yc; 
-   end        
-end
-
-
-%% Make Filename
-filename='Cloud Centre'; 
-
-% Create the name of the figure
-[filepath,name,~]=fileparts(imgdir);
-
-figDir=fullfile(imgdir,'figures');
-if ~exist(figDir,'dir')
-   mkdir(figDir); 
-end
+params = [data.Params];
+xvals = [params.(xVar)];
 
 
 %% Make Figure
@@ -46,9 +31,8 @@ end
 strs=strsplit(imgdir,filesep);
 str=[strs{end-1} filesep strs{end}];
 
-hF=figure('Name',[pad('Gauss Centre',20) str],...
-    'units','pixels','color','w','Menubar','none','Resize','off',...
-    'numbertitle','off');
+hF=figure('Name',[pad([data.FitType ' centre'],20) str],...
+    'units','pixels','color','w','numbertitle','off');
 hF.Position(1)=1200;
 hF.Position(2)=280;
 hF.Position(3)=600;
@@ -62,13 +46,21 @@ t.Position(4)=t.Extent(4);
 t.Position(3)=hF.Position(3);
 t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
 
+
+    function chSize(~,~)
+        t.Position(3)=hF.Position(3);
+        t.Position(4)=t.Extent(4);
+        t.Position(1:2)=[5 hF.Position(4)-t.Position(4)]; 
+    end
+hF.SizeChangedFcn = @chSize;
+
 %% Track X
 hax1=subplot(221);
 set(hax1,'box','on','linewidth',1,'fontsize',10,'units','pixels');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 co=get(gca,'colororder');
-for nn=1:size(atomdata(1).ROI,1)
+for nn=1:size(Xc,2)
    plot(xvals,Xc(:,nn),'o','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
@@ -97,7 +89,7 @@ set(hax2,'box','on','linewidth',1,'fontsize',10,'units','pixels');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 co=get(gca,'colororder');
-for nn=1:size(atomdata(1).ROI,1)
+for nn=1:size(Yc,2)
    plot(xvals,Yc(:,nn),'o','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end

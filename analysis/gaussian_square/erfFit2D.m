@@ -61,7 +61,7 @@ opt.Upper      = [1.5*N0 max(X)  20  range(X) max(Y) 20  range(Y) 0.15];
 opt.Weights=[];
 
 % Perform the fit
-fprintf(' fitting...');
+fprintf(' erf fitting...');
 t1=now;
 [fout,gof,output]=fit([xx(:) yy(:)],Z(:),myfit,opt);
 t2=now;

@@ -1,6 +1,6 @@
 function hFs=showErfProfile(atomdata,direction,style,rNum,xVar)
 global imgdir
-imgdir
+
 pMax=36;
 
 switch nargin
@@ -121,15 +121,7 @@ for kk=1:(ceil(length(atomdata)/pMax))
                     Y=sum(z,2); % Z(Xc,x)
                     YF=sum(zzF,2);
             end
-            X=y;        
-
-%             y1=max([min(y) fout.Yc-6*fout.Ys]);
-%             y2=min([max(y) fout.Yc+6*fout.Ys]);
-% 
-%             str=['{\bf y_c: }'  num2str(round(fout.Yc)) ...
-%                 'px  ' ...
-%                 '{\bf \sigma_y: }' num2str(round(fout.Ys)) ...
-%                 'px'];    
+            X=y;         
         end
 
         % Plot the data
@@ -144,10 +136,6 @@ for kk=1:(ceil(length(atomdata)/pMax))
 
 
         % Draw the analysis string box
-%         text(thisAxes.Position(3)-1, thisAxes.Position(4), str, 'Units', 'pixels',...
-%             'FontSize', 8,...
-%             'verticalalignment','cap','horizontalalignment','right'); 
-
         iterNum=(kk-1)*pMax+ii;
         
         % Draw the iteration number and variable value
