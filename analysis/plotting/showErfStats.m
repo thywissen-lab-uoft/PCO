@@ -33,6 +33,8 @@ for nn=1:size(erfdata.Natoms,2)
     t.Position(4)=t.Extent(4);
     t.Position(3)=hF.Position(3);
     t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
+    
+    resizeFig(hF,t);
 
     subplot(241);
     histogram(erfdata.Natoms(:,nn),20,'FaceColor',co(nn,:))

@@ -17,8 +17,7 @@ A  = pi*Xs.*Ys;
 %% Make Figure
 
 hF=figure('Name',[pad([data.FitType ' size'],20) str],...
-    'units','pixels','color','w','Menubar','none','Resize','off',...
-    'numbertitle','off');
+    'units','pixels','color','w','numbertitle','off');
 hF.Position(1)=1015;
 hF.Position(2)=50;
 hF.Position(3)=800;
@@ -31,6 +30,10 @@ t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
 t.Position(4)=t.Extent(4);
 t.Position(3)=hF.Position(3);
 t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
+
+uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
+    'w','horizontalalignment','left','fontsize',12,'fontweight','bold',...
+    'position',[2 2 40 20]);
 
 % Make axis
 hax1=subplot(131);
@@ -82,7 +85,10 @@ text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',
     'interpreter','latex');
 
 
-hax1.Position(4)=hax1.Position(4)-15;
-hax2.Position(4)=hax1.Position(4);
-hax3.Position(4)=hax1.Position(4);
+% hax1.Position(4)=hax1.Position(4)-15;
+% hax2.Position(4)=hax1.Position(4);
+% hax3.Position(4)=hax1.Position(4);
+
+resizeFig(hF,t,[hax1 hax2 hax3]);
+
 

@@ -92,4 +92,6 @@ str=['$n=\frac{N}{(2\pi)^{3/2}\sigma_X \sigma_Y \sigma_Z}$' newline '$\sigma_z=\
 text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',...
     'interpreter','latex');
 
+resizeFig(hF,t,hax);
+
 

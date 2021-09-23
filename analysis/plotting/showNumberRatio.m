@@ -46,20 +46,7 @@ ylabel([data.FitType ' relative number']);
 hax.Position(4)=hax.Position(4)-20;
 co=get(gca,'colororder');
 
-function chSize(~,~)
-    try
-        t.Position(3)=hF.Position(3);
-        t.Position(4)=t.Extent(4);
-        t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
-
-        hax.Units='pixels';
-        hax.Position(2)=55;
-        hax.Position(4)=(hF.Position(4)-25-t.Position(4))-hax.Position(2);
-        hax.Units='normalized';        
-    end 
-end
-chSize;
-hF.SizeChangedFcn=@chSize;
+resizeFig(hF,t,[hax]);
 
 for nn=1:size(Natoms,2)
    plot(xvals,Natoms(:,nn)./sum(Natoms,2),'o','color',co(nn,:),'linewidth',1,'markersize',8,...

@@ -58,6 +58,8 @@ for nn=1:size(R,2)
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
 
+resizeFig(hF,t,[hax]);
+
 
 
 end

@@ -114,21 +114,8 @@ hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 ylabel([data.FitType ' atom number']);
 
-    function chSize(~,~)
-        try
-            t.Position(3)=hF.Position(3);
-            t.Position(4)=t.Extent(4);
-            t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
+resizeFig(hF,t,[hax]);
 
-            hax.Units='pixels';
-            hax.Position(2)=55;
-            hax.Position(4)=(hF.Position(4)-25-t.Position(4))-hax.Position(2);
-            hax.Units='normalized';        
-        end 
-    end
-chSize;
-
-hF.SizeChangedFcn=@chSize;
         
 co=get(gca,'colororder');
 

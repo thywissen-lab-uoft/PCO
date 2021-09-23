@@ -50,16 +50,11 @@ uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
     'w','horizontalalignment','left','fontsize',12,'fontweight','bold',...
     'position',[2 2 40 20]);
 
-    function chSize(~,~)
-        t.Position(3)=hF.Position(3);
-        t.Position(4)=t.Extent(4);
-        t.Position(1:2)=[5 hF.Position(4)-t.Position(4)]; 
-    end
-hF.SizeChangedFcn = @chSize;
+resizeFig(hF,t)
 
 %% Track X
 hax1=subplot(221);
-set(hax1,'box','on','linewidth',1,'fontsize',10,'units','pixels',...
+set(hax1,'box','on','linewidth',1,'fontsize',10,...
     'xgrid','on','ygrid','on');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
@@ -89,7 +84,7 @@ drawnow;
 %% Track Y
 
 hax2=subplot(223);
-set(hax2,'box','on','linewidth',1,'fontsize',10,'units','pixels',...
+set(hax2,'box','on','linewidth',1,'fontsize',10,...
     'xgrid','on','ygrid','on');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');

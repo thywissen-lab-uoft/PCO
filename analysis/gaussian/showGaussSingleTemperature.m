@@ -172,6 +172,5 @@ text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',
     'interpreter','latex');
 
 
-hax1.Position(4)=hax1.Position(4)-15;
-hax2.Position(4)=hax1.Position(4);
-hax3.Position(4)=hax1.Position(4);
+resizeFig(hF,t,[hax1 hax2 hax3]);
+

@@ -39,14 +39,13 @@ uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
 
 
 % Make axis
-hax=subplot(121);
-set(hax,'box','on','linewidth',1,'fontsize',8,'units','pixels',...
+hax1=subplot(121);
+set(hax1,'box','on','linewidth',1,'fontsize',8,'units','pixels',...
     'xgrid','on','ygrid','on');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 ylabel('R-squared');
 
-hax.Position(4)=hax.Position(4)-20;
 
 co=get(gca,'colororder');
 
@@ -56,14 +55,13 @@ for nn=1:size(R2,2)
 end
 
 
-hax=subplot(122);
-set(hax,'box','on','linewidth',1,'fontsize',8,'units','pixels',...
+hax2=subplot(122);
+set(hax2,'box','on','linewidth',1,'fontsize',8,'units','pixels',...
     'xgrid','on','ygrid','on');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 ylabel('see');
 
-hax.Position(4)=hax.Position(4)-20;
 
 co=get(gca,'colororder');
 
@@ -74,7 +72,7 @@ end
 % ylim([0 1.1]);
 
 
-
+resizeFig(hF,t,[hax1 hax2]);
 
 
 

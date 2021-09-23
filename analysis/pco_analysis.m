@@ -658,32 +658,33 @@ if doGaussFit
 end
 
 %% 2D Gauss OD Profile
-% Style of profile --> cut or sum?
-style='cut';
-%style='sum';
-clear hF_X;    
-clear hF_Y;
-hF_X=[];
-hF_Y=[];
-for rNum=1:size(ROI,1)
-    hF_Xs_rNum=showProfile(atomdata,'GaussFit','X',style,rNum,pco_xVar);        
-    hF_Ys_rNum=showProfile(atomdata,'GaussFit','Y',style,rNum,pco_xVar);  
-    pause(1);
-    
-%  Save th figures (this can be slow)
-    if doSave
-        for kk=1:length(hF_Xs_rNum) 
-            saveFigure(atomdata,hF_Xs_rNum(kk),['gauss_profile_X' num2str(rNum) '_' num2str(kk)]);
-        end             
+if doGaussFit
+    % Style of profile --> cut or sum?
+    style='cut';
+    %style='sum';
+    clear hF_X;    
+    clear hF_Y;
+    hF_X=[];
+    hF_Y=[];
+    for rNum=1:size(ROI,1)
+        hF_Xs_rNum=showProfile(atomdata,'GaussFit','X',style,rNum,pco_xVar);        
+        hF_Ys_rNum=showProfile(atomdata,'GaussFit','Y',style,rNum,pco_xVar);  
+        pause(1);
 
-        for kk=1:length(hF_Ys_rNum)
-            saveFigure(atomdata,hF_Ys_rNum(kk),['gauss_profile_Y' num2str(rNum) '_' num2str(kk)]);
+    %  Save th figures (this can be slow)
+        if doSave
+            for kk=1:length(hF_Xs_rNum) 
+                saveFigure(atomdata,hF_Xs_rNum(kk),['gauss_profile_X' num2str(rNum) '_' num2str(kk)]);
+            end             
+
+            for kk=1:length(hF_Ys_rNum)
+                saveFigure(atomdata,hF_Ys_rNum(kk),['gauss_profile_Y' num2str(rNum) '_' num2str(kk)]);
+            end
         end
-    end
-    hF_X=[hF_X; hF_Xs_rNum];
-    hF_Y=[hF_Y; hF_Ys_rNum];
-end   
-
+        hF_X=[hF_X; hF_Xs_rNum];
+        hF_Y=[hF_Y; hF_Ys_rNum];
+    end   
+end
 %% 2D Gauss Analysis
 
 if doGaussFit  
@@ -729,16 +730,11 @@ if doGaussFit
         
     % Aspect ratio
     hF_ratio=showAspectRatio(gauss_data,pco_xVar,gaussPopts);    
-    if doSave;saveFigure(atomdata,hF_ratio,'gauss_ratio');end
-  
-
-    
-
+    if doSave;saveFigure(atomdata,hF_ratio,'gauss_ratio');end   
 
     % Peak gaussian density
     hF_density=showGaussDensity(atomdata,pco_xVar,gaussPopts);    
-    if doSave;saveFigure(atomdata,hF_density,'gauss_density');end
-    
+    if doSave;saveFigure(atomdata,hF_density,'gauss_density');end    
 
     % Gaussian Temperature Analysis
     if isequal(pco_xVar,'tof') && length(atomdata)>2
@@ -775,30 +771,30 @@ if doErfFit
 end
 
 %% 2D Erf OD Profile
+if doErfFit
+    % Style of profile --> cut or sum?
+    style='cut';
+    %  style='sum';
+    clear hF_X_erf;clear hF_Y_erf;
+    hF_X_erf=[];hF_Y_erf=[];
+    for rNum=1:size(ROI,1)
+        hF_Xs_rNum_erf=showProfile(atomdata,'ErfFit','X',style,rNum,pco_xVar);        
+        hF_Ys_rNum_erf=showProfile(atomdata,'ErfFit','Y',style,rNum,pco_xVar);  
+        pause(1);
 
-% Style of profile --> cut or sum?
-style='cut';
-%  style='sum';
-clear hF_X_erf;clear hF_Y_erf;
-hF_X_erf=[];hF_Y_erf=[];
-for rNum=1:size(ROI,1)
-    hF_Xs_rNum_erf=showProfile(atomdata,'ErfFit','X',style,rNum,pco_xVar);        
-    hF_Ys_rNum_erf=showProfile(atomdata,'ErfFit','Y',style,rNum,pco_xVar);  
-    pause(1);
-    
-%   Save the figures (this can be slow)
-    if doSave
-        for kk=1:length(hF_Xs_rNum) 
-            saveFigure(atomdata,hF_Xs_rNum_erf(kk),['erf_profile_X' num2str(rNum) '_' num2str(kk)]);
-        end 
-        for kk=1:length(hF_Ys_rNum)
-            saveFigure(atomdata,hF_Xs_rNum_erf(kk),['erf_profile_Y' num2str(rNum) '_' num2str(kk)]);
+    %   Save the figures (this can be slow)
+        if doSave
+            for kk=1:length(hF_Xs_rNum) 
+                saveFigure(atomdata,hF_Xs_rNum_erf(kk),['erf_profile_X' num2str(rNum) '_' num2str(kk)]);
+            end 
+            for kk=1:length(hF_Ys_rNum)
+                saveFigure(atomdata,hF_Xs_rNum_erf(kk),['erf_profile_Y' num2str(rNum) '_' num2str(kk)]);
+            end
         end
-    end
-    hF_X_erf=[hF_X_erf; hF_Xs_rNum];
-    hF_Y_erf=[hF_Y_erf; hF_Ys_rNum];
-end  
-
+        hF_X_erf=[hF_X_erf; hF_Xs_rNum];
+        hF_Y_erf=[hF_Y_erf; hF_Ys_rNum];
+    end  
+end
 %% 2D Erf Analysis
 % Plot the fit results
 if doErfFit
@@ -998,7 +994,7 @@ if doCustom
 
 %     DATA=custom_outdata.BoxCount;
 %     DATA=custom_outdata.GaussData;
-    DATA=custom_outdata.ErfData;
+%     DATA=custom_outdata.ErfData;
     %%%%%%%%%%%%%%% RF SPEC %%%%%%%%%%%%%%
 
     % Center frequency for expected RF field (if relevant)
