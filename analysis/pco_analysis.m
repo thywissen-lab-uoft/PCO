@@ -39,7 +39,7 @@ disp(' ');
 % imaging GUI is unaware of.  These include the atom chose (Rb or K) and
 % the camera from which the images are taken (X or Y).
 
-disp('Choosing global settings for analysis...');
+disp('Setting global settings for analysis...');
 
 global camaxis
 global pxsize
@@ -169,7 +169,11 @@ for kk=1:length(files)
     if isequal(pco_xVar,'ExecutionDate')
         data.Params.(pco_xVar)=datenum(data.Params.(pco_xVar))*24*60*60;
     end  
-    atomdata(kk)=data;    
+    atomdata(kk)=data;   
+    
+    % Append PixelSize, Cross Section
+    atomdata(kk).PixelSize = pxsize;
+    atomdata(kk).CrossSection = crosssec;    
 end
 disp(' ');
 
@@ -418,6 +422,7 @@ if doFermiFitLong
 end
 
 % Assign the ROI
+disp('Assigning ROI to data');
 [atomdata.ROI]=deal(ROI);
 
 %% Calculate the optical density
@@ -795,7 +800,7 @@ if doErfFit
 
        % Style of profile --> cut or sum?
     style='cut';
-    %     style='sum';
+    %  style='sum';
     clear hF_X_erf;    
     clear hF_Y_erf;
     hF_X_erf=[];
@@ -816,6 +821,8 @@ if doErfFit
         hF_X_erf=[hF_X_erf; hF_Xs_rNum];
         hF_Y_erf=[hF_Y_erf; hF_Ys_rNum];
     end  
+    
+    erf_data=getErfData(atomdata,pco_xVar);
 
     params=[atomdata.Params];
     xvals=[params.(pco_xVar)];

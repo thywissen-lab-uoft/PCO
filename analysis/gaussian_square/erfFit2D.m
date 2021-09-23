@@ -7,16 +7,20 @@ function [fout,gof,output,N] = erfFit2D(X,Y,Z)
 % No pre-processing is performed on the data.  It is assumed that the data
 % is of sufficiently small number of pixels to make fitting time small.
 
+% Conva to double format
 Z=double(Z);X=double(X);Y=double(Y);
 
+% Convert position vectors into image
 [xx,yy]=meshgrid(X,Y);
 
+% Rescale the image for computation time
 doScale=0;
 if doScale
     sc=0.4;
     X=imresize(X,sc);Y=imresize(Y,sc);Z=imresize(Z,sc);
 end
 
+% Smooth the data
 doSmooth=0;
 if doSmooth
     sSmooth=1;
@@ -26,16 +30,20 @@ end
 % Calculate guesses for center and size
 Zx=sum(Z,1);Zy=sum(Z,2)';               % Get X and Y sum profiles
 
+% Set negative OD to zero
 Zx(Zx<0)=0;Zy(Zy<0)=0;
 
+% Computer first and second moments of sum distributions
 Nx=sum(Zx);Ny=sum(Zy);                  % Get the total number of counts
 Xc=mean(X(Zx>.9*max(Zx)));              % X center (use >90% SNR)
 Yc=mean(Y(Zy>.9*max(Zy)));              % Y center (use >90% SNR)
 Xs=1.5*sqrt(sum((X-Xc).^2.*Zx)/Nx);     % X standard deviation * 1.5
 Ys=1.5*sqrt(sum((Y-Yc).^2.*Zy)/Ny);     % Y standard deviation * 1.5
 
+% Guess the peak
 N0=max(max(Z))*.8;
 
+% Guess the background
 nbg=min(min(Z));
 nbg=0;
 
@@ -59,8 +67,8 @@ t1=now;
 t2=now;
 disp([' done (' num2str(round((t2-t1)*24*60*60,1)) ' sec.).']);
 
+% Compute number
 Zf = feval(fout,xx,yy);
-
 N = sum(sum(Zf))-fout.nbg*size(Z,1)*size(Z,2);
 
 doDebug=0;
