@@ -117,6 +117,15 @@ for kk=1:(ceil(length(atomdata)/pMax))
         if isfield(atomdataSUB(ii),'BoxCount') && ~(doGauss || doErf)
             Yc(end+1) = atomdataSUB(ii).BoxCount(rNum).Yc;
             Xc(end+1) = atomdataSUB(ii).BoxCount(rNum).Xc;
+            
+            if Yc<y(1) || Yc>y(end)
+                Yc = mean(y);
+            end
+            
+            if Xc<x(1) || Xc>x(end)
+                Xc = mean(x);
+            end
+            
             doBox = 1;
         end
         

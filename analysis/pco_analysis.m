@@ -1,4 +1,19 @@
 
+%% Data Source
+% Select the data source
+
+data_source = 'box';
+data_source = 'gauss';
+data_source = 'erf';
+
+switch data_source
+    case 'box'        
+        data = box_data;
+    case 'gauss'
+        data = gauss_data;
+    case 'erf'
+        data = erf_data;
+end
 
 %% Box Count Analysis
 
@@ -12,8 +27,7 @@ if doBoxCount
     boxPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
     boxPopts.CenterParabolaFit = 0;
     boxPopts.CenterLinearFit = 0;     % Linear fit to cloud center
-    boxPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
-    
+    boxPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset    
        
     hF_number_box = showAtomNumber(box_data,pco_xVar,boxPopts);  
     ylim([0 max(get(gca,'YLim'))]);    
@@ -31,72 +45,7 @@ if doBoxCount
         
     % box Size
     hF_size_box=showSize(box_data,pco_xVar,boxPopts);    
-    if doSave;saveFigure(hF_size_box,'box_size',saveOpts);end
-    
-    if doBoxRabi && size(ROI,1)>1 
-        boxRabiopts=struct;
-        boxRabiopts.FigLabel = FigLabel;
-        boxRabiopts.xUnit=pco_unit;
-
-        boxRabiopts.Ratio_79=0.62;0.5;0.66;
-        boxRabiopts.Guess=[.9 13 1]; % [probability transfer, freq, t2 time,]
-
-        boxRabiopts.Sign=[1 0]; % is N(t=0)=1 or 0?
-        boxRabiopts.Sign='auto'; % Automatic fit sign
-        
-        
-        [hF_rabi_contrast,rabi_contrast]=boxRabiOscillationsContrast(box_data,pco_xVar,boxRabiopts);
-        if doSave;saveFigure(hF_rabi_contrast,'box_rabi_oscillate_contrast',saveOpts);end
-
-        [hF_rabi_raw,rabi_absolute]=boxRabiOscillationsAbsolute(box_data,pco_xVar,boxRabiopts);
-        if doSave;saveFigure(hF_rabi_raw,'box_rabi_oscillate_raw',saveOpts);end    
-    end
-
-    if doLandauZener && size(box_data.Natoms,2)==2 && doBoxCount && size(box_data.Natoms,1)>3
-        lz_opts=struct;
-        lz_opts.Mode='auto';
-        lz_opts.BoxIndex=1;  % 1/2 ratio or 2/1 ratio
-        lz_opts.LZ_GUESS=[1 .8]; % Fit guess kHz,ampltidue can omit guess as well
-        lz_opts.num_scale = 0.6;        
-        
-        % Define the dt/df in ms/kHz
-        % This can be different variables depending on the sweep
-
-        % Grab the sequence parameters
-        params=[atomdata.Params];
-
-        % Get df and dt
-    %     SweepTimeVar='sweep_time';      % Variable that defines sweep time
-    %     SweepRangeVar='sweep_range';    %    Variable that defines sweep range
-
-
-    %     SweepTimeVar='uwave_sweep_time';      % Variable that defines sweep time
-    %     SweepRangeVar='uwave_delta_freq';    %    Variable that defines sweep range
-
-    % Shift Register
-        SweepTimeVar='HF_Raman_sweep_time';     
-
-    %     SweepTimeVar='Raman_Time';      % Variable that defines sweep time
-        SweepRangeVar='HF_Raman_sweep_range';    %    Variable that defines sweep range
-    %     
-        % Convert the parameter into df and dt (add whatever custom processing
-        % you want).
-        dT=[params.(SweepTimeVar)];
-    %     dF=[params.(SweepRangeVar)]*1000; % Factor of two for the SRS
-        dF=[params.(SweepRangeVar)]*1000*2; % Factor of two for the AOM DP
-
-    %     dF=40*ones(length(atomdata),1)';
-
-        % Convert to dtdf
-        dtdf=dT./dF; 
-
-        % Perform the analysis and save the output
-        [hF_LandauZener,frabi]=landauZenerAnalysis(box_data,dtdf,lz_opts); 
-
-        if doSave
-            saveFigure(hF_LandauZener,'box_landau_zener',saveOpts);
-        end
-    end   
+    if doSave;saveFigure(hF_size_box,'box_size',saveOpts);end       
 end
 
 %% 2D Gauss Analysis
@@ -170,8 +119,6 @@ if doGaussFit
     end         
 end
 
-
-
 %% 2D Erf Analysis
 
 if doErfFit  
@@ -222,28 +169,67 @@ if doErfFit
       
 end
 
-%% Gauss fit : Rabi oscilations
-GaussRabiopts=struct;
-GaussRabiopts.xUnit=pco_unit;
-GaussRabiopts.Ratio_79=0.6;0.5;0.66;
+%% Landau Zener
+if doLandauZener && size(data.Natoms,2)>1 && size(data.Natoms,1)>3
+    lz_opts=struct;
+    lz_opts.Mode='auto';
+    lz_opts.BoxIndex=1;  % 1/2 ratio or 2/1 ratio
+    lz_opts.LZ_GUESS=[1 .8]; % Fit guess kHz,ampltidue can omit guess as well
+    lz_opts.num_scale = 0.6;        
 
-GaussRabiopts.Guess=[.9 10 1]; % [probability transfer, freq, t2 time,]
-boxRabiopts.Guess=[.5 4 10]; % [probability transfer, freq, t2 time,]
+    % Define the dt/df in ms/kHz
+    % This can be different variables depending on the sweep
+
+    % Grab the sequence parameters
+    params=[data.Params];
+
+    % Get df and dt
+%     SweepTimeVar='sweep_time';      % Variable that defines sweep time
+%     SweepRangeVar='sweep_range';    %    Variable that defines sweep range
+
+%     SweepTimeVar='uwave_sweep_time';      % Variable that defines sweep time
+%     SweepRangeVar='uwave_delta_freq';    %    Variable that defines sweep range
+
+    % Shift Register
+    SweepTimeVar='HF_Raman_sweep_time';     
+
+%     SweepTimeVar='Raman_Time';      % Variable that defines sweep time
+    SweepRangeVar='HF_Raman_sweep_range';    %    Variable that defines sweep range
+%     
+    % Convert the parameter into df and dt (add whatever custom processing
+    % you want).
+    dT=[params.(SweepTimeVar)];
+%     dF=[params.(SweepRangeVar)]*1000; % Factor of two for the SRS
+    dF=[params.(SweepRangeVar)]*1000*2; % Factor of two for the AOM DP
 
 
-GaussRabiopts.Sign=-1; % N1-N2 (+1) or N2-N1 (-1)
+    % Convert to dtdf
+    dtdf=dT./dF; 
+    % Perform the analysis and save the output
+    [hF_LandauZener,frabi]=landauZenerAnalysis(data,dtdf,lz_opts); 
 
-if doGaussFit && doGaussRabi 
-    if size(ROI,1)==2
-        % For normalized rabi oscillations
-        [hF_rabi_gauss]=GaussRabiOscillations(atomdata,pco_xVar,GaussRabiopts);
-    else
-        % For un-normalized rabi oscillations
-        [hF_rabi_gauss]=GaussRabiOscillations_raw(atomdata,pco_xVar,GaussRabiopts);
+    if doSave
+        saveFigure(hF_LandauZener,[data_source '_landau_zener'],saveOpts);
     end
-    
-    if doSave;saveFigure(hF_rabi_gauss,'gauss_rabi_oscillate',saveOpts);end
+end
 
+%% Rabi Oscillations
+if doRabi 
+    boxRabiopts=struct;
+    boxRabiopts.FigLabel = FigLabel;
+    boxRabiopts.xUnit=pco_unit;
+
+    boxRabiopts.Ratio_79=0.62;0.5;0.66;
+    boxRabiopts.Guess=[.9 13 1]; % [probability transfer, freq, t2 time,]
+
+    boxRabiopts.Sign=[1 0]; % is N(t=0)=1 or 0?
+    boxRabiopts.Sign='auto'; % Automatic fit sign
+
+    [hF_rabi_contrast,rabi_contrast]=rabiOscillationsContrast(data,pco_xVar,boxRabiopts);
+    if doSave;saveFigure(hF_rabi_contrast,[data_source '_rabi_oscillate_contrast'],saveOpts);end
+
+    [hF_rabi_raw,rabi_absolute]=rabiOscillationsAbsolute(data,pco_xVar,boxRabiopts);
+    if doSave;saveFigure(hF_rabi_raw,[data_source '_rabi_oscillate_raw'],saveOpts);end    
 end
 
 %% Custom
@@ -251,20 +237,22 @@ if doCustom
     custom_outdata=struct;
     
     if doGaussFit
-        custom_outdata.GaussData=gauss_data;     
+        custom_outdata.GaussData=data;     
     end    
     
     if doBoxCount
-        custom_outdata.BoxCount=Ndatabox;    
+        custom_outdata.BoxCount=data;    
     end
     
     if doErfFit
-        custom_outdata.ErfData=erf_data;    
+        custom_outdata.ErfData=data;    
     end
 
+    
 %     DATA=custom_outdata.BoxCount;
 %      DATA=custom_outdata.GaussData;
-    DATA=custom_outdata.ErfData;
+%     data=custom_outdata.ErfData;
+    DATA=data;
     %%%%%%%%%%%%%%% RF SPEC %%%%%%%%%%%%%%
 
     % Center frequency for expected RF field (if relevant)
@@ -276,7 +264,7 @@ if doCustom
     x0= (BreitRabiK(B,9/2,-5/2)-BreitRabiK(B,9/2,-7/2))/6.6260755e-34/1E6; 
 %     %x0 = 0;
 %     % Grab Raw data
-    X=DATA.X; 
+    X=data.X; 
 %     X=X';
     
 %     X=2*X;
@@ -297,13 +285,11 @@ if doCustom
 
 
     % Define Y Data
-     N1=DATA.Natoms(:,1);
-     N2=DATA.Natoms(:,2);     
+     N1=data.Natoms(:,1);
+     N2=data.Natoms(:,2);     
      
      Ratio_79=0.6;
-     N2=N2/Ratio_79;
-     
-     
+     N2=N2/Ratio_79;  
      
     custom_outdata.X=X;
     custom_outdata.Xstr=xstr;
@@ -337,7 +323,7 @@ if doCustom
             fstr='Transfer Fraction';
          case 5 % random customized stuffs 
              N2=N2*0.6;
-             N3=DATA.Natoms(:,3);
+             N3=data.Natoms(:,3);
              Y=(N3+ N2-2*N1)./(N3+N2-N1);
              ystr=['Higher band fraction'];
              xstr=['latt ramp time (ms)'];

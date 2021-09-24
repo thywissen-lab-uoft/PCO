@@ -1,4 +1,4 @@
-function [hF,frabi,frabi2] = landauZenerAnalysis(atomdata,dtdf,opts)
+function [hF,frabi,frabi2] = landauZenerAnalysis(data,dtdf,opts)
 
 %%
 if nargin == 3 && isfield(opts,'FigLabel') 
@@ -15,75 +15,35 @@ if nargin==2
     opts.BoxIndex=1;
 end
 
-if isequal(opts.Mode,'custom')   
-    Nrel=atomdata;
-    ind=1;
-else    
+%% Grab the data
 
+Natoms = data.Natoms;
+NatomsTot = sum(Natoms,2);
 
-    %% Grab the box counts analysis
-    for kk=1:length(atomdata)
-       for ind=1:size(atomdata(kk).ROI,1)
-            BC=atomdata(kk).BoxCount(ind);           % Grab the box count
-            Xc(kk,ind)=BC.Xc;Yc(kk,ind)=BC.Yc;        % X and Y center
-            Xs(kk,ind)=BC.Xs;Ys(kk,ind)=BC.Ys;        % X and Y sigma   
-            Zs(kk,ind)=BC.Ys;                        % ASSUME sZ=sY;                
-            nbg(kk,ind)=BC.Nbkgd;                    % Background
-            N(kk,ind)=BC.Ncounts;
+% Which index to plot
+ind=opts.BoxIndex;
 
-            if BC.Ncounts<0
-               warning(['Negative box count detected atomdata(' num2str(kk) ')' ...
-                   ' ROI : ' num2str(ind) '. Setting to 0']);
-               N(kk,ind)=0;
-            end
+% Calculate the normalized atom number
+scale = opts.num_scale;
+Natoms(:,2) = Natoms(:,ind)./scale;
+Nrel=Natoms(:,ind)'./NatomsTot;
 
-            Natoms(kk,ind)=N(kk,ind)*(pxsize^2/crosssec);  % Atom number  
-       end  
+%% Ignore Bad Data Points
+badInds=[NatomsTot<1E4];
 
-
-
-      NatomsTot(kk)=sum(Natoms(kk,:));                 % Total Atom number over all boxes
-
-    end
-    disp(Natoms)
-
-
-
-    % Convert sizes in meters
-    Xs = Xs*pxsize;
-    Ys = Ys*pxsize;
-    Zs = Zs*pxsize;
-
-    %% Grab the relative atom number to fit
-
-    % Which ROI do we plot against?
-    % [~,ind]=min(Natoms(1,:));  
-
-
-    ind=opts.BoxIndex;
-
-    % Calculate the normalized atom number
-    scale = opts.num_scale;
-    Natoms(:,2) = Natoms(:,ind)./scale;
-    Nrel=Natoms(:,ind)'./NatomsTot;
-
-    %% Ignore Bad Data Points
-    badInds=[NatomsTot<1E4];
-
-    if sum(badInds)
-       warning('Low atom number detected. Check your images and delete bad data'); 
-    end
-
-    for kk=1:length(badInds)
-        if badInds(kk)
-           warning([' atomdata(' num2str(kk) ') total atoms <1E4. Ignoring in analysis.']);
-        end
-    end
-
-    Nrel(badInds)=[];
-    dtdf(badInds)=[];
-
+if sum(badInds)
+   warning('Low atom number detected. Check your images and delete bad data'); 
 end
+
+for kk=1:length(badInds)
+    if badInds(kk)
+       warning([' atomdata(' num2str(kk) ') total atoms <1E4. Ignoring in analysis.']);
+    end
+end
+
+Nrel(badInds)=[];
+dtdf(badInds)=[];
+
 %% Analyze the data
 
 % Peform the fit
@@ -109,19 +69,16 @@ f2str=['$\Omega_R=2\pi \times' num2str(round(fout2.f_rabi,3))  '~\mathrm{kHz},~T
 
 % Initialize the figure
 hF=figure('Name',[pad('Landau Zener',20) FigLabel],...
-    'units','pixels','color','w','Menubar','none','Resize','off',...
+    'units','pixels','color','w',...
     'numbertitle','off');
-hF.Position(1)=0;
-hF.Position(2)=50;
-hF.Position(3)=500;
-hF.Position(4)=400;
+hF.Position =[0 50 500 400];
 clf
 drawnow;
 
-% Lable this as PCO analysis
-uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
+% Add PCO label
+uicontrol('style','text','string',['PCO,' data.FitType],'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left','fontsize',12,'fontweight','bold',...
-    'position',[2 2 40 20]);
+    'position',[2 2 100 20]);
 
 % Make axis
 hax=axes;
@@ -164,8 +121,6 @@ t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
 
 
 % Add theoretical curve function (fit function)
-fitStr='$A(1-\exp(-\frac{1}{4}\Omega_\mathrm{R}^2 \frac{dt}{df}))$';
-
 fitStr=['$P_{\mathrm{LZ}}:=(1-\exp(-\frac{1}{4}\Omega_\mathrm{R}^2 \frac{dt}{df}))$ ' newline ...
     '$\mathrm{fit~1:}~A \times P_{\mathrm{LZ}}$ ' newline ...
     '$\mathrm{fit~2:}~ P_{\mathrm{LZ}} \times \frac{1}{2}(1+\exp(-\pi \frac{dt}{df}\Omega_R/T_2))$'];

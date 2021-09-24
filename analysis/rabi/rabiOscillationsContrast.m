@@ -1,8 +1,12 @@
-function [hF,outdata]=GaussRabiOscillations(atomdata,xVar,opts)
-% Grab important global variables
-global pxsize
-global imgdir
-global crosssec
+function [hF,outdata]=rabiOscillationsContrast(data,xVar,opts)
+
+%%
+if nargin == 3 && isfield(opts,'FigLabel') 
+    FigLabel = opts.FigLabel;
+else
+    FigLabel = '';
+    opts = struct;
+end
 
 if nargin==2
     opts=struct;
@@ -12,55 +16,24 @@ end
 disp(' ');
 disp('Analyzing rabi oscillations');
 
-%% Sort the data by the parameter given
-params=[atomdata.Params];
+%% Grab the data
+params=[data.Params];
 xvals=[params.(xVar)];
 
-[xvals,inds]=sort(xvals,'ascend');
-atomdata=atomdata(inds);
+% Grab the atom number, set zero values to zero
+Natoms = data.Natoms;
+Natoms(Natoms<0)=0;
 
-%% Grab the Gaussfit outputs
-Natoms=zeros(length(atomdata),size(atomdata(1).ROI,1));
-
-for kk=1:length(atomdata)
-   for nn=1:size(atomdata(kk).ROI,1)
-%         GF=atomdata(kk).GaussFit(nn);           % Grab the box count
-%         Xc(kk,nn)=GF.Xc;Yc(kk,nn)=GF.Yc;        % X and Y center
-%         Xs(kk,nn)=GF.Xs;Ys(kk,nn)=GF.Ys;        % X and Y sigma   
-%         Zs(kk,nn)=GF.Ys;                        % ASSUME sZ=sY;                
-%         nbg(kk,nn)=GF.Nbkgd;                    % Background
-%         N(kk,nn)=GF.Ncounts;
-        
-        fout=atomdata(kk).GaussFit{nn};         
-        Xc(kk,nn)=fout.Xc;Yc(kk,nn)=fout.Yc;
-        Xs(kk,nn)=fout.Xs;Ys(kk,nn)=fout.Ys;
-        A(kk,nn)=fout.A;
-        nbg(kk,nn)=fout.nbg;
-
-        N(kk,nn)=2*pi*Xs(kk,nn)*Ys(kk,nn)*A(kk,nn);
-%         Natoms(kk,nn)=N(kk,nn)*((pxsize)^2/crosssec);   % Atom number  
-        
-%         if fout.Ncounts<0
-%            warning(['Negative box count detected atomdata(' num2str(kk) ')' ...
-%                ' ROI : ' num2str(nn) '. Setting to 0']);
-%            N(kk,nn)=0;
-%         end        
-        Natoms(kk,nn)=N(kk,nn)*(pxsize^2/crosssec);  % Atom number  
-   end   
-    Natoms(Natoms<0)=0;
-end
-
-
-
-%% Scale atom number for 79 Ratio if HF
+% Scale the 79 atoms
 doScale=[0 0];
-for kk=1:size(atomdata(1).ROI,1)
-   if atomdata(1).ROI(kk,3)>1024      
-    doScale(kk)=1;
-    Natoms(:,kk)=Natoms(:,kk)/opts.Ratio_79; 
-   end
+for kk=1:size(Natoms,2)
+    if data.Yc(1,kk)>1024      
+        doScale(kk)=1;
+        Natoms(:,kk)=Natoms(:,kk)/opts.Ratio_79; 
+    end
 end
 
+% Get the total numbers
 NatomsTot=sum(Natoms,2)';
 
 %% Automatically detect low data points
@@ -72,16 +45,21 @@ end
 
 for kk=1:length(badInds)
     if badInds(kk)
-       warning([' atomdata(' num2str(kk) ') ' atomdata(kk).Name ' total atoms <3E4.']);
+       warning([' Natoms(' num2str(kk) ') ' data.FileNames{kk} ' total atoms <3E4.']);
     end
 end
 
 %% Formulate into Contrast
 
+C=(Natoms(:,1)-Natoms(:,2))./(Natoms(:,1)+Natoms(:,2));
+
+if isequal(opts.Sign,'auto')
+    C=sign(C(1))*C;
+else
+    C=opts.Sign*C;
+end
+
 T=xvals';
-
-C=opts.Sign*(Natoms(:,1)-Natoms(:,2))./(Natoms(:,1)+Natoms(:,2));
-
 G=opts.Guess;
 
 
@@ -103,6 +81,8 @@ opt=fitoptions(myfit);
 
 opt.StartPoint=G;
 opt.Lower=[0 .1 0];
+opt.Upper=[1 100 100];
+
 opt.Robust='bisquare';
 
 
@@ -127,28 +107,26 @@ outdata.xVar=xVar;
 outdata.X=xvals';
 outdata.Natoms=Natoms;
 outdata.NatomsTot=NatomsTot;
-outdata.NRatio=Natoms./repmat(NatomsTot',[1 size(atomdata(1).ROI,1)]);
+outdata.NRatio=Natoms./repmat(NatomsTot',[1 size(Natoms,2)]);
+outdata.Contrast=C;
+outdata.Fit=fout;
+outdata.Ratio_79=opts.Ratio_79;
 
 %% Make Figure
-
-% Create image directory string name
-strs=strsplit(imgdir,filesep);
-str=[strs{end-1} filesep strs{end}];
-
 % Create teh figure
-hF=figure('Name',[pad('Gauss Rabi Oscillations',20) str],...
-    'units','pixels','color','w','Menubar','none','Resize','off',...
+hF=figure('Name',[pad('Box Rabi',20) FigLabel],...
+    'units','pixels','color','w','Menubar','figure','Resize','on',...
     'numbertitle','off');
 hF.Position(1)=0;
 hF.Position(2)=50;
-hF.Position(3)=600;
+hF.Position(3)=1000;
 hF.Position(4)=600;
 clf
 
 % Add PCO label
-uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
+uicontrol('style','text','string',['PCO,' data.FitType],'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left','fontsize',12,'fontweight','bold',...
-    'position',[2 2 40 20]);
+    'position',[2 2 100 20]);
 
 % Plot relative number of atoms in each box
 hax=subplot(211);
@@ -158,13 +136,10 @@ set(hax,'box','on','linewidth',1,'fontsize',14,'units','pixels','fontname','time
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 
-
-% xlabel('pulsetime');
-
-ylabel('relative Gauss atom number');
+ylabel('relative box atom number');
 hax.Position(4)=hax.Position(4)-20;
 
-for nn=1:size(atomdata(1).ROI,1)
+for nn=1:size(Natoms,2)
    plot(xvals,Natoms(:,nn)./NatomsTot','o','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
@@ -173,7 +148,7 @@ ylim([0 1.2]);
 % Right axis for total atom number
 yyaxis right
 plot(xvals,NatomsTot','-','linewidth',1,'color',[.4 .4 .4]);
-ylabel('scaled total Gauss atom number','fontsize',8);
+ylabel('scaled total box atom number','fontsize',8);
 yL=get(gca,'YLim');
 ylim([0 yL(2)]);
 set(gca,'YColor',[.4 .4 .4]);
@@ -184,16 +159,23 @@ for kk=1:length(doScale)
         
         mystr=['$N_' num2str(kk) '\rightarrow N_' num2str(kk) '/' ...
             num2str(opts.Ratio_79) '$'];
-       text(.02,.85,mystr,'units','normalized','interpreter','latex',...
-           'verticalalignment','bottom');
+       text(.98,.02,mystr,'units','normalized','interpreter','latex',...
+           'verticalalignment','bottom','horizontalalignment','right');
+       
+
     end
 end
+xlim([0 max(T)]);
+
+set(gca,'units','normalized','xgrid','on','ygrid','on');
 
 hax2=subplot(212);
-set(hax2,'box','on','linewidth',1,'fontsize',14,'fontname','times');
+set(hax2,'box','on','linewidth',1,'fontsize',14,'fontname','times',...
+    'xgrid','on','ygrid','on');
 hold on
 
 pF=plot(tt,feval(fout,tt),'r-','linewidth',2);
+xlim([0 max(T)]);
 
 plot(T,C,'o','color','k','linewidth',1,'markersize',8,...
     'markerfacecolor',[.5 .5 .5],'markeredgecolor','k');
@@ -211,14 +193,22 @@ text(0.98,0.02,rabiStr,'units','normalized','verticalalignment','bottom',...
 ll=legend(pF,{paramStr},'interpreter','latex','location','northeast');
 ll.Units='normalized';
 ll.Position(2)=hax2.Position(2)+hax2.Position(4)-ll.Position(4);
+ll.Position(1)=hax2.Position(1)+hax2.Position(3)-ll.Position(3);
 
 % Image directory folder string
-t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left','fontsize',6);
 t.Position(4)=t.Extent(4);
 t.Position(3)=hF.Position(3);
 t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
 
+
+    function myresize(~,~)
+        t.Position(2)=t.Parent.Position(4)-t.Position(4); 
+        ll.Position(2)=hax2.Position(2)+hax2.Position(4)-ll.Position(4);
+        ll.Position(1)=hax2.Position(1)+hax2.Position(3)-ll.Position(3);
+    end
+hF.SizeChangedFcn=@myresize;
 
 
     

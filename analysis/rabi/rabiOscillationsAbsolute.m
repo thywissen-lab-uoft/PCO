@@ -1,4 +1,4 @@
-function [hF,outdata]=boxRabiOscillationsAbsolute(data,xVar,opts)
+function [hF,outdata]=rabiOscillationsAbsolute(data,xVar,opts)
 
 %%
 if nargin == 3 && isfield(opts,'FigLabel') 
@@ -132,9 +132,9 @@ hF.Position(4)=400;
 clf
 
 % Add PCO label
-uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
-    'w','horizontalalignment','left','fontsize',10,'fontweight','bold',...
-    'position',[2 2 40 20]);
+uicontrol('style','text','string',['PCO,' data.FitType],'units','pixels','backgroundcolor',...
+    'w','horizontalalignment','left','fontsize',12,'fontweight','bold',...
+    'position',[2 2 100 20]);
 
 % Construct axis
 hax=axes;

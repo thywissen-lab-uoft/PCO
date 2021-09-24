@@ -89,8 +89,8 @@ end
 % pco_xVar = 'latt_ramp_time';
 % pco_xVar = 'power_val';
 % pco_xVar = 'Lattice_loading_field';
-% pco_xVar = 'rf_rabi_freq_HF';
-pco_xVar = 'rf_freq_HF';
+pco_xVar = 'rf_rabi_freq_HF';
+% pco_xVar = 'rf_freq_HF';
 % pco_xVar = 'HF_FeshValue_Final_ODT';
 
 
@@ -105,18 +105,17 @@ pco_overrideUnit='ms';
 
 % Saving
 doSave=0;           % Save the figures?
-doUpload = 1;       % Upload to google drive?
+doUpload = 0;       % Upload to google drive?
 
 % Animation
-doAnimate = 1;       % Animate the Cloud
+doAnimate = 0;       % Animate the Cloud
 
 % Probe Beam
 doProbeFit=0;        % Fit probe beam to 2D Gaussian
 
 % Box Count
-doBoxCount= 1;        % Box count analysis
+doBoxCount= 0;        % Box count analysis
 doLandauZener=0;     % Landau Zener Analysis on BOX
-doBoxRabi=0;
 doRamanSpec=0;       % Raman box count count analyis
 
 % Gaussian
@@ -125,13 +124,15 @@ doGaussRabi=0;
 doBEC=0;
 
 % Erf Fit
-doErfFit = 1;
+doErfFit = 0;
 
 % Fermi
 doFermiFitLong=0;    % Fermi Fit for XDT TOF
 
+doRabi = 0;
+
 % Custom Box counts
-doCustom= 1;          % Custom Box Count
+doCustom= 0;          % Custom Box Count
 doCustom_BM = 0;    % Custom Band map
 
 %% Select image directory
@@ -683,8 +684,8 @@ end
 % Style of profile --> cut or sum?
 style='cut';
 %  style='sum';
-clear hF_X_erf;clear hF_Y_erf;
-hF_X_erf=[];hF_Y_erf=[];
+clear hF_X;clear hF_Y;
+hF_X=[];hF_Y=[];
 for rNum=1:size(ROI,1)
     hF_Xs_rNum=showProfile(atomdata,'X',style,rNum,pco_xVar);        
     hF_Ys_rNum=showProfile(atomdata,'Y',style,rNum,pco_xVar);  
