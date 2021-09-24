@@ -752,7 +752,7 @@ if doBoxCount
         dtdf=dT./dF; 
 
         % Perform the analysis and save the output
-        [hF_LandauZener,frabi]=landauZenerAnalysis(atomdata,dtdf,lz_opts); 
+        [hF_LandauZener,frabi]=landauZenerAnalysis(box_data,dtdf,lz_opts); 
 
         if doSave
             saveFigure(hF_LandauZener,'box_landau_zener',saveOpts);

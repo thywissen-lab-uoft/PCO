@@ -1,8 +1,12 @@
-function [hF,outdata]=boxRabiOscillationsAbsolute(atomdata,xVar,opts)
-% Grab important global variables
-global pxsize
-global imgdir
-global crosssec
+function [hF,outdata]=boxRabiOscillationsAbsolute(data,xVar,opts)
+
+%%
+if nargin == 3 && isfield(opts,'FigLabel') 
+    FigLabel = opts.FigLabel;
+else
+    FigLabel = '';
+    opts = struct;
+end
 
 if nargin==2
     opts=struct;
@@ -12,44 +16,24 @@ end
 disp(' ');
 disp('Analyzing rabi oscillations');
 
-%% Sort the data by the parameter given
-params=[atomdata.Params];
+%% Grab the data
+params=[data.Params];
 xvals=[params.(xVar)];
 
-[xvals,inds]=sort(xvals,'ascend');
-atomdata=atomdata(inds);
+% Grab the atom number, set zero values to zero
+Natoms = data.Natoms;
+Natoms(Natoms<0)=0;
 
-%% Grab the box count outputs
-Natoms=zeros(length(atomdata),size(atomdata(1).ROI,1));
-
-for kk=1:length(atomdata)
-   for nn=1:size(atomdata(kk).ROI,1)
-        BC=atomdata(kk).BoxCount(nn);           % Grab the box count
-        Xc(kk,nn)=BC.Xc;Yc(kk,nn)=BC.Yc;        % X and Y center
-        Xs(kk,nn)=BC.Xs;Ys(kk,nn)=BC.Ys;        % X and Y sigma   
-        Zs(kk,nn)=BC.Ys;                        % ASSUME sZ=sY;                
-        nbg(kk,nn)=BC.Nbkgd;                    % Background
-        N(kk,nn)=BC.Ncounts;
-        
-        if BC.Ncounts<0
-           warning(['Negative box count detected atomdata(' num2str(kk) ')' ...
-               ' ROI : ' num2str(nn) '. Setting to 0']);
-           N(kk,nn)=0;
-        end        
-        Natoms(kk,nn)=N(kk,nn)*(pxsize^2/crosssec);  % Atom number  
-   end   
-    Natoms(Natoms<0)=0;
-end
-
-%% Scale atom number for 79 Ratio if HF
+% Scale the 79 atoms
 doScale=[0 0];
-for kk=1:size(atomdata(1).ROI,1)
-   if atomdata(1).ROI(kk,3)>1024      
+for kk=1:size(Natoms,2)
+    if data.Yc(1,kk)>1024      
         doScale(kk)=1;
         Natoms(:,kk)=Natoms(:,kk)/opts.Ratio_79; 
-   end
+    end
 end
 
+% Get the total numbers
 NatomsTot=sum(Natoms,2)';
 
 %% Automatically detect low data points
@@ -61,7 +45,7 @@ end
 
 for kk=1:length(badInds)
     if badInds(kk)
-       warning([' atomdata(' num2str(kk) ') ' atomdata(kk).Name ' total atoms <3E4.']);
+       warning([' Natoms(' num2str(kk) ') ' data.FileNames{kk} ' total atoms <3E4.']);
     end
 end
 
@@ -137,12 +121,8 @@ outdata.Fits=fouts;
 %% Make Figure
 tt=linspace(0,max(T),1000);
 
-% Create image directory string name
-strs=strsplit(imgdir,filesep);
-str=[strs{end-1} filesep strs{end}];
-
 % Create teh figure
-hF=figure('Name',[pad('Box Rabi Oscillations',20) str],...
+hF=figure('Name',[pad('Box Rabi Oscillations',20) FigLabel],...
     'units','pixels','color','w','Menubar','figure','Resize','on',...
     'numbertitle','off');
 hF.Position(1)=605;
@@ -195,7 +175,7 @@ end
 
 
 % Image directory folder string
-t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left','fontsize',6);
 t.Position(4)=t.Extent(4);
 t.Position(3)=hF.Position(3);

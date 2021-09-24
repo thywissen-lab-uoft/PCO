@@ -136,9 +136,6 @@ set(hax,'box','on','linewidth',1,'fontsize',14,'units','pixels','fontname','time
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 
-
-% xlabel('pulsetime');
-
 ylabel('relative box atom number');
 hax.Position(4)=hax.Position(4)-20;
 
