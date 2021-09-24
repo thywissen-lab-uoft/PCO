@@ -1,8 +1,29 @@
-function [hF,data] = BECanalysis(atomdata,xVar,opts)
+function [hF,data] = BECanalysis(gauss_data,xVar,opts)
 
-global pxsize
-global imgdir
-global crosssec
+
+if nargin == 3 && isfield(opts,'FigLabel') 
+    FigLabel = opts.FigLabel;
+else
+    FigLabel = '';
+    opts = struct;
+end
+
+if isfield(gauss_data,'Atom')
+    switch gauss_data.Atom
+        case 0
+            ind = 1;
+        case 1
+            warning('Attemping to perform BEC analysis on potassium');
+            ind = 1;
+        case 2
+            ind = find(gauss_data.Yc(1,:)>1024,1);
+        otherwise
+            warning('Unknown atom type');
+            ind = 1;        
+    end
+else
+    ind=1;    
+end
 
 %% Fundamental Consants
 
@@ -23,52 +44,26 @@ debroglie=@(T) h./sqrt(2*pi*m*kB*T);
 gammaScatter=@(n,T) n.*sigmaScatter.*sqrt(kB*T/m);
 T_BEC=@(freq,N) hbar*(2*pi*freq)/kB*0.94.*N.^(1/3);
 
-%% Sort the data
-params=[atomdata.Params];
+%% Grab the Data
+    
+params=[gauss_data.Params];
+
 xvals=[params.(xVar)];
 
-[xvals,inds]=sort(xvals,'ascend');
-atomdata=atomdata(inds);
-
-params=[atomdata.Params];
 tofs=[params.tof];
+tofs = tofs*1e-3;
 
-%%
+freqs = BECopts.pow2freq(pows);
 
-if sum(opts.BECinds)>1
-   warning('Code cannot do BEC analysis on multiple valid ROIs'); 
-   return;
-end
+Natoms  = gauss_data.Natoms(:,ind);
+Xs      = gauss_data.Xs(:,ind);
+Ys      = gauss_data.Ys(:,ind);
 
-ind=find(opts.BECinds,1);
-%% Grab the Data
-Xc=zeros(length(atomdata),1);
-Yc=zeros(length(atomdata),1);
-Xs=zeros(length(atomdata),1);
-Ys=zeros(length(atomdata),1);
-A=zeros(length(atomdata),1);
-nbg=zeros(length(atomdata),1);
-N=zeros(length(atomdata),1);
-Natoms=zeros(length(atomdata),1);
-Tx=zeros(length(atomdata),1);
-Ty=zeros(length(atomdata),1);
-
-for kk=1:length(atomdata)
-
-    fout=atomdata(kk).GaussFit{ind};         
-    Xc(kk)=fout.Xc;Yc(kk)=fout.Yc;
-    Xs(kk)=fout.Xs;Ys(kk)=fout.Ys;
-    A(kk)=fout.A;
-    nbg(kk)=fout.nbg;
-
-    N(kk)=2*pi*Xs(kk)*Ys(kk)*A(kk);
-    Natoms(kk)=N(kk)*((pxsize)^2/crosssec);   % gauss number  
-
-    Tx(kk)=(Xs(kk)*pxsize./(tofs(kk)*1e-3)).^2*m/kB;
-    Ty(kk)=(Ys(kk)*pxsize./(tofs(kk)*1e-3)).^2*m/kB;
-end
+Tx      = Xs.*(PixelSize/tofs).^2*m/kB;
+Ty      = Ys.*(PixelSize/tofs).^2*m/kB;
 
 Nlim=[3E4 max(Natoms)*2];
+
 
 %% Outdata
 data=struct;
@@ -81,7 +76,7 @@ data.Tx=Tx;
 data.Ty=Ty;
 data.T=sqrt(Tx.*Ty);
 data.Natoms=Natoms;
-data.Freqs=opts.Freqs;
+data.Freqs=freqs;
 data.Density=Natoms./(2*pi*sigmaHO(data.T,data.Freqs).^2).^(3/2);    
 data.Gamma=gammaScatter(data.Density,data.T);
 data.TBEC=T_BEC(data.Freqs,data.Natoms);
@@ -91,7 +86,7 @@ showBECTransition=0;
 if sum(data.T<data.TBEC)
     showBECTransition=1;
     ind=find(flip(data.T<data.TBEC),1);    
-    ind=length(atomdata)-ind+0;
+    ind=length(gauss_data)-ind+0;
 end
 
 
@@ -224,11 +219,9 @@ pData=plot(data.X,data.Freqs,'o','markerfacecolor',co(1,:),...
     'color',co(1,:)*.5);
 
 
-strs=strsplit(imgdir,filesep);
-str=[strs{end-1} filesep strs{end}];
 
 % Image directory folder string
-t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left');
 t.Position(4)=t.Extent(4);
 t.Position(3)=hF.Position(3);

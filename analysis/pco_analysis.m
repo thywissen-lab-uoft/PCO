@@ -761,6 +761,23 @@ if doGaussFit
         [hF_temp,fitX,fitY]=computeGaussianTemperature(gauss_data,gaussPopts);
         if doSave;saveFigure(hF_temp,'gauss_temp',saveOpts);end    
     end      
+    
+    % Determine which ROIs to perform BEC analysis on (for double shutter)
+    if doBEC 
+        % Calculate trap frequencies
+        % Use the K calibration and scale down by mass and polarizability        
+
+        BECopts=struct;
+        BECopts.FigLabel = FigLabel;
+        BECopts.xUnit=pco_unit;   
+        BECopts.pow2freq = @(P) 0.725*61.5*sqrt(P./(0.085)); % Calibrated 2021.02.25
+        
+        [hF_BEC,BECdata]=BECanalysis(gauss_data,pco_xVar,BECopts);    
+
+        if doSave;saveFigure(hF_BEC,'gauss_BEC',saveOpts);end        
+    end
+
+    
       
 end
 
@@ -961,44 +978,7 @@ if doFermiFitLong
     if doSave;saveFigure(hF_fermi_temp2,'fermi_compare',saveOpts);end
 end
 
-%% BEC Analysis
 
-% Determine which ROIs to perform BEC analysis on (for double shutter)
-if isfield(atomdata(1),'Flags') 
-    switch atomdata(1).Flags.image_atomtype
-        case 0
-            BECinds=ones(size(ROI,1),1);
-        case 1
-            BECinds=zeros(size(ROI,1),1);
-        case 2
-            BECinds=zeros(size(ROI,1),1);
-            for nn=1:size(ROI)
-                if ROI(nn,3)>1024
-                   BECinds(nn)=1; 
-                end                
-            end
-
-    end
-end
-
-if doBEC && isfield(atomdata(1),'GaussFit')
-    % Calculate trap frequencies
-    % Use the K calibration and scale down by mass and polarizability
-    params=[atomdata.Params];
-    powers=[params.Evap_End_Power]'; 
-    foo2 = @(P) 0.725*61.5*sqrt(P./(0.085)); % Calibrated 2021.02.25
-    freqs=foo2(powers);    
-    
-    BECopts=struct;
-    BECopts.Freqs=freqs;
-    BECopts.xUnit=pco_unit;   
-    BECopts.BECinds=BECinds;
-    
-    
-    [hF_BEC,BECdata]=BECanalysis(atomdata,pco_xVar,BECopts);    
-    
-    if doSave;saveFigure(hF_BEC,'gauss_BEC',saveOpts);end        
-end
 
 
 %% Custom
