@@ -189,16 +189,16 @@ for kk=1:(ceil(length(atomdata)/pMax))
         end
         
         if doErf
-            plot(X,YF_erf,'r','LineWidth',2);
+            plot(X,YF_erf,'b','LineWidth',2);
         end
         
         % Plot the data
-        plot(X,Y,'k-');
+        plot(X,Y_data,'k-');
         
         % Adjust limits
         xlim([X(1) X(end)]);   
-        ax.YLim(1)=min([0 min(Y)]);
-        ax.YLim(2)=max([max(Y)*1.5 0]);   
+        ax.YLim(1)=min([0 min(Y_data)]);
+        ax.YLim(2)=max([max(Y_data)*1.5 0]);   
         
         % Draw the analysis string box
         iterNum=(kk-1)*pMax+ii;
