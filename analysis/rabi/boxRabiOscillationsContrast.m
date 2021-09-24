@@ -107,7 +107,7 @@ outdata.xVar=xVar;
 outdata.X=xvals';
 outdata.Natoms=Natoms;
 outdata.NatomsTot=NatomsTot;
-outdata.NRatio=Natoms./repmat(NatomsTot',[1 size(data(1).ROI,1)]);
+outdata.NRatio=Natoms./repmat(NatomsTot',[1 size(Natoms,2)]);
 outdata.Contrast=C;
 outdata.Fit=fout;
 outdata.Ratio_79=opts.Ratio_79;
@@ -119,7 +119,7 @@ hF=figure('Name',[pad('Box Rabi',20) FigLabel],...
     'numbertitle','off');
 hF.Position(1)=0;
 hF.Position(2)=50;
-hF.Position(3)=600;
+hF.Position(3)=1000;
 hF.Position(4)=600;
 clf
 

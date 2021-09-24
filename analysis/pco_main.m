@@ -116,7 +116,7 @@ doProbeFit=0;        % Fit probe beam to 2D Gaussian
 % Box Count
 doBoxCount= 1;        % Box count analysis
 doLandauZener=0;     % Landau Zener Analysis on BOX
-doBoxRabi=0;
+doBoxRabi=1;
 doRamanSpec=0;       % Raman box count count analyis
 
 % Gaussian
