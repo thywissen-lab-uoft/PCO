@@ -582,34 +582,7 @@ if doGaussFit
     gauss_data=getGaussData(atomdata,pco_xVar);  
 end
 
-%% 2D Gauss OD Profile
-if doGaussFit
-    % Style of profile --> cut or sum?
-    style='cut';
-    %style='sum';
-    clear hF_X;    
-    clear hF_Y;
-    hF_X=[];
-    hF_Y=[];
-    for rNum=1:size(ROI,1)
-        hF_Xs_rNum=showProfile(atomdata,'GaussFit','X',style,rNum,pco_xVar);        
-        hF_Ys_rNum=showProfile(atomdata,'GaussFit','Y',style,rNum,pco_xVar);  
-        pause(1);
 
-    %  Save th figures (this can be slow)
-        if doSave
-            for kk=1:length(hF_Xs_rNum) 
-                saveFigure(hF_Xs_rNum(kk),['gauss_profile_X' num2str(rNum) '_' num2str(kk)],saveOpts);
-            end             
-
-            for kk=1:length(hF_Ys_rNum)
-                saveFigure(hF_Ys_rNum(kk),['gauss_profile_Y' num2str(rNum) '_' num2str(kk)],saveOpts);
-            end
-        end
-        hF_X=[hF_X; hF_Xs_rNum];
-        hF_Y=[hF_Y; hF_Ys_rNum];
-    end   
-end
 
 %% 2D Erf Fit
 
@@ -638,31 +611,30 @@ if doErfFit
     erf_data=getErfData(atomdata,pco_xVar);    
 end
 
-%% 2D Erf OD Profile
-if doErfFit
-    % Style of profile --> cut or sum?
-    style='cut';
-    %  style='sum';
-    clear hF_X_erf;clear hF_Y_erf;
-    hF_X_erf=[];hF_Y_erf=[];
-    for rNum=1:size(ROI,1)
-        hF_Xs_rNum_erf=showProfile(atomdata,'ErfFit','X',style,rNum,pco_xVar);        
-        hF_Ys_rNum_erf=showProfile(atomdata,'ErfFit','Y',style,rNum,pco_xVar);  
-        pause(1);
+%% OD Profiles w or w/o Fits 
+% Style of profile --> cut or sum?
+style='cut';
+%  style='sum';
+clear hF_X_erf;clear hF_Y_erf;
+hF_X_erf=[];hF_Y_erf=[];
+for rNum=1:size(ROI,1)
+    hF_Xs_rNum=showProfile(atomdata,'X',style,rNum,pco_xVar);        
+    hF_Ys_rNum=showProfile(atomdata,'Y',style,rNum,pco_xVar);  
+    pause(1);
 
-    %   Save the figures (this can be slow)
-        if doSave
-            for kk=1:length(hF_Xs_rNum) 
-                saveFigure(hF_Xs_rNum_erf(kk),['erf_profile_X' num2str(rNum) '_' num2str(kk)],saveOpts);
-            end 
-            for kk=1:length(hF_Ys_rNum)
-                saveFigure(hF_Xs_rNum_erf(kk),['erf_profile_Y' num2str(rNum) '_' num2str(kk)],saveOpts);
-            end
+%   Save the figures (this can be slow)
+    if doSave
+        for kk=1:length(hF_Xs_rNum) 
+            saveFigure(hF_Xs_rNum(kk),['OD_X' num2str(rNum) '_' num2str(kk)],saveOpts);
+        end 
+        for kk=1:length(hF_Ys_rNum)
+            saveFigure(hF_Xs_rNum(kk),['OD_Y' num2str(rNum) '_' num2str(kk)],saveOpts);
         end
-        hF_X_erf=[hF_X_erf; hF_Xs_rNum];
-        hF_Y_erf=[hF_Y_erf; hF_Ys_rNum];
-    end  
-end
+    end
+    hF_X=[hF_X; hF_Xs_rNum];
+    hF_Y=[hF_Y; hF_Ys_rNum];
+end  
+
   
 
 %% Animate cloud

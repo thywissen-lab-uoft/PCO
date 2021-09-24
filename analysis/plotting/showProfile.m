@@ -124,7 +124,7 @@ for kk=1:(ceil(length(atomdata)/pMax))
         Yc = mean(Yc);iY = find(round(Yc)==y,1);
         Xc = mean(Xc);iX = find(round(Xc)==x,1);
         
-        % Get gauss profile
+        %%%% Get gauss profile %%%%
         if doGauss   
             zzF_gauss = feval(gaussFit,xx,yy);
 
@@ -145,7 +145,7 @@ for kk=1:(ceil(length(atomdata)/pMax))
             end            
         end
         
-        % Get erf profile
+        %%%% Get erf profile %%%%
         if doErf   
             zzF_erf = feval(erfFit,xx,yy);
 
@@ -166,7 +166,7 @@ for kk=1:(ceil(length(atomdata)/pMax))
             end            
         end
         
-        % Get the data
+        %%%% Get the data %%%%
         if isequal(direction,'X') && isequal(style,'cut')
             Y_data = z(iY,:);
         end
@@ -183,7 +183,7 @@ for kk=1:(ceil(length(atomdata)/pMax))
             Y_data = sum(z,2);
         end  
         
-        % Plot the fits
+        %%%% Plot the fits %%%%
         if doGauss
             plot(X,YF_gauss,'r','LineWidth',2);
         end
@@ -211,6 +211,7 @@ for kk=1:(ceil(length(atomdata)/pMax))
             'FontSize', 8,...
             'verticalalignment','cap','HorizontalAlignment','left');
         
+        %%%% Determine String Label %%%%
         str = [direction ' ' style];
         if isequal(style,'cut') && isequal(direction,'X')
            str = [str ' @ y = ' num2str(round(Yc)) ' px']; 
