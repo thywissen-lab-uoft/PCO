@@ -577,8 +577,7 @@ if doLandauZener && size(ROI,1)==2 && doBoxCount && length(atomdata)>3
 %     SweepRangeVar='uwave_delta_freq';    %    Variable that defines sweep range
     
 % Shift Register
-    SweepTimeVar='HF_Raman_sweep_time';  
-    
+    SweepTimeVar='HF_Raman_sweep_time';     
     
 %     SweepTimeVar='Raman_Time';      % Variable that defines sweep time
     SweepRangeVar='HF_Raman_sweep_range';    %    Variable that defines sweep range
