@@ -84,12 +84,12 @@ end
 % pco_xVar='HF_Raman_sweep_time';
 % pco_xVar = 'ExecutionDate';
 % pco_xVar = 'Pulse_Time';
-pco_xVar = 'rf_rabi_time_HF';
+% pco_xVar = 'rf_rabi_time_HF';
 % 
 % pco_xVar = 'latt_ramp_time';
 % pco_xVar = 'power_val';
 % pco_xVar = 'Lattice_loading_field';
-% pco_xVar = 'rf_rabi_freq_HF';
+pco_xVar = 'rf_rabi_freq_HF';
 % pco_xVar = 'rf_freq_HF';
 % pco_xVar = 'HF_FeshValue_Final_ODT';
 
@@ -114,22 +114,22 @@ doAnimate = 0;       % Animate the Cloud
 doProbeFit=0;        % Fit probe beam to 2D Gaussian
 
 % Box Count
-doBoxCount= 1;        % Box count analysis
+doBoxCount= 0;        % Box count analysis
 doLandauZener=0;     % Landau Zener Analysis on BOX
 doRamanSpec=0;       % Raman box count count analyis
 
 % Gaussian
-doGaussFit= 1;        % Flag for performing the gaussian fit
+doGaussFit= 0;        % Flag for performing the gaussian fit
 doGaussRabi=0;
 doBEC=0;
 
 % Erf Fit
-doErfFit = 1;
+doErfFit = 0;
 
 % Fermi
 doFermiFitLong=0;    % Fermi Fit for XDT TOF
 
-doRabi = 1;
+doRabi = 0;
 
 % Custom Box counts
 doCustom= 0;          % Custom Box Count
