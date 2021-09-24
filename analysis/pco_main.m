@@ -1,4 +1,4 @@
-% PCOabanalysis.m
+% PCO_main.m
 % This is an imaging analysis script. It analyzes image taken from the PCO
 % camera using our home made MATLAB code. It anaticipates loadining in .mat
 % files which contain the PWA (probe with atoms) and PWOA (probe without
