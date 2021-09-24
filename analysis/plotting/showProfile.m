@@ -77,6 +77,15 @@ for kk=1:(ceil(length(atomdata)/pMax))
         x=x(ROI(1):ROI(2));y=y(ROI(3):ROI(4));
         z=z(ROI(3):ROI(4),ROI(1):ROI(2));
         
+        switch direction
+            case 'X'
+                X=x;
+            case 'Y'
+                X=y;
+            otherwise
+                error('invalid plot direction');                               
+        end
+        
         % Mesh grid for fits
         [xx,yy]=meshgrid(x,y);
         
@@ -105,7 +114,7 @@ for kk=1:(ceil(length(atomdata)/pMax))
         
         clear doBox
         doBox = 0;
-        if isfield(atomdataSUB(ii),'BoxCount') && (doGauss || doErf)
+        if isfield(atomdataSUB(ii),'BoxCount') && ~(doGauss || doErf)
             Yc(end+1) = atomdataSUB(ii).BoxCount(rNum).Yc;
             Xc(end+1) = atomdataSUB(ii).BoxCount(rNum).Xc;
             doBox = 1;
@@ -113,7 +122,7 @@ for kk=1:(ceil(length(atomdata)/pMax))
         
         % Find index to plot against
         Yc = mean(Yc);iY = find(round(Yc)==y,1);
-        Xc = mean(Yc);iX = find(round(Xc)==x,1);
+        Xc = mean(Xc);iX = find(round(Xc)==x,1);
         
         % Get gauss profile
         if doGauss   
@@ -157,6 +166,22 @@ for kk=1:(ceil(length(atomdata)/pMax))
             end            
         end
         
+        if isequal(direction,'X') && isequal(style,'cut')
+            YF_erf = zzF_erf(iY,:);
+        end
+
+        if isequal(direction,'X') && isequal(style,'sum')
+            YF_erf = sum(zzF_erf,1);
+        end
+
+        if isequal(direction,'Y') && isequal(style,'cut')
+            YF_erf = zzF_erf(:,iX);
+        end
+
+        if isequal(direction,'Y') && isequal(style,'sum')
+            YF_erf = sum(zzF_erf,2);
+        end  
+        
 
         if doGauss
             plot(X,YF_gauss,'r','LineWidth',2);
@@ -173,8 +198,8 @@ for kk=1:(ceil(length(atomdata)/pMax))
 %         % Evaluvate the fit for doing numerical projection
 %         zzF=feval(fout,xx,yy);      
 
-        indy=find(round(fout.Yc)==y);           % Y center
-        indx=find(round(fout.Xc)==x);           % X center      
+%         indy=find(round(fout.Yc)==y);           % Y center
+%         indx=find(round(fout.Xc)==x);           % X center      
 
 %         if isequal(direction,'X')
 %             switch style
