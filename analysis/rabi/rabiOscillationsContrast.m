@@ -124,9 +124,9 @@ hF.Position(4)=600;
 clf
 
 % Add PCO label
-uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
+uicontrol('style','text','string',['PCO,' data.FitType],'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left','fontsize',12,'fontweight','bold',...
-    'position',[2 2 40 20]);
+    'position',[2 2 100 20]);
 
 % Plot relative number of atoms in each box
 hax=subplot(211);

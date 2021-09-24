@@ -116,19 +116,20 @@ doProbeFit=0;        % Fit probe beam to 2D Gaussian
 % Box Count
 doBoxCount= 1;        % Box count analysis
 doLandauZener=0;     % Landau Zener Analysis on BOX
-doBoxRabi=1;
 doRamanSpec=0;       % Raman box count count analyis
 
 % Gaussian
-doGaussFit= 0;        % Flag for performing the gaussian fit
+doGaussFit= 1;        % Flag for performing the gaussian fit
 doGaussRabi=0;
 doBEC=0;
 
 % Erf Fit
-doErfFit = 0;
+doErfFit = 1;
 
 % Fermi
 doFermiFitLong=0;    % Fermi Fit for XDT TOF
+
+doRabi = 1;
 
 % Custom Box counts
 doCustom= 0;          % Custom Box Count

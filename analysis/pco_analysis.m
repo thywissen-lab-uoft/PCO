@@ -1,4 +1,6 @@
 data_source = 'box';
+data_source = 'gauss';
+data_source = 'erf';
 
 switch data_source
     case 'box'        
@@ -226,38 +228,13 @@ if doRabi
     boxRabiopts.Sign=[1 0]; % is N(t=0)=1 or 0?
     boxRabiopts.Sign='auto'; % Automatic fit sign
 
-
-    [hF_rabi_contrast,rabi_contrast]=boxRabiOscillationsContrast(box_data,pco_xVar,boxRabiopts);
+    [hF_rabi_contrast,rabi_contrast]=rabiOscillationsContrast(data,pco_xVar,boxRabiopts);
     if doSave;saveFigure(hF_rabi_contrast,'box_rabi_oscillate_contrast',saveOpts);end
 
-    [hF_rabi_raw,rabi_absolute]=boxRabiOscillationsAbsolute(box_data,pco_xVar,boxRabiopts);
+    [hF_rabi_raw,rabi_absolute]=rabiOscillationsAbsolute(data,pco_xVar,boxRabiopts);
     if doSave;saveFigure(hF_rabi_raw,'box_rabi_oscillate_raw',saveOpts);end    
-
 end
 
-%% Gauss fit : Rabi oscilations
-GaussRabiopts=struct;
-GaussRabiopts.xUnit=pco_unit;
-GaussRabiopts.Ratio_79=0.6;0.5;0.66;
-
-GaussRabiopts.Guess=[.9 10 1]; % [probability transfer, freq, t2 time,]
-boxRabiopts.Guess=[.5 4 10]; % [probability transfer, freq, t2 time,]
-
-
-GaussRabiopts.Sign=-1; % N1-N2 (+1) or N2-N1 (-1)
-
-if doGaussFit && doGaussRabi 
-    if size(ROI,1)==2
-        % For normalized rabi oscillations
-        [hF_rabi_gauss]=GaussRabiOscillations(atomdata,pco_xVar,GaussRabiopts);
-    else
-        % For un-normalized rabi oscillations
-        [hF_rabi_gauss]=GaussRabiOscillations_raw(atomdata,pco_xVar,GaussRabiopts);
-    end
-    
-    if doSave;saveFigure(hF_rabi_gauss,'gauss_rabi_oscillate',saveOpts);end
-
-end
 
 %% Custom
 if doCustom 
