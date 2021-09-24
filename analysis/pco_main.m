@@ -995,8 +995,8 @@ if doCustom
     end
 
 %     DATA=custom_outdata.BoxCount;
-     DATA=custom_outdata.GaussData;
-%     DATA=custom_outdata.ErfData;
+%      DATA=custom_outdata.GaussData;
+    DATA=custom_outdata.ErfData;
     %%%%%%%%%%%%%%% RF SPEC %%%%%%%%%%%%%%
 
     % Center frequency for expected RF field (if relevant)
@@ -1186,8 +1186,8 @@ if doCustom
     end
 
     
-    negGauss_double=0;
-    if length(X)>4 && negGauss_double
+    negGauss_double=1;
+    if length(X)>8 && negGauss_double
 %         X= reshape(X,size(X,2),1);
         myfit=fittype('bg-A1*exp(-(x-x1).^2/(2*s1.^2))-A2*exp(-(x-x2).^2/(2*s2^2))',...
             'coefficients',{'A1','s1','x1','A2','s2','x2','bg'},...
@@ -1295,7 +1295,7 @@ if doCustom
         custom_outdata.Fit=fout;
     end
     
-    negLorentz=1;    
+    negLorentz=0;    
     if length(X)>4 && negLorentz
         myfit=fittype('bg-A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)',...
             'coefficients',{'A','G','x0','bg'},...
