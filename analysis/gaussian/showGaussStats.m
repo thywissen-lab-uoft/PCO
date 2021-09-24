@@ -19,6 +19,8 @@ for nn=1:size(gauss_data.Natoms,2)
     hF.Position(3)=500;
     hF.Position(4)=300;
     drawnow;
+    
+    co=get(gca,'colororder');
 
     % Image directory folder string
     t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...

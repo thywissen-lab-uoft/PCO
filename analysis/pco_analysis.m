@@ -720,7 +720,7 @@ if doGaussFit
     gaussPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
     
     % Plot the statistics of gaussian fit
-    hF_stats=showGaussStats(atomdata);     
+    hF_stats=showGaussStats(gauss_data,gaussPopts);     
     if doSave;saveFigure(hF_stats,'gauss_stats',saveOpts);end       
     
     hF_number_gauss = showAtomNumber(gauss_data,pco_xVar,gaussPopts);  
