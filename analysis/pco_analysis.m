@@ -93,7 +93,6 @@ end
 pco_xVar = 'rf_freq_HF';
 % pco_xVar = 'HF_FeshValue_Final_ODT';
 
-doSave=0;
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit=1;
@@ -103,37 +102,37 @@ pco_overrideUnit='ms';
 
 
 %% Analysis Flags
+
+% Saving
+doSave=1;           % Save the figures?
+doUpload = 1;       % Upload to google drive?
+
+% Animation
+doAnimate = 1;       % Animate the Cloud
+
+% Probe Beam
 doProbeFit=0;        % Fit probe beam to 2D Gaussian
 
 % Box Count
 doBoxCount= 1;        % Box count analysis
 doLandauZener=0;     % Landau Zener Analysis on BOX
 doBoxRabi=0;
-
-
-% Custom Box counts
 doRamanSpec=0;       % Raman box count count analyis
-
-% Fermi
-doFermiFitLong=0;    % Fermi Fit for XDT TOF
 
 % Gaussian
 doGaussFit= 1;        % Flag for performing the gaussian fit
 doGaussRabi=0;
+doBEC=0;
 
 % Erf Fit
 doErfFit = 1;
 
-% BEC (requries gaussian)
-doBEC=0;
+% Fermi
+doFermiFitLong=0;    % Fermi Fit for XDT TOF
 
-% Custom in line figure
-doCustom= 1;          % Custom Box Count
+% Custom Box counts
+doCustom= 0;          % Custom Box Count
 doCustom_BM = 0;    % Custom Band map
-
-
-%Animation
-doAnimate = 1;       % Animate the Cloud
 
 %% Select image directory
 % Choose the directory where the images to analyze are stored

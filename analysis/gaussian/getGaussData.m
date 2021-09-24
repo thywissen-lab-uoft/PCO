@@ -49,7 +49,7 @@ if isfield(atomdata(1),'Flags')
 else
     output.Atom         = NaN;
 end
-endoutput.PixelSize    = PixelSize;
+output.PixelSize    = PixelSize;
 output.CrossSection = CrossSection;
 output.xVar         = xVar;
 output.X            = X;
