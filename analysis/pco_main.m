@@ -482,8 +482,8 @@ end
 %% Box Count
 % This section of code computes the box counts on all your data and ROIs.
 
-% doBoxCount=1;   % Enable box count analysis
-doSubBG=1;      % Subtract background based on reference spot?
+boxOpts = struct;
+boxOpts.doSubBG = 1;
 
 % bgROI=[400 500 400 500];
 % Box count for small cloud (get close to where the atoms live)
@@ -494,16 +494,13 @@ bgROI=[700 790 500 600];
 % bgROI=[900 1000 450 500]; % even more zoom in for BM
 % bgROI=[800 1000 600 700]; % for k dfg long tof
 
+boxOpts.bgROI = bgROI;
+
 if doBoxCount
     disp(repmat('-',1,60));    
     disp('Performing box count analysis');
-    disp(repmat('-',1,60));        
-    
-    if doSubBG
-        atomdata=boxCount(atomdata,bgROI);
-    else
-        atomdata=boxCount(atomdata);
-    end  
+    disp(repmat('-',1,60));      
+    atomdata=boxCount(atomdata,boxOpts);     
 end   
 
 %% Custom Box Count : Raman Spectroscopy

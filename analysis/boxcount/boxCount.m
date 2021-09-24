@@ -1,12 +1,14 @@
-function atomdata=boxCount(atomdata,bgROI)
+function atomdata=boxCount(atomdata,boxOpts)
 
     fprintf('Performing box count analysis ...');    
     if nargin==1
-        disp(' No background ROI provided, will assume background of zero.');
-        bgROI=[];
+        boxOpts = struct;
+        boxOpts.doSubBG = 0;
+        disp(' No background subtract');
     else
         disp([' Using background counts from ROI = [' ...
-            num2str(bgROI) ']']);        
+            num2str(boxOpts.bgROI) ']']);   
+        bgROI = boxOpts.bgROI;
     end    
     
 
@@ -20,7 +22,13 @@ function atomdata=boxCount(atomdata,bgROI)
             z=double(atomdata(kk).OD(ROI(3):ROI(4),ROI(1):ROI(2)));
             nbg=0;
             
-            if nargin==2
+            if boxOpts.doSubBG && isfield(boxOpts,'bgROI')
+                bgROI = boxOpts.bgROI;
+                
+                if ROI(3)>1024
+                   bgROI = bgROI + [0 0 1024 1024];
+                end
+                
                 zbg=double(atomdata(kk).OD(bgROI(3):bgROI(4),bgROI(1):bgROI(2)));
                 Nsum=sum(sum(zbg));
                 nbg=Nsum/(size(zbg,1)*size(zbg,2)); % count density
@@ -57,8 +65,7 @@ function atomdata=boxCount(atomdata,bgROI)
             BoxCount(k).Yc=Yc;              % Y center of mass
             BoxCount(k).Xs=Xs;              % X standard deviation
             BoxCount(k).Ys=Ys;              % Y standard deviation
-        end 
-        
+        end         
         atomdata(kk).BoxCount=BoxCount;
     end
 end
