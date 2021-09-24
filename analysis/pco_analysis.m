@@ -507,100 +507,8 @@ if doBoxCount
     end  
 end
     
-boxPopts = struct;
-boxPopts.FigLabel = FigLabel;
-boxPopts.xUnit=pco_unit;
-boxPopts.NumberExpFit = 0;      
-boxPopts.NumberExpOffsetFit = 0; 
-boxPopts.RatioSineFit=0;
-
-if doBoxCount  
-    % Plot the atom number
-    [hF_numberbox,Ndatabox]=showBoxAtomNumber(atomdata,pco_xVar,boxPopts); 
-    if doSave;saveFigure(hF_numberbox,'box_number',saveOpts);end
-    
-    % Plot the ratios if there are more than one ROI.
-    if size(ROI,1)>1    
-        [hF_numberratio,Ndataratio]=showBoxAtomNumberRatio(atomdata,pco_xVar,boxPopts);
-        if doSave;saveFigure(hF_numberratio,'box_number_ratio',saveOpts);end          
-    end     
-    
-    % Plot the box aspect ratio
-    hF_box_ratio=showBoxAspectRatio(atomdata,pco_xVar,boxPopts);
-    if doSave;saveFigure(hF_box_ratio,'box_ratio',saveOpts);end
-end   
-    
-%% Box Count : Rabi oscillations
-boxRabiopts=struct;
-boxRabiopts.xUnit=pco_unit;
-
-boxRabiopts.Ratio_79=0.62;0.5;0.66;
-boxRabiopts.Guess=[.9 13 1]; % [probability transfer, freq, t2 time,]
-
-boxRabiopts.Sign=[1 0]; % is N(t=0)=1 or 0?
-boxRabiopts.Sign='auto'; % Automatic fit sign
 
 
-if doBoxCount && doBoxRabi && size(ROI,1)>1 
-    [hF_rabi_contrast,rabi_contrast]=boxRabiOscillationsContrast(atomdata,pco_xVar,boxRabiopts);
-    if doSave;saveFigure(hF_rabi_contrast,'box_rabi_oscillate_contrast',saveOpts);end
-        
-    [hF_rabi_raw,rabi_absolute]=boxRabiOscillationsAbsolute(atomdata,pco_xVar,boxRabiopts);
-    if doSave;saveFigure(hF_rabi_raw,'box_rabi_oscillate_raw',saveOpts);end    
-end
-
-%% Box Count : Landau Zener
-
-lz_opts=struct;
-
-lz_opts.Mode='auto';
-lz_opts.BoxIndex=1;  % 1/2 ratio or 2/1 ratio
-lz_opts.LZ_GUESS=[1 .8]; % Fit guess kHz,ampltidue can omit guess as well
-lz_opts.num_scale = 0.6;
-
-% Only perform landau zener on two ROI, boxcount, and more than three
-% pictures
-% Note to CF : Could add analysis for raw and gaussian (later)
-if doLandauZener && size(ROI,1)==2 && doBoxCount && length(atomdata)>3
-    % Define the dt/df in ms/kHz
-    % This can be different variables depending on the sweep
-    
-    % Grab the sequence parameters
-    params=[atomdata.Params];
-
-    % Get df and dt
-%     SweepTimeVar='sweep_time';      % Variable that defines sweep time
-%     SweepRangeVar='sweep_range';    %    Variable that defines sweep range
-    
-
-%     SweepTimeVar='uwave_sweep_time';      % Variable that defines sweep time
-%     SweepRangeVar='uwave_delta_freq';    %    Variable that defines sweep range
-    
-% Shift Register
-    SweepTimeVar='HF_Raman_sweep_time';     
-    
-%     SweepTimeVar='Raman_Time';      % Variable that defines sweep time
-    SweepRangeVar='HF_Raman_sweep_range';    %    Variable that defines sweep range
-%     
-    % Convert the parameter into df and dt (add whatever custom processing
-    % you want).
-    dT=[params.(SweepTimeVar)];
-%     dF=[params.(SweepRangeVar)]*1000; % Factor of two for the SRS
-    dF=[params.(SweepRangeVar)]*1000*2; % Factor of two for the AOM DP
-
-%     dF=40*ones(length(atomdata),1)';
-    
-    % Convert to dtdf
-    dtdf=dT./dF; 
-
-    % Perform the analysis and save the output
-    [hF_LandauZener,frabi]=landauZenerAnalysis(atomdata,dtdf,lz_opts); 
-    
-    if doSave
-        saveFigure(hF_LandauZener,'box_landau_zener',saveOpts);
-    end
-end   
-    
 
 %% Custom Box Count : Raman Spectroscopy
 
@@ -704,6 +612,152 @@ if doGaussFit
         hF_Y=[hF_Y; hF_Ys_rNum];
     end   
 end
+
+%% 2D Erf Fit
+
+% Perform the Erf Fit
+if doErfFit
+    disp(repmat('-',1,60));    
+    disp('Performing 2D erf fit');
+    disp(repmat('-',1,60)); 
+
+    for kk=1:length(atomdata)
+        disp(repmat('-',1,60));   
+        disp(['(' num2str(kk) ') ' atomdata(kk).Name]);
+        for nn=1:size(atomdata(kk).ROI,1)   % Iterate over all ROIs
+            sROI=atomdata(kk).ROI(nn,:);     % Grab the analysis ROI
+            Dx=sROI(1):sROI(2);               % X Vector
+            Dy=sROI(3):sROI(4);               % Y Vector
+            data=atomdata(kk).OD(Dy,Dx);    % Optical density        
+            [fout,gof,output,N]=erfFit2D(Dx,Dy,data);    % Perform the fit  
+            Natoms = N*(PixelSize^2/CrossSection);
+            atomdata(kk).ErfFit{nn} = fout; % Assign the fit object       
+            atomdata(kk).ErfGOF{nn} = gof; % Assign the fit object
+            atomdata(kk).ErfNum{nn} = Natoms;
+        end
+    end    
+    % Get a summary of the erf fit data
+    erf_data=getErfData(atomdata,pco_xVar);    
+end
+
+%% 2D Erf OD Profile
+if doErfFit
+    % Style of profile --> cut or sum?
+    style='cut';
+    %  style='sum';
+    clear hF_X_erf;clear hF_Y_erf;
+    hF_X_erf=[];hF_Y_erf=[];
+    for rNum=1:size(ROI,1)
+        hF_Xs_rNum_erf=showProfile(atomdata,'ErfFit','X',style,rNum,pco_xVar);        
+        hF_Ys_rNum_erf=showProfile(atomdata,'ErfFit','Y',style,rNum,pco_xVar);  
+        pause(1);
+
+    %   Save the figures (this can be slow)
+        if doSave
+            for kk=1:length(hF_Xs_rNum) 
+                saveFigure(hF_Xs_rNum_erf(kk),['erf_profile_X' num2str(rNum) '_' num2str(kk)],saveOpts);
+            end 
+            for kk=1:length(hF_Ys_rNum)
+                saveFigure(hF_Xs_rNum_erf(kk),['erf_profile_Y' num2str(rNum) '_' num2str(kk)],saveOpts);
+            end
+        end
+        hF_X_erf=[hF_X_erf; hF_Xs_rNum];
+        hF_Y_erf=[hF_Y_erf; hF_Ys_rNum];
+    end  
+end
+
+    
+%% Box Count Analysis
+
+if doBoxCount
+    
+    boxPopts = struct;
+    boxPopts.FigLabel = FigLabel;
+    boxPopts.xUnit=pco_unit;
+    boxPopts.NumberExpFit = 0;      
+    boxPopts.NumberExpOffsetFit = 0; 
+    boxPopts.RatioSineFit=0;
+
+    % Plot the atom number
+    [hF_numberbox,Ndatabox]=showBoxAtomNumber(atomdata,pco_xVar,boxPopts); 
+    if doSave;saveFigure(hF_numberbox,'box_number',saveOpts);end
+    
+    % Plot the ratios if there are more than one ROI.
+    if size(ROI,1)>1    
+        [hF_numberratio,Ndataratio]=showBoxAtomNumberRatio(atomdata,pco_xVar,boxPopts);
+        if doSave;saveFigure(hF_numberratio,'box_number_ratio',saveOpts);end          
+    end     
+    
+    % Plot the box aspect ratio
+    hF_box_ratio=showBoxAspectRatio(atomdata,pco_xVar,boxPopts);
+    if doSave;saveFigure(hF_box_ratio,'box_ratio',saveOpts);end  
+
+
+    if doBoxRabi && size(ROI,1)>1 
+        boxRabiopts=struct;
+        boxRabiopts.xUnit=pco_unit;
+
+        boxRabiopts.Ratio_79=0.62;0.5;0.66;
+        boxRabiopts.Guess=[.9 13 1]; % [probability transfer, freq, t2 time,]
+
+        boxRabiopts.Sign=[1 0]; % is N(t=0)=1 or 0?
+        boxRabiopts.Sign='auto'; % Automatic fit sign
+        
+        
+        [hF_rabi_contrast,rabi_contrast]=boxRabiOscillationsContrast(atomdata,pco_xVar,boxRabiopts);
+        if doSave;saveFigure(hF_rabi_contrast,'box_rabi_oscillate_contrast',saveOpts);end
+
+        [hF_rabi_raw,rabi_absolute]=boxRabiOscillationsAbsolute(atomdata,pco_xVar,boxRabiopts);
+        if doSave;saveFigure(hF_rabi_raw,'box_rabi_oscillate_raw',saveOpts);end    
+    end
+
+    if doLandauZener && size(ROI,1)==2 && doBoxCount && length(atomdata)>3
+        lz_opts=struct;
+        lz_opts.Mode='auto';
+        lz_opts.BoxIndex=1;  % 1/2 ratio or 2/1 ratio
+        lz_opts.LZ_GUESS=[1 .8]; % Fit guess kHz,ampltidue can omit guess as well
+        lz_opts.num_scale = 0.6;        
+        
+        % Define the dt/df in ms/kHz
+        % This can be different variables depending on the sweep
+
+        % Grab the sequence parameters
+        params=[atomdata.Params];
+
+        % Get df and dt
+    %     SweepTimeVar='sweep_time';      % Variable that defines sweep time
+    %     SweepRangeVar='sweep_range';    %    Variable that defines sweep range
+
+
+    %     SweepTimeVar='uwave_sweep_time';      % Variable that defines sweep time
+    %     SweepRangeVar='uwave_delta_freq';    %    Variable that defines sweep range
+
+    % Shift Register
+        SweepTimeVar='HF_Raman_sweep_time';     
+
+    %     SweepTimeVar='Raman_Time';      % Variable that defines sweep time
+        SweepRangeVar='HF_Raman_sweep_range';    %    Variable that defines sweep range
+    %     
+        % Convert the parameter into df and dt (add whatever custom processing
+        % you want).
+        dT=[params.(SweepTimeVar)];
+    %     dF=[params.(SweepRangeVar)]*1000; % Factor of two for the SRS
+        dF=[params.(SweepRangeVar)]*1000*2; % Factor of two for the AOM DP
+
+    %     dF=40*ones(length(atomdata),1)';
+
+        % Convert to dtdf
+        dtdf=dT./dF; 
+
+        % Perform the analysis and save the output
+        [hF_LandauZener,frabi]=landauZenerAnalysis(atomdata,dtdf,lz_opts); 
+
+        if doSave
+            saveFigure(hF_LandauZener,'box_landau_zener',saveOpts);
+        end
+    end   
+end
+
 %% 2D Gauss Analysis
 
 if doGaussFit  
@@ -764,9 +818,6 @@ if doGaussFit
     
     % Determine which ROIs to perform BEC analysis on (for double shutter)
     if doBEC 
-        % Calculate trap frequencies
-        % Use the K calibration and scale down by mass and polarizability        
-
         BECopts=struct;
         BECopts.FigLabel = FigLabel;
         BECopts.xUnit=pco_unit;   
@@ -775,64 +826,10 @@ if doGaussFit
         [hF_BEC,BECdata]=BECanalysis(gauss_data,pco_xVar,BECopts);    
 
         if doSave;saveFigure(hF_BEC,'gauss_BEC',saveOpts);end        
-    end
-
-    
-      
+    end         
 end
 
-%% 2D Erf Fit
 
-% Perform the Erf Fit
-if doErfFit
-    disp(repmat('-',1,60));    
-    disp('Performing 2D erf fit');
-    disp(repmat('-',1,60)); 
-
-    for kk=1:length(atomdata)
-        disp(repmat('-',1,60));   
-        disp(['(' num2str(kk) ') ' atomdata(kk).Name]);
-        for nn=1:size(atomdata(kk).ROI,1)   % Iterate over all ROIs
-            sROI=atomdata(kk).ROI(nn,:);     % Grab the analysis ROI
-            Dx=sROI(1):sROI(2);               % X Vector
-            Dy=sROI(3):sROI(4);               % Y Vector
-            data=atomdata(kk).OD(Dy,Dx);    % Optical density        
-            [fout,gof,output,N]=erfFit2D(Dx,Dy,data);    % Perform the fit  
-            Natoms = N*(PixelSize^2/CrossSection);
-            atomdata(kk).ErfFit{nn} = fout; % Assign the fit object       
-            atomdata(kk).ErfGOF{nn} = gof; % Assign the fit object
-            atomdata(kk).ErfNum{nn} = Natoms;
-        end
-    end    
-    % Get a summary of the erf fit data
-    erf_data=getErfData(atomdata,pco_xVar);    
-end
-
-%% 2D Erf OD Profile
-if doErfFit
-    % Style of profile --> cut or sum?
-    style='cut';
-    %  style='sum';
-    clear hF_X_erf;clear hF_Y_erf;
-    hF_X_erf=[];hF_Y_erf=[];
-    for rNum=1:size(ROI,1)
-        hF_Xs_rNum_erf=showProfile(atomdata,'ErfFit','X',style,rNum,pco_xVar);        
-        hF_Ys_rNum_erf=showProfile(atomdata,'ErfFit','Y',style,rNum,pco_xVar);  
-        pause(1);
-
-    %   Save the figures (this can be slow)
-        if doSave
-            for kk=1:length(hF_Xs_rNum) 
-                saveFigure(hF_Xs_rNum_erf(kk),['erf_profile_X' num2str(rNum) '_' num2str(kk)],saveOpts);
-            end 
-            for kk=1:length(hF_Ys_rNum)
-                saveFigure(hF_Xs_rNum_erf(kk),['erf_profile_Y' num2str(rNum) '_' num2str(kk)],saveOpts);
-            end
-        end
-        hF_X_erf=[hF_X_erf; hF_Xs_rNum];
-        hF_Y_erf=[hF_Y_erf; hF_Ys_rNum];
-    end  
-end
 
 %% 2D Erf Analysis
 
