@@ -506,8 +506,6 @@ if doBoxCount
     end  
 end   
 
-
-
 %% Custom Box Count : Raman Spectroscopy
 
 raman=struct;
