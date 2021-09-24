@@ -696,6 +696,7 @@ if doBoxCount
     
     if doBoxRabi && size(ROI,1)>1 
         boxRabiopts=struct;
+        boxRabiopts.FigLabel = FigLabel;
         boxRabiopts.xUnit=pco_unit;
 
         boxRabiopts.Ratio_79=0.62;0.5;0.66;
@@ -705,14 +706,14 @@ if doBoxCount
         boxRabiopts.Sign='auto'; % Automatic fit sign
         
         
-        [hF_rabi_contrast,rabi_contrast]=boxRabiOscillationsContrast(atomdata,pco_xVar,boxRabiopts);
+        [hF_rabi_contrast,rabi_contrast]=boxRabiOscillationsContrast(box_data,pco_xVar,boxRabiopts);
         if doSave;saveFigure(hF_rabi_contrast,'box_rabi_oscillate_contrast',saveOpts);end
 
-        [hF_rabi_raw,rabi_absolute]=boxRabiOscillationsAbsolute(atomdata,pco_xVar,boxRabiopts);
+        [hF_rabi_raw,rabi_absolute]=boxRabiOscillationsAbsolute(box_data,pco_xVar,boxRabiopts);
         if doSave;saveFigure(hF_rabi_raw,'box_rabi_oscillate_raw',saveOpts);end    
     end
 
-    if doLandauZener && size(ROI,1)==2 && doBoxCount && length(atomdata)>3
+    if doLandauZener && size(box_data.Natoms,2)==2 && doBoxCount && size(box_data.Natoms,1)>3
         lz_opts=struct;
         lz_opts.Mode='auto';
         lz_opts.BoxIndex=1;  % 1/2 ratio or 2/1 ratio
