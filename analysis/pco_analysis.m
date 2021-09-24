@@ -93,7 +93,7 @@ end
 pco_xVar = 'rf_freq_HF';
 % pco_xVar = 'HF_FeshValue_Final_ODT';
 
-doSave=1;
+doSave=0;
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit=1;
@@ -1027,7 +1027,7 @@ if doCustom
     end
 
 %     DATA=custom_outdata.BoxCount;
-%     DATA=custom_outdata.GaussData;
+     DATA=custom_outdata.GaussData;
 %     DATA=custom_outdata.ErfData;
     %%%%%%%%%%%%%%% RF SPEC %%%%%%%%%%%%%%
 
