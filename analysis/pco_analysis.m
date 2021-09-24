@@ -505,8 +505,7 @@ if doBoxCount
     else
         atomdata=boxCount(atomdata);
     end  
-end
-    
+end   
 
 
 
@@ -665,8 +664,36 @@ if doErfFit
         hF_Y_erf=[hF_Y_erf; hF_Ys_rNum];
     end  
 end
+  
 
+%% Animate cloud
+if doAnimate && doSave
+    animateOpts=struct;
+    animateOpts.FigLabel = FigLabel;
+    animateOpts.saveDir = saveDir;
+    animateOpts.StartDelay=3;   % Time to hold on first picture
+    animateOpts.MidDelay=1;    % Time to hold in middle picutres
+    animateOpts.EndDelay=2;     % Time to hold final picture
+    animateOpts.doAverage=1;    % Average over duplicates?
+    animateOpts.doRotate=0;     % Rotate the image?
+    animateOpts.xUnit=pco_unit;
     
+    % Stacking images (applicable only for double exposure)
+     animateOpts.doubleStack='vertical';
+     animateOpts.doubleStack='horizontal';
+
+     % Asceneding or descending
+    %animateOpts.Order='descend';   
+     animateOpts.Order='ascend';
+    
+    % Color limits
+    animateOpts.CLim=[0 1;
+        0 1.5];   
+    
+    animateCloudDouble(atomdata,pco_xVar,animateOpts);    
+end
+
+
 %% Box Count Analysis
 
 if doBoxCount
@@ -1561,31 +1588,3 @@ end
 if doCustom_BM
     customBM_script;
 end
-
-%% Animate cloud
-if doAnimate && doSave
-    animateOpts=struct;
-    animateOpts.FigLabel = FigLabel;
-    animateOpts.saveDir = saveDir;
-    animateOpts.StartDelay=3;   % Time to hold on first picture
-    animateOpts.MidDelay=1;    % Time to hold in middle picutres
-    animateOpts.EndDelay=2;     % Time to hold final picture
-    animateOpts.doAverage=1;    % Average over duplicates?
-    animateOpts.doRotate=0;     % Rotate the image?
-    animateOpts.xUnit=pco_unit;
-    
-    % Stacking images (applicable only for double exposure)
-     animateOpts.doubleStack='vertical';
-     animateOpts.doubleStack='horizontal';
-
-     % Asceneding or descending
-    %animateOpts.Order='descend';   
-     animateOpts.Order='ascend';
-    
-    % Color limits
-    animateOpts.CLim=[0 1;
-        0 1.5];   
-    
-    animateCloudDouble(atomdata,pco_xVar,animateOpts);    
-end
-
