@@ -23,8 +23,7 @@ if doBoxCount
     boxPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
     boxPopts.CenterParabolaFit = 0;
     boxPopts.CenterLinearFit = 0;     % Linear fit to cloud center
-    boxPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
-    
+    boxPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset    
        
     hF_number_box = showAtomNumber(box_data,pco_xVar,boxPopts);  
     ylim([0 max(get(gca,'YLim'))]);    
@@ -42,8 +41,7 @@ if doBoxCount
         
     % box Size
     hF_size_box=showSize(box_data,pco_xVar,boxPopts);    
-    if doSave;saveFigure(hF_size_box,'box_size',saveOpts);end
-       
+    if doSave;saveFigure(hF_size_box,'box_size',saveOpts);end       
 end
 
 %% 2D Gauss Analysis
@@ -116,8 +114,6 @@ if doGaussFit
         if doSave;saveFigure(hF_BEC,'gauss_BEC',saveOpts);end        
     end         
 end
-
-
 
 %% 2D Erf Analysis
 
@@ -232,26 +228,27 @@ if doRabi
     if doSave;saveFigure(hF_rabi_raw,[data_source '_rabi_oscillate_raw'],saveOpts);end    
 end
 
-
 %% Custom
 if doCustom 
     custom_outdata=struct;
     
     if doGaussFit
-        custom_outdata.GaussData=gauss_data;     
+        custom_outdata.GaussData=data;     
     end    
     
     if doBoxCount
-        custom_outdata.BoxCount=Ndatabox;    
+        custom_outdata.BoxCount=data;    
     end
     
     if doErfFit
-        custom_outdata.ErfData=erf_data;    
+        custom_outdata.ErfData=data;    
     end
 
+    
 %     DATA=custom_outdata.BoxCount;
 %      DATA=custom_outdata.GaussData;
-    DATA=custom_outdata.ErfData;
+%     data=custom_outdata.ErfData;
+    DATA=data;
     %%%%%%%%%%%%%%% RF SPEC %%%%%%%%%%%%%%
 
     % Center frequency for expected RF field (if relevant)
@@ -263,7 +260,7 @@ if doCustom
     x0= (BreitRabiK(B,9/2,-5/2)-BreitRabiK(B,9/2,-7/2))/6.6260755e-34/1E6; 
 %     %x0 = 0;
 %     % Grab Raw data
-    X=DATA.X; 
+    X=data.X; 
 %     X=X';
     
 %     X=2*X;
@@ -284,13 +281,11 @@ if doCustom
 
 
     % Define Y Data
-     N1=DATA.Natoms(:,1);
-     N2=DATA.Natoms(:,2);     
+     N1=data.Natoms(:,1);
+     N2=data.Natoms(:,2);     
      
      Ratio_79=0.6;
-     N2=N2/Ratio_79;
-     
-     
+     N2=N2/Ratio_79;  
      
     custom_outdata.X=X;
     custom_outdata.Xstr=xstr;
@@ -324,7 +319,7 @@ if doCustom
             fstr='Transfer Fraction';
          case 5 % random customized stuffs 
              N2=N2*0.6;
-             N3=DATA.Natoms(:,3);
+             N3=data.Natoms(:,3);
              Y=(N3+ N2-2*N1)./(N3+N2-N1);
              ystr=['Higher band fraction'];
              xstr=['latt ramp time (ms)'];
