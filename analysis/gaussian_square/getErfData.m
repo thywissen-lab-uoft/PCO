@@ -41,7 +41,13 @@ end
 output = struct;
 
 output.FileNames    = {atomdata.Name}';
-output.Atom         = atomdata(1).Flags.image_atomtype;
+
+if isfield(atomdata(1),'Flags')
+    output.Atom         = atomdata(1).Flags.image_atomtype;
+else
+    output.Atom         = NaN;
+end
+
 output.PixelSize    = atomdata(1).PixelSize;
 output.CrossSection = atomdata(1).CrossSection;
 output.xVar         = xVar;
