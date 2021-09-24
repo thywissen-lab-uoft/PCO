@@ -500,7 +500,8 @@ if doBoxCount
     disp(repmat('-',1,60));    
     disp('Performing box count analysis');
     disp(repmat('-',1,60));      
-    atomdata=boxCount(atomdata,boxOpts);     
+    atomdata=boxCount(atomdata,boxOpts);
+    box_data = getBoxData(atomdata,xVar);
 end   
 
 %% Custom Box Count : Raman Spectroscopy

@@ -8,10 +8,8 @@ function atomdata=boxCount(atomdata,boxOpts)
     else
         disp([' Using background counts from ROI = [' ...
             num2str(boxOpts.bgROI) ']']);   
-        bgROI = boxOpts.bgROI;
     end    
     
-
     for kk=1:length(atomdata)
 
         BoxCount=struct;    
