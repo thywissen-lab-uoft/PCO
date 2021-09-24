@@ -607,6 +607,78 @@ if doErfFit
     erf_data=getErfData(atomdata,pco_xVar);    
 end
 
+%% Fermi-Fitter Long TOF
+% This section of code fits the optical density to the distribution
+% expected from a degenerate cloud of 40K from a harmonic trap.
+%
+% This fitting protocol assumes a long time tof limit. In this limit the
+% temperature and fugacity can be determined without external knowledge of
+% the trap frequencies.
+%
+% However, if the trap frequency is known via an independent measure, it
+% can be used as a check.
+
+fermiFitOpts=struct;
+fermiFitOpts.xUnit=pco_unit;
+fermiFitOpts.ShowDetails=1;         % Plot shot-by-shot details?
+fermiFitOpts.SaveDetails=1;         % Save shot-by-shot details?
+fermiFitOpts.AutoROI=1;             % Automatically choose ROI from Gaussian Fit to optimize fitting speed
+
+% Determine which ROIs to perform BEC analysis on (for double shutter)
+if isfield(atomdata(1),'Flags') 
+    switch atomdata(1).Flags.image_atomtype
+        case 0
+            DFGinds=zeros(size(ROI,1),1);
+        case 1
+            DFGinds=ones(size(ROI,1),1);
+        case 2
+            DFGinds=zeros(size(ROI,1),1);
+            for nn=1:size(ROI)
+                if ROI(nn,3)<1024
+                   DFGinds(nn)=1; 
+                end                
+            end
+    end
+end
+    
+% Do the analysis
+if doFermiFitLong    
+    fermiFitOpts.DFGinds=DFGinds;
+
+    % Calculate trap frequencies
+    params=[atomdata.Params];
+
+    % Evaporation end power
+    powers=[params.Evap_End_Power];
+
+    % For ODT ramp back up
+    % powers=[params.power_val];
+
+    foo = @(P) 61.5*sqrt(P./(0.085)); % Calibrated 2021.02.25
+    freqs=foo(powers);        
+    fermiFitOpts.Freqs=freqs;  
+    
+    disp(repmat('-',1,60));    
+    disp('Performing Fermi-Fit long tof');
+    disp(repmat('-',1,60));       
+    atomdata=computeFermiFit(atomdata,fermiFitOpts); 
+end
+
+% Plotting
+if doFermiFitLong
+    hF_fermi_temp=showFermiTemp(atomdata,pco_xVar,fermiFitOpts);    
+    if doSave;saveFigure(hF_fermi_temp,'fermi_temperature',saveOpts);end
+    
+    hF_fermi_error=showFermiError(atomdata,pco_xVar,fermiFitOpts);    
+    if doSave;saveFigure(hF_fermi_error,'fermi_error',saveOpts);end       
+
+    
+    hF_fermi_temp2=showFermiTempCompare(atomdata,pco_xVar,fermiFitOpts);    
+    if doSave;saveFigure(hF_fermi_temp2,'fermi_compare',saveOpts);end
+end
+
+
+
 %% OD Profiles w or w/o Fits 
 % Style of profile --> cut or sum?
 style='cut';
@@ -630,8 +702,7 @@ for rNum=1:size(ROI,1)
     hF_X=[hF_X; hF_Xs_rNum];
     hF_Y=[hF_Y; hF_Ys_rNum];
 end  
-
-  
+ 
 
 %% Animate cloud
 if doAnimate && doSave
@@ -906,79 +977,6 @@ if doGaussFit && doGaussRabi
     if doSave;saveFigure(hF_rabi_gauss,'gauss_rabi_oscillate',saveOpts);end
 
 end
-
-%% Fermi-Fitter Long TOF
-% This section of code fits the optical density to the distribution
-% expected from a degenerate cloud of 40K from a harmonic trap.
-%
-% This fitting protocol assumes a long time tof limit. In this limit the
-% temperature and fugacity can be determined without external knowledge of
-% the trap frequencies.
-%
-% However, if the trap frequency is known via an independent measure, it
-% can be used as a check.
-
-fermiFitOpts=struct;
-fermiFitOpts.xUnit=pco_unit;
-fermiFitOpts.ShowDetails=1;         % Plot shot-by-shot details?
-fermiFitOpts.SaveDetails=1;         % Save shot-by-shot details?
-fermiFitOpts.AutoROI=1;             % Automatically choose ROI from Gaussian Fit to optimize fitting speed
-
-% Determine which ROIs to perform BEC analysis on (for double shutter)
-if isfield(atomdata(1),'Flags') 
-    switch atomdata(1).Flags.image_atomtype
-        case 0
-            DFGinds=zeros(size(ROI,1),1);
-        case 1
-            DFGinds=ones(size(ROI,1),1);
-        case 2
-            DFGinds=zeros(size(ROI,1),1);
-            for nn=1:size(ROI)
-                if ROI(nn,3)<1024
-                   DFGinds(nn)=1; 
-                end                
-            end
-    end
-end
-    
-% Do the analysis
-if doFermiFitLong    
-    fermiFitOpts.DFGinds=DFGinds;
-
-    % Calculate trap frequencies
-    params=[atomdata.Params];
-
-    % Evaporation end power
-    powers=[params.Evap_End_Power];
-
-    % For ODT ramp back up
-    % powers=[params.power_val];
-
-    foo = @(P) 61.5*sqrt(P./(0.085)); % Calibrated 2021.02.25
-    freqs=foo(powers);        
-    fermiFitOpts.Freqs=freqs;  
-    
-    disp(repmat('-',1,60));    
-    disp('Performing Fermi-Fit long tof');
-    disp(repmat('-',1,60));       
-    atomdata=computeFermiFit(atomdata,fermiFitOpts); 
-end
-
-% Plotting
-if doFermiFitLong
-    hF_fermi_temp=showFermiTemp(atomdata,pco_xVar,fermiFitOpts);    
-    if doSave;saveFigure(hF_fermi_temp,'fermi_temperature',saveOpts);end
-    
-    hF_fermi_error=showFermiError(atomdata,pco_xVar,fermiFitOpts);    
-    if doSave;saveFigure(hF_fermi_error,'fermi_error',saveOpts);end       
-
-    
-    hF_fermi_temp2=showFermiTempCompare(atomdata,pco_xVar,fermiFitOpts);    
-    if doSave;saveFigure(hF_fermi_temp2,'fermi_compare',saveOpts);end
-end
-
-
-
 
 %% Custom
 if doCustom 

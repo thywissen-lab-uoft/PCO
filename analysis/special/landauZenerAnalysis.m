@@ -1,10 +1,12 @@
 function [hF,frabi,frabi2] = landauZenerAnalysis(atomdata,dtdf,opts)
 
-% Grab important global variables
-
-global pxsize
-global imgdir
-global crosssec
+%%
+if nargin == 3 && isfield(opts,'FigLabel') 
+    FigLabel = opts.FigLabel;
+else
+    FigLabel = '';
+    opts = struct;
+end
 
 if nargin==2
     opts=struct;
@@ -104,20 +106,9 @@ f2str=['$\Omega_R=2\pi \times' num2str(round(fout2.f_rabi,3))  '~\mathrm{kHz},~T
 
 %% Make Figure
 
-% Create the name of the figure
-[filepath,name,~]=fileparts(imgdir);
-
-figDir=fullfile(imgdir,'figures');
-if ~exist(figDir,'dir')
-   mkdir(figDir); 
-end
-
-strs=strsplit(imgdir,filesep);
-str=[strs{end-1} filesep strs{end}];
-
 
 % Initialize the figure
-hF=figure('Name',[pad('Landau Zener',20) str],...
+hF=figure('Name',[pad('Landau Zener',20) FigLabel],...
     'units','pixels','color','w','Menubar','none','Resize','off',...
     'numbertitle','off');
 hF.Position(1)=0;
@@ -163,7 +154,7 @@ xL=get(gca,'XLim');
 xlim([0 xL(2)]);
 
 % Image directory folder string
-t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left');
 drawnow;
 t.Position(4)=t.Extent(4);
