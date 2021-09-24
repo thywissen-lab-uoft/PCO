@@ -621,7 +621,7 @@ for rNum=1:size(ROI,1)
     hF_Xs_rNum=showProfile(atomdata,'X',style,rNum,pco_xVar);        
     hF_Ys_rNum=showProfile(atomdata,'Y',style,rNum,pco_xVar);  
     pause(1);
-
+    
 %   Save the figures (this can be slow)
     if doSave
         for kk=1:length(hF_Xs_rNum) 
