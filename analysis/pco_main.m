@@ -731,3 +731,6 @@ if doAnimate && doSave
     animateCloudDouble(atomdata,pco_xVar,animateOpts);    
 end
 
+%% Analysis
+
+pco_analysis;
