@@ -683,8 +683,8 @@ end
 % Style of profile --> cut or sum?
 style='cut';
 %  style='sum';
-clear hF_X_erf;clear hF_Y_erf;
-hF_X_erf=[];hF_Y_erf=[];
+clear hF_X;clear hF_Y;
+hF_X=[];hF_Y=[];
 for rNum=1:size(ROI,1)
     hF_Xs_rNum=showProfile(atomdata,'X',style,rNum,pco_xVar);        
     hF_Ys_rNum=showProfile(atomdata,'Y',style,rNum,pco_xVar);  
