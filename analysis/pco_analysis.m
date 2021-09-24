@@ -818,6 +818,8 @@ if doErfFit
     end  
 end
 
+%% 2D Erf Analysis
+
 if doErfFit  
     ErfPopts = struct;
     ErfPopts.FigLabel = FigLabel;
@@ -907,7 +909,6 @@ fermiFitOpts.ShowDetails=1;         % Plot shot-by-shot details?
 fermiFitOpts.SaveDetails=1;         % Save shot-by-shot details?
 fermiFitOpts.AutoROI=1;             % Automatically choose ROI from Gaussian Fit to optimize fitting speed
 
-
 % Determine which ROIs to perform BEC analysis on (for double shutter)
 if isfield(atomdata(1),'Flags') 
     switch atomdata(1).Flags.image_atomtype
@@ -922,14 +923,11 @@ if isfield(atomdata(1),'Flags')
                    DFGinds(nn)=1; 
                 end                
             end
-
     end
 end
-
     
 % Do the analysis
-if doFermiFitLong
-    
+if doFermiFitLong    
     fermiFitOpts.DFGinds=DFGinds;
 
     % Calculate trap frequencies
@@ -941,19 +939,14 @@ if doFermiFitLong
     % For ODT ramp back up
     % powers=[params.power_val];
 
-
     foo = @(P) 61.5*sqrt(P./(0.085)); % Calibrated 2021.02.25
     freqs=foo(powers);        
-    fermiFitOpts.Freqs=freqs;
-    
-    
+    fermiFitOpts.Freqs=freqs;  
     
     disp(repmat('-',1,60));    
     disp('Performing Fermi-Fit long tof');
     disp(repmat('-',1,60));       
-    atomdata=computeFermiFit(atomdata,fermiFitOpts);  
-    
-
+    atomdata=computeFermiFit(atomdata,fermiFitOpts); 
 end
 
 % Plotting
@@ -988,7 +981,6 @@ if isfield(atomdata(1),'Flags')
 
     end
 end
-
 
 if doBEC && isfield(atomdata(1),'GaussFit')
     % Calculate trap frequencies
@@ -1617,8 +1609,7 @@ if doAnimate && doSave
     % Color limits
     animateOpts.CLim=[0 1;
         0 1.5];   
-
-    animateCloudDouble(atomdata,pco_xVar,animateOpts);
     
+    animateCloudDouble(atomdata,pco_xVar,animateOpts);    
 end
 
