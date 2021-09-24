@@ -104,7 +104,7 @@ pco_overrideUnit='ms';
 %% Analysis Flags
 
 % Saving
-doSave=1;           % Save the figures?
+doSave=0;           % Save the figures?
 doUpload = 1;       % Upload to google drive?
 
 % Animation
@@ -501,7 +501,7 @@ if doBoxCount
     disp('Performing box count analysis');
     disp(repmat('-',1,60));      
     atomdata=boxCount(atomdata,boxOpts);
-    box_data = getBoxData(atomdata,xVar);
+    box_data = getBoxData(atomdata,pco_xVar);
 end   
 
 %% Custom Box Count : Raman Spectroscopy
@@ -664,29 +664,36 @@ end
 %% Box Count Analysis
 
 if doBoxCount
-    
     boxPopts = struct;
     boxPopts.FigLabel = FigLabel;
     boxPopts.xUnit=pco_unit;
-    boxPopts.NumberExpFit = 0;      
-    boxPopts.NumberExpOffsetFit = 0; 
-    boxPopts.RatioSineFit=0;
-
-    % Plot the atom number
-    [hF_numberbox,Ndatabox]=showBoxAtomNumber(atomdata,pco_xVar,boxPopts); 
-    if doSave;saveFigure(hF_numberbox,'box_number',saveOpts);end
+    boxPopts.NumberExpFit = 0;        % Fit exponential decay to atom number
+    boxPopts.NumberLorentzianFit=0;   % Fit atom number to lorentzian
+    boxPopts.CenterSineFit = 0;       % Fit sine fit to cloud center
+    boxPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
+    boxPopts.CenterParabolaFit = 0;
+    boxPopts.CenterLinearFit = 0;     % Linear fit to cloud center
+    boxPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
+    
+       
+    hF_number_box = showAtomNumber(box_data,pco_xVar,boxPopts);  
+    ylim([0 max(get(gca,'YLim'))]);    
+    if doSave;saveFigure(hF_number_box,'box_number',saveOpts);end
     
     % Plot the ratios if there are more than one ROI.
     if size(ROI,1)>1    
-        [hF_numberratio,Ndataratio]=showBoxAtomNumberRatio(atomdata,pco_xVar,boxPopts);
-        if doSave;saveFigure(hF_numberratio,'box_number_ratio',saveOpts);end          
-    end     
+        hF_number_box_ratio=showNumberRatio(box_data,pco_xVar,boxPopts);
+        if doSave;saveFigure(hF_number_box_ratio,'box_number_ratio',saveOpts);end
+    end
+
+    % Cloud centre
+    hF_Centre_box=showAtomCentre(box_data,pco_xVar,boxPopts);    
+    if doSave;saveFigure(hF_Centre_box,'box_position',saveOpts);end 
+        
+    % box Size
+    hF_size_box=showSize(box_data,pco_xVar,boxPopts);    
+    if doSave;saveFigure(hF_size_box,'box_size',saveOpts);end
     
-    % Plot the box aspect ratio
-    hF_box_ratio=showBoxAspectRatio(atomdata,pco_xVar,boxPopts);
-    if doSave;saveFigure(hF_box_ratio,'box_ratio',saveOpts);end  
-
-
     if doBoxRabi && size(ROI,1)>1 
         boxRabiopts=struct;
         boxRabiopts.xUnit=pco_unit;

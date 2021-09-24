@@ -20,17 +20,17 @@ X = reshape(X,[length(X) 1]);
 
 PixelSize = atomdata(1).PixelSize;
 CrossSection = atomdata(1).CrossSection;
+bgROI=atomdata(1).BoxCount.bgROI;        % ROI for calculating bgkd
 
 for kk=1:length(atomdata)
-   for nn=1:length(atomdata(kk).GaussFit)
+   for nn=1:length(atomdata(kk).BoxCount)
         bc=atomdata(kk).BoxCount(nn);               % Grab the fit
         
 
         N(kk,nn)=bc.Ncounts;    % Number of counts (w/ bkgd removed)
         Nraw(kk,nn)=bc.Nraw;          % Raw of number of counts
-        Nbg(kk,nn)=bc.Nbg;          % Bakcground number of counts
-        nbg(kk,nn)=bc.nbg;          % Background counts/px
-        bgROI(kk,nn)=bc.bgROI;        % ROI for calculating bgkd
+        Nbg(kk,nn)=bc.Nbkgd;          % Bakcground number of counts
+        nbg(kk,nn)=bc.nbkgd;          % Background counts/px
         Xc(kk,nn)=bc.Xc;              % X center of mass
         Yc(kk,nn)=bc.Yc;              % Y center of mass
         Xs(kk,nn)=bc.Xs;              % X standard deviation
@@ -61,6 +61,7 @@ output.Flags        = [atomdata.Flags];
 output.FitType      = 'box';
 
 % Assign fit outputs
+output.bgROI        = bgROI;
 output.Natoms       = Natoms;
 output.Xc           = Xc;
 output.Yc           = Yc;
