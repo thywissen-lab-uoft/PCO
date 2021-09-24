@@ -56,107 +56,182 @@ for kk=1:(ceil(length(atomdata)/pMax))
 
     for ii=1:length(atomdataSUB)
         % Create axes object
-        thisAxes=axes('parent',hF,'units','pixels');
-        set(thisAxes,'FontSize',8,'XMinorTick','on','YMinorTick','on',...
+        ax=axes('parent',hF,'units','pixels');
+        set(ax,'FontSize',8,'XMinorTick','on','YMinorTick','on',...
             'Box','on','YGrid','on','XGrid','on','units','pixels',...
             'YTickLabel',{});
         hold on;     
         cla;
         [a,b,c,d]=getAxesPos(ii,length(atomdataSUB),...
             hF.Position(3),hF.Position(4));
-        thisAxes.Position(1)=a;
-        thisAxes.Position(2)=b;
-        thisAxes.Position(3)=c;
-        thisAxes.Position(4)=d;   
-
+        ax.Position = [a b c d];
+        
+        % Get this ROI
         ROI=atomdataSUB(ii).ROI(rNum,:);
 
         % Get the data
-        x=atomdataSUB(ii).X;    % X vector
-        y=atomdataSUB(ii).Y;    % Y vector
+        x=atomdataSUB(ii).X;y=atomdataSUB(ii).Y;  
         z=atomdataSUB(ii).OD; % N counts
 
         % Get data over the selected ROI
-        x=x(ROI(1):ROI(2));
-        y=y(ROI(3):ROI(4));
+        x=x(ROI(1):ROI(2));y=y(ROI(3):ROI(4));
         z=z(ROI(3):ROI(4),ROI(1):ROI(2));
-
-        % Get the gaussian fit
-        fout=atomdataSUB(ii).(FitType){rNum};
-
-
-        % Evaluvate the fit for doing numerical projection
+        
+        % Mesh grid for fits
         [xx,yy]=meshgrid(x,y);
-        zzF=feval(fout,xx,yy);      
+        
+        Yc = [];
+        Xc = [];
+        
+        % Get the gaussian fit
+        clear gaussFit
+        doGauss = 0;
+        if isfield(atomdataSUB(ii),'GaussFit')
+            gaussFit  = atomdataSUB(ii).GaussFit{rNum};
+            Yc(end+1) = gaussFit.Yc;
+            Xc(end+1) = gaussFit.Xc;
+            doGauss = 1;
+        end
+        
+        % Get the erf fit
+        clear erfFit
+        doErf = 0;
+        if isfield(atomdataSUB(ii),'ErfFit')
+            erfFit = atomdataSUB(ii).ErfFit{rNum};
+            Yc(end+1) = erfFit.Yc;
+            Xc(end+1) = erfFit.Xc;
+            doErf = 1;
+        end
+        
+        clear doBox
+        doBox = 0;
+        if isfield(atomdataSUB(ii),'BoxCount') && (doGauss || doErf)
+            Yc(end+1) = atomdataSUB(ii).BoxCount(rNum).Yc;
+            Xc(end+1) = atomdataSUB(ii).BoxCount(rNum).Xc;
+            doBox = 1;
+        end
+        
+        % Find index to plot against
+        Yc = mean(Yc);iY = find(round(Yc)==y,1);
+        Xc = mean(Yc);iX = find(round(Xc)==x,1);
+        
+        % Get gauss profile
+        if doGauss   
+            zzF_gauss = feval(gaussFit,xx,yy);
+
+            if isequal(direction,'X') && isequal(style,'cut')
+                YF_gauss = zzF_gauss(iY,:);
+            end
+            
+            if isequal(direction,'X') && isequal(style,'sum')
+                YF_gauss = sum(zzF_gauss,1);
+            end
+            
+            if isequal(direction,'Y') && isequal(style,'cut')
+                YF_gauss = zzF_gauss(:,iX);
+            end
+            
+            if isequal(direction,'Y') && isequal(style,'sum')
+                YF_gauss = sum(zzF_gauss,2);
+            end            
+        end
+        
+        % Get erf profile
+        if doErf   
+            zzF_erf = feval(erfFit,xx,yy);
+
+            if isequal(direction,'X') && isequal(style,'cut')
+                YF_erf = zzF_erf(iY,:);
+            end
+            
+            if isequal(direction,'X') && isequal(style,'sum')
+                YF_erf = sum(zzF_erf,1);
+            end
+            
+            if isequal(direction,'Y') && isequal(style,'cut')
+                YF_erf = zzF_erf(:,iX);
+            end
+            
+            if isequal(direction,'Y') && isequal(style,'sum')
+                YF_erf = sum(zzF_erf,2);
+            end            
+        end
+        
+
+        if doGauss
+            plot(X,YF_gauss,'r','LineWidth',2);
+        end
+        
+        if doErf
+            plot(X,YF_erf,'r','LineWidth',2);
+        end
+        
+        
+%         
+%         fout=atomdataSUB(ii).(FitType){rNum};
+% 
+%         % Evaluvate the fit for doing numerical projection
+%         zzF=feval(fout,xx,yy);      
 
         indy=find(round(fout.Yc)==y);           % Y center
         indx=find(round(fout.Xc)==x);           % X center      
 
-        if isequal(direction,'X')
-            switch style
-                case 'cut'
-                    Y=z(indy,:); % Z(Xc,x)
-                    YF=zzF(indy,:);
-                case 'sum'
-                    Y=sum(z,1); % Z(Xc,x)
-                    YF=sum(zzF,1);
-            end
-
-
-            X=x;        
-
-            x1=max([min(x) fout.Xc-6*fout.Xs]);
-            x2=min([max(x) fout.Xc+6*fout.Xs]);
-
-            str=['{\bf x_c: }'  num2str(round(fout.Xc)) ...
-                'px  ' ...
-                '{\bf \sigma_x: }' num2str(round(fout.Xs)) ...
-                'px'];   
-        else
-            switch style
-                case 'cut'
-                    Y=z(:,indx); % Z(Xc,x)
-                    YF=zzF(:,indx);
-                case 'sum'
-                    Y=sum(z,2); % Z(Xc,x)
-                    YF=sum(zzF,2);
-            end
-            X=y;   
-            y1=max([min(y) fout.Yc-6*fout.Ys]);
-            y2=min([max(y) fout.Yc+6*fout.Ys]);
-
-            str=['{\bf y_c: }'  num2str(round(fout.Yc)) ...
-                'px  ' ...
-                '{\bf \sigma_y: }' num2str(round(fout.Ys)) ...
-                'px'];  
-        end
+%         if isequal(direction,'X')
+%             switch style
+%                 case 'cut'
+%                     Y=z(indy,:); % Z(Xc,x)  
+%                     YF=zzF(indy,:);
+%                 case 'sum'
+%                     Y=sum(z,1); % Z(Xc,x)
+%                     YF=sum(zzF,1);
+%             end
+%             X=x; 
+%             str=['{\bf x_c: }'  num2str(round(fout.Xc)) ...
+%                 'px  ' ...
+%                 '{\bf \sigma_x: }' num2str(round(fout.Xs)) ...
+%                 'px'];   
+%         else
+%             switch style
+%                 case 'cut'
+%                     Y=z(:,indx); % Z(Xc,x)
+%                     YF=zzF(:,indx);
+%                 case 'sum'
+%                     Y=sum(z,2); % Z(Xc,x)
+%                     YF=sum(zzF,2);
+%             end
+%             X=y;   
+%             str=['{\bf y_c: }'  num2str(round(fout.Yc)) ...
+%                 'px  ' ...
+%                 '{\bf \sigma_y: }' num2str(round(fout.Ys)) ...
+%                 'px'];  
+%         end
 
         % Plot the data
         try
-            plot(X,YF,'r','LineWidth',2);
+%             plot(X,YF,'r','LineWidth',2);
             plot(X,Y,'k-');  
 
-        % Set the limits
-        xlim([X(1) X(end)]);   
-        thisAxes.YLim(1)=min([0 min(Y)]);
-        thisAxes.YLim(2)=max([max(Y)*1.5 0]);   
-        
-        % Draw the analysis string box
-        text(thisAxes.Position(3)-1, thisAxes.Position(4), str, 'Units', 'pixels',...
-            'FontSize', 8,...
-            'verticalalignment','cap','horizontalalignment','right'); 
+            % Set the limits
+            xlim([X(1) X(end)]);   
+            ax.YLim(1)=min([0 min(Y)]);
+            ax.YLim(2)=max([max(Y)*1.5 0]);   
+
+            % Draw the analysis string box
+%             text(ax.Position(3)-1, ax.Position(4), str, 'Units', 'pixels',...
+%                 'FontSize', 8,...
+%                 'verticalalignment','cap','horizontalalignment','right'); 
 
 
-        % Draw the analysis string box
-        iterNum=(kk-1)*pMax+ii;
-        
-        % Draw the iteration number and variable value
-        text(3, thisAxes.Position(4)-1, ...
-            ['{\bf(' num2str(iterNum) ')' newline ...
-            num2str(atomdataSUB(ii).Params.(xVar)) '}'], ...
-            'Units', 'pixels',...
-            'FontSize', 8,...
-            'verticalalignment','cap','HorizontalAlignment','left'); 
+            % Draw the analysis string box
+            iterNum=(kk-1)*pMax+ii;
+
+            % Draw the iteration number and variable value
+            text(3, ax.Position(4)-1, ...
+                ['{\bf(' num2str(iterNum) ')' newline ...
+                num2str(atomdataSUB(ii).Params.(xVar)) '}'], ...
+                'Units', 'pixels',...
+                'FontSize', 8,...
+                'verticalalignment','cap','HorizontalAlignment','left'); 
         end
     end      
     disp('done.');
