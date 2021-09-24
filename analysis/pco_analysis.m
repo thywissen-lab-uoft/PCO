@@ -269,7 +269,7 @@ if doCustom
 
     % Center frequency for expected RF field (if relevant)
 %     B = atomdata(1).Params.HF_FeshValue_Initial;
-    B = 205;
+    B = 207;
 
 %     B=201;
 %     B=200;
