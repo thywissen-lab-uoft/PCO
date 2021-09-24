@@ -1,4 +1,4 @@
-function [hF,outdata]=boxRabiOscillationsAbsolute(data,xVar,opts)
+function [hF,outdata]=rabiOscillationsAbsolute(data,xVar,opts)
 
 %%
 if nargin == 3 && isfield(opts,'FigLabel') 

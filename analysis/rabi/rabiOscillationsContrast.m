@@ -1,4 +1,4 @@
-function [hF,outdata]=boxRabiOscillationsContrast(data,xVar,opts)
+function [hF,outdata]=rabiOscillationsContrast(data,xVar,opts)
 
 %%
 if nargin == 3 && isfield(opts,'FigLabel') 

@@ -43,53 +43,7 @@ if doBoxCount
     % box Size
     hF_size_box=showSize(box_data,pco_xVar,boxPopts);    
     if doSave;saveFigure(hF_size_box,'box_size',saveOpts);end
-    
-
-    if doLandauZener && size(box_data.Natoms,2)==2 && doBoxCount && size(box_data.Natoms,1)>3
-        lz_opts=struct;
-        lz_opts.Mode='auto';
-        lz_opts.BoxIndex=1;  % 1/2 ratio or 2/1 ratio
-        lz_opts.LZ_GUESS=[1 .8]; % Fit guess kHz,ampltidue can omit guess as well
-        lz_opts.num_scale = 0.6;        
-        
-        % Define the dt/df in ms/kHz
-        % This can be different variables depending on the sweep
-
-        % Grab the sequence parameters
-        params=[atomdata.Params];
-
-        % Get df and dt
-    %     SweepTimeVar='sweep_time';      % Variable that defines sweep time
-    %     SweepRangeVar='sweep_range';    %    Variable that defines sweep range
-
-
-    %     SweepTimeVar='uwave_sweep_time';      % Variable that defines sweep time
-    %     SweepRangeVar='uwave_delta_freq';    %    Variable that defines sweep range
-
-    % Shift Register
-        SweepTimeVar='HF_Raman_sweep_time';     
-
-    %     SweepTimeVar='Raman_Time';      % Variable that defines sweep time
-        SweepRangeVar='HF_Raman_sweep_range';    %    Variable that defines sweep range
-    %     
-        % Convert the parameter into df and dt (add whatever custom processing
-        % you want).
-        dT=[params.(SweepTimeVar)];
-    %     dF=[params.(SweepRangeVar)]*1000; % Factor of two for the SRS
-        dF=[params.(SweepRangeVar)]*1000*2; % Factor of two for the AOM DP
-
-    %     dF=40*ones(length(atomdata),1)';
-
-        % Convert to dtdf
-        dtdf=dT./dF; 
-
-        % Perform the analysis and save the output
-        [hF_LandauZener,frabi]=landauZenerAnalysis(box_data,dtdf,lz_opts); 
-
-        if doSave
-            saveFigure(hF_LandauZener,'box_landau_zener',saveOpts);
-        end
-    end   
+       
 end
 
 %% 2D Gauss Analysis
@@ -215,9 +169,52 @@ if doErfFit
       
 end
 
+%% Landau Zener
+if doLandauZener && size(data.Natoms,2)>1 && size(data.Natoms,1)>3
+    lz_opts=struct;
+    lz_opts.Mode='auto';
+    lz_opts.BoxIndex=1;  % 1/2 ratio or 2/1 ratio
+    lz_opts.LZ_GUESS=[1 .8]; % Fit guess kHz,ampltidue can omit guess as well
+    lz_opts.num_scale = 0.6;        
+
+    % Define the dt/df in ms/kHz
+    % This can be different variables depending on the sweep
+
+    % Grab the sequence parameters
+    params=[data.Params];
+
+    % Get df and dt
+%     SweepTimeVar='sweep_time';      % Variable that defines sweep time
+%     SweepRangeVar='sweep_range';    %    Variable that defines sweep range
+
+%     SweepTimeVar='uwave_sweep_time';      % Variable that defines sweep time
+%     SweepRangeVar='uwave_delta_freq';    %    Variable that defines sweep range
+
+    % Shift Register
+    SweepTimeVar='HF_Raman_sweep_time';     
+
+%     SweepTimeVar='Raman_Time';      % Variable that defines sweep time
+    SweepRangeVar='HF_Raman_sweep_range';    %    Variable that defines sweep range
+%     
+    % Convert the parameter into df and dt (add whatever custom processing
+    % you want).
+    dT=[params.(SweepTimeVar)];
+%     dF=[params.(SweepRangeVar)]*1000; % Factor of two for the SRS
+    dF=[params.(SweepRangeVar)]*1000*2; % Factor of two for the AOM DP
+
+
+    % Convert to dtdf
+    dtdf=dT./dF; 
+    % Perform the analysis and save the output
+    [hF_LandauZener,frabi]=landauZenerAnalysis(data,dtdf,lz_opts); 
+
+    if doSave
+        saveFigure(hF_LandauZener,[data_source '_landau_zener'],saveOpts);
+    end
+end
+
 %% Rabi Oscillations
-if doRabi
- 
+if doRabi 
     boxRabiopts=struct;
     boxRabiopts.FigLabel = FigLabel;
     boxRabiopts.xUnit=pco_unit;
@@ -229,10 +226,10 @@ if doRabi
     boxRabiopts.Sign='auto'; % Automatic fit sign
 
     [hF_rabi_contrast,rabi_contrast]=rabiOscillationsContrast(data,pco_xVar,boxRabiopts);
-    if doSave;saveFigure(hF_rabi_contrast,'box_rabi_oscillate_contrast',saveOpts);end
+    if doSave;saveFigure(hF_rabi_contrast,[data_source '_rabi_oscillate_contrast'],saveOpts);end
 
     [hF_rabi_raw,rabi_absolute]=rabiOscillationsAbsolute(data,pco_xVar,boxRabiopts);
-    if doSave;saveFigure(hF_rabi_raw,'box_rabi_oscillate_raw',saveOpts);end    
+    if doSave;saveFigure(hF_rabi_raw,[data_source '_rabi_oscillate_raw'],saveOpts);end    
 end
 
 
