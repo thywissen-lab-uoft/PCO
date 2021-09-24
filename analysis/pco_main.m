@@ -1189,7 +1189,7 @@ if doCustom
 
     
     negGauss_double=0;
-    if length(atomdata)>4 && negGauss_double
+    if length(X)>4 && negGauss_double
 %         X= reshape(X,size(X,2),1);
         myfit=fittype('bg-A1*exp(-(x-x1).^2/(2*s1.^2))-A2*exp(-(x-x2).^2/(2*s2^2))',...
             'coefficients',{'A1','s1','x1','A2','s2','x2','bg'},...
@@ -1227,7 +1227,7 @@ if doCustom
     
     
     negGauss=0;
-    if length(atomdata)>4 && negGauss
+    if length(X)>4 && negGauss
         myfit=fittype('bg-A1*exp(-(x-x1).^2/G1.^2)',...
             'coefficients',{'A1','G1','x1','bg'},...
             'independent','x');
@@ -1259,7 +1259,7 @@ if doCustom
     end
     
     negLorentz_double=0;    
-    if length(atomdata)>4 && negLorentz_double
+    if length(X)>4 && negLorentz_double
         X= reshape(X,length(X),1);
         myfit=fittype('bg-A1*(G1/2).^2*((x-x1).^2+(G1/2).^2).^(-1)-A2*(G2/2).^2*((x-x2).^2+(G2/2).^2).^(-1)',...
             'coefficients',{'A1','G1','x1','A2','G2','x2','bg'},...
@@ -1298,7 +1298,7 @@ if doCustom
     end
     
     negLorentz=1;    
-    if length(atomdata)>4 && negLorentz
+    if length(X)>4 && negLorentz
         myfit=fittype('bg-A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)',...
             'coefficients',{'A','G','x0','bg'},...
             'independent','x');
@@ -1335,7 +1335,7 @@ if doCustom
     
     
     Lorentz_double=0;    
-    if length(atomdata)>4 && Lorentz_double
+    if length(X)>4 && Lorentz_double
         myfit=fittype('bg+A1*(G1/2).^2*((x-x1).^2+(G1/2).^2).^(-1)+A2*(G2/2).^2*((x-x2).^2+(G2/2).^2).^(-1)',...
             'coefficients',{'A1','G1','x1','A2','G2','x2','bg'},...
             'independent','x');
@@ -1370,7 +1370,7 @@ if doCustom
     end
     
     Lorentz_triple=0;    
-    if length(atomdata)>4 && Lorentz_triple
+    if length(X)>4 && Lorentz_triple
         myfit=fittype('bg+A1*(G1/2).^2*((x-x1).^2+(G1/2).^2).^(-1)+A2*(G2/2).^2*((x-x2).^2+(G2/2).^2).^(-1)+A3*(G3/2).^2*((x-x3).^2+(G3/2).^2).^(-1)',...
             'coefficients',{'A1','G1','x1','A2','G2','x2','A3','G3','x3','bg'},...
             'independent','x');
@@ -1406,7 +1406,7 @@ if doCustom
     
     % Assymetric lorentzian fit, good for AM spec
     fit_lorentz_assymetric=0;
-    if length(atomdata)>4 && fit_lorentz_assymetric
+    if length(X)>4 && fit_lorentz_assymetric
         g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
         y=@(x,a,x0,G,A,bg) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1)+bg;        
         myfit=fittype(@(a,x0,G,A,bg,x) y(x,a,x0,G,A,bg),'coefficients',{'a','x0','G','A','bg'},...
@@ -1447,7 +1447,7 @@ if doCustom
     
     
     lorentz=0;
-    if length(atomdata)>4 && lorentz
+    if length(X)>4 && lorentz
         % Symmetric Lorentzian
         myfit=fittype('A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)+bg','coefficients',{'A','G','x0','bg'},...
             'independent','x');
@@ -1476,7 +1476,7 @@ if doCustom
     
     
     Gauss=0;
-    if length(atomdata)>4 && Gauss
+    if length(X)>4 && Gauss
         myfit=fittype('bg+A1*exp(-(x-x1).^2/G1.^2)',...
             'coefficients',{'A1','G1','x1','bg'},...
             'independent','x');
@@ -1508,7 +1508,7 @@ if doCustom
     end
     
     Rabi_oscillation = 0;
-    if length(atomdata)>4 && Rabi_oscillation
+    if length(X)>4 && Rabi_oscillation
         myfunc=@(P,f,tau,t) P*(1 + exp(-t/tau).*cos(2*pi*f*t))/2;
         % myfunc=@(P,f,tau,t) 2*P*sin(pi*f*t).^2.*exp(-(pi*t/tau)/P);
         myfit=fittype(@(P,f,tau,t) myfunc(P,f,tau,t),'independent','t',...
