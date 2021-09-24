@@ -166,23 +166,24 @@ for kk=1:(ceil(length(atomdata)/pMax))
             end            
         end
         
+        % Get the data
         if isequal(direction,'X') && isequal(style,'cut')
-            YF_erf = zzF_erf(iY,:);
+            Y_data = z(iY,:);
         end
 
         if isequal(direction,'X') && isequal(style,'sum')
-            YF_erf = sum(zzF_erf,1);
+            Y_data = sum(z,1);
         end
 
         if isequal(direction,'Y') && isequal(style,'cut')
-            YF_erf = zzF_erf(:,iX);
+            Y_data = z(:,iX);
         end
 
         if isequal(direction,'Y') && isequal(style,'sum')
-            YF_erf = sum(zzF_erf,2);
+            Y_data = sum(z,2);
         end  
         
-
+        % Plot the fits
         if doGauss
             plot(X,YF_gauss,'r','LineWidth',2);
         end
@@ -191,7 +192,25 @@ for kk=1:(ceil(length(atomdata)/pMax))
             plot(X,YF_erf,'r','LineWidth',2);
         end
         
+        % Plot the data
+        plot(X,Y,'k-');
         
+        % Adjust limits
+        xlim([X(1) X(end)]);   
+        ax.YLim(1)=min([0 min(Y)]);
+        ax.YLim(2)=max([max(Y)*1.5 0]);   
+        
+        % Draw the analysis string box
+        iterNum=(kk-1)*pMax+ii;
+
+        % Draw the iteration number and variable value
+        text(3, ax.Position(4)-1, ...
+            ['{\bf(' num2str(iterNum) ')' newline ...
+            num2str(atomdataSUB(ii).Params.(xVar)) '}'], ...
+            'Units', 'pixels',...
+            'FontSize', 8,...
+            'verticalalignment','cap','HorizontalAlignment','left');
+
 %         
 %         fout=atomdataSUB(ii).(FitType){rNum};
 % 
@@ -232,14 +251,11 @@ for kk=1:(ceil(length(atomdata)/pMax))
 %         end
 
         % Plot the data
-        try
 %             plot(X,YF,'r','LineWidth',2);
-            plot(X,Y,'k-');  
+%             plot(X,Y,'k-');  
 
             % Set the limits
-            xlim([X(1) X(end)]);   
-            ax.YLim(1)=min([0 min(Y)]);
-            ax.YLim(2)=max([max(Y)*1.5 0]);   
+
 
             % Draw the analysis string box
 %             text(ax.Position(3)-1, ax.Position(4), str, 'Units', 'pixels',...
@@ -247,17 +263,8 @@ for kk=1:(ceil(length(atomdata)/pMax))
 %                 'verticalalignment','cap','horizontalalignment','right'); 
 
 
-            % Draw the analysis string box
-            iterNum=(kk-1)*pMax+ii;
-
-            % Draw the iteration number and variable value
-            text(3, ax.Position(4)-1, ...
-                ['{\bf(' num2str(iterNum) ')' newline ...
-                num2str(atomdataSUB(ii).Params.(xVar)) '}'], ...
-                'Units', 'pixels',...
-                'FontSize', 8,...
-                'verticalalignment','cap','HorizontalAlignment','left'); 
-        end
+ 
+        
     end      
     disp('done.');
     
