@@ -58,7 +58,7 @@ for kk=1:length(atomdata)
                ' ROI : ' num2str(nn) '. Setting to 0']);
            N(kk,nn)=0;
         end        
-        Natoms(kk,nn)=N(kk,nn)*(pxsize^2/crosssec);  % Atom number  
+        Natoms(kk,nn)=N(kk,nn)*(PixelSize^2/CrossSection);  % Atom number  
    end        
 end
 

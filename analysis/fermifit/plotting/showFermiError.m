@@ -27,34 +27,9 @@ for kk=1:length(atomdata)
         sseg(kk,nn)=atomdata(kk).FermiFitGauss{nn}.SSE;
         r2(kk,nn)=atomdata(kk).FermiFit{nn}.R2;
         r2g(kk,nn)=atomdata(kk).FermiFitGauss{nn}.R2;
-
-%         fout=atomdata(kk).GaussFit{nn};             % Grab the fit
-%         Xc(kk,nn)=fout.Xc;Yc(kk,nn)=fout.Yc;        % X and Y center
-%         Xs(kk,nn)=fout.Xs;Ys(kk,nn)=fout.Ys;        % X and Y sigma   
-%         Zs(kk,nn)=fout.Ys;                          % ASSUME sZ=sY;                
-%         A(kk,nn)=fout.A;                            % Amplitude
-%         nbg(kk,nn)=fout.nbg;                        % Background
-%         N(kk,nn)=2*pi*Xs(kk,nn)*Ys(kk,nn)*A(kk,nn); % Number of counts
-%         Natoms(kk,nn)=N(kk,nn)*(pxsize^2/crosssec);  % Atom number  
 end
-% 
-% % Convert sizes in meters
-% Xs = Xs*pxsize;
-% Ys = Ys*pxsize;
-% Zs = Zs*pxsize;
-
-
-%% Outdata
-% 
-% outdata=struct;
-% outdata.xVar=xVar;
-% outdata.X=xvals;
-% outdata.Natoms=Natoms;
-
 
 %% Make Figure
-
-
 hF=figure('Name',[pad('Fermi Error',20) FigLabel],...
     'units','pixels','color','w','Menubar','none','Resize','off');
 hF.Position(1)=500;
