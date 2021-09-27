@@ -34,26 +34,20 @@ for kk=1:length(figs)
 end
 disp(' ');
 
-%% Select global settings
+%% Select settings
 % This section of code sets some global settings for the analysis which the
 % imaging GUI is unaware of.  These include the atom chose (Rb or K) and
 % the camera from which the images are taken (X or Y).
 
 disp('Setting global settings for analysis...');
 
-global camaxis
-global crosssec
-
 lambdaRb=780E-9;lambdaK=770E-9;   % Rb and K wavelengths             
 lambda=mean([lambdaRb lambdaK]);  % mean wavelength      
-crosssec=3/(2*pi)*lambda^2; % ideal cross 2-level cross section
+CrossSection = 3/(2*pi)*lambda^2; 
 
 % Choose your camera
 camaxis='X';
 % camaxis='Y';
-
-CrossSection = 3/(2*pi)*lambda^2; 
-
 % Choose the pixel size base on the camera
 switch camaxis
     case 'X'

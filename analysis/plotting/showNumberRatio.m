@@ -1,5 +1,4 @@
 function hF=showNumberRatio(data,xVar,opts)
-% Grab important global variables
 
 
 %% Directory string
