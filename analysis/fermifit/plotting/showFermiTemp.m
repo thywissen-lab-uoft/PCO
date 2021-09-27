@@ -1,9 +1,10 @@
 function hF=showFermiTemp(atomdata,xVar,opts)
 % Grab important global variables
-
-global imgdir
-
-
+if nargin == 3 && isfield(opts,'FigLabel') 
+    FigLabel = opts.FigLabel;
+else
+    FigLabel = '';
+end
 
 
 %% Sort the data by the parameter given
@@ -26,18 +27,7 @@ end
 
 %% Make Figure
 
-% Create the name of the figure
-[filepath,name,~]=fileparts(imgdir);
-
-figDir=fullfile(imgdir,'figures');
-if ~exist(figDir,'dir')
-   mkdir(figDir); 
-end
-
-strs=strsplit(imgdir,filesep);
-str=[strs{end-1} filesep strs{end}];
-
-hF=figure('Name',[pad('Fermi Temp',20) str],...
+hF=figure('Name',[pad('Fermi Temp',20) FigLabel],...
     'units','pixels','color','w','Resize','off');
 hF.Position(1)=500;
 hF.Position(2)=50;
@@ -46,7 +36,7 @@ hF.Position(4)=350;
 drawnow;
 
 % Image directory folder string
-t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left');
 t.Position(4)=t.Extent(4);
 t.Position(3)=hF.Position(3);

@@ -77,12 +77,10 @@ for kk=1:length(atomdata)
             end
                
             
-        end
-        
+        end        
         
         atomdata(kk).FermiFit{nn}=fitFermi; % Assign the fit object       
         atomdata(kk).FermiFitGauss{nn}=fitGauss;
-%     end
 end    
 
 end

@@ -194,6 +194,7 @@ if opts.ShowDetails
 
     % Plot the initial guess
     hF_guess = figure(1200);
+    hF_guess.Position=[50 500 1000 300];
     clf
     set(hF_guess,'color','w','Name','Fermi-Fit Guess');
 
