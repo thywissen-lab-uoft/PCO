@@ -493,6 +493,9 @@ if doBoxCount
     disp(repmat('-',1,60));      
     atomdata=boxCount(atomdata,boxOpts);
     box_data = getBoxData(atomdata,pco_xVar);
+    if doSave
+        save([saveDir filesep 'box_data','box_data');
+    end  
 end   
 
 %% Custom Box Count : Raman Spectroscopy
@@ -569,6 +572,9 @@ if doGaussFit
         end
     end
     gauss_data=getGaussData(atomdata,pco_xVar);  
+    if doSave
+        save([saveDir filesep 'gauss_data','gauss_data');
+    end
 end
 
 
@@ -597,7 +603,10 @@ if doErfFit
         end
     end    
     % Get a summary of the erf fit data
-    erf_data=getErfData(atomdata,pco_xVar);    
+    erf_data=getErfData(atomdata,pco_xVar);  
+    if doSave
+        save([saveDir filesep 'erf_data','erf_data');
+    end  
 end
 
 %% Fermi-Fitter Long TOF
