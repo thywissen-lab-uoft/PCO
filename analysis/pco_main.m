@@ -557,7 +557,7 @@ if doRamanSpec
 end
 
 %% 2D Gaussian Fit
-% This section of code computes a 2D gaussin fit on all your data and ROIs.
+% This section of code computes a 2D gaussian fit on all your data and ROIs.
 
 if doGaussFit   
     disp(repmat('-',1,60));    
