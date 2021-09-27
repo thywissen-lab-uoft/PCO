@@ -1,29 +1,15 @@
-function hFs=showProfile(atomdata,direction,style,rNum,xVar)
-global imgdir
-strs=strsplit(imgdir,filesep);
-str=[strs{end-1} filesep strs{end}];
-    
+function hFs=showProfile(atomdata,direction,xVar,opts)
     
 pMax=36;
 
-switch nargin
-    case 1
-        direction='X';
-        xVar='timestamp';
-        rNum=1;
-        style='cut';
-        
-    case 2
-        xVar='timestamp';
-        rNum=1;
-        style='cut';
-    case 3
-        xVar='timestamp';
-        rNum=1;
-    case 4
-        xVar='timestamp';
-end
+rNum = opts.ROINum;
+style = opts.Style;
 
+if nargin == 4 && isfield(opts,'FigLabel') 
+    FigLabel = opts.FigLabel;
+else
+    FigLabel = '';
+end
     
 %% Make Fgiure
 
@@ -34,11 +20,9 @@ for kk=1:(ceil(length(atomdata)/pMax))
     fprintf(['Showing OD profile ' direction ' ROI ' ...
         num2str(rNum) ' ' num2str(nStart) ' to ' num2str(nEnd) ' ... ']);
 
-    atomdataSUB=atomdata(nStart:nEnd);    
+    atomdataSUB=atomdata(nStart:nEnd);  
     
-
-    
-    hFs(kk)=figure('Name', [pad(['OD Cut ' direction ' R' num2str(rNum) ' ' num2str(kk)],20) str], 'Visible', 'On', ...
+    hFs(kk)=figure('Name', [pad(['OD Cut ' direction ' R' num2str(rNum) ' ' num2str(kk)],20) FigLabel], 'Visible', 'On', ...
         'NumberTitle','off','color','w','MenuBar','none','units','pixels',...
         'Resize','off'); 
     hF=hFs(kk);
@@ -48,7 +32,7 @@ for kk=1:(ceil(length(atomdata)/pMax))
     hF.Position(4)=1000;
     clf;
 
-    t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+    t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
         'w','horizontalalignment','left');
     t.Position(4)=t.Extent(4);
     t.Position(3)=hF.Position(3);
