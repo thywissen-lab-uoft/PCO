@@ -107,8 +107,8 @@ if doCustom
     %%%%%%%%%%%%%%% X DATA %%%%%%%%%%%%%%
 
     % Center frequency for expected RF field (if relevant)
-    B = atomdata(1).Params.HF_FeshValue_Initial_Lattice;
-    B = B+ 2.35*atomdata(1).Params.HF_zshim_Initial_Lattice;
+    B = data.Params(1).HF_FeshValue_Initial_Lattice;
+    B = B+ 2.35*data.Params(1).HF_zshim_Initial_Lattice;
     
     x0= (BreitRabiK(B,9/2,-5/2)-BreitRabiK(B,9/2,-7/2))/6.6260755e-34/1E6; 
 %     %x0 = 0;
