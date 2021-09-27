@@ -21,17 +21,6 @@ switch data_source
         data = erf_data;
 end
 
-%% Variable Choice
-% This section of code let's you choose how your X and Y variables are
-% chosen.
-
-x_mode = 'custom';
-x_mode = 'auto';
-
-y_mode = 'custom';
-y_mode = 'auto';
-
-
 %% Landau Zener
 if doLandauZener && size(data.Natoms,2)>1 && size(data.Natoms,1)>3
     lz_opts=struct;
@@ -135,9 +124,7 @@ if doCustom
 
 %     X = 2*X - 80;  %Raman AOM condition
 %     X=X-x0;  
-%     X=X*1E3;  
-    
-    
+%     X=X*1E3;    
 
 %      xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];    
 %     xstr=['Fesh field (G)'] ;
@@ -663,11 +650,8 @@ if doCustom
     mystr=['$N_7 \rightarrow N_7/' ...
         num2str(Ratio_79) '$'];
    text(.98,.02,mystr,'units','normalized','interpreter','latex',...
-       'verticalalignment','bottom','horizontalalignment','right');
-       
-
+       'verticalalignment','bottom','horizontalalignment','right');    
     
-%     hax.YLim(1)=0;
     pp=get(gcf,'position');
     set(gcf,'position',[pp(1) pp(2) 800 400]);    
     if doSave
