@@ -95,7 +95,6 @@ pco_overrideUnit='MHz';
 
 % Saving
 doSave = 1;           % Save the figures?
-doUpload = 0;       % Upload to google drive?
 
 % Animation
 doAnimate = 0;       % Animate the Cloud
@@ -124,6 +123,10 @@ doRabi = 0;
 % Custom Box counts
 doCustom = 1;          % Custom Box Count
 doCustom_BM = 0;    % Custom Band map
+
+%% GDrive Settings
+GDrive_root = 'G:\My Drive\Lattice Shared\LabData';
+doUpload = 1;       % Upload to google drive?
 
 %% Select image directory
 % Choose the directory where the images to analyze are stored
@@ -494,8 +497,18 @@ if doBoxCount
     atomdata=boxCount(atomdata,boxOpts);
     box_data = getBoxData(atomdata,pco_xVar);
     if doSave
-        save([saveDir filesep 'box_data','box_data');
+        save([saveDir filesep 'box_data'],'box_data');
     end  
+    
+        
+    if doSave && doUpload && exist(GDrive_root,'dir')
+        gDir = [fileparts(getImageDir2(datevec(now),GDrive_root)) filesep FigLabel];
+        gFile = [gDir filesep 'box_data'];        
+        if ~exist(gDir,'dir')
+           mkdir(gDir) 
+        end
+        save(gFile,'box_data');
+    end
 end   
 
 %% Custom Box Count : Raman Spectroscopy
@@ -573,7 +586,16 @@ if doGaussFit
     end
     gauss_data=getGaussData(atomdata,pco_xVar);  
     if doSave
-        save([saveDir filesep 'gauss_data','gauss_data');
+        save([saveDir filesep 'gauss_data'],'gauss_data');
+    end
+    
+    if doSave && doUpload && exist(GDrive_root,'dir')
+        gDir = [fileparts(getImageDir2(datevec(now),GDrive_root)) filesep FigLabel];
+        gFile = [gDir filesep 'gauss_data'];        
+        if ~exist(gDir,'dir')
+           mkdir(gDir) 
+        end
+        save(gFile,'gauss_data');
     end
 end
 
@@ -605,8 +627,17 @@ if doErfFit
     % Get a summary of the erf fit data
     erf_data=getErfData(atomdata,pco_xVar);  
     if doSave
-        save([saveDir filesep 'erf_data','erf_data');
+        save([saveDir filesep 'erf_data'],'erf_data');
     end  
+    
+    if doSave && doUpload && exist(GDrive_root,'dir')
+        gDir = [fileparts(getImageDir2(datevec(now),GDrive_root)) filesep FigLabel];
+        gFile = [gDir filesep 'erf_data'];        
+        if ~exist(gDir,'dir')
+           mkdir(gDir) 
+        end
+        save(gFile,'erf_data');
+    end
 end
 
 %% Fermi-Fitter Long TOF
