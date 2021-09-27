@@ -34,7 +34,7 @@ for kk=1:length(figs)
 end
 disp(' ');
 
-%% Select global settings
+%% Select settings
 % This section of code sets some global settings for the analysis which the
 % imaging GUI is unaware of.  These include the atom chose (Rb or K) and
 % the camera from which the images are taken (X or Y).

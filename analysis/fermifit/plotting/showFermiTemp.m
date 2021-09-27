@@ -1,5 +1,4 @@
 function hF=showFermiTemp(atomdata,xVar,opts)
-% Grab important global variables
 if nargin == 3 && isfield(opts,'FigLabel') 
     FigLabel = opts.FigLabel;
 else
