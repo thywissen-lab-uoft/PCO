@@ -87,68 +87,54 @@ end
 
 %% Custom
 if doCustom 
-    custom_outdata=struct;
+    custom_outdata=struct;    
+%     custom_outdata.GaussData=data;         
+%     custom_outdata.BoxCount=data;      
+    custom_outdata.ErfData=data;   
     
-    if doGaussFit
-        custom_outdata.GaussData=data;     
-    end    
-    
-    if doBoxCount
-        custom_outdata.BoxCount=data;    
-    end
-    
-    if doErfFit
-        custom_outdata.ErfData=data;    
-    end
-
-    
-%     DATA=custom_outdata.BoxCount;
-%      DATA=custom_outdata.GaussData;
-%     data=custom_outdata.ErfData;
-    DATA=data;
-    %%%%%%%%%%%%%%% RF SPEC %%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%% Fit Flags
+    T2exp=0;
+    negGauss_double=1;
+    negGauss=0;
+    negLorentz_double=0;    
+    negLorentz=0;    
+    Lorentz_double=0;    
+    Lorentz_triple=0;    
+    Gauss=0;
+    lorentz=0;
+    Rabi_oscillation = 0;
+        
+    %%%%%%%%%%%%%%% X DATA %%%%%%%%%%%%%%
 
     % Center frequency for expected RF field (if relevant)
     B = atomdata(1).Params.HF_FeshValue_Initial_Lattice;
     B = B+ 2.35*atomdata(1).Params.HF_zshim_Initial_Lattice;
-
-%      B=204.5;
-%     B=200;
+    
     x0= (BreitRabiK(B,9/2,-5/2)-BreitRabiK(B,9/2,-7/2))/6.6260755e-34/1E6; 
 %     %x0 = 0;
+
 %     % Grab Raw data
     X=data.X; 
-%     X=X';
-    
+%     X=X';    
 %     X=2*X;
 
     X = 2*X - 80;  %Raman AOM condition
     X=X-x0;  
     X=X*1E3;    
 
-%      xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];    
+     xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];    
 %     xstr=['Fesh field (G)'] ;
-    xstr=['Pulse Time (ms)']; 
-    
+%     xstr=['Pulse Time (ms)'];     
 %     xstr=['2 Pulse Time (ms)']; 
-
 %     xstr = pco_xVar;
 
-
-    % Define Y Data
+     % Get the atom number
      N1=data.Natoms(:,1);
-     N2=data.Natoms(:,2);     
-     
+     N2=data.Natoms(:,2);         
      Ratio_79=0.6;
-     N2=N2/Ratio_79;  
+     N2=N2/Ratio_79;       
      
-    custom_outdata.X=X;
-    custom_outdata.Xstr=xstr;
-    custom_outdata.Ratio_79=Ratio_79;     
-    custom_outdata.N9=N1;
-    custom_outdata.N7=N2;
-    custom_outdata.Ntot=N1+N2;
-     
+     % Define the Y Data
      dataMode=1;         
      switch dataMode
          case 0     
@@ -184,9 +170,17 @@ if doCustom
              ystr=['N_7/N_9'];
              fstr='79 ratio';
      end
+     
+    custom_outdata.X=X;
+    custom_outdata.Y = Y;
+    custom_outdata.Xstr=xstr;
+    custom_outdata.Ratio_79=Ratio_79;     
+    custom_outdata.N9=N1;
+    custom_outdata.N7=N2;
+    custom_outdata.Ntot=N1+N2;
 
 
-       [ux,ia,ib]=unique(X);    
+    [ux,ia,ib]=unique(X);    
     Yu=zeros(length(ux),2);    
     for kk=1:length(ux)
         inds=find(X==ux(kk));
@@ -194,29 +188,6 @@ if doCustom
         Yu(kk,2)=std(Y(inds));       
     end
     
-%     
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-%     %%%%%%%%%%%%%%% AM SPEC %%%%%%%%%%%%%%
-%      X=DATA.X*1e-3;   
-%      X=X';
-%      xstr=['modulation frequency (kHz)'];
-%      
-%      % Define Y Data
-%      N1=DATA.Natoms(:,1);
-%      N2=DATA.Natoms(:,2);     
-%      Y=(N1-N2)./N1;
-%      ystr='\Delta N/N_{tot}';
-%      
-% 
-%     [ux,ia,ib]=unique(X);    
-%     Yu=zeros(length(ux),2);    
-%     for kk=1:length(ux)
-%         inds=find(X==ux(kk));
-%         Yu(kk,1)=mean(Y(inds));
-%         Yu(kk,2)=std(Y(inds));       
-%     end
-%     
     %%%%%%%%%%%%%%%%%%%%%%%%% FIGURE
     hFB=figure;
     hFB.Color='w';
@@ -227,15 +198,13 @@ if doCustom
     co=get(gca,'colororder');    
 
     % Image directory folder string
-    t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
-    'w','horizontalalignment','left','fontsize',6);
-    t.Position(4)=t.Extent(4);
-    t.Position(3)=hFB.Position(3);
+    t=uicontrol('style','text','string',FigLabel,'units','pixels',...
+        'backgroundcolor','w','horizontalalignment','left','fontsize',6);
+    t.Position(3:4)=[hFB.Position(3) t.Extent(4)];
     t.Position(1:2)=[5 hFB.Position(4)-t.Position(4)];
-
     
-    plot(X,Y,'o','markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5,...
-        'linewidth',2,'markersize',8);
+%     plot(X,Y,'o','markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5,...
+%         'linewidth',2,'markersize',8);
     errorbar(ux,Yu(:,1),Yu(:,2),'o','markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5,...
         'linewidth',2,'markersize',8);    
     
@@ -250,9 +219,7 @@ if doCustom
     hold on    
     xlim([min(X) max(X)]);
     
-%     ylim([0.4 1]);
     
-    T2exp=0;
     if T2exp
         myfit=fittype('A+(1-A)*exp(-pi*t/tau)',...
             'coefficients',{'A','tau'},...
@@ -287,11 +254,8 @@ if doCustom
         t=text(.02,.03,str,'units','normalized',...
             'fontsize',10,'interpreter','latex');
     end
-
     
-    negGauss_double=1;
     if length(X)>8 && negGauss_double
-%         X= reshape(X,size(X,2),1);
         myfit=fittype('bg-A1*exp(-(x-x1).^2/(2*s1.^2))-A2*exp(-(x-x2).^2/(2*s2^2))',...
             'coefficients',{'A1','s1','x1','A2','s2','x2','bg'},...
             'independent','x');
@@ -302,11 +266,11 @@ if doCustom
         [Ymin,ind]=min(Y);
         A=bg-Ymin;
         xC=X(ind);
-        % Assign guess
-        G=[A 15 xC A 15 xC-50 bg];
         
-        
-        G=[A 15 15 A 15 60 bg];
+        % Assign guess        
+        xC1 = 20;
+        xC2 = 55;
+        G=[A 15 xC1 A/10 15 xC2 bg];
         
         opt.StartPoint=G;
         opt.Robust='bisquare';
@@ -327,7 +291,6 @@ if doCustom
     end
     
     
-    negGauss=0;
     if length(X)>4 && negGauss
         myfit=fittype('bg-A1*exp(-(x-x1).^2/G1.^2)',...
             'coefficients',{'A1','G1','x1','bg'},...
@@ -359,7 +322,6 @@ if doCustom
         legend(pF,lStr,'location','best');
     end
     
-    negLorentz_double=0;    
     if length(X)>4 && negLorentz_double
         X= reshape(X,length(X),1);
         myfit=fittype('bg-A1*(G1/2).^2*((x-x1).^2+(G1/2).^2).^(-1)-A2*(G2/2).^2*((x-x2).^2+(G2/2).^2).^(-1)',...
@@ -376,9 +338,9 @@ if doCustom
         xC=X(ind);
         
         % Assign guess
-%         G=[A 30 xC A 30 50 bg];
-        G=[A 30 15 A/10 30 -90 bg];
-        
+        xC1 = 20;
+        xC2 = 90;
+        G=[A 20 xC1 A/10 20 xC2 bg];        
         
         opt.StartPoint=G;
         opt.Robust='bisquare';
@@ -398,7 +360,6 @@ if doCustom
         custom_outdata.Fit=fout;
     end
     
-    negLorentz=0;    
     if length(X)>4 && negLorentz
         myfit=fittype('bg-A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)',...
             'coefficients',{'A','G','x0','bg'},...
@@ -435,7 +396,6 @@ if doCustom
     end
     
     
-    Lorentz_double=0;    
     if length(X)>4 && Lorentz_double
         myfit=fittype('bg+A1*(G1/2).^2*((x-x1).^2+(G1/2).^2).^(-1)+A2*(G2/2).^2*((x-x2).^2+(G2/2).^2).^(-1)',...
             'coefficients',{'A1','G1','x1','A2','G2','x2','bg'},...
@@ -470,7 +430,6 @@ if doCustom
         legend(pF,lStr,'location','best');
     end
     
-    Lorentz_triple=0;    
     if length(X)>4 && Lorentz_triple
         myfit=fittype('bg+A1*(G1/2).^2*((x-x1).^2+(G1/2).^2).^(-1)+A2*(G2/2).^2*((x-x2).^2+(G2/2).^2).^(-1)+A3*(G3/2).^2*((x-x3).^2+(G3/2).^2).^(-1)',...
             'coefficients',{'A1','G1','x1','A2','G2','x2','A3','G3','x3','bg'},...
@@ -547,7 +506,6 @@ if doCustom
     end
     
     
-    lorentz=0;
     if length(X)>4 && lorentz
         % Symmetric Lorentzian
         myfit=fittype('A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)+bg','coefficients',{'A','G','x0','bg'},...
@@ -575,8 +533,6 @@ if doCustom
 %         xlim([130 200]);    
     end
     
-    
-    Gauss=0;
     if length(X)>4 && Gauss
         myfit=fittype('bg+A1*exp(-(x-x1).^2/G1.^2)',...
             'coefficients',{'A1','G1','x1','bg'},...
@@ -608,7 +564,6 @@ if doCustom
         legend(pF,lStr,'location','best');
     end
     
-    Rabi_oscillation = 0;
     if length(X)>4 && Rabi_oscillation
         myfunc=@(P,f,tau,t) P*(1 + exp(-t/tau).*cos(2*pi*f*t))/2;
         % myfunc=@(P,f,tau,t) 2*P*sin(pi*f*t).^2.*exp(-(pi*t/tau)/P);
