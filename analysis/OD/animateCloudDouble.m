@@ -123,7 +123,7 @@ Y=1:size(Z,1);
 %% Determine figure and axis size
 
 % Long dimension of figure
-L=1000;
+L=800;
 
 if doubleImage
     switch opts.doubleStack

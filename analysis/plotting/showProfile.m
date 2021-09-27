@@ -342,9 +342,6 @@ for kk=1:(ceil(length(atomdata)/pMax))
         text(ax.Position(3)-1, ax.Position(4)-2, lstr, 'Units', 'pixels',...
             'FontSize', 8,...
             'verticalalignment','cap','horizontalalignment','right'); 
-
-
- 
         
     end      
     disp('done.');
