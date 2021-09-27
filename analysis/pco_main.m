@@ -41,19 +41,13 @@ disp(' ');
 
 disp('Setting global settings for analysis...');
 
-global camaxis
-global crosssec
-
 lambdaRb=780E-9;lambdaK=770E-9;   % Rb and K wavelengths             
 lambda=mean([lambdaRb lambdaK]);  % mean wavelength      
-crosssec=3/(2*pi)*lambda^2; % ideal cross 2-level cross section
+CrossSection = 3/(2*pi)*lambda^2; 
 
 % Choose your camera
 camaxis='X';
 % camaxis='Y';
-
-CrossSection = 3/(2*pi)*lambda^2; 
-
 % Choose the pixel size base on the camera
 switch camaxis
     case 'X'
