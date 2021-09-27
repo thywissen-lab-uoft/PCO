@@ -308,7 +308,7 @@ if doCustom
         G=[A 15 xC A 15 xC-50 bg];
         
         
-        G=[A 15 15 A 15 105 bg];
+        G=[A 15 15 A 15 60 bg];
         
         opt.StartPoint=G;
         opt.Robust='bisquare';
