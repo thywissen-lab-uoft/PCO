@@ -224,12 +224,10 @@ if doCustom
     
     hFB.Name=fstr;
     hFB.Position=[400 400 400 400];
-    strs=strsplit(imgdir,filesep);
-    str=[strs{end-1} filesep strs{end}];
     co=get(gca,'colororder');    
 
     % Image directory folder string
-    t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+    t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left','fontsize',6);
     t.Position(4)=t.Extent(4);
     t.Position(3)=hFB.Position(3);

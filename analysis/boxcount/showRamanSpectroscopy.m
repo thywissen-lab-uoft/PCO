@@ -1,11 +1,11 @@
 function hF = showRamanSpectroscopy(atomdata,xVar,opts)
 % Grab important global variables
 
-global pxsize
-global imgdir
-global crosssec
-
-
+if nargin == 3 && isfield(opts,'FigLabel') 
+    FigLabel = opts.FigLabel;
+else
+    FigLabel = '';
+end
 
 %% Sort the data by the parameter given
 params=[atomdata.Params];
@@ -59,19 +59,7 @@ end
 
 %% Make Figure
 
-
-% Create the name of the figure
-[filepath,name,~]=fileparts(imgdir);
-
-figDir=fullfile(imgdir,'figures');
-if ~exist(figDir,'dir')
-   mkdir(figDir); 
-end
-
-strs=strsplit(imgdir,filesep);
-str=[strs{end-1} filesep strs{end}];
-
-hF=figure('Name',[pad('Raman Spec',20) str],...
+hF=figure('Name',[pad('Raman Spec',20) FigLabel],...
     'units','pixels','color','w','Menubar','none','Resize','off',...
     'numbertitle','off');
 hF.Position(1)=0;
@@ -201,7 +189,7 @@ drawRect(opts.ROI_2_V(1,:),co(5,:));
 drawRect(opts.ROI_2_V(2,:),co(5,:));
 
 % Image directory folder string
-t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
     'w','horizontalalignment','left','fontsize',10);
 drawnow;
 t.Position(4)=t.Extent(4);

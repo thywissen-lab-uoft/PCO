@@ -1,6 +1,5 @@
 function atomdata = ramanSpectroscopy(atomdata,opt)
 global pxsize
-global imgdir
 global crosssec
 
 
