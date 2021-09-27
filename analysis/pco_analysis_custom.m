@@ -122,9 +122,9 @@ if doCustom
     
 %     X=2*X;
 
-%     X = 2*X - 80;  %Raman AOM condition
-%     X=X-x0;  
-%     X=X*1E3;    
+    X = 2*X - 80;  %Raman AOM condition
+    X=X-x0;  
+    X=X*1E3;    
 
 %      xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];    
 %     xstr=['Fesh field (G)'] ;
