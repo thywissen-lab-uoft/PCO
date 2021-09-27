@@ -23,6 +23,7 @@ switch nargin
     case 4
         xVar='timestamp';
 end
+
     
 %% Make Fgiure
 
@@ -250,7 +251,7 @@ for kk=1:(ceil(length(atomdata)/pMax))
         
         % Plot the data
         plot(X,Y_data,'k-');
-        
+
         % Adjust limits
         xlim([X(1) X(end)]);   
         ax.YLim(1)=min([0 min(Y_data)]);
