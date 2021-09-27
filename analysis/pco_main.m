@@ -43,7 +43,6 @@ disp('Setting global settings for analysis...');
 
 global camaxis
 global pxsize
-global imgdir
 global crosssec
 
 lambdaRb=780E-9;lambdaK=770E-9;   % Rb and K wavelengths             
