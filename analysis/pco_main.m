@@ -78,8 +78,8 @@ end
 % pco_xVar='Pulse_Time';
 
 
- pco_xVar='Pulse_Time';
-% pco_xVar='ExecutionDate';
+%  pco_xVar='Pulse_Time';
+pco_xVar='ExecutionDate';
 
 % pco_xVar='HF_kdet_shift';
 % pco_xVar = 'ExecutionDate';
@@ -104,7 +104,7 @@ pco_overrideUnit='MHz';
 %% Analysis Flags
 
 % Saving
-doSave=1;           % Save the figures?
+doSave = 0;           % Save the figures?
 doUpload = 0;       % Upload to google drive?
 
 % Animation
@@ -124,15 +124,15 @@ doGaussRabi=0;
 doBEC=0;
 
 % Erf Fit
-doErfFit = 1;
+doErfFit = 0;
 
 % Fermi
-doFermiFitLong=0;    % Fermi Fit for XDT TOF
+doFermiFitLong=1;    % Fermi Fit for XDT TOF
 
 doRabi = 0;
 
 % Custom Box counts
-doCustom= 1;          % Custom Box Count
+doCustom= 0;          % Custom Box Count
 doCustom_BM = 0;    % Custom Band map
 
 %% Select image directory
@@ -681,14 +681,18 @@ end
 
 
 %% OD Profiles w or w/o Fits 
-% Style of profile --> cut or sum?
-style='cut';
-%  style='sum';
+profile_opts = struct;
+profile_opts.Style = 'cut'; 'sum';  % Cut or sum?
+profile_opts.FigLabel = FigLabel;
+
 clear hF_X;clear hF_Y;
 hF_X=[];hF_Y=[];
 for rNum=1:size(ROI,1)
-    hF_Xs_rNum=showProfile(atomdata,'X',style,rNum,pco_xVar);        
-    hF_Ys_rNum=showProfile(atomdata,'Y',style,rNum,pco_xVar);  
+    profile_opts.ROINum = rNum;
+
+    hF_Xs_rNum=showProfile(atomdata,'X',pco_xVar,profile_opts);        
+    hF_Ys_rNum=showProfile(atomdata,'Y',pco_xVar,profile_opts);  
+    
     pause(1);
     
 %   Save the figures (this can be slow)
@@ -697,7 +701,7 @@ for rNum=1:size(ROI,1)
             saveFigure(hF_Xs_rNum(kk),['OD_X' num2str(rNum) '_' num2str(kk)],saveOpts);
         end 
         for kk=1:length(hF_Ys_rNum)
-            saveFigure(hF_Xs_rNum(kk),['OD_Y' num2str(rNum) '_' num2str(kk)],saveOpts);
+            saveFigure(hF_Ys_rNum(kk),['OD_Y' num2str(rNum) '_' num2str(kk)],saveOpts);
         end
     end
     hF_X=[hF_X; hF_Xs_rNum];
