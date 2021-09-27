@@ -42,7 +42,6 @@ disp(' ');
 disp('Setting global settings for analysis...');
 
 global camaxis
-global pxsize
 global crosssec
 
 lambdaRb=780E-9;lambdaK=770E-9;   % Rb and K wavelengths             
@@ -58,10 +57,8 @@ CrossSection = 3/(2*pi)*lambda^2;
 % Choose the pixel size base on the camera
 switch camaxis
     case 'X'
-        pxsize=6.45E-6;
         PixelSize = 6.45E-6;        
     case 'Y'
-        pxsize=3.225E-6;
         PixelSize = 3.225E-6;
     otherwise
         error('You didn''t pick a camera');
@@ -509,6 +506,8 @@ end
 raman=struct;
 raman.xUnit=pco_unit;
 raman.doSubBG=1;
+raman.PixelSize = PixelSize;
+raman.CrossSection = CrossSection;
 
 raman.bgROI=[920 970 350 450];
 raman.ROI_1=[835 920 400 465];
