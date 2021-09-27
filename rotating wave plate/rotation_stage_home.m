@@ -19,7 +19,7 @@ fprintf(g,'pc')
 %% Send Commands
 
 %Transmit a command asking for the current position
-%   (clear input buffer first since some info will be left there by the
+%   (clear input buffer firsrot since some info will be left there by the
 %   move command etc...)
 flushinput(g)
 fprintf(g,'tp')

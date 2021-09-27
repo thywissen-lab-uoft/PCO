@@ -2,8 +2,8 @@
 %% Data Source
 % Select the data source
 
-data_source = 'box';
-data_source = 'gauss';
+% data_source = 'box';
+% data_source = 'gauss';
 data_source = 'erf';
 
 switch data_source
@@ -256,10 +256,10 @@ if doCustom
     %%%%%%%%%%%%%%% RF SPEC %%%%%%%%%%%%%%
 
     % Center frequency for expected RF field (if relevant)
-%     B = atomdata(1).Params.HF_FeshValue_Initial;
-    B = 207;
+    B = atomdata(1).Params.HF_FeshValue_Initial_Lattice;
+    B = B+ 2.35*atomdata(1).Params.HF_zshim_Initial_Lattice;
 
-%     B=201;
+%      B=204.5;
 %     B=200;
     x0= (BreitRabiK(B,9/2,-5/2)-BreitRabiK(B,9/2,-7/2))/6.6260755e-34/1E6; 
 %     %x0 = 0;
@@ -298,7 +298,7 @@ if doCustom
     custom_outdata.N7=N2;
     custom_outdata.Ntot=N1+N2;
      
-     dataMode=3;         
+     dataMode=1;         
      switch dataMode
          case 0     
              Y=(N1-N2)./(N1);
@@ -440,7 +440,7 @@ if doCustom
     end
 
     
-    negGauss_double=1;
+    negGauss_double=0;
     if length(X)>8 && negGauss_double
 %         X= reshape(X,size(X,2),1);
         myfit=fittype('bg-A1*exp(-(x-x1).^2/(2*s1.^2))-A2*exp(-(x-x2).^2/(2*s2^2))',...
@@ -457,7 +457,7 @@ if doCustom
         G=[A 15 xC A 15 xC-50 bg];
         
         
-        G=[A 15 15 A 15 80 bg];
+        G=[A 15 15 A 15 105 bg];
         
         opt.StartPoint=G;
         opt.Robust='bisquare';

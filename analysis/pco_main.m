@@ -74,14 +74,14 @@ end
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-% pco_xVar='Raman_AOM3_freq';
+%   pco_xVar='Raman_AOM3_freq';
 % pco_xVar='Pulse_Time';
 
 
 %  pco_xVar='Pulse_Time';
 % pco_xVar='ExecutionDate';
 
-% pco_xVar='HF_Raman_sweep_time';
+% pco_xVar='HF_kdet_shift';
 % pco_xVar = 'ExecutionDate';
 % pco_xVar = 'Pulse_Time';
 % pco_xVar = 'rf_rabi_time_HF';
@@ -89,8 +89,8 @@ end
 % pco_xVar = 'latt_ramp_time';
 % pco_xVar = 'power_val';
 % pco_xVar = 'Lattice_loading_field';
-pco_xVar = 'rf_rabi_freq_HF';
-% pco_xVar = 'rf_freq_HF';
+% pco_xVar = 'rf_rabi_freq_HF';
+  pco_xVar = 'rf_freq_HF';
 % pco_xVar = 'HF_FeshValue_Final_ODT';
 
 
@@ -98,13 +98,13 @@ pco_xVar = 'rf_rabi_freq_HF';
 pco_autoUnit=1;
 
 % If ixon_autoUnit=0, this will be used.
-pco_overrideUnit='ms';
+pco_overrideUnit='MHz';
 
 
 %% Analysis Flags
 
 % Saving
-doSave=0;           % Save the figures?
+doSave=1;           % Save the figures?
 doUpload = 0;       % Upload to google drive?
 
 % Animation
@@ -114,7 +114,7 @@ doAnimate = 0;       % Animate the Cloud
 doProbeFit=0;        % Fit probe beam to 2D Gaussian
 
 % Box Count
-doBoxCount= 0;        % Box count analysis
+doBoxCount= 1;        % Box count analysis
 doLandauZener=0;     % Landau Zener Analysis on BOX
 doRamanSpec=0;       % Raman box count count analyis
 
@@ -124,7 +124,7 @@ doGaussRabi=0;
 doBEC=0;
 
 % Erf Fit
-doErfFit = 0;
+doErfFit = 1;
 
 % Fermi
 doFermiFitLong=0;    % Fermi Fit for XDT TOF
@@ -132,7 +132,7 @@ doFermiFitLong=0;    % Fermi Fit for XDT TOF
 doRabi = 0;
 
 % Custom Box counts
-doCustom= 0;          % Custom Box Count
+doCustom= 1;          % Custom Box Count
 doCustom_BM = 0;    % Custom Band map
 
 %% Select image directory
