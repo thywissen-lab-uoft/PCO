@@ -291,7 +291,7 @@ if doCustom
     end
 
     
-    negGauss_double=0;
+    negGauss_double=1;
     if length(X)>8 && negGauss_double
 %         X= reshape(X,size(X,2),1);
         myfit=fittype('bg-A1*exp(-(x-x1).^2/(2*s1.^2))-A2*exp(-(x-x2).^2/(2*s2^2))',...
@@ -610,7 +610,7 @@ if doCustom
         legend(pF,lStr,'location','best');
     end
     
-    Rabi_oscillation = 1;
+    Rabi_oscillation = 0;
     if length(X)>4 && Rabi_oscillation
         myfunc=@(P,f,tau,t) P*(1 + exp(-t/tau).*cos(2*pi*f*t))/2;
         % myfunc=@(P,f,tau,t) 2*P*sin(pi*f*t).^2.*exp(-(pi*t/tau)/P);

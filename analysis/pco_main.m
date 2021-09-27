@@ -104,7 +104,7 @@ pco_overrideUnit='MHz';
 %% Analysis Flags
 
 % Saving
-doSave = 0;           % Save the figures?
+doSave = 1;           % Save the figures?
 doUpload = 0;       % Upload to google drive?
 
 % Animation
@@ -124,15 +124,15 @@ doGaussRabi=0;
 doBEC=0;
 
 % Erf Fit
-doErfFit = 0;
+doErfFit = 1;
 
 % Fermi
-doFermiFitLong=1;    % Fermi Fit for XDT TOF
+doFermiFitLong = 0;    % Fermi Fit for XDT TOF
 
 doRabi = 0;
 
 % Custom Box counts
-doCustom= 0;          % Custom Box Count
+doCustom = 1;          % Custom Box Count
 doCustom_BM = 0;    % Custom Band map
 
 %% Select image directory
