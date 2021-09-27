@@ -2,9 +2,13 @@ function atomdata=computeFermiFit(atomdata,inputopts)
 %COMPUTEFERMIFIT Summary of this function goes here
 %   Detailed explanation goes here
 
+if nargin == 2 && isfield(inputopts,'FigLabel') 
+    FigLabel = inputopts.FigLabel;
+else
+    FigLabel = '';
+end
 
-global pxsize
-global imgdir
+PixelSize = inputopts.PixelSize;
 
 %%
 
@@ -44,7 +48,7 @@ for kk=1:length(atomdata)
         data=atomdata(kk).OD(Dy,Dx);    % Optical density      
 
         opts=struct;
-        opts.PixelSize=pxsize;              % Pixel size in m
+        opts.PixelSize=PixelSize;              % Pixel size in m
         opts.TOF=atomdata(kk).Params.tof*1E-3;  % tof in seconds
         opts.ShowDetails=inputopts.ShowDetails;  
         opts.Freq=inputopts.Freqs(kk);
@@ -58,14 +62,14 @@ for kk=1:length(atomdata)
         
         if inputopts.ShowDetails
             figure(hF);           
-            strs=strsplit(imgdir,filesep);
-            str=[strs{end-1} filesep strs{end}];           
+
             % Image directory string
-            t=uicontrol('style','text','string',str,'units','pixels','backgroundcolor',...
+            t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
                 'w','horizontalalignment','left');
             t.Position(4)=t.Extent(4);
             t.Position(3)=hF.Position(3);
             t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
+            drawnow;
             
             if inputopts.SaveDetails                
                 fName=['fermilong_' atomdata(kk).Name];
