@@ -90,7 +90,7 @@ if doCustom
     custom_outdata=struct;    
 %     custom_outdata.GaussData=data;         
 %     custom_outdata.BoxCount=data;      
-    custom_outdata.ErfData=data;   
+    custom_outdata.ErfData=data;
     
     %%%%%%%%%%%%%%%% Fit Flags
     T2exp=0;
@@ -135,7 +135,7 @@ if doCustom
      N2=N2/Ratio_79;       
      
      % Define the Y Data
-     dataMode=1;         
+     dataMode=2;         
      switch dataMode
          case 0     
              Y=(N1-N2)./(N1);

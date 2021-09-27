@@ -103,7 +103,7 @@ doAnimate = 0;       % Animate the Cloud
 doProbeFit=0;        % Fit probe beam to 2D Gaussian
 
 % Box Count
-doBoxCount= 0;        % Box count analysis
+doBoxCount= 1;        % Box count analysis
 doLandauZener=0;     % Landau Zener Analysis on BOX
 doRamanSpec=0;       % Raman box count count analyis
 
@@ -121,8 +121,8 @@ doFermiFitLong = 0;    % Fermi Fit for XDT TOF
 doRabi = 0;
 
 % Custom Box counts
-doCustom = 1;          % Custom Box Count
-doCustom_BM = 0;    % Custom Band map
+doCustom = 0;          % Custom Box Count
+doCustom_BM = 1;    % Custom Band map
 
 %% GDrive Settings
 GDrive_root = 'G:\My Drive\Lattice Shared\LabData';
