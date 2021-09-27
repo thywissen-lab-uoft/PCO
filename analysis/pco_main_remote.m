@@ -99,10 +99,11 @@ end
 
 %% Flags
 
-doSave     = 0;
+doSave     = 1;
 doCustom = 1;
 doLandauZener = 0;
 doRabi = 0;
+
 %% Standard Analysis
 
 pco_analysis_standard;

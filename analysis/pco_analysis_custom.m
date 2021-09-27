@@ -87,11 +87,9 @@ end
 
 %% Custom
 if doCustom 
-    custom_outdata=struct;    
-%     custom_outdata.GaussData=data;         
-%     custom_outdata.BoxCount=data;      
-    custom_outdata.ErfData=data;   
-    
+    custom_data=struct;    
+    custom_data.Source = data;
+
     %%%%%%%%%%%%%%%% Fit Flags
     T2exp=0;
     negGauss_double=1;
@@ -132,7 +130,14 @@ if doCustom
      N1=data.Natoms(:,1);
      N2=data.Natoms(:,2);         
      Ratio_79=0.6;
-     N2=N2/Ratio_79;       
+     N2=N2/Ratio_79;
+     
+    custom_data.X=X;
+    custom_data.Xstr=xstr;
+    custom_data.Ratio_79=Ratio_79;     
+    custom_data.N9=N1;
+    custom_data.N7=N2;
+    custom_data.Ntot=N1+N2;
      
      % Define the Y Data
      dataMode=1;         
@@ -170,15 +175,8 @@ if doCustom
              ystr=['N_7/N_9'];
              fstr='79 ratio';
      end
-     
-    custom_outdata.X=X;
-    custom_outdata.Y = Y;
-    custom_outdata.Xstr=xstr;
-    custom_outdata.Ratio_79=Ratio_79;     
-    custom_outdata.N9=N1;
-    custom_outdata.N7=N2;
-    custom_outdata.Ntot=N1+N2;
-
+    custom_data.Y = Y;
+    custom_data.YStr = ystr;
 
     [ux,ia,ib]=unique(X);    
     Yu=zeros(length(ux),2);    
@@ -357,7 +355,7 @@ if doCustom
             ' FWHM=(' num2str(round(fout.G1,1)) ',' num2str(round(fout.G2,1)) ')' ];
         legend(pF,lStr,'location','best');
         
-        custom_outdata.Fit=fout;
+        custom_data.Fit=fout;
     end
     
     if length(X)>4 && negLorentz
@@ -610,6 +608,11 @@ if doCustom
     if doSave
         saveFigure(hFB,fstr,saveOpts);
     end
+    
+    if doSave
+        save([saveDir filesep 'custom_data'],'custom_data');
+    end
+    
 end
 
 %% Custom BM
