@@ -1,6 +1,7 @@
 function atomdata = ramanSpectroscopy(atomdata,opt)
-global pxsize
-global crosssec
+
+PixelSize = opt.PixelSize;
+CrossSection = opt.CrossSection;
 
 
 fprintf('performing box count raman...');
@@ -18,19 +19,19 @@ for kk=1:length(atomdata)
     end       
     
     % Calculate number in total F manifolds
-    N_1=sum(sum(OD(opt.ROI_1(3):opt.ROI_1(4),opt.ROI_1(1):opt.ROI_1(2))))*(pxsize^2/crosssec);
-    N_2=sum(sum(OD(opt.ROI_2(3):opt.ROI_2(4),opt.ROI_2(1):opt.ROI_2(2))))*(pxsize^2/crosssec);
+    N_1=sum(sum(OD(opt.ROI_1(3):opt.ROI_1(4),opt.ROI_1(1):opt.ROI_1(2))))*(PixelSize^2/CrossSection);
+    N_2=sum(sum(OD(opt.ROI_2(3):opt.ROI_2(4),opt.ROI_2(1):opt.ROI_2(2))))*(PixelSize^2/CrossSection);
 
     % Calculate 
-    N_2_Ha=sum(sum(OD(opt.ROI_2_H(1,3):opt.ROI_2_H(1,4),opt.ROI_2_H(1,1):opt.ROI_2_H(1,2))))*(pxsize^2/crosssec);
-    N_2_Hb=sum(sum(OD(opt.ROI_2_H(2,3):opt.ROI_2_H(2,4),opt.ROI_2_H(2,1):opt.ROI_2_H(2,2))))*(pxsize^2/crosssec);
+    N_2_Ha=sum(sum(OD(opt.ROI_2_H(1,3):opt.ROI_2_H(1,4),opt.ROI_2_H(1,1):opt.ROI_2_H(1,2))))*(PixelSize^2/CrossSection);
+    N_2_Hb=sum(sum(OD(opt.ROI_2_H(2,3):opt.ROI_2_H(2,4),opt.ROI_2_H(2,1):opt.ROI_2_H(2,2))))*(PixelSize^2/CrossSection);
       
     
     N_2_H=N_2_Ha+N_2_Hb;
 
     
-    N_2_Va=sum(sum(OD(opt.ROI_2_V(1,3):opt.ROI_2_V(1,4),opt.ROI_2_V(1,1):opt.ROI_2_V(1,2))))*(pxsize^2/crosssec);
-    N_2_Vb=sum(sum(OD(opt.ROI_2_V(2,3):opt.ROI_2_V(2,4),opt.ROI_2_V(2,1):opt.ROI_2_V(2,2))))*(pxsize^2/crosssec);
+    N_2_Va=sum(sum(OD(opt.ROI_2_V(1,3):opt.ROI_2_V(1,4),opt.ROI_2_V(1,1):opt.ROI_2_V(1,2))))*(PixelSize^2/CrossSection);
+    N_2_Vb=sum(sum(OD(opt.ROI_2_V(2,3):opt.ROI_2_V(2,4),opt.ROI_2_V(2,1):opt.ROI_2_V(2,2))))*(PixelSize^2/CrossSection);
     N_2_V=N_2_Va+N_2_Vb;
     
     % Dont let number go below zero (can introduce systematic)
