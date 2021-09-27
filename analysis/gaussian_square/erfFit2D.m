@@ -55,9 +55,9 @@ myfit=fittype(fitStrFunc,'independent',{'xx','yy'},...
     'coefficients',{'A','Xc','Xr','Xs','Yc','Yr','Ys','nbg'});
 
 opt=fitoptions(myfit);
-opt.StartPoint = [N0     Xc      2   Xs       Yc     2   Ys       nbg];
-opt.Lower      = [0      10      0   1        10     0   1        -.15];
-opt.Upper      = [1.5*N0 max(X)  20  range(X) max(Y) 20  range(Y) 0.15];
+opt.StartPoint = [N0     Xc        2   Xs       Yc         2   Ys       nbg];
+opt.Lower      = [0      min(X)-1  0   1        min(Y)+1   0   1        -.15];
+opt.Upper      = [1.5*N0 max(X)+1  20  range(X) max(Y)-1   20  range(Y) 0.15];
 opt.Weights=[];
 
 % Perform the fit

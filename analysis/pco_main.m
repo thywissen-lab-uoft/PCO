@@ -78,7 +78,7 @@ end
 % pco_xVar='Pulse_Time';
 
 
-%  pco_xVar='Pulse_Time';
+ pco_xVar='Pulse_Time';
 % pco_xVar='ExecutionDate';
 
 % pco_xVar='HF_kdet_shift';
@@ -90,7 +90,7 @@ end
 % pco_xVar = 'power_val';
 % pco_xVar = 'Lattice_loading_field';
 % pco_xVar = 'rf_rabi_freq_HF';
-  pco_xVar = 'rf_freq_HF';
+%   pco_xVar = 'rf_freq_HF';
 % pco_xVar = 'HF_FeshValue_Final_ODT';
 
 
@@ -114,7 +114,7 @@ doAnimate = 0;       % Animate the Cloud
 doProbeFit=0;        % Fit probe beam to 2D Gaussian
 
 % Box Count
-doBoxCount= 1;        % Box count analysis
+doBoxCount= 0;        % Box count analysis
 doLandauZener=0;     % Landau Zener Analysis on BOX
 doRamanSpec=0;       % Raman box count count analyis
 
