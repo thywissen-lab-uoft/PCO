@@ -270,14 +270,14 @@ if doCustom
 %     X=2*X;
 
 %     X = 2*X - 80;  %Raman AOM condition
-    X=X-x0;  
-    X=X*1E3;  
+%     X=X-x0;  
+%     X=X*1E3;  
     
     
 
-     xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];    
+%      xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];    
 %     xstr=['Fesh field (G)'] ;
-%     xstr=['Pulse Time (ms)']; 
+    xstr=['Pulse Time (ms)']; 
     
 %     xstr=['2 Pulse Time (ms)']; 
 
@@ -759,7 +759,7 @@ if doCustom
         legend(pF,lStr,'location','best');
     end
     
-    Rabi_oscillation = 0;
+    Rabi_oscillation = 1;
     if length(X)>4 && Rabi_oscillation
         myfunc=@(P,f,tau,t) P*(1 + exp(-t/tau).*cos(2*pi*f*t))/2;
         % myfunc=@(P,f,tau,t) 2*P*sin(pi*f*t).^2.*exp(-(pi*t/tau)/P);
@@ -774,7 +774,7 @@ if doCustom
 
         opt=fitoptions(myfit);
         opt.StartPoint=[100,10,0.1];        
-        opt.StartPoint=[P0,1/.04,.002];
+        opt.StartPoint=[P0,1/.06,.002];
         opt.Lower=[0 1 0];
 
         opt.Robust='bisquare';

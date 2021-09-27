@@ -130,8 +130,20 @@ for kk=1:(ceil(length(atomdata)/pMax))
         end
         
         % Find index to plot against
-        Yc = mean(Yc);iY = find(round(Yc)==y,1);
-        Xc = mean(Xc);iX = find(round(Xc)==x,1);
+        Yc = mean(Yc);        
+        iY = find(round(Yc)==y,1);
+        
+        if Yc>y(end) || Yc<y(1)
+           keyboard 
+        end
+        
+                
+        if Xc>x(end) || Xc<x(1)
+           keyboard 
+        end
+        
+        Xc = mean(Xc);
+        iX = find(round(Xc)==x,1);
         
         %%%% Get gauss profile %%%%
         if doGauss   
