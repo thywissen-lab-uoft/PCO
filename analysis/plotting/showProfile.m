@@ -95,7 +95,7 @@ for kk=1:(ceil(length(atomdata)/pMax))
         % Get the gaussian fit
         clear gaussFit
         doGauss = 0;
-        if isfield(atomdataSUB(ii),'GaussFit')
+        if isfield(atomdataSUB(ii),'GaussFit') && ~isfield(atomdataSUB(ii),'FermiFit')
             gaussFit  = atomdataSUB(ii).GaussFit{rNum};
             Yc(end+1) = gaussFit.Yc;
             Xc(end+1) = gaussFit.Xc;
@@ -112,6 +112,19 @@ for kk=1:(ceil(length(atomdata)/pMax))
             doErf = 1;
         end
         
+        % Get the fermi fit
+        clear doFermi
+        doFermi = 0;
+        if isfield(atomdataSUB(ii),'FermiFit')
+            fermiFit = atomdataSUB(ii).FermiFit{rNum}.Fit;
+            Yc(end+1) = fermiFit.Yc;
+            Xc(end+1) = fermiFit.Xc;            
+            doFermi = 1;
+            
+            fermiFitGauss  = atomdataSUB(ii).FermiFitGauss{rNum}.Fit;
+        end  
+        
+        % Get the box count
         clear doBox
         doBox = 0;
         if isfield(atomdataSUB(ii),'BoxCount') && ~(doGauss || doErf)
@@ -127,20 +140,11 @@ for kk=1:(ceil(length(atomdata)/pMax))
             end
             
             doBox = 1;
-        end
+        end   
         
         % Find index to plot against
         Yc = mean(Yc);        
-        iY = find(round(Yc)==y,1);
-        
-        if Yc>y(end) || Yc<y(1)
-           keyboard 
-        end
-        
-                
-        if Xc>x(end) || Xc<x(1)
-           keyboard 
-        end
+        iY = find(round(Yc)==y,1);   
         
         Xc = mean(Xc);
         iX = find(round(Xc)==x,1);
@@ -187,6 +191,32 @@ for kk=1:(ceil(length(atomdata)/pMax))
             end            
         end
         
+        %%%% Get fermi profile %%%%
+        if doFermi   
+            zzF_fermi = feval(fermiFit,xx,yy);
+            zzF_fermi_gauss = feval(fermiFitGauss,xx,yy);
+
+            if isequal(direction,'X') && isequal(style,'cut')
+                YF_fermi       = zzF_fermi(iY,:);
+                YF_fermi_gauss = zzF_fermi_gauss(iY,:);
+            end
+            
+            if isequal(direction,'X') && isequal(style,'sum')
+                YF_fermi = sum(zzF_fermi,1);
+                YF_fermi_gauss = sum(zzF_fermi_gauss,1);
+            end
+            
+            if isequal(direction,'Y') && isequal(style,'cut')
+                YF_fermi = zzF_fermi(:,iX);
+                YF_fermi_gauss = zzF_fermi_gauss(:,iX);
+            end
+            
+            if isequal(direction,'Y') && isequal(style,'sum')
+                YF_fermi = sum(zzF_fermi,2);
+                YF_fermi_gauss = sum(zzF_fermi_gauss,2);
+            end            
+        end
+        
         %%%% Get the data %%%%
         if isequal(direction,'X') && isequal(style,'cut')
             Y_data = z(iY,:);
@@ -211,6 +241,11 @@ for kk=1:(ceil(length(atomdata)/pMax))
         
         if doErf
             plot(X,YF_erf,'b','LineWidth',2);
+        end
+        
+        if doFermi
+            plot(X,YF_fermi,'LineWidth',2,'color',[.588 .294 0]);
+            plot(X,YF_fermi_gauss,'-','LineWidth',2,'color',[255 165 0]/255);
         end
         
         % Plot the data
@@ -271,6 +306,34 @@ for kk=1:(ceil(length(atomdata)/pMax))
                     'px  ' ...
                     '{\bf \sigma: }' num2str(round(erfFit.Ys)) ...
                     'px'];   
+            end
+        end
+        
+        if doFermi
+            if isequal(direction,'X')
+               lstr = [lstr newline ...
+                   'fermi {\bf c: }'  num2str(round(fermiFit.Xc)) ...
+                    'px  ' ...
+                    '{\bf W: }' num2str(round(fermiFit.W,1)) ...
+                    'px' ...
+                    '{\bf Q: }' num2str(round(fermiFit.Q,2))];   
+               lstr = [lstr newline ...
+                   'fermi gauss {\bf c: }'  num2str(round(fermiFitGauss.Xc)) ...
+                    'px  ' ...
+                    '{\bf Wx: }' num2str(round(fermiFitGauss.Wx,1)) ...
+                    'px'];                 
+            else
+               lstr = [lstr newline ...
+                   'fermi {\bf c: }'  num2str(round(fermiFit.Yc)) ...
+                    'px  ' ...
+                    '{\bf W: }' num2str(round(fermiFit.W,1)) ...
+                    'px' ...
+                    '{\bf Q: }' num2str(round(fermiFit.Q,2))]; 
+               lstr = [lstr newline ...
+                   'fermi gauss {\bf c: }'  num2str(round(fermiFitGauss.Yc)) ...
+                    'px  ' ...
+                    '{\bf Wy: }' num2str(round(fermiFitGauss.Wy,1)) ...
+                    'px'];  
             end
         end
 
