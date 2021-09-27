@@ -734,4 +734,6 @@ end
 
 %% Analysis
 
-pco_analysis;
+pco_analysis_standard;
+
+pco_analysis_custom;

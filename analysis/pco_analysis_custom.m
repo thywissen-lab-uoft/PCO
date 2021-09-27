@@ -1,3 +1,36 @@
+%% pco_analysis_custom.m
+%
+% This script runs customized analysis on the box, gaussian, or erf fits.
+% In particular, it enables you to customized how the analysis is
+% performed.
+
+
+%% Custom Analysis Data Source
+% Select the data source
+
+% data_source = 'box';
+% data_source = 'gauss';
+data_source = 'erf';
+
+switch data_source
+    case 'box'        
+        data = box_data;
+    case 'gauss'
+        data = gauss_data;
+    case 'erf'
+        data = erf_data;
+end
+
+%% Variable Choice
+% This section of code let's you choose how your X and Y variables are
+% chosen.
+
+x_mode = 'custom';
+x_mode = 'auto';
+
+y_mode = 'custom';
+y_mode = 'auto';
+
 
 %% Landau Zener
 if doLandauZener && size(data.Natoms,2)>1 && size(data.Natoms,1)>3
@@ -43,8 +76,9 @@ if doLandauZener && size(data.Natoms,2)>1 && size(data.Natoms,1)>3
     end
 end
 
+
 %% Rabi Oscillations
-if doRabi 
+if doRabi && length(data.Natoms)>4
     boxRabiopts=struct;
     boxRabiopts.FigLabel = FigLabel;
     boxRabiopts.xUnit=pco_unit;

@@ -1,19 +1,7 @@
-
-%% Custom Analysis Data Source
-% Select the data source
-
-% data_source = 'box';
-% data_source = 'gauss';
-data_source = 'erf';
-
-switch data_source
-    case 'box'        
-        data = box_data;
-    case 'gauss'
-        data = gauss_data;
-    case 'erf'
-        data = erf_data;
-end
+%% pco_analysis_standard
+%
+% This script runs the basic plotting and analysis code for box count,
+% gaussian, and erf fits.
 
 %% Box Count Analysis
 % This is the default box count analysis.
