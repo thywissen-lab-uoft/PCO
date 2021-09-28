@@ -100,14 +100,21 @@ if doCustom
     fit_lorentz_assymetric=0;
     lorentz=0;
     Rabi_oscillation = 0;
-    
+    fit_lorentz_assymetric_4=0;
+    gauss_4=0;
 %% Process X Data
 
 % Center frequency for expected RF field (if relevant)
-B = atomdata(1).Params.HF_FeshValue_Initial_Lattice;
+% Calibrated 2021/09/25-26
+Bfb   = data.Params(1).HF_FeshValue_Initial_Lattice;
+Bshim = data.Params(1).HF_zshim_Initial_Lattice;
+Boff  = 0.11;
 
-mF1 = -7/2;
-mF2 = -5/2;
+B = Bfb + Bshim + Boff;
+
+% Choose the mf States
+mF1 = -9/2;
+mF2 = -7/2;
 
 x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
 
@@ -135,7 +142,7 @@ end
 %% Define the Y Data
     
     % Scale atom number if it imaged at -7
-    Ratio_79=0.6;
+    Ratio_79=0.9;
     N = data.Natoms;
     for nn=1:size(data.Natoms,2)
        if mean(data.Yc(:,nn))>1024
@@ -144,10 +151,9 @@ end
     end
     
     % Default total atom number is just the sum
-    Ntot = sum(N,2);   
-    
+    Ntot = sum(N,2);       
 
-     dataMode= 1;         
+     dataMode= 4;         
      switch dataMode
          case 0     
              Y=(N(:,1)-N(:,2))./N(:,1);
@@ -167,7 +173,7 @@ end
             fstr=ystr;
          case 4
             Y=N(:,1)./(N(:,1)+N(:,2));
-            ystr=['Transfer Fraction'];
+%             ystr=['Transfer Fraction'];
             ystr=['N_9/(N_7+N_9)'];
             fstr='Transfer Fraction';
          case 5 % random customized stuffs 
@@ -250,38 +256,34 @@ end
             'coefficients',{'A','tau'},...
             'independent','t');
         
-        myfit=fittype('0.5+0.5*exp(-pi*t/tau)-A*0',...
+        myfit=fittype('0.5+0.5*exp(-pi*t/tau)-A',...
             'coefficients',{'A','tau'},...
             'independent','t');
-%         
-        opt=fitoptions(myfit);
-        
+         
+        % Fit options and guess
+        opt=fitoptions(myfit);        
         Ag = 0.5;
         taug = median(X);
-        G=[Ag taug];
-        
+        G=[Ag taug];        
         opt.StartPoint=G;
-        opt.Robust='bisquare';
   
         % Perform the fit
-        fout=fit(X,Y,myfit,opt);
-        disp(fout);
-        ci = confint(fout,0.95);
-        disp(ci)
+        fout=fit(X,Y,myfit,opt)
+        
         % Plot the fit
         tt=linspace(0,max(X),1000);
         xlim([0 max(X)]);
         pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
         lStr=['$ \tau = ' num2str(round(fout.tau,3)) '~\mathrm{ms}$'];
-        legend(pF,lStr,'location','best','interpreter','latex');
-        
+        legend(pF,lStr,'location','best','interpreter','latex');        
         str = '$A+(1-A)\exp(-\pi t/\tau)$';
         t=text(.02,.03,str,'units','normalized',...
             'fontsize',10,'interpreter','latex');
     end
     
     if length(X)>8 && negGauss_double
-        myfit=fittype('bg-A1*exp(-(x-x1).^2/(2*s1.^2))-A2*exp(-(x-x2).^2/(2*s2^2))',...
+        myfit=fittype(['bg-A1*exp(-(x-x1).^2/(2*s1.^2))- ' ...
+            'A2*exp(-(x-x2).^2/(2*s2^2))'],...
             'coefficients',{'A1','s1','x1','A2','s2','x2','bg'},...
             'independent','x');
         opt=fitoptions(myfit);
@@ -293,8 +295,8 @@ end
         xC=X(ind);
         
         % Assign guess        
-        xC1 = 20;
-        xC2 = 55;
+        xC1 = 0;
+        xC2 = 60;
         G=[A 15 xC1 A/10 15 xC2 bg];
         
         opt.StartPoint=G;
@@ -309,17 +311,16 @@ end
         tt=linspace(min(X),max(X),1000);
         pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
 %         ylim([-0.1 2])
-        lStr=['xC=(' num2str(round(fout.x1,2)) 'Â±' num2str(abs(round(ci(1,3)-fout.x1,2))) ','...
-            num2str(round(fout.x2,2)) 'Â±' num2str(abs(round(ci(1,6)-fout.x2,2))) ')' ...
-            ' \sigma=(' num2str(round(fout.s1,1)) ',' num2str(round(fout.s2,1)) ')' ];
+        lStr=['xC=(' num2str(round(fout.x1,2)) ' ± ' num2str(abs(round(ci(1,3)-fout.x1,2))) ', '...
+            num2str(round(fout.x2,2)) ' ± ' num2str(abs(round(ci(1,6)-fout.x2,2))) ')' ...
+            ' \sigma=(' num2str(round(fout.s1,1)) ', ' num2str(round(fout.s2,1)) ')' ];
         legend(pF,lStr,'location','best');
     end
     
     
     if length(X)>4 && negGauss
         myfit=fittype('bg-A1*exp(-(x-x1).^2/G1.^2)',...
-            'coefficients',{'A1','G1','x1','bg'},...
-            'independent','x');
+            'coefficients',{'A1','G1','x1','bg'},'independent','x');
         opt=fitoptions(myfit);
         % Background is max
         bg=max(Y);
@@ -328,7 +329,6 @@ end
         A=bg-Ymin;
         xC=X(ind);
         % Assign guess
-%         G=[A 30 xC A 30 xC-50 bg];
         G=[A 10 15 bg];
         opt.StartPoint=G;
         opt.Robust='bisquare';
@@ -385,6 +385,68 @@ end
         custom_data.Fit=fout;
     end
     
+       % Assymetric lorentzian fit, good for AM spec
+    if length(X)>10 && gauss_4
+        y=@(x,A,s,x0) A*exp(-(x-x0).^2./(2*s^2));
+        
+        yTot = @(a1,a2,a3,a4,...
+                s1,s2,s3,s4,...
+                x1,x2,x3,x4,...
+                bg,x) ...
+            y(x,a1,s1,x1) + ...
+            y(x,a2,s2,x2) + ...
+            y(x,a3,s3,x3) + ...
+            y(x,a4,s4,x4) + bg;           
+        
+        myfit=fittype(@(a1,a2,a3,a4,...
+                s1,s2,s3,s4,...
+                x1,x2,x3,x4,...
+                bg,x) yTot(a1,a2,a3,a4,...
+                s1,s2,s3,s4,...
+                x1,x2,x3,x4,...
+                bg,x),'coefficients',{'a1','a2','a3','a4',...
+                's1','s2','s3','s4',...
+                'x1','x2','x3','x4',...
+                'bg'},...
+            'independent','x'); 
+        
+        opt=fitoptions(myfit);
+        
+        opt.StartPoint = zeros(1,13);
+        
+        % ampitude
+        opt.StartPoint(1) = -2.5e4;
+        opt.StartPoint(2) = -1.2e4;
+        opt.StartPoint(3) = -1e4;
+        opt.StartPoint(4) = -2e4;
+        
+        % sigma
+        opt.StartPoint(5) = 10;
+        opt.StartPoint(6) = 10;
+        opt.StartPoint(7) = 10;
+        opt.StartPoint(8) = 10;
+        
+        % center
+        opt.StartPoint(9) = -4.5;
+        opt.StartPoint(10) = 60;
+        opt.StartPoint(11) = 126;
+        opt.StartPoint(12) = 190;
+        
+        % bkacground
+        opt.StartPoint(end) = 4E4;        
+        
+        fout=fit(X,Y,myfit,opt)
+%         ci = confint(fout_lorentz,0.95);   
+        
+        XF=linspace(min(X)-5,max(X)+5,1000);
+        xlim([min(X)-0.1 max(X)+0.1]);
+        pExp=plot(XF,feval(fout,XF),'r-','linewidth',2);
+%         str=['$f_0 = ' num2str(round(fout_lorentz.x0,2)) '\pm' num2str(round((ci(2,2)-ci(1,2))/2,2)) '$ kHz' newline ...
+%             '$\mathrm{FWHM} = ' num2str(round(abs(fout_lorentz.G),2)) ' $ kHz'];
+%         legend(pExp,{str},'interpreter','latex','location','best','fontsize',8);         
+    end
+    
+    
     if length(X)>4 && negLorentz
         myfit=fittype('bg-A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)',...
             'coefficients',{'A','G','x0','bg'},...
@@ -403,10 +465,6 @@ end
         % Assign guess
         G=[A 35 -50 bg];
         opt.StartPoint=G;
-%         opt.Robust='bisquare';
-%         opt.Lower=[0 0 -inf 0];
-
-%         opt.Upper=[A range(X) inf A];
 
         % Perform the fit
         fout=fit(X,Y,myfit,opt);
@@ -487,6 +545,88 @@ end
         lStr=['xC=(' num2str(round(fout.x1,1)) ',' num2str(round(fout.x2,1)) ',' num2str(round(fout.x3,1)) ')' ...
             ' FWHM=(' num2str(round(fout.G1,1)) ',' num2str(round(fout.G2,1)) ',' num2str(round(fout.G3,1)) ')' ];
         legend(pF,lStr,'location','best');
+    end
+    
+    % Assymetric lorentzian fit, good for AM spec
+    if length(X)>10 && fit_lorentz_assymetric_4
+        g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
+        y=@(x,a,x0,G,A) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1);    
+        
+        yTot = @(pa1,pa2,pa3,pa4,...
+                pb1,pb2,pb3,pb4,...
+                pc1,pc2,pc3,pc4,...
+                pd1,pd2,pd3,pd4,...
+                bg,x) ...
+            y(x,pa1,pa2,pa3,pa4) + ...
+            y(x,pb1,pb2,pb3,pb4) + ...
+            y(x,pc1,pc2,pc3,pc4) + ...
+            y(x,pd1,pd2,pd3,pd4) + bg;           
+        
+        myfit=fittype(@(pa1,pa2,pa3,pa4,...
+                pb1,pb2,pb3,pb4,...
+                pc1,pc2,pc3,pc4,...
+                pd1,pd2,pd3,pd4,...
+                bg,x) yTot(pa1,pa2,pa3,pa4,...
+                pb1,pb2,pb3,pb4,...
+                pc1,pc2,pc3,pc4,...
+                pd1,pd2,pd3,pd4,...
+                bg,x),'coefficients',{'pa1','pa2','pa3','pa4',...
+                'pb1','pb2','pb3','pb4',...
+                'pc1','pc2','pc3','pc4',...
+                'pd1','pd2','pd3','pd4','bg'},...
+            'independent','x'); 
+        
+        opt=fitoptions(myfit);
+        
+        opt.StartPoint = zeros(1,17);
+        % assymetry
+        opt.StartPoint(1) = 0;
+        opt.StartPoint(5) = 0;
+        opt.StartPoint(9) = 0;
+        opt.StartPoint(13) = 0;
+        
+        % center
+        opt.StartPoint(2) = 0;
+        opt.StartPoint(6) = 50;
+        opt.StartPoint(10) = 120;
+        opt.StartPoint(14) = 190;
+        
+        % linewidth
+        opt.StartPoint(3) = 30;
+        opt.StartPoint(7) = 30;
+        opt.StartPoint(11) = 30;
+        opt.StartPoint(15) = 30;
+
+        % ampltiude
+        opt.StartPoint(4) = -2e4;
+        opt.StartPoint(8) = -1e4;
+        opt.StartPoint(12) = -1e4;
+        opt.StartPoint(16) = -1e4;
+        
+        % bkacground
+        opt.StartPoint(17) = 4E4;        
+        
+        G0=30;
+        bg=min(Y);max(Y);
+        A0=(max(Y)-min(Y));
+        inds=[Y>.9*max(Y)];            
+        
+        [~,i]=max(Y);
+        x0=X(i);
+        x0=mean(X(inds));     
+%         opt.StartPoint=[.1 -110 G0 A0 bg];  
+        opt.Robust='bisquare';
+%         opts.Weights=w;
+        
+        fout_lorentz=fit(X,Y,myfit,opt);
+%         ci = confint(fout_lorentz,0.95);   
+        
+        XF=linspace(min(X)-5,max(X)+5,1000);
+        xlim([min(X)-0.1 max(X)+0.1]);
+        pExp=plot(XF,feval(fout_lorentz,XF),'r-','linewidth',2);
+%         str=['$f_0 = ' num2str(round(fout_lorentz.x0,2)) '\pm' num2str(round((ci(2,2)-ci(1,2))/2,2)) '$ kHz' newline ...
+%             '$\mathrm{FWHM} = ' num2str(round(abs(fout_lorentz.G),2)) ' $ kHz'];
+%         legend(pExp,{str},'interpreter','latex','location','best','fontsize',8);         
     end
     
     % Assymetric lorentzian fit, good for AM spec

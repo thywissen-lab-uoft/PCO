@@ -96,7 +96,7 @@ pco_overrideUnit='MHz';
 doSave        = 1;      % Save the figures?
 
 % Animation
-doAnimate     = 0;      % Animate the Cloud
+doAnimate     = 1;      % Animate the Cloud
 
 % Probe Beam
 doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
@@ -729,15 +729,15 @@ for rNum=1:size(ROI,1)
     hF_Xs_rNum=showProfile(atomdata,'X',pco_xVar,profile_opts);        
     hF_Ys_rNum=showProfile(atomdata,'Y',pco_xVar,profile_opts);  
     
-    pause(1);
+    pause(2);
     
 %   Save the figures (this can be slow)
     if doSave
         for kk=1:length(hF_Xs_rNum) 
-            saveFigure(hF_Xs_rNum(kk),['OD_X' num2str(rNum) '_' num2str(kk)],saveOpts);
+            saveFigure(hF_Xs_rNum(kk),['OD_R' num2str(rNum) '_X' num2str(kk)],saveOpts);
         end 
         for kk=1:length(hF_Ys_rNum)
-            saveFigure(hF_Ys_rNum(kk),['OD_Y' num2str(rNum) '_' num2str(kk)],saveOpts);
+            saveFigure(hF_Ys_rNum(kk),['OD_R' num2str(rNum) '_Y' num2str(kk)],saveOpts);
         end
     end
     hF_X=[hF_X; hF_Xs_rNum];
