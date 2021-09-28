@@ -8,9 +8,9 @@
 %% Custom Analysis Data Source
 % Select the data source
 
-% data_source = 'box';
+data_source = 'box';
 % data_source = 'gauss';
-data_source = 'erf';
+% data_source = 'erf';
 
 switch data_source
     case 'box'        
@@ -90,15 +90,17 @@ if doCustom
     custom_data=struct;    
     custom_data.Source = data;
 
+
     %%%%%%%%%%%%%%%% Fit Flags
     T2exp=0;
-    negGauss_double=1;
+    negGauss_double=0;
     negGauss=0;
     negLorentz_double=0;    
     negLorentz=0;    
     Lorentz_double=0;    
     Lorentz_triple=0;    
     Gauss=0;
+    fit_lorentz_assymetric=0;
     lorentz=0;
     Rabi_oscillation = 0;
         
@@ -108,7 +110,7 @@ if doCustom
     B = data.Params(1).HF_FeshValue_Initial_Lattice;
     B = B+ 2.35*data.Params(1).HF_zshim_Initial_Lattice;
     
-    x0= (BreitRabiK(B,9/2,-5/2)-BreitRabiK(B,9/2,-7/2))/6.6260755e-34/1E6; 
+    x0= (BreitRabiK(B,9/2,-7/2)-BreitRabiK(B,9/2,-9/2))/6.6260755e-34/1E6; 
 %     %x0 = 0;
 
 %     % Grab Raw data
@@ -128,7 +130,9 @@ if doCustom
 
      % Get the atom number
      N1=data.Natoms(:,1);
-     N2=data.Natoms(:,2);         
+     N2=data.Natoms(:,2);   
+%      N3=data.Natoms(:,3);         
+
      Ratio_79=0.6;
      N2=N2/Ratio_79;
      
@@ -138,9 +142,10 @@ if doCustom
     custom_data.N9=N1;
     custom_data.N7=N2;
     custom_data.Ntot=N1+N2;
+%      N3=N3/Ratio_79;
      
      % Define the Y Data
-     dataMode=1;         
+     dataMode= 2;         
      switch dataMode
          case 0     
              Y=(N1-N2)./(N1);
@@ -174,6 +179,16 @@ if doCustom
              Y=N2./N1;
              ystr=['N_7/N_9'];
              fstr='79 ratio';
+             
+          case 7
+             Y=N1./N2;
+             ystr=['N_9/N_7'];
+             fstr='79 ratio';
+             
+         case 8
+             Y=(N1+N2)./(N1+N2+N3);
+             ystr=['y excited fraction'];
+             fstr='y excited ratio';
      end
     custom_data.Y = Y;
     custom_data.YStr = ystr;
@@ -282,8 +297,8 @@ if doCustom
         tt=linspace(min(X),max(X),1000);
         pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
 %         ylim([-0.1 2])
-        lStr=['xC=(' num2str(round(fout.x1,2)) '±' num2str(abs(round(ci(1,3)-fout.x1,2))) ','...
-            num2str(round(fout.x2,2)) '±' num2str(abs(round(ci(1,6)-fout.x2,2))) ')' ...
+        lStr=['xC=(' num2str(round(fout.x1,2)) 'Â±' num2str(abs(round(ci(1,3)-fout.x1,2))) ','...
+            num2str(round(fout.x2,2)) 'Â±' num2str(abs(round(ci(1,6)-fout.x2,2))) ')' ...
             ' \sigma=(' num2str(round(fout.s1,1)) ',' num2str(round(fout.s2,1)) ')' ];
         legend(pF,lStr,'location','best');
     end
@@ -314,7 +329,7 @@ if doCustom
         % Plot the fit
         tt=linspace(min(X),max(X),1000);
         pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
-        lStr=['xC=(' num2str(round(fout.x1,2)) '±' num2str(abs(round(ci(1,3)-fout.x1,2))) ','...
+        lStr=['xC=(' num2str(round(fout.x1,2)) 'Â±' num2str(abs(round(ci(1,3)-fout.x1,2))) ','...
              ')' ...
             ' FWHM=(' num2str(round(fout.G1,1)) ')' ];
         legend(pF,lStr,'location','best');
@@ -463,7 +478,6 @@ if doCustom
     end
     
     % Assymetric lorentzian fit, good for AM spec
-    fit_lorentz_assymetric=0;
     if length(X)>4 && fit_lorentz_assymetric
         g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
         y=@(x,a,x0,G,A,bg) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1)+bg;        
@@ -478,7 +492,7 @@ if doCustom
         [~,i]=max(Y);
         x0=X(i);
         x0=mean(X(inds));     
-        opt.StartPoint=[.1 -0 G0 A0 bg];  
+        opt.StartPoint=[.1 -110 G0 A0 bg];  
         opt.Robust='bisquare';
 %         opts.Weights=w;
         
@@ -556,45 +570,65 @@ if doCustom
         % Plot the fit
         tt=linspace(min(X),max(X),1000);
         pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
-        lStr=['xC=(' num2str(round(fout.x1,2)) '±' num2str(abs(round(ci(1,3)-fout.x1,2))) ','...
+        lStr=['xC=(' num2str(round(fout.x1,2)) 'Â±' num2str(abs(round(ci(1,3)-fout.x1,2))) ','...
              ')' ...
             ' FWHM=(' num2str(round(fout.G1,1)) ')' ];
         legend(pF,lStr,'location','best');
     end
     
-    if length(X)>4 && Rabi_oscillation
-        myfunc=@(P,f,tau,t) P*(1 + exp(-t/tau).*cos(2*pi*f*t))/2;
-        % myfunc=@(P,f,tau,t) 2*P*sin(pi*f*t).^2.*exp(-(pi*t/tau)/P);
-        myfit=fittype(@(P,f,tau,t) myfunc(P,f,tau,t),'independent','t',...
-            'coefficients',{'P','f','tau'});
+    if length(X)>4 && Rabi_oscillation       
         
-        P0 = max(Y)*.8;
-
-%         myfit=fittype('(1-2*P*sin(pi*f*t).^2).*exp(-(pi*t/tau)/P)',...
-%             'independent','t',...
-%             'coefficients',{'P','f','tau'});
-
-        opt=fitoptions(myfit);
-        opt.StartPoint=[100,10,0.1];        
-        opt.StartPoint=[P0,1/.06,.002];
-        opt.Lower=[0 1 0];
-
-        opt.Robust='bisquare';
-        X = reshape(X,length(X),1);
-
-        fout=fit(X,Y,myfit,opt);
-
-        omega_rabi=2*pi*fout.f*sqrt(fout.P);
-        disp(fout);
+        guess_freq = 1/.25;
+        guess_tau = 0.5;
+    
+        myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t))/2;
         
-        % Plot the fit
-        tt=linspace(min(X),max(X),1000);
-        pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
-        lStr=['f=' num2str(round(fout.f,1)) 'kHz' ',' ...
-            ' P=' num2str(round(fout.P,1)) ',' ...
-            ' tau=' num2str(round(fout.tau,3))  'ms'];
-        legend(pF,lStr,'location','best');
-        xlim
+        
+        
+        fitFuncStr = '$0.5N_0\left(1-\exp(-\pi t / \tau)\cos(2 \pi f t)\right)$';
+
+    
+%         myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t+pi))/2;   
+%         fitFuncStr = '$0.5N_0\left(1-\exp(-\pi t / \tau)\cos(2 \pi f t)\right)$';
+%         % Pleaes upte the string
+    
+    
+    
+
+    % Define the fit
+    myfit=fittype(@(N0,f,tau,t) myfunc(N0,f,tau,t),'independent','t',...
+        'coefficients',{'N0','f','tau'});
+    opt=fitoptions(myfit);   
+    
+    
+    opt.StartPoint=[max(Y) guess_freq guess_tau];
+    opt.Lower=[max(Y)*.5 .1 0];
+    opt.Upper=[1 100 1000];
+
+    opt.Robust='bisquare';
+
+    % Perform the fit
+    fout=fit(X,Y,myfit,opt);
+    % Construct fit strings
+    omega_rabi=2*pi*fout.f; 
+    paramStr=['$N_0=' num2str(fout.N0,2) ',~f=' num2str(round(fout.f,2)) ...
+        '~\mathrm{kHz},~\tau=' num2str(round(fout.tau,2)) '~\mathrm{ms}' ...
+        '$'];
+
+    tt=linspace(0,max(X),1000);
+     pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
+    
+    text(.45,.90,fitFuncStr,'units','normalized','interpreter','latex',...
+        'horizontalalignment','right','fontsize',14);
+    
+    xL=get(gca,'XLim');
+    yL=get(gca,'YLim');
+
+    xlim([0 xL(2)]);
+    ylim([0 yL(2)+.1]);
+
+    legend(pF,paramStr,'location','northeast','interpreter','latex');
+    outdata.Fit=fout;
 
     end
     

@@ -20,7 +20,7 @@ outdata=struct;
 
 doBoxCount=1;   % Enable box count analysis
 doSubBG=1;      % Subtract background based on reference spot?
-bgROI=[700 790 500 600];
+boxOpts.bgROI=[700 790 500 600];
 
 if doBoxCount
     disp(repmat('-',1,60));    
@@ -28,7 +28,7 @@ if doBoxCount
     disp(repmat('-',1,60));        
     
     if doSubBG
-        atomdata=boxCount(atomdata,bgROI);
+        atomdata=boxCount(atomdata,boxOpts);
     else
         atomdata=boxCount(atomdata);
     end  
@@ -65,8 +65,10 @@ end
 %% Process X Data as Raman
 
 % Center frequency for expected RF field (if relevant)
-B = atomdata(1).Params.HF_FeshValue_Initial;
+B = atomdata(1).Params.HF_FeshValue_Initial_Lattice;
+% B = 209;
 x0= (BreitRabiK(B,9/2,-7/2)-BreitRabiK(B,9/2,-9/2))/6.6260755e-34/1E6; 
+disp(x0)
 
 switch pco_xVar
     case 'Raman_AOM3_freq'
@@ -153,7 +155,7 @@ for kk=1:length(ux)
 end
 
 %% Select Fitting Options
-fit_RabiOscillation = 1;
+fit_RabiOscillation = 0;
 doLandauZener = 0;
 
 % Lorentzian Fit
@@ -199,7 +201,7 @@ xlim([min(X) max(X)]);
 %% Perform the Fit
 if length(atomdata)>4 && fit_RabiOscillation  
     
-    guess_freq = 13;
+    guess_freq = 1/.25;
     guess_tau = 0.5;
     
         myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t))/2;
@@ -299,8 +301,9 @@ if length(atomdata)>4 && lorentz_assymetric_single
 
     [~,i]=max(Y);
     x0=X(i);
-%         x0=mean(X(inds));     
-    opt.StartPoint=[.1 -0 G0 A0 bg];  
+%         x0=mean(X(inds));    
+    xC=-115;
+    opt.StartPoint=[.1 xC G0 A0 bg];  
     opt.Robust='bisquare';
 %         opts.Weights=w;
 
