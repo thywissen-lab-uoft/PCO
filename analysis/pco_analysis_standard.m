@@ -135,7 +135,7 @@ if doErfFit
     if doSave;saveFigure(hF_number_erf,'erf_number',saveOpts);end
     
     % Plot the ratios if there are more than one ROI.
-    if size(ROI,1)>1    
+    if size(erf_data.Natoms,2)>1    
         hF_number_erf_ratio=showNumberRatio(erf_data,pco_xVar,ErfPopts);
         if doSave;saveFigure(hF_number_erf_ratio,'erf_number_ratio',saveOpts);end
     end

@@ -87,11 +87,10 @@ end
 
 %% Custom
 if doCustom 
-    custom_outdata=struct;    
-%     custom_outdata.GaussData=data;         
-%     custom_outdata.BoxCount=data;      
-    custom_outdata.ErfData=data;
-    
+    custom_data=struct;    
+    custom_data.Source = data;
+
+
     %%%%%%%%%%%%%%%% Fit Flags
     T2exp=0;
     negGauss_double=0;
@@ -108,8 +107,8 @@ if doCustom
     %%%%%%%%%%%%%%% X DATA %%%%%%%%%%%%%%
 
     % Center frequency for expected RF field (if relevant)
-    B = atomdata(1).Params.HF_FeshValue_Initial_Lattice;
-    B = B+ 2.35*atomdata(1).Params.HF_zshim_Initial_Lattice;
+    B = data.Params(1).HF_FeshValue_Initial_Lattice;
+    B = B+ 2.35*data.Params(1).HF_zshim_Initial_Lattice;
     
     x0= (BreitRabiK(B,9/2,-7/2)-BreitRabiK(B,9/2,-9/2))/6.6260755e-34/1E6; 
 %     %x0 = 0;
@@ -136,6 +135,13 @@ if doCustom
 
      Ratio_79=0.6;
      N2=N2/Ratio_79;
+     
+    custom_data.X=X;
+    custom_data.Xstr=xstr;
+    custom_data.Ratio_79=Ratio_79;     
+    custom_data.N9=N1;
+    custom_data.N7=N2;
+    custom_data.Ntot=N1+N2;
 %      N3=N3/Ratio_79;
      
      % Define the Y Data
@@ -184,15 +190,8 @@ if doCustom
              ystr=['y excited fraction'];
              fstr='y excited ratio';
      end
-     
-    custom_outdata.X=X;
-    custom_outdata.Y = Y;
-    custom_outdata.Xstr=xstr;
-    custom_outdata.Ratio_79=Ratio_79;     
-    custom_outdata.N9=N1;
-    custom_outdata.N7=N2;
-    custom_outdata.Ntot=N1+N2;
-
+    custom_data.Y = Y;
+    custom_data.YStr = ystr;
 
     [ux,ia,ib]=unique(X);    
     Yu=zeros(length(ux),2);    
@@ -298,8 +297,8 @@ if doCustom
         tt=linspace(min(X),max(X),1000);
         pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
 %         ylim([-0.1 2])
-        lStr=['xC=(' num2str(round(fout.x1,2)) '±' num2str(abs(round(ci(1,3)-fout.x1,2))) ','...
-            num2str(round(fout.x2,2)) '±' num2str(abs(round(ci(1,6)-fout.x2,2))) ')' ...
+        lStr=['xC=(' num2str(round(fout.x1,2)) 'Â±' num2str(abs(round(ci(1,3)-fout.x1,2))) ','...
+            num2str(round(fout.x2,2)) 'Â±' num2str(abs(round(ci(1,6)-fout.x2,2))) ')' ...
             ' \sigma=(' num2str(round(fout.s1,1)) ',' num2str(round(fout.s2,1)) ')' ];
         legend(pF,lStr,'location','best');
     end
@@ -330,7 +329,7 @@ if doCustom
         % Plot the fit
         tt=linspace(min(X),max(X),1000);
         pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
-        lStr=['xC=(' num2str(round(fout.x1,2)) '±' num2str(abs(round(ci(1,3)-fout.x1,2))) ','...
+        lStr=['xC=(' num2str(round(fout.x1,2)) 'Â±' num2str(abs(round(ci(1,3)-fout.x1,2))) ','...
              ')' ...
             ' FWHM=(' num2str(round(fout.G1,1)) ')' ];
         legend(pF,lStr,'location','best');
@@ -371,7 +370,7 @@ if doCustom
             ' FWHM=(' num2str(round(fout.G1,1)) ',' num2str(round(fout.G2,1)) ')' ];
         legend(pF,lStr,'location','best');
         
-        custom_outdata.Fit=fout;
+        custom_data.Fit=fout;
     end
     
     if length(X)>4 && negLorentz
@@ -571,7 +570,7 @@ if doCustom
         % Plot the fit
         tt=linspace(min(X),max(X),1000);
         pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
-        lStr=['xC=(' num2str(round(fout.x1,2)) '±' num2str(abs(round(ci(1,3)-fout.x1,2))) ','...
+        lStr=['xC=(' num2str(round(fout.x1,2)) 'Â±' num2str(abs(round(ci(1,3)-fout.x1,2))) ','...
              ')' ...
             ' FWHM=(' num2str(round(fout.G1,1)) ')' ];
         legend(pF,lStr,'location','best');
@@ -643,6 +642,11 @@ if doCustom
     if doSave
         saveFigure(hFB,fstr,saveOpts);
     end
+    
+    if doSave
+        save([saveDir filesep 'custom_data'],'custom_data');
+    end
+    
 end
 
 %% Custom BM
