@@ -67,7 +67,6 @@ end
   pco_xVar='Raman_AOM3_freq';
 % pco_xVar='Pulse_Time';
 
-
 %  pco_xVar='Pulse_Time';
 % pco_xVar='ExecutionDate';
 
@@ -94,34 +93,34 @@ pco_overrideUnit='MHz';
 %% Analysis Flags
 
 % Saving
-doSave = 1;           % Save the figures?
+doSave        = 1;      % Save the figures?
 
 % Animation
-doAnimate = 1;       % Animate the Cloud
+doAnimate     = 0;      % Animate the Cloud
 
 % Probe Beam
-doProbeFit=0;        % Fit probe beam to 2D Gaussian
+doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
 
 % Box Count
-doBoxCount= 1;        % Box count analysis
-doLandauZener=0;     % Landau Zener Analysis on BOX
-doRamanSpec=0;       % Raman box count count analyis
+doBoxCount    = 0;      % Box count analysis
+doLandauZener = 0;      % Landau Zener Analysis on BOX
+doRamanSpec   = 0;      % Raman box count count analyis
 
 % Gaussian
-doGaussFit= 0;        % Flag for performing the gaussian fit
-doGaussRabi=0;
-doBEC=0;
+doGaussFit    = 0;      % Enable gauss fitting
+doGaussRabi   = 0;      % Enable gauss rabi
+doBEC         = 0;      % Enable BEC analysis
 
 % Erf Fit
-doErfFit = 0;
+doErfFit      = 1;      % En
 
 % Fermi
-doFermiFitLong = 0;    % Fermi Fit for XDT TOF
+doFermiFitLong = 0;     % Eanble Fermi Fit for XDT TOF
 
-doRabi = 0;
 
 % Custom Box counts
-doCustom = 1;          % Custom Box Count
+doRabi = 0;
+doCustom =  1;          % Custom Box Count
 doCustom_BM = 0;    % Custom Band map
 
 %% GDrive Settings
@@ -315,7 +314,8 @@ atomdata=atomdata(inds);
 % % 
   ROI=[800 950 490 620;
        800 950 1520 1650];   %  band map 15 ms TOF 9box, 7 box
-   
+%    ROI = ROI(1,:); % 9 only 
+%    ROI = ROI(2,:); % 7 only
    % 
 % ROI = [810 870 510 590;
 %     880 930 510 590;
@@ -333,8 +333,7 @@ atomdata=atomdata(inds);
 %         850 900 525+1030 580+1030;
 %         825 930 525+1030 580+1030;
 %         850 900 500+1030 605+1030]; %  band map 15 ms TOF x vs y-z bands 
-%     
-% %     
+%        
 % ROI = [855 900 517 567;
 %         810 940 517 567;
 %         855 900 480 615;
@@ -350,9 +349,6 @@ atomdata=atomdata(inds);
 %      810         940        1547        1597    % 7 center + H wing
 %      855         900        1510        1645];  % 7 center + V wing
 
-    
-
-    
 % ROI = [850 900 520 570;
 %         810 940 520 570;
 %         850 900 480 615];

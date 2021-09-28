@@ -8,9 +8,9 @@
 %% Custom Analysis Data Source
 % Select the data source
 
-data_source = 'box';
+% data_source = 'box';
 % data_source = 'gauss';
-% data_source = 'erf';
+data_source = 'erf';
 
 switch data_source
     case 'box'        
@@ -87,9 +87,6 @@ end
 
 %% Custom
 if doCustom 
-    custom_data=struct;    
-    custom_data.Source = data;
-
 
     %%%%%%%%%%%%%%%% Fit Flags
     T2exp=0;
@@ -103,95 +100,109 @@ if doCustom
     fit_lorentz_assymetric=0;
     lorentz=0;
     Rabi_oscillation = 0;
-        
-    %%%%%%%%%%%%%%% X DATA %%%%%%%%%%%%%%
-
-    % Center frequency for expected RF field (if relevant)
-    B = data.Params(1).HF_FeshValue_Initial_Lattice;
-    B = B+ 2.35*data.Params(1).HF_zshim_Initial_Lattice;
     
-    x0= (BreitRabiK(B,9/2,-7/2)-BreitRabiK(B,9/2,-9/2))/6.6260755e-34/1E6; 
-%     %x0 = 0;
+%% Process X Data
 
-%     % Grab Raw data
-    X=data.X; 
-%     X=X';    
-%     X=2*X;
+% Center frequency for expected RF field (if relevant)
+B = atomdata(1).Params.HF_FeshValue_Initial_Lattice;
 
-    X = 2*X - 80;  %Raman AOM condition
-    X=X-x0;  
-    X=X*1E3;    
+mF1 = -7/2;
+mF2 = -5/2;
 
-     xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];    
-%     xstr=['Fesh field (G)'] ;
-%     xstr=['Pulse Time (ms)'];     
-%     xstr=['2 Pulse Time (ms)']; 
-%     xstr = pco_xVar;
+x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
 
-     % Get the atom number
-     N1=data.Natoms(:,1);
-     N2=data.Natoms(:,2);   
-%      N3=data.Natoms(:,3);         
+switch pco_xVar
+    case 'Raman_AOM3_freq'
+        % Calculate relative to the Raman condition
+        X=data.X;
+        X = 2*X - 80;  %Raman AOM condition
+        X = X - x0;   
+        X = X*1e3;
+        xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)']; 
+    case 'Pulse_Time'
+        X=data.X;
+        xstr=['pulse time (ms)'];    
+    case 'rf_freq_HF'
+        X=data.X;
+        X = X - x0;   
+        X = X*1e3;
+        xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)']; 
+    otherwise
+        X = data.X;
+        xstr = pco_xVar;
+end    
 
-     Ratio_79=0.6;
-     N2=N2/Ratio_79;
-     
-    custom_data.X=X;
-    custom_data.Xstr=xstr;
-    custom_data.Ratio_79=Ratio_79;     
-    custom_data.N9=N1;
-    custom_data.N7=N2;
-    custom_data.Ntot=N1+N2;
-%      N3=N3/Ratio_79;
-     
-     % Define the Y Data
-     dataMode= 2;         
+%% Define the Y Data
+    
+    % Scale atom number if it imaged at -7
+    Ratio_79=0.6;
+    N = data.Natoms;
+    for nn=1:size(data.Natoms,2)
+       if mean(data.Yc(:,nn))>1024
+           N(:,nn) = N(:,nn)/Ratio_79;
+       end        
+    end
+    
+    % Default total atom number is just the sum
+    Ntot = sum(N,2);   
+    
+
+     dataMode= 1;         
      switch dataMode
          case 0     
-             Y=(N1-N2)./(N1);
+             Y=(N(:,1)-N(:,2))./N(:,1);
              ystr=['\Delta N97/N9'];
              fstr='custom';
          case 1
-            Y= N2;
+            Y = N(:,2);
             ystr=['N_7'];
             fstr=ystr;
          case 2     
-            Y= N1;
+            Y= N(:,1);
             ystr=['N_9'];
             fstr=ystr;
          case 3
-            Y=N1+N2;
+            Y=N(:,1)+N(:,2);
             ystr=['N_9+N_7'];
             fstr=ystr;
          case 4
-            Y=N1./(N1+N2);
+            Y=N(:,1)./(N(:,1)+N(:,2));
             ystr=['Transfer Fraction'];
             ystr=['N_9/(N_7+N_9)'];
             fstr='Transfer Fraction';
          case 5 % random customized stuffs 
-             N2=N2*0.6;
-             N3=data.Natoms(:,3);
-             Y=(N3+ N2-2*N1)./(N3+N2-N1);
+             N(:,2)=N(:,2)*0.6;
+             N(:,2)=N(:,3);
+             Y =(N(:,3)+ N(:,2)-2*N(:,1))./(N(:,3)+N(:,2)-N(:,1));
              ystr=['Higher band fraction'];
              xstr=['latt ramp time (ms)'];
              fstr='custom';
          case 6
-             Y=N2./N1;
+             Y=N(:,2)./N(:,1);
              ystr=['N_7/N_9'];
              fstr='79 ratio';
              
           case 7
-             Y=N1./N2;
+             Y=N(:,1)./N(:,2);
              ystr=['N_9/N_7'];
              fstr='79 ratio';
              
          case 8
-             Y=(N1+N2)./(N1+N2+N3);
+             Y =(N(:,1)+N(:,2))./(N(:,1)+N(:,2)+N(:,3));
              ystr=['y excited fraction'];
              fstr='y excited ratio';
      end
+
+    custom_data=struct;    
+    custom_data.Source = data;
+    custom_data.X=X;
+    custom_data.Xstr=xstr;   
+    custom_data.Ratio_79=Ratio_79;     
+    custom_data.N = N;
     custom_data.Y = Y;
     custom_data.YStr = ystr;
+    
+%% Plot the unique values
 
     [ux,ia,ib]=unique(X);    
     Yu=zeros(length(ux),2);    
@@ -232,6 +243,7 @@ if doCustom
     hold on    
     xlim([min(X) max(X)]);
     
+%% Various Fits
     
     if T2exp
         myfit=fittype('A+(1-A)*exp(-pi*t/tau)',...
@@ -497,24 +509,14 @@ if doCustom
 %         opts.Weights=w;
         
         fout_lorentz=fit(X,Y,myfit,opt);
-        ci = confint(fout_lorentz,0.95);
-        
-   
-        
+        ci = confint(fout_lorentz,0.95);   
         
         XF=linspace(min(X)-5,max(X)+5,1000);
         xlim([min(X)-0.1 max(X)+0.1]);
         pExp=plot(XF,feval(fout_lorentz,XF),'r-','linewidth',2);
         str=['$f_0 = ' num2str(round(fout_lorentz.x0,2)) '\pm' num2str(round((ci(2,2)-ci(1,2))/2,2)) '$ kHz' newline ...
             '$\mathrm{FWHM} = ' num2str(round(abs(fout_lorentz.G),2)) ' $ kHz'];
-        legend(pExp,{str},'interpreter','latex','location','best','fontsize',8); 
-        
-%         fout_lorentz.a=opt.StartPoint(1);
-%         fout_lorentz.x0=opt.StartPoint(2);
-%         fout_lorentz.G=opt.StartPoint(3);
-%         fout_lorentz.A=opt.StartPoint(4);
-%         fout_lorentz.bg=opt.StartPoint(5);
-
+        legend(pExp,{str},'interpreter','latex','location','best','fontsize',8);         
     end
     
     
@@ -578,10 +580,10 @@ if doCustom
     
     if length(X)>4 && Rabi_oscillation       
         
-        guess_freq = 1/.25;
-        guess_tau = 0.5;
+        guess_freq = 1/.04;
+        guess_tau = 1;
     
-        myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t))/2;
+        myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t-pi))/2;
         
         
         
@@ -602,8 +604,8 @@ if doCustom
     
     
     opt.StartPoint=[max(Y) guess_freq guess_tau];
-    opt.Lower=[max(Y)*.5 .1 0];
-    opt.Upper=[1 100 1000];
+    opt.Lower=[max(Y)/5 .1 0];
+    opt.Upper=[max(Y) 100 1000];
 
     opt.Robust='bisquare';
 

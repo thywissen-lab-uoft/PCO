@@ -8,7 +8,7 @@ else
     FigLabel = '';
 end
 
-PixelSize = inputopts.PixelSize;
+PixelSize = atomdata(1).PixelSize;
 
 %%
 
