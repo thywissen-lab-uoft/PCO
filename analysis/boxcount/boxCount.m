@@ -6,8 +6,8 @@ function atomdata=boxCount(atomdata,boxOpts)
         boxOpts.doSubBG = 0;
         disp(' No background subtract');
     else
-        disp([' Using background counts from ROI = [' ...
-            num2str(boxOpts.bgROI) ']']);   
+%         disp([' Using background counts from ROI = [' ...
+%             num2str(boxOpts.bgROI) ']']);   
     end    
     
     for kk=1:length(atomdata)

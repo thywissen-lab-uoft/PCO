@@ -97,7 +97,7 @@ pco_overrideUnit='MHz';
 doSave = 1;           % Save the figures?
 
 % Animation
-doAnimate = 0;       % Animate the Cloud
+doAnimate = 1;       % Animate the Cloud
 
 % Probe Beam
 doProbeFit=0;        % Fit probe beam to 2D Gaussian
@@ -113,7 +113,7 @@ doGaussRabi=0;
 doBEC=0;
 
 % Erf Fit
-doErfFit = 1;
+doErfFit = 0;
 
 % Fermi
 doFermiFitLong = 0;    % Fermi Fit for XDT TOF
@@ -121,8 +121,8 @@ doFermiFitLong = 0;    % Fermi Fit for XDT TOF
 doRabi = 0;
 
 % Custom Box counts
-doCustom = 0;          % Custom Box Count
-doCustom_BM = 1;    % Custom Band map
+doCustom = 1;          % Custom Box Count
+doCustom_BM = 0;    % Custom Band map
 
 %% GDrive Settings
 GDrive_root = 'G:\My Drive\Lattice Shared\LabData';
@@ -315,6 +315,12 @@ atomdata=atomdata(inds);
 % % 
   ROI=[800 950 490 620;
        800 950 1520 1650];   %  band map 15 ms TOF 9box, 7 box
+   
+   % 
+% ROI = [810 870 510 590;
+%     880 930 510 590;
+%     820 930 1530 1620]; %  band map 15 ms TOF 9p boxes y, 7 box
+
 %  
 %  ROI = [855 900 525 570;
 %         830 925 500 595;
@@ -343,6 +349,8 @@ atomdata=atomdata(inds);
 %      855         900        1547        1597    % 7 center
 %      810         940        1547        1597    % 7 center + H wing
 %      855         900        1510        1645];  % 7 center + V wing
+
+    
 
     
 % ROI = [850 900 520 570;
