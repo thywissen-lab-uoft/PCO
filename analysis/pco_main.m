@@ -216,6 +216,8 @@ for kk=1:length(atomdata)
     end
 end
 
+atomdata = matchParamsFlags(atomdata);
+
 % Sort it
 [~, inds]=sort(x);
 atomdata=atomdata(inds);
