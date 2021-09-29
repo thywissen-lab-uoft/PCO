@@ -106,11 +106,12 @@ if doCustom
 
 % Center frequency for expected RF field (if relevant)
 % Calibrated 2021/09/25-26
-Bfb   = data.Params(1).HF_FeshValue_Initial_Lattice;
-Bshim = data.Params(1).HF_zshim_Initial_Lattice*2.35;
-Boff  = 0.11;
-
-B = Bfb + Bshim + Boff;
+% Bfb   = data.Params(1).HF_FeshValue_Initial_Lattice;
+% Bshim = data.Params(1).HF_zshim_Initial_Lattice*2.35;
+% Boff  = 0.11;
+% 
+% B = Bfb + Bshim + Boff;
+B=201;
 
 % Choose the mf States
 mF1 = -7/2;
@@ -180,11 +181,13 @@ end
             ystr=['N_9/(N_7+N_9)'];
             fstr='Transfer Fraction';
          case 5 % random customized stuffs 
-             N(:,2)=N(:,2)*0.6;
-             N(:,2)=N(:,3);
-             Y =(N(:,3)+ N(:,2)-2*N(:,1))./(N(:,3)+N(:,2)-N(:,1));
-             ystr=['Higher band fraction'];
-             xstr=['latt ramp time (ms)'];
+%              N(:,2)=N(:,2)*0.6;
+%              N(:,2)=N(:,3);
+%              Y =(N(:,3)+ N(:,2)-2*N(:,1))./(N(:,3)+N(:,2)-N(:,1));
+             Y =(N(:,1)- N(:,2))./(N(:,1)+N(:,2));
+             ystr=['(N_9-N_7)/(N_7+N_9)'];
+%              ystr=['Higher band fraction'];
+%              xstr=['latt ramp time (ms)'];
              fstr='custom';
          case 6
              Y=N(:,2)./N(:,1);
@@ -246,7 +249,7 @@ end
     
     set(gca,'fontsize',12,'linewidth',1,'box','on','xgrid','on','ygrid','on');
     yL=get(gca,'YLim');
-    ylim([0 yL(2)]);
+    ylim([-0.2 yL(2)]);
 %     ylim([1.1E5 2.5E5]);
 
     hold on    
