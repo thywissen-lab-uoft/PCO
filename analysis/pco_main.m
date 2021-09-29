@@ -96,7 +96,7 @@ pco_overrideUnit='MHz';
 doSave        = 1;      % Save the figures?
 
 % Animation
-doAnimate     = 1;      % Animate the Cloud
+doAnimate     = 0;      % Animate the Cloud
 
 % Probe Beam
 doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
@@ -468,8 +468,8 @@ probe_opts.xUnit=pco_unit;
 probe_opts.PixelSize = PixelSize;
 probe_opts.FigLabel = FigLabel;
 
-[hF_probe,counts]=showProbeCounts(atomdata,pco_xVar,probe_opts);
-saveFigure(hF_probe,'probe',saveOpts)
+% [hF_probe,counts]=showProbeCounts(atomdata,pco_xVar,probe_opts);
+% saveFigure(hF_probe,'probe',saveOpts)
 
 if doProbeFit
    atomdata=analyzeProbeBeam(atomdata);
@@ -768,6 +768,8 @@ if doAnimate && doSave
     % Color limits
     animateOpts.CLim=[0 1;
         0 1.5];   
+    animateOpts.CLim=[0 .2;
+        0 .5]; 
     
     animateCloudDouble(atomdata,pco_xVar,animateOpts);    
 end

@@ -107,14 +107,14 @@ if doCustom
 % Center frequency for expected RF field (if relevant)
 % Calibrated 2021/09/25-26
 Bfb   = data.Params(1).HF_FeshValue_Initial_Lattice;
-Bshim = data.Params(1).HF_zshim_Initial_Lattice;
+Bshim = data.Params(1).HF_zshim_Initial_Lattice*2.35;
 Boff  = 0.11;
 
 B = Bfb + Bshim + Boff;
 
 % Choose the mf States
-mF1 = -9/2;
-mF2 = -7/2;
+mF1 = -7/2;
+mF2 = -5/2;
 
 x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
 
@@ -127,6 +127,9 @@ switch pco_xVar
         X = X*1e3;
         xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)']; 
     case 'Pulse_Time'
+        X=data.X;
+        xstr=['pulse time (ms)'];    
+   case 'rf_rabi_time_HF'
         X=data.X;
         xstr=['pulse time (ms)'];    
     case 'rf_freq_HF'
@@ -153,7 +156,7 @@ end
     % Default total atom number is just the sum
     Ntot = sum(N,2);       
 
-     dataMode= 4;         
+     dataMode= 1;         
      switch dataMode
          case 0     
              Y=(N(:,1)-N(:,2))./N(:,1);
