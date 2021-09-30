@@ -64,14 +64,14 @@ end
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-%   pco_xVar='Raman_AOM3_freq';
+  pco_xVar='Raman_AOM3_freq';
 % pco_xVar='Pulse_Time';
 
 %  pco_xVar='Pulse_Time';
 % pco_xVar='ExecutionDate';
 
 % pco_xVar='HF_kdet_shift';
-% pco_xVar = 'ExecutionDate';
+pco_xVar = 'ExecutionDate';
 % pco_xVar = 'Pulse_Time';
 % pco_xVar = 'rf_rabi_time_HF';
 % 
@@ -79,7 +79,7 @@ end
 % pco_xVar = 'power_val';
 % pco_xVar = 'Lattice_loading_field';
 % pco_xVar = 'rf_rabi_freq_HF';
-  pco_xVar = 'rf_freq_HF';
+%   pco_xVar = 'rf_freq_HF';
 % pco_xVar = 'HF_FeshValue_Final_ODT';
 
 
@@ -96,7 +96,7 @@ pco_overrideUnit='MHz';
 doSave        = 1;      % Save the figures?
 
 % Animation
-doAnimate     = 0;      % Animate the Cloud
+doAnimate     = 1;      % Animate the Cloud
 
 % Probe Beam
 doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
@@ -112,15 +112,15 @@ doGaussRabi   = 0;      % Enable gauss rabi
 doBEC         = 0;      % Enable BEC analysis
 
 % Erf Fit
-doErfFit      = 1;      % En
+doErfFit      = 0;      % En
 
 % Fermi
-doFermiFitLong = 0;     % Eanble Fermi Fit for XDT TOF
+doFermiFitLong = 1;     % Eanble Fermi Fit for XDT TOF
 
 
 % Custom Box counts
 doRabi = 0;
-doCustom =  1;          % Custom Box Count
+doCustom =  0;          % Custom Box Count
 doCustom_BM = 0;    % Custom Band map
 
 %% GDrive Settings
@@ -470,8 +470,8 @@ probe_opts.xUnit=pco_unit;
 probe_opts.PixelSize = PixelSize;
 probe_opts.FigLabel = FigLabel;
 
-% [hF_probe,counts]=showProbeCounts(atomdata,pco_xVar,probe_opts);
-% saveFigure(hF_probe,'probe',saveOpts)
+[hF_probe,counts]=showProbeCounts(atomdata,pco_xVar,probe_opts);
+saveFigure(hF_probe,'probe',saveOpts)
 
 if doProbeFit
    atomdata=analyzeProbeBeam(atomdata);
