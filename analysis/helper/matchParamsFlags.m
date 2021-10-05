@@ -1,7 +1,7 @@
 function atomdata = matchParamsFlags(atomdata)
 
-pAll = sort(fieldnames(atomdata(2).Params));
-fAll = sort(fieldnames(atomdata(2).Flags));
+pAll = sort(fieldnames(atomdata(1).Params));
+fAll = sort(fieldnames(atomdata(1).Flags));
 
 badParams = 0;
 badFlags  = 0;

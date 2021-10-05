@@ -79,6 +79,7 @@ else
     [xvals,inds]=sort(xvals,'descend');
 end
 
+
 % Reorder the data
 ODs=ODs(:,:,inds);
 
@@ -274,6 +275,7 @@ drawnow;
 
 
 %% Animate
+% xvals = (xvals-45.5935)*1e3;
 
 for kk=1:length(xvals)   % Iterate over all unique xvalues
     

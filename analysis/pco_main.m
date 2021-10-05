@@ -67,19 +67,20 @@ end
   pco_xVar='Raman_AOM3_freq';
 % pco_xVar='Pulse_Time';
 
-%  pco_xVar='Pulse_Time';
 % pco_xVar='ExecutionDate';
+% pco_xVar = 'rf_tof_srs_power';
+% pco_xVar = 'rf_tof_delta_freq';
 
 % pco_xVar='HF_kdet_shift';
-pco_xVar = 'ExecutionDate';
-% pco_xVar = 'Pulse_Time';
+%  pco_xVar = 'ExecutionDate';
+% pco_xVar = 'rf_pulse_length';
 % pco_xVar = 'rf_rabi_time_HF';
 % 
 % pco_xVar = 'latt_ramp_time';
 % pco_xVar = 'power_val';
 % pco_xVar = 'Lattice_loading_field';
 % pco_xVar = 'rf_rabi_freq_HF';
-%   pco_xVar = 'rf_freq_HF';
+%   pco_xVar = 'rf_delta_freq_HF';
 % pco_xVar = 'HF_FeshValue_Final_ODT';
 
 
@@ -112,15 +113,15 @@ doGaussRabi   = 0;      % Enable gauss rabi
 doBEC         = 0;      % Enable BEC analysis
 
 % Erf Fit
-doErfFit      = 0;      % En
+doErfFit      = 1;      % En
 
 % Fermi
-doFermiFitLong = 1;     % Eanble Fermi Fit for XDT TOF
+doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
 
 
 % Custom Box counts
 doRabi = 0;
-doCustom =  0;          % Custom Box Count
+doCustom =  1;          % Custom Box Count
 doCustom_BM = 0;    % Custom Band map
 
 %% GDrive Settings
@@ -184,6 +185,8 @@ for kk=1:length(files)
 end
 disp(' ');
 
+atomdata = matchParamsFlags(atomdata);
+
 
 if isequal(pco_xVar,'ExecutionDate')
    p=[atomdata.Params] ;
@@ -216,7 +219,6 @@ for kk=1:length(atomdata)
     end
 end
 
-atomdata = matchParamsFlags(atomdata);
 
 % Sort it
 [~, inds]=sort(x);
@@ -232,7 +234,7 @@ atomdata=atomdata(inds);
 
 
 %%%%% RF 1B
-%ROI = [533 1323 230 980];   % RF1B 5 ms TOF
+% ROI = [533 1323 230 980];   % RF1B 5 ms TOF
 % ROI =  [700 1100 300 600];
 % ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
 
@@ -313,15 +315,21 @@ atomdata=atomdata(inds);
 % % % 
 %  ROI = [800 950 1520 1630;
 %       800 950 490 600];   %  band map 15 ms TOF  7box, 9 box
-% % 
-  ROI=[800 950 490 620;
-       800 950 1520 1650];   %  band map 15 ms TOF 9box, 7 box
+% % % % % 
+% % %   ROI=[800 950 490 620;
+% % %        800 950 1520 1650];   %  band map 15 ms TOF 9box, 7 box
+     ROI=[800 950 490 620;
+       800 950 1570 1700];   %  band map 15 ms TOF 9box, 7 box
 %    ROI = ROI(1,:); % 9 only 
 %    ROI = ROI(2,:); % 7 only
+
+%  band map 15 ms TOF 9box, 7 box
+    ROI=[800 950 490 660];
+    ROI(2,:)=ROI(1,:)+[0 0 1050 1050];
    % 
 % ROI = [810 870 510 590;
 %     880 930 510 590;
-%     820 930 1530 1620]; %  band map 15 ms TOF 9p boxes y, 7 box
+%     820 930 1530+25 1620+25]; %  band map 15 ms TOF 9p boxes y, 7 box
 
 %  
 %  ROI = [855 900 525 570;
@@ -768,10 +776,10 @@ if doAnimate && doSave
      animateOpts.Order='ascend';
     
     % Color limits
-    animateOpts.CLim=[0 1;
-        0 1.5];   
     animateOpts.CLim=[0 .2;
-        0 .5]; 
+        0 .2];   
+%     animateOpts.CLim=[0 .2;
+%         0 .5]; 
     
     animateCloudDouble(atomdata,pco_xVar,animateOpts);    
 end

@@ -59,11 +59,14 @@ G=opts.Guess;
 
 sgn=[1 0];
 if isequal(opts.Sign,'auto')
-   if C(1,1)>C(1,2)
-      sgn=[1 0];
-   else
-       sgn=[0 1];
-   end
+    
+    for kk=1:size(C,2)
+        if C(1,kk)/sum(C(1,:),2)<.5
+           sgn(kk)=0; 
+        else
+            sgn(kk)=1;
+        end
+    end
 else
     sgn=opts.Sign;
 end
@@ -149,7 +152,7 @@ for nn=1:length(fouts)
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
 
-ylabel('box number');
+ylabel('atom number');
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 
 xlim([0 max(T)]);

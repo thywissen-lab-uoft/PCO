@@ -17,24 +17,30 @@ disp(' ');
 disp('Analyzing rabi oscillations');
 
 %% Grab the data
-params=[data.Params];
-xvals=[params.(xVar)];
 
-% Grab the atom number, set zero values to zero
-Natoms = data.Natoms;
-Natoms(Natoms<0)=0;
+if isfield(data,'FitType') && ~isequal(data.FitType,'custom')
+    params=[data.Params];
+    xvals=[params.(xVar)];
 
-% Scale the 79 atoms
-doScale=[0 0];
-for kk=1:size(Natoms,2)
-    if data.Yc(1,kk)>1024      
-        doScale(kk)=1;
-        Natoms(:,kk)=Natoms(:,kk)/opts.Ratio_79; 
+    % Grab the atom number, set zero values to zero
+    Natoms = data.Natoms;
+    Natoms(Natoms<0)=0;
+
+    % Scale the 79 atoms
+    doScale=[0 0];
+    for kk=1:size(Natoms,2)
+        if data.Yc(1,kk)>1024      
+            doScale(kk)=1;
+            Natoms(:,kk)=Natoms(:,kk)/opts.Ratio_79; 
+        end
     end
-end
 
-% Get the total numbers
-NatomsTot=sum(Natoms,2)';
+    % Get the total numbers
+    NatomsTot=sum(Natoms,2)';
+else
+    xvals = data.X;
+    
+end
 
 %% Automatically detect low data points
 
@@ -51,7 +57,12 @@ end
 
 %% Formulate into Contrast
 
-C=(Natoms(:,1)-Natoms(:,2))./(Natoms(:,1)+Natoms(:,2));
+if size(Natoms,2)==2
+
+    C=(Natoms(:,1)-Natoms(:,2))./(Natoms(:,1)+Natoms(:,2));
+else
+    C=(Natoms(:,1)+Natoms(:,2)-Natoms(:,3))./(Natoms(:,1)+Natoms(:,2)+Natoms(:,3));
+end
 
 if isequal(opts.Sign,'auto')
     C=sign(C(1))*C;
@@ -91,11 +102,11 @@ fout=fit(T,C,myfit,opt);
 omega_rabi=2*pi*fout.f*sqrt(fout.P);
 disp(fout);
 
-fitStr=['$(1-2P\sin(\pi f t)^2)\exp(-\pi t /(\tau P))$'];
+fitStr=['$(1-2P\sin(\pi f t)^2)\exp(-\pi t /(\tau_2 P))$'];
 
 paramStr=['$P=' num2str(round(fout.P,3)) ',~f=' num2str(round(fout.f,2)) ...
-    '~\mathrm{kHz},~\tau=' num2str(round(fout.tau,2)) '~\mathrm{ms}' ...
-    '$'];
+    '~\mathrm{kHz},~\tau_2=' num2str(round(fout.tau,2)) '~\mathrm{ms}' ...
+    ',~\tau_e=' num2str(round((fout.tau*fout.P/pi),2)) '~\mathrm{ms}$'];
 
 rabiStr=['$~f_\mathrm{rabi}=' num2str(round(omega_rabi/(2*pi),2)) '~\mathrm{kHz}$'];
 
@@ -136,7 +147,7 @@ set(hax,'box','on','linewidth',1,'fontsize',14,'units','pixels','fontname','time
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 
-ylabel('relative box atom number');
+ylabel('relative atom number');
 hax.Position(4)=hax.Position(4)-20;
 
 for nn=1:size(Natoms,2)

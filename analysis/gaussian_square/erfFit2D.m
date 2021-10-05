@@ -71,6 +71,26 @@ disp([' done (' num2str(round((t2-t1)*24*60*60,1)) ' sec.).']);
 Zf = feval(fout,xx,yy);
 N = sum(sum(Zf))-fout.nbg*size(Z,1)*size(Z,2);
 
+% if gof.rsquare<.1
+%    opt=fitoptions(myfit);
+%     opt.StartPoint = [0     Xc        2   30       Yc         2   30       nbg];
+%     opt.Lower      = [0      min(X)+2  0   1        min(Y)+2   0   1        -.15];
+%     opt.Upper      = [1.5*N0 max(X)-2  20  range(X) max(Y)-2   20  range(Y) 0.15];
+%     opt.Weights=[];
+% 
+%     % Perform the fit
+%     fprintf(' erf fitting...');
+%     t1=now;
+%     [fout,gof,output]=fit([xx(:) yy(:)],Z(:),myfit,opt);
+%     t2=now;
+%     disp([' done (' num2str(round((t2-t1)*24*60*60,1)) ' sec.).']);
+% 
+%     % Compute number
+%     Zf = feval(fout,xx,yy);
+%     N = sum(sum(Zf))-fout.nbg*size(Z,1)*size(Z,2);
+% 
+% end
+
 doDebug=0;
 if doDebug
     figure(10);
