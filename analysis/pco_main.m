@@ -97,7 +97,7 @@ pco_overrideUnit='MHz';
 doSave        = 1;      % Save the figures?
 
 % Animation
-doAnimate     = 1;      % Animate the Cloud
+doAnimate     = 0;      % Animate the Cloud
 
 % Probe Beam
 doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
@@ -120,9 +120,11 @@ doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
 
 
 % Custom Box counts
-doRabi = 0;
 doCustom =  1;          % Custom Box Count
-doCustom_BM = 0;    % Custom Band map
+
+    doRabiAbsolute = 0;
+    doRabiContrast = 0;
+    doCustom_BM = 0;    % Custom Band map
 
 %% GDrive Settings
 GDrive_root = 'G:\My Drive\Lattice Shared\LabData';
@@ -788,4 +790,6 @@ end
 
 pco_analysis_standard;
 
-pco_analysis_custom;
+if doCustom
+    pco_analysis_custom;
+end

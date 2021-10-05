@@ -21,137 +21,137 @@ switch data_source
 end
 
 %% Generate Custom Data
-% 
-% doCustomX = 1;
-% 
-% process_data = struct;
-% process_data.Source = data;
-% process_data.FitType = 'custom';
-% process_data.Ratio_79=1;    
-% 
-% % Scale the atom number in each box if necessary
-% N = data.Natoms;
-% for nn=1:size(data.Natoms,2)
-%    if mean(data.Yc(:,nn))>1024
-%        N(:,nn) = N(:,nn)/process_data.Ratio_79;
-%    end        
-% end
-% process_data.Natoms = N;     
-% 
-% % Get the default X data;
-% process_data.X = data.X;
-% process_data.XStr = data.xVar;
-% process_data.Xunit = data.Units(1).(pco_xVar);
-% 
-% if doCustomX
-% 
-%     if isfield(data.Params(1),'HF_FeshValue_Initial_lattice') && ...
-%             isfield(data.Params(1),'HF_zshim_Initial_Lattice')
-%         Bfb   = data.Params(1).HF_FeshValue_Initial_Lattice;
-%         Bshim = data.Params(1).HF_zshim_Initial_Lattice*2.35;
-%         Boff  = 0.11;
-% 
-%         B = Bfb + Bshim + Boff;
-% 
-%         % Choose the mf States
-%         mF1 = -7/2;
-%         mF2 = -5/2;
-%         x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
-%     end
-% 
-%     switch pco_xVar
-%         case 'Raman_AOM3_freq'
-%             X=process_data.X;
-%             X = 2*X - 80;
-%             X = X - x0;   
-%             X = X*1e3;
-%             xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)']; 
-%             xunit = 'kHz';
-%         case 'Pulse_Time'
-%             X=process_data.X;
-%             xstr='pulse time (ms)';    
-%             xunit = 'ms';
-%        case 'rf_rabi_time_HF'
-%             X=process_data.X;
-%             xstr='pulse time (ms)';    
-%             xunit = 'ms';
-%         case 'rf_freq_HF'
-%             X=process_data.X;
-%             X = X - x0;   
-%             X = X*1e3;
-%             xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)']; 
-%             xunit = 'kHz';
-%         case 'rf_tof_freq'
-%           X=process_data.X;
-%             X = X - x0;   
-%             X = X*1e3;
-%             xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];  
-%             xunit = 'kHz';
-%         otherwise
-%             X = process_data.X;
-%             xstr = pco_xVar;        
-%     end 
-%     process_data.X = X;
-%     process_data.XLabel = xstr;        
-% end    
-% 
-% 
-% %% Customize Y Data
-% beep=0;
-% if beep
-%     
-%     % Scale the atom number in each box if necessary
-%     Ratio_79=1;
-%     N = data.Natoms;
-%     
-%     for nn=1:size(data.Natoms,2)
-%        if mean(data.Yc(:,nn))>1024
-%            N(:,nn) = N(:,nn)/Ratio_79;
-%        end        
-%     end
-%     process_data.Ratio_79=Ratio_79;    
-%     process_data.Natoms = N;        
-% 
-%     dataMode= 1;         
-%     switch dataMode
-%         case 0     
-%              process_data.Function = @(N) (N(:,1)-N(:,2))./N(:,1);
-%              ystr=['\Delta N97/N9'];
-%              figName='bob';
-%         case 1
-%             process_data.Function = @(N) N(:,2);
-%             ystr=['N_7'];
-%             figName=ystr;
-%         case 2     
-%             process_data.Function = @(N) N(:,1);
-%             ystr=['N_9'];
-%             figName=ystr;
-%         case 3
-%             process_data.Function = @(N) sum(N,2);
-%             ystr=['N_{tot}'];
-%             figName=ystr;
-%         case 4
-%             process_data.Function=@(N) N(:,1)./(N(:,1)+N(:,2));
-%             ystr=['Transfer Fraction'];
-%             ystr=['N_9/(N_7+N_9)'];
-%             figName='Transfer Fraction';
-%         case 6
-%             process_data.Function=@(N) N(:,2)./N(:,1);
-%             ystr=['N_7/N_9'];
-%             figName='79 ratio';             
-%         case 7
-%             process_data.Function=@(N) N(:,1)./N(:,2);
-%             ystr=['N_9/N_7'];
-%             figName='97 ratio';             
-%         case 8
-%             process_data.Function = @(N) (N(:,1)+N(:,2))./(N(:,1)+N(:,2)+N(:,3));
-%             ystr=['y excited fraction'];
-%             figName='y excited ratio';
-%      end
-% 
-%      process_data.Y = process_data.Function(process_data.Natoms);
-%      process_data.YLabel = ystr;
-% end
+
+doCustomX = 1;
+
+process_data = struct;
+process_data.Source = data;
+process_data.FitType = 'custom';
+process_data.Ratio_79=1;    
+
+% Scale the atom number in each box if necessary
+N = data.Natoms;
+for nn=1:size(data.Natoms,2)
+   if mean(data.Yc(:,nn))>1024
+       N(:,nn) = N(:,nn)/process_data.Ratio_79;
+   end        
+end
+process_data.Natoms = N;     
+
+% Get the default X data;
+process_data.X = data.X;
+process_data.XLabel = data.xVar;
+process_data.XUnit = data.Units(1).(pco_xVar);
+
+if doCustomX
+    if isfield(data.Params(1),'HF_FeshValue_Initial_lattice') && ...
+            isfield(data.Params(1),'HF_zshim_Initial_Lattice')
+        Bfb   = data.Params(1).HF_FeshValue_Initial_Lattice;
+        Bshim = data.Params(1).HF_zshim_Initial_Lattice*2.35;
+        Boff  = 0.11;
+
+        B = Bfb + Bshim + Boff;
+
+        % Choose the mf States
+        mF1 = -7/2;
+        mF2 = -5/2;
+        x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
+    end
+
+    switch pco_xVar
+        case 'Raman_AOM3_freq'
+            X=process_data.X;
+            X = 2*X - 80;
+            X = X - x0;   
+            X = X*1e3;
+            xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)']; 
+            xunit = 'kHz';
+        case 'Pulse_Time'
+            X=process_data.X;
+            xstr='pulse time (ms)';    
+            xunit = 'ms';
+       case 'rf_rabi_time_HF'
+            X=process_data.X;
+            xstr='pulse time (ms)';    
+            xunit = 'ms';
+        case 'rf_freq_HF'
+            X=process_data.X;
+            X = X - x0;   
+            X = X*1e3;
+            xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)']; 
+            xunit = 'kHz';
+        case 'rf_tof_freq'
+          X=process_data.X;
+            X = X - x0;   
+            X = X*1e3;
+            xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];  
+            xunit = 'kHz';
+        otherwise
+            X = process_data.X;
+            xstr = pco_xVar;        
+    end 
+    process_data.X = X;
+    process_data.XLabel = xstr;        
+    process_data.XUnit = xunit;
+end    
+
+
+%% Customize Y Data
+beep=0;
+if beep
+    
+    % Scale the atom number in each box if necessary
+    Ratio_79=1;
+    N = data.Natoms;
+    
+    for nn=1:size(data.Natoms,2)
+       if mean(data.Yc(:,nn))>1024
+           N(:,nn) = N(:,nn)/Ratio_79;
+       end        
+    end
+    process_data.Ratio_79=Ratio_79;    
+    process_data.Natoms = N;        
+
+    dataMode= 1;         
+    switch dataMode
+        case 0     
+             process_data.Function = @(N) (N(:,1)-N(:,2))./N(:,1);
+             ystr=['\Delta N97/N9'];
+             figName='bob';
+        case 1
+            process_data.Function = @(N) N(:,2);
+            ystr=['N_7'];
+            figName=ystr;
+        case 2     
+            process_data.Function = @(N) N(:,1);
+            ystr=['N_9'];
+            figName=ystr;
+        case 3
+            process_data.Function = @(N) sum(N,2);
+            ystr=['N_{tot}'];
+            figName=ystr;
+        case 4
+            process_data.Function=@(N) N(:,1)./(N(:,1)+N(:,2));
+            ystr=['Transfer Fraction'];
+            ystr=['N_9/(N_7+N_9)'];
+            figName='Transfer Fraction';
+        case 6
+            process_data.Function=@(N) N(:,2)./N(:,1);
+            ystr=['N_7/N_9'];
+            figName='79 ratio';             
+        case 7
+            process_data.Function=@(N) N(:,1)./N(:,2);
+            ystr=['N_9/N_7'];
+            figName='97 ratio';             
+        case 8
+            process_data.Function = @(N) (N(:,1)+N(:,2))./(N(:,1)+N(:,2)+N(:,3));
+            ystr=['y excited fraction'];
+            figName='y excited ratio';
+     end
+
+     process_data.Y = process_data.Function(process_data.Natoms);
+     process_data.YLabel = ystr;
+end
 
 
 %% Landau Zener
@@ -175,9 +175,6 @@ if doLandauZener && size(data.Natoms,2)>1 && size(data.Natoms,1)>3
 %     SweepTimeVar='uwave_sweep_time';      % Variable that defines sweep time
 %     SweepRangeVar='uwave_delta_freq';    %    Variable that defines sweep range
 
-    % Shift Register
-    SweepTimeVar='HF_Raman_sweep_time';     
-
 %     SweepTimeVar='Raman_Time';      % Variable that defines sweep time
     SweepRangeVar='HF_Raman_sweep_range';    %    Variable that defines sweep range
 %     
@@ -199,31 +196,41 @@ end
 
 
 %% Rabi Oscillations
-if doRabi && size(data.Natoms,1)>4
-    rabi_opts=struct;
-    rabi_opts.FigLabel = FigLabel;
-    rabi_opts.xUnit=pco_unit;
+
+rabi_opts=struct;
+rabi_opts.FigLabel  = FigLabel;
+rabi_opts.xUnit     = pco_unit;
+
+rabi_opts.Ratio_79=0.62;
+rabi_opts.Ratio_79=1;
+
+rabi_opts.Guess=[.9 13 1]; % [probability transfer, freq, t2 time]
+rabi_opts.Sign='auto'; % Automatic fit sign
+
+T = process_data.X;
+N = process_data.Natoms;
+
+if doRabiContrast && size(data.Natoms,1)>4
     
-    rabi_opts.Ratio_79=0.62;
-    rabi_opts.Ratio_79=1;
-    
-    rabi_opts.Guess=[.9 13 1]; % [probability transfer, freq, t2 time]
-    rabi_opts.Sign='auto'; % Automatic fit sign
-    
-    % Choose the boxes to use    
-    if size(data.Natoms,2)==2    
-        rabi_opts.Boxes = [1 0;
-                           0 1];
+    % Calculate the contrast for two boxes
+    if size(data.Natoms,2)==2   
+        C = (N(:,1)-N(:,2))./(N(:,1)+N(:,2));
+        Ntot = N(:,1)+N(:,2);
     end
     
+    % Calculate the contrast for three boxes
     if size(data.Natoms,3)==3
-        rabi_opts.Boxes = [1 1 0;
-                           0 0 1];
-    end 
+        C = (N(:,1)+N(:,2)-N(:,3))./(N(:,1)+N(:,2)+N(:,3));
+        Ntot = N(:,1)+N(:,2)+N(:,3);
+    end  
+    
+    % Add additional lines for different counting schemes
 
     [hF_rabi_contrast,rabi_contrast]=rabiOscillationsContrast(data,pco_xVar,rabi_opts);
     if doSave;saveFigure(hF_rabi_contrast,[data_source '_rabi_oscillate_contrast'],saveOpts);end
+end
 
+if doRabiAbsolute && size(data.Natoms,1)>4    
     [hF_rabi_raw,rabi_absolute]=rabiOscillationsAbsolute(data,pco_xVar,rabi_opts);
     if doSave;saveFigure(hF_rabi_raw,[data_source '_rabi_oscillate_raw'],saveOpts);end    
 end
@@ -233,6 +240,10 @@ if doCustom
 
     %%%%%%%%%%%%%%%% Fit Flags
     T2exp=0;
+    Rabi_oscillation = 0;
+
+    
+    
     negGauss_double=0;
     negGauss=0;
     negLorentz_double=0;    
@@ -242,7 +253,6 @@ if doCustom
     Gauss=0;
     fit_lorentz_assymetric=0;
     lorentz=0;
-    Rabi_oscillation = 0;
     fit_lorentz_assymetric_4=0;
     gauss_4=0;
     
@@ -406,6 +416,8 @@ end
     
 %% Various Fits
     
+
+%% Exponential Fit
     if T2exp
         myfit=fittype('A+(1-A)*exp(-pi*t/tau)',...
             'coefficients',{'A','tau'},...
@@ -435,7 +447,8 @@ end
         t=text(.02,.03,str,'units','normalized',...
             'fontsize',10,'interpreter','latex');
     end
-    
+   
+    %% Negative Double Gauss
     if length(X)>8 && negGauss_double
         myfit=fittype(['bg-A1*exp(-(x-x1).^2/(2*s1.^2))- ' ...
             'A2*exp(-(x-x2).^2/(2*s2^2))'],...
@@ -472,7 +485,8 @@ end
         legend(pF,lStr,'location','best');
     end
     
-    
+ %% Negative Gauss
+ 
     if length(X)>4 && negGauss
         myfit=fittype('bg-A1*exp(-(x-x1).^2/G1.^2)',...
             'coefficients',{'A1','G1','x1','bg'},'independent','x');
@@ -501,6 +515,8 @@ end
             ' FWHM=(' num2str(round(fout.G1,1)) ')' ];
         legend(pF,lStr,'location','best');
     end
+    
+%% Negative Lorentz Double
     
     if length(X)>4 && negLorentz_double
         X= reshape(X,length(X),1);
@@ -540,7 +556,7 @@ end
         custom_data.Fit=fout;
     end
     
-       % Assymetric lorentzian fit, good for AM spec
+%% Gauss
     if length(X)>10 && gauss_4
         y=@(x,A,s,x0) A*exp(-(x-x0).^2./(2*s^2));
         
@@ -601,7 +617,7 @@ end
 %         legend(pExp,{str},'interpreter','latex','location','best','fontsize',8);         
     end
     
-    
+    %% Negative Lorentzian
     if length(X)>4 && negLorentz
         myfit=fittype('bg-A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)',...
             'coefficients',{'A','G','x0','bg'},...
@@ -633,7 +649,7 @@ end
         legend(pF,lStr,'location','best');
     end
     
-    
+    %% Double Loretnzian
     if length(X)>4 && Lorentz_double
         myfit=fittype('bg+A1*(G1/2).^2*((x-x1).^2+(G1/2).^2).^(-1)+A2*(G2/2).^2*((x-x2).^2+(G2/2).^2).^(-1)',...
             'coefficients',{'A1','G1','x1','A2','G2','x2','bg'},...
@@ -668,6 +684,7 @@ end
         legend(pF,lStr,'location','best');
     end
     
+    %% Triple Lorentzian
     if length(X)>4 && Lorentz_triple
         myfit=fittype('bg+A1*(G1/2).^2*((x-x1).^2+(G1/2).^2).^(-1)+A2*(G2/2).^2*((x-x2).^2+(G2/2).^2).^(-1)+A3*(G3/2).^2*((x-x3).^2+(G3/2).^2).^(-1)',...
             'coefficients',{'A1','G1','x1','A2','G2','x2','A3','G3','x3','bg'},...
@@ -701,6 +718,8 @@ end
             ' FWHM=(' num2str(round(fout.G1,1)) ',' num2str(round(fout.G2,1)) ',' num2str(round(fout.G3,1)) ')' ];
         legend(pF,lStr,'location','best');
     end
+    
+    %% Four Lorentzian
     
     % Assymetric lorentzian fit, good for AM spec
     if length(X)>10 && fit_lorentz_assymetric_4
@@ -784,6 +803,8 @@ end
 %         legend(pExp,{str},'interpreter','latex','location','best','fontsize',8);         
     end
     
+    %% Assymetric Lorentzian
+    
     % Assymetric lorentzian fit, good for AM spec
     if length(X)>4 && fit_lorentz_assymetric
         g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
@@ -814,6 +835,7 @@ end
         legend(pExp,{str},'interpreter','latex','location','best','fontsize',8);         
     end
     
+    %% Lorentzian
     
     if length(X)>4 && lorentz
         % Symmetric Lorentzian
@@ -842,6 +864,7 @@ end
 %         xlim([130 200]);    
     end
     
+    %% Gauss Single
     if length(X)>4 && Gauss
         myfit=fittype('bg+A1*exp(-(x-x1).^2/G1.^2)',...
             'coefficients',{'A1','G1','x1','bg'},...
@@ -853,8 +876,7 @@ end
         [Ymin,ind]=min(Y);
         A=bg-Ymin;
         xC=X(ind);
-        % Assign guess
-%         G=[A 30 xC A 30 xC-50 bg];
+ 
         G=[A 10 0 bg];
         opt.StartPoint=G;
         opt.Robust='bisquare';
@@ -863,15 +885,18 @@ end
         fout=fit(X,Y,myfit,opt);
         disp(fout);
         ci = confint(fout,0.95);
-        disp(ci)
+        
         % Plot the fit
         tt=linspace(min(X),max(X),1000);
         pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
-        lStr=['xC=(' num2str(round(fout.x1,2)) '±' num2str(abs(round(ci(1,3)-fout.x1,2))) ','...
+        lStr=['xC=(' num2str(round(fout.x1,2)) '±' ...
+            num2str(abs(round(ci(1,3)-fout.x1,2))) ','...
              ')' ...
             ' FWHM=(' num2str(round(fout.G1,1)) ')' ];
         legend(pF,lStr,'location','best');
     end
+    
+    %% Rabi
     
     if length(X)>4 && Rabi_oscillation       
         
@@ -881,13 +906,9 @@ end
 %         myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t))/2;           
 %         fitFuncStr = '$0.5N_0\left(1-\exp(-\pi t / \tau)\cos(2 \pi f t)\right)$';
 
-    
-        myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t+pi))/2;   
-        fitFuncStr = '$0.5N_0\left(1-\exp(-\pi t / \tau)\cos(2 \pi f t)\right)$';
-%         % Pleaes upte the string
-    
-    
-    
+    myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t+pi))/2;   
+    fitFuncStr = '$0.5N_0\left(1-\exp(-\pi t / \tau)\cos(2 \pi f t)\right)$';
+
 
     % Define the fit
     myfit=fittype(@(N0,f,tau,t) myfunc(N0,f,tau,t),'independent','t',...

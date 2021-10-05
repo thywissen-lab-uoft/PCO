@@ -219,9 +219,8 @@ t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
         ll.Position(2)=hax2.Position(2)+hax2.Position(4)-ll.Position(4);
         ll.Position(1)=hax2.Position(1)+hax2.Position(3)-ll.Position(3);
     end
+
 hF.SizeChangedFcn=@myresize;
-
-
     
 end
 
