@@ -10,7 +10,6 @@ end
 %% Sort the data by the parameter given
 params=[data.Params];
 X=[params.(xVar)];
-
 Natoms = data.Natoms;
 
 %% Exponential Decay Fit

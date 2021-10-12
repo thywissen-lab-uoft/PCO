@@ -72,9 +72,11 @@ end
 % pco_xVar = 'rf_tof_delta_freq';
 
 % pco_xVar='HF_kdet_shift';
-%  pco_xVar = 'ExecutionDate';
+ pco_xVar = 'Evap_End_Power';
 % pco_xVar = 'rf_pulse_length';
 % pco_xVar = 'rf_rabi_time_HF';
+% pco_xVar = 'rf_freq_HF';
+
 % 
 % pco_xVar = 'latt_ramp_time';
 % pco_xVar = 'power_val';
@@ -82,6 +84,7 @@ end
 % pco_xVar = 'rf_rabi_freq_HF';
 %   pco_xVar = 'rf_delta_freq_HF';
 % pco_xVar = 'HF_FeshValue_Final_ODT';
+%   pco_xVar='HF_prob_pwr2';
 
 
 % Should the analysis attempt to automatically find the unit?
@@ -95,7 +98,7 @@ pco_overrideUnit='MHz';
 
 % Saving
 doSave        = 1;      % Save the figures?
-
+ 
 % Animation
 doAnimate     = 0;      % Animate the Cloud
 
@@ -113,18 +116,18 @@ doGaussRabi   = 0;      % Enable gauss rabi
 doBEC         = 0;      % Enable BEC analysis
 
 % Erf Fit
-doErfFit      = 1;      % En
+doErfFit      = 0;      % En
 
 % Fermi
-doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
+doFermiFitLong = 1;     % Enable Fermi Fit for XDT TOF
 
 
 % Custom Box counts
-doCustom =  1;          % Custom Box Count
+doCustom =  0;          % Custom Box Count
 
-    doRabiAbsolute = 0;
-    doRabiContrast = 0;
-    doCustom_BM = 0;    % Custom Band map
+doRabiAbsolute = 0;
+doRabiContrast = 0;
+doCustom_BM = 0;    % Custom Band map
 
 %% GDrive Settings
 GDrive_root = 'G:\My Drive\Lattice Shared\LabData';
@@ -326,8 +329,8 @@ atomdata=atomdata(inds);
 %    ROI = ROI(2,:); % 7 only
 
 %  band map 15 ms TOF 9box, 7 box
-    ROI=[800 950 490 660];
-    ROI(2,:)=ROI(1,:)+[0 0 1050 1050];
+%     ROI=[800 950 490 660];
+%     ROI(2,:)=ROI(1,:)+[0 0 1050 1050];
    % 
 % ROI = [810 870 510 590;
 %     880 930 510 590;

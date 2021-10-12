@@ -112,7 +112,7 @@ if beep
     process_data.Ratio_79=Ratio_79;    
     process_data.Natoms = N;        
 
-    dataMode= 1;         
+    dataMode= 2;         
     switch dataMode
         case 0     
              process_data.Function = @(N) (N(:,1)-N(:,2))./N(:,1);
@@ -241,20 +241,23 @@ if doCustom
     %%%%%%%%%%%%%%%% Fit Flags
     T2exp=0;
     Rabi_oscillation = 0;
-
     
-    
-    negGauss_double=0;
-    negGauss=0;
-    negLorentz_double=0;    
-    negLorentz=0;    
-    Lorentz_double=0;    
-    Lorentz_triple=0;    
-    Gauss=0;
-    fit_lorentz_assymetric=0;
-    lorentz=0;
-    fit_lorentz_assymetric_4=0;
+    gauss_single=0;
     gauss_4=0;
+    gauss_neg_double=0;
+    gauss_neg_single=0;
+    
+    lorentz_neg_single=0;    
+    lorentz_neg_double=0;  
+    
+    lorentz_single=0;
+    lorentz_double=0;    
+    lorentz_triple=0;    
+    
+    lorentz_asym_single=0;
+    lorentz_asym_double=0;
+
+    fit_lorentz_assymetric_4=0;
     
 %% Process X Data
 
@@ -268,7 +271,7 @@ B = Bfb + Bshim + Boff;
 % B=201;
 
 % Choose the mf States
-mF1 = -9/2;
+mF1 = -5/2;
 mF2 = -7/2;
 
 x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
@@ -316,7 +319,7 @@ end
     % Default total atom number is just the sum
     Ntot = sum(N,2);       
 
-     dataMode= 5;         
+     dataMode= 1;         
      switch dataMode
          case 0     
              Y=(N(:,1)-N(:,2))./N(:,1);
@@ -413,9 +416,7 @@ end
 
     hold on    
     xlim([min(X) max(X)]);
-    
-%% Various Fits
-    
+        
 
 %% Exponential Fit
     if T2exp
@@ -449,7 +450,7 @@ end
     end
    
     %% Negative Double Gauss
-    if length(X)>8 && negGauss_double
+    if length(X)>8 && gauss_neg_double
         myfit=fittype(['bg-A1*exp(-(x-x1).^2/(2*s1.^2))- ' ...
             'A2*exp(-(x-x2).^2/(2*s2^2))'],...
             'coefficients',{'A1','s1','x1','A2','s2','x2','bg'},...
@@ -465,11 +466,11 @@ end
         % Assign guess        
         xC1 = 0;
         xC2 = 60;
-        G=[A 15 xC1 A/10 15 xC2 bg];
+        G=[A 15 xC1 A/10 10 xC2 bg];
         
         opt.StartPoint=G;
         opt.Robust='bisquare';
-        opt.Lower=[0 0 -inf 0 0 -inf 0];
+%         opt.Lower=[0 0 -inf 0 0 -inf 0];
         % Perform the fit
         fout=fit(X,Y,myfit,opt);
         disp(fout);
@@ -487,7 +488,7 @@ end
     
  %% Negative Gauss
  
-    if length(X)>4 && negGauss
+    if length(X)>4 && gauss_neg_single
         myfit=fittype('bg-A1*exp(-(x-x1).^2/G1.^2)',...
             'coefficients',{'A1','G1','x1','bg'},'independent','x');
         opt=fitoptions(myfit);
@@ -518,7 +519,7 @@ end
     
 %% Negative Lorentz Double
     
-    if length(X)>4 && negLorentz_double
+    if length(X)>4 && lorentz_neg_double
         X= reshape(X,length(X),1);
         myfit=fittype('bg-A1*(G1/2).^2*((x-x1).^2+(G1/2).^2).^(-1)-A2*(G2/2).^2*((x-x2).^2+(G2/2).^2).^(-1)',...
             'coefficients',{'A1','G1','x1','A2','G2','x2','bg'},...
@@ -618,7 +619,7 @@ end
     end
     
     %% Negative Lorentzian
-    if length(X)>4 && negLorentz
+    if length(X)>4 && lorentz_neg_single
         myfit=fittype('bg-A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)',...
             'coefficients',{'A','G','x0','bg'},...
             'independent','x');
@@ -650,7 +651,7 @@ end
     end
     
     %% Double Loretnzian
-    if length(X)>4 && Lorentz_double
+    if length(X)>4 && lorentz_double
         myfit=fittype('bg+A1*(G1/2).^2*((x-x1).^2+(G1/2).^2).^(-1)+A2*(G2/2).^2*((x-x2).^2+(G2/2).^2).^(-1)',...
             'coefficients',{'A1','G1','x1','A2','G2','x2','bg'},...
             'independent','x');
@@ -685,7 +686,7 @@ end
     end
     
     %% Triple Lorentzian
-    if length(X)>4 && Lorentz_triple
+    if length(X)>4 && lorentz_triple
         myfit=fittype('bg+A1*(G1/2).^2*((x-x1).^2+(G1/2).^2).^(-1)+A2*(G2/2).^2*((x-x2).^2+(G2/2).^2).^(-1)+A3*(G3/2).^2*((x-x3).^2+(G3/2).^2).^(-1)',...
             'coefficients',{'A1','G1','x1','A2','G2','x2','A3','G3','x3','bg'},...
             'independent','x');
@@ -782,7 +783,7 @@ end
         
         G0=30;
         bg=min(Y);max(Y);
-        A0=(max(Y)-min(Y));
+        A1=(max(Y)-min(Y));
         inds=[Y>.9*max(Y)];            
         
         [~,i]=max(Y);
@@ -806,48 +807,110 @@ end
     %% Assymetric Lorentzian
     
     % Assymetric lorentzian fit, good for AM spec
-    if length(X)>4 && fit_lorentz_assymetric
+    if length(X)>4 && lorentz_asym_single
         g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
-        y=@(x,a,x0,G,A,bg) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1)+bg;        
-        myfit=fittype(@(a,x0,G,A,bg,x) y(x,a,x0,G,A,bg),'coefficients',{'a','x0','G','A','bg'},...
+        y=@(x,a,x0,G,A,bg) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1);        
+        
+        myfit=fittype(@(bg,a1,x1,G1,A1,x) y(x,a1,x1,G1,A1)+bg,...
+            'coefficients',{'bg','a1','x1','G1','A1'},...
             'independent','x'); 
+        
         opt=fitoptions(myfit);
-        G0=30;
+        
+        % Background
         bg=min(Y);max(Y);
-        A0=(max(Y)-min(Y));
-        inds=[Y>.9*max(Y)];            
         
-        [~,i]=max(Y);
-        x0=X(i);
-        x0=mean(X(inds));     
-        opt.StartPoint=[.1 -110 G0 A0 bg];  
+        % Linewidth
+        G1=30;
+
+        % Contrast
+        A1=(max(Y)-min(Y));
+        
+        % Center Point
+        inds=[Y>.9*max(Y)];         
+        x1=mean(X(inds));    
+        
+        % Assymetry
+        a1 = -0.05; % Long on right
+%         a1 = +0.05; % Long on left
+        
+        opt.StartPoint=[bg a1 x2 G1 A1];  
         opt.Robust='bisquare';
-%         opts.Weights=w;
         
-        fout_lorentz=fit(X,Y,myfit,opt);
+        fout_lorentz=fit(X,Y,myfit,opt)
         ci = confint(fout_lorentz,0.95);   
         
         XF=linspace(min(X)-5,max(X)+5,1000);
         xlim([min(X)-0.1 max(X)+0.1]);
         pExp=plot(XF,feval(fout_lorentz,XF),'r-','linewidth',2);
-        str=['$f_0 = ' num2str(round(fout_lorentz.x0,2)) '\pm' num2str(round((ci(2,2)-ci(1,2))/2,2)) '$ kHz' newline ...
-            '$\mathrm{FWHM} = ' num2str(round(abs(fout_lorentz.G),2)) ' $ kHz'];
-        legend(pExp,{str},'interpreter','latex','location','best','fontsize',8);         
+        str=['$f_0 = ' num2str(round(fout_lorentz.x1,2)) '\pm' ...
+            num2str(round((ci(2,2)-ci(1,2))/2,2)) '$ kHz' newline ...
+            '$\mathrm{FWHM} = ' ...
+            num2str(round(abs(fout_lorentz.G1),2)) ' $ kHz' newline ...
+            '$a = ' num2str(round(fout_lorentz.a1,3)) '$ kHz'];
+        legend(pExp,{str},'interpreter','latex','location','northwest','fontsize',10);         
+    end
+    
+    % Assymetric lorentzian fit
+    if length(X)>4 && lorentz_asym_double
+        g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
+        y=@(x,a,x0,G,A) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1);   
+        
+        foo = @(x,bg,a1,x1,G1,A1,a2,x2,G2,A2) ...
+            y(x,a1,x2,G1,A1)+y(x,a2,x2,G2,A2)+bg;
+        
+        myfit=fittype(@(bg,a1,x1,G1,A1,a2,x2,G2,A2,x) ...
+            y(x,a1,x1,G1,A1)+y(x,a2,x2,G2,A2)+bg,...
+            'coefficients',{'bg',...
+            'a1','x1','G1','A1',...
+            'a2','x2','G2','A2'},...
+            'independent','x'); 
+        opt=fitoptions(myfit);
+
+        bg=min(Y);
+        
+        G1 = 13;
+        G2 = 13;        
+                       
+        A1 = (max(Y)-min(Y));   
+        A2 = A1/20;
+        
+        inds=[Y>.9*max(Y)];
+        x1 = mean(X(inds)); 
+        x2 = x1-30; x2 = -150;
+        
+        a1 = -.05;
+        a2 = -.05;
+        
+        
+        opt.StartPoint=[bg a1 x1 G1 A1 a2 x2 G2 A2];  
+        opt.Robust='bisquare';
+%         opts.Weights=w;
+        
+        fout_lorentz=fit(X,Y,myfit,opt)
+        ci = confint(fout_lorentz,0.95);   
+        
+        XF=linspace(min(X)-5,max(X)+5,1000);
+        xlim([min(X)-0.1 max(X)+0.1]);
+        pFit=plot(XF,feval(fout_lorentz,XF),'r-','linewidth',2);
+%         str=['$f_0 = ' num2str(round(fout_lorentz.x0,2)) '\pm' num2str(round((ci(2,2)-ci(1,2))/2,2)) '$ kHz' newline ...
+%             '$\mathrm{FWHM} = ' num2str(round(abs(fout_lorentz.G),2)) ' $ kHz'];
+%         legend(pExp,{str},'interpreter','latex','location','best','fontsize',8);         
     end
     
     %% Lorentzian
     
-    if length(X)>4 && lorentz
+    if length(X)>4 && lorentz_single
         % Symmetric Lorentzian
         myfit=fittype('A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)+bg','coefficients',{'A','G','x0','bg'},...
             'independent','x');
         opt=fitoptions(myfit);
         G0=20;
         bg=min(Y);
-        A0=(max(Y)-min(Y));
+        A1=(max(Y)-min(Y));
         inds=[Y>.8*max(Y)];
         x0=mean(X(inds));
-        opt.StartPoint=[A0/100 G0 x0 bg];   
+        opt.StartPoint=[A1/100 G0 x0 bg];   
 %         opt.Upper=[1 3*G0 x0+range(X) 0];   
 
         opt.Robust='bisquare';
@@ -865,7 +928,7 @@ end
     end
     
     %% Gauss Single
-    if length(X)>4 && Gauss
+    if length(X)>4 && gauss_single
         myfit=fittype('bg+A1*exp(-(x-x1).^2/G1.^2)',...
             'coefficients',{'A1','G1','x1','bg'},...
             'independent','x');
