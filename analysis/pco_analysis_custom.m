@@ -57,6 +57,14 @@ if doCustomX
         mF2 = -5/2;
         x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
     end
+    
+            B = 205 + 0 + 0.11;
+
+        % Choose the mf States
+        mF1 = -7/2;
+        mF2 = -5/2;
+        x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
+    
 
     switch pco_xVar
         case 'Raman_AOM3_freq'
@@ -245,7 +253,7 @@ if doCustom
     gauss_single=0;
     gauss_4=0;
     gauss_neg_double=0;
-    gauss_neg_single=0;
+    gauss_neg_single=1;
     
     lorentz_neg_single=0;    
     lorentz_neg_double=0;  
@@ -465,8 +473,8 @@ end
         
         % Assign guess        
         xC1 = 0;
-        xC2 = 60;
-        G=[A 15 xC1 A/10 10 xC2 bg];
+        xC2 = 40;
+        G=[A 15 xC1 A/2 50 xC2 bg];
         
         opt.StartPoint=G;
         opt.Robust='bisquare';
@@ -499,7 +507,7 @@ end
         A=bg-Ymin;
         xC=X(ind);
         % Assign guess
-        G=[A 10 55 bg];
+        G=[A 10 35 bg];
         opt.StartPoint=G;
         opt.Robust='bisquare';
         opt.Lower=[0 0 -inf 0 0 -inf 0];
@@ -511,9 +519,9 @@ end
         % Plot the fit
         tt=linspace(min(X),max(X),1000);
         pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
-        lStr=['xC=(' num2str(round(fout.x1,2)) '±' num2str(abs(round(ci(1,3)-fout.x1,2))) ','...
-             ')' ...
-            ' FWHM=(' num2str(round(fout.G1,1)) ')' ];
+        lStr=['xC=(' num2str(round(fout.x1,2)) '±' num2str(abs(round(ci(1,3)-fout.x1,2))) ')'',' ...
+            ' FWHM=(' num2str(round(fout.G1,1)) ')'','...
+            ' A=(' num2str(round(fout.A1,1)) ')'];
         legend(pF,lStr,'location','best');
     end
     
