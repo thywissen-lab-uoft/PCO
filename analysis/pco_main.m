@@ -72,10 +72,10 @@ end
 % pco_xVar = 'rf_tof_delta_freq';
 
 % pco_xVar='HF_kdet_shift';
- pco_xVar = 'Evap_End_Power';
+%  pco_xVar = 'Evap_End_Power';
 % pco_xVar = 'rf_pulse_length';
 % pco_xVar = 'rf_rabi_time_HF';
-% pco_xVar = 'rf_freq_HF';
+pco_xVar = 'rf_freq_HF';
 
 % 
 % pco_xVar = 'latt_ramp_time';
@@ -116,14 +116,14 @@ doGaussRabi   = 0;      % Enable gauss rabi
 doBEC         = 0;      % Enable BEC analysis
 
 % Erf Fit
-doErfFit      = 0;      % En
+doErfFit      = 1;      % En
 
 % Fermi
-doFermiFitLong = 1;     % Enable Fermi Fit for XDT TOF
+doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
 
 
 % Custom Box counts
-doCustom =  0;          % Custom Box Count
+doCustom =  1;          % Custom Box Count
 
 doRabiAbsolute = 0;
 doRabiContrast = 0;
@@ -324,7 +324,7 @@ atomdata=atomdata(inds);
 % % %   ROI=[800 950 490 620;
 % % %        800 950 1520 1650];   %  band map 15 ms TOF 9box, 7 box
      ROI=[800 950 490 620;
-       800 950 1570 1700];   %  band map 15 ms TOF 9box, 7 box
+       800 950 1540 1670];   %  band map 15 ms TOF 9box, 7 box
 %    ROI = ROI(1,:); % 9 only 
 %    ROI = ROI(2,:); % 7 only
 

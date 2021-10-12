@@ -267,7 +267,7 @@ Bfb   = data.Params(1).HF_FeshValue_Initial_Lattice;
 Bshim = data.Params(1).HF_zshim_Initial_Lattice*2.35;
 Boff  = 0.11;
 
-B = Bfb + Bshim + Boff;
+B = 207 + Bshim + Boff;
 % B=201;
 
 % Choose the mf States
