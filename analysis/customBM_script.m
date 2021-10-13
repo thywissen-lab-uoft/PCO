@@ -66,7 +66,7 @@ end
 
 % Center frequency for expected RF field (if relevant)
 B = atomdata(1).Params.HF_FeshValue_Initial_Lattice;
-% B = 209;
+B = 205;
 x0= (BreitRabiK(B,9/2,-7/2)-BreitRabiK(B,9/2,-9/2))/6.6260755e-34/1E6; 
 disp(x0)
 

@@ -75,7 +75,7 @@ end
 %  pco_xVar = 'Evap_End_Power';
 % pco_xVar = 'rf_pulse_length';
 % pco_xVar = 'rf_rabi_time_HF';
-pco_xVar = 'rf_freq_HF';
+% pco_xVar = 'rf_freq_HF';
 
 % 
 % pco_xVar = 'latt_ramp_time';
@@ -100,7 +100,7 @@ pco_overrideUnit='MHz';
 doSave        = 1;      % Save the figures?
  
 % Animation
-doAnimate     = 0;      % Animate the Cloud
+doAnimate     = 1;      % Animate the Cloud
 
 % Probe Beam
 doProbeFit    = 0;      % Fit probe beam to 2D Gaussian

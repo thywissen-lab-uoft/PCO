@@ -58,13 +58,13 @@ if doCustomX
         x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
     end
     
-            B = 205 + 0 + 0.11;
+        B = 205 + 0 + 0.11;
 
         % Choose the mf States
         mF1 = -7/2;
         mF2 = -5/2;
         x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
-    
+        disp(x0)
 
     switch pco_xVar
         case 'Raman_AOM3_freq'
@@ -253,7 +253,8 @@ if doCustom
     gauss_single=0;
     gauss_4=0;
     gauss_neg_double=0;
-    gauss_neg_single=1;
+    gauss_neg_single=0;
+    gauss_double = 0;
     
     lorentz_neg_single=0;    
     lorentz_neg_double=0;  
@@ -262,8 +263,8 @@ if doCustom
     lorentz_double=0;    
     lorentz_triple=0;    
     
-    lorentz_asym_single=0;
-    lorentz_asym_double=0;
+    lorentz_asym_single= 0;
+    lorentz_asym_double= 1;
 
     fit_lorentz_assymetric_4=0;
     
@@ -275,11 +276,11 @@ Bfb   = data.Params(1).HF_FeshValue_Initial_Lattice;
 Bshim = data.Params(1).HF_zshim_Initial_Lattice*2.35;
 Boff  = 0.11;
 
-B = 207 + Bshim + Boff;
+B = Bfb + Bshim + Boff;
 % B=201;
 
 % Choose the mf States
-mF1 = -5/2;
+mF1 = -9/2;
 mF2 = -7/2;
 
 x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
@@ -327,7 +328,7 @@ end
     % Default total atom number is just the sum
     Ntot = sum(N,2);       
 
-     dataMode= 1;         
+     dataMode= 5;         
      switch dataMode
          case 0     
              Y=(N(:,1)-N(:,2))./N(:,1);
@@ -507,7 +508,7 @@ end
         A=bg-Ymin;
         xC=X(ind);
         % Assign guess
-        G=[A 10 35 bg];
+        G=[A 10 38 bg];
         opt.StartPoint=G;
         opt.Robust='bisquare';
         opt.Lower=[0 0 -inf 0 0 -inf 0];
@@ -626,6 +627,40 @@ end
 %         legend(pExp,{str},'interpreter','latex','location','best','fontsize',8);         
     end
     
+ %% Double Gauss
+ 
+    if length(X)>4 && gauss_double
+        myfit=fittype('bg+A1*exp(-(x-x1).^2/G1.^2)+A2*exp(-(x-x2).^2/G2.^2)',...
+            'coefficients',{'A1','G1','x1','A2','G2','x2','bg'},'independent','x');
+        opt=fitoptions(myfit);
+        % Background is max
+        bg=min(Y);
+        % Find center
+        [Ymin,ind]=min(Y);
+        A=bg-Ymin;
+        xC=X(ind);
+        % Assign guess
+        G=[A 10 -130 A 10 -155 bg];
+        opt.StartPoint=G;
+        opt.Robust='bisquare';
+        opt.Lower=[0 0 -inf 0 0 -inf 0];
+        % Perform the fit
+        fout=fit(X,Y,myfit,opt);
+        disp(fout);
+        ci = confint(fout,0.95);
+        disp(ci)
+        % Plot the fit
+        tt=linspace(min(X),max(X),1000);
+        pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
+        str=['$f_1 = ' num2str(round(fout.x1,2)) '\pm' num2str(round((ci(2,3)-ci(1,3))/2,2)) '$ kHz' newline ...
+            '$\mathrm{FWHM} = ' num2str(round(abs(fout.G1),2)) ' $ kHz' newline ...
+            '$f_2 = ' num2str(round(fout.x2,2)) '\pm' num2str(round((ci(2,6)-ci(1,6))/2,2)) '$ kHz' newline ...
+            '$\mathrm{FWHM} = ' num2str(round(abs(fout.G2),2)) ' $ kHz' newline...
+            'A1 =' num2str(round(fout.A1,2)) newline...
+            'A2 =' num2str(round(fout.A2,2))];
+        legend(pF,str,'location','best','interpreter','latex');
+    end
+    
     %% Negative Lorentzian
     if length(X)>4 && lorentz_neg_single
         myfit=fittype('bg-A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)',...
@@ -674,7 +709,7 @@ end
         xC=X(ind);
         
         % Assign guess
-        G=[A 30 -90 A 30 15 bg];
+        G=[A 30 -160 A 30 -135 bg];
         
         
         opt.StartPoint=G;
@@ -860,7 +895,7 @@ end
     end
     
     % Assymetric lorentzian fit
-    if length(X)>4 && lorentz_asym_double
+    if length(X)>9 && lorentz_asym_double
         g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
         y=@(x,a,x0,G,A) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1);   
         
@@ -881,11 +916,11 @@ end
         G2 = 13;        
                        
         A1 = (max(Y)-min(Y));   
-        A2 = A1/20;
+        A2 = A1/10;
         
         inds=[Y>.9*max(Y)];
-        x1 = mean(X(inds)); 
-        x2 = x1-30; x2 = -150;
+        x1 = -130;mean(X(inds)); 
+        x2 = x1-30; x2 = -180;
         
         a1 = -.05;
         a2 = -.05;
@@ -901,9 +936,13 @@ end
         XF=linspace(min(X)-5,max(X)+5,1000);
         xlim([min(X)-0.1 max(X)+0.1]);
         pFit=plot(XF,feval(fout_lorentz,XF),'r-','linewidth',2);
-%         str=['$f_0 = ' num2str(round(fout_lorentz.x0,2)) '\pm' num2str(round((ci(2,2)-ci(1,2))/2,2)) '$ kHz' newline ...
-%             '$\mathrm{FWHM} = ' num2str(round(abs(fout_lorentz.G),2)) ' $ kHz'];
-%         legend(pExp,{str},'interpreter','latex','location','best','fontsize',8);         
+        str=['$f_1 = ' num2str(round(fout_lorentz.x1,2)) '\pm' num2str(round((ci(2,3)-ci(1,3))/2,2)) '$ kHz' newline ...
+            '$\mathrm{FWHM} = ' num2str(round(abs(fout_lorentz.G1),2)) ' $ kHz' newline ...
+            '$f_2 = ' num2str(round(fout_lorentz.x2,2)) '\pm' num2str(round((ci(2,7)-ci(1,7))/2,2)) '$ kHz' newline ...
+            '$\mathrm{FWHM} = ' num2str(round(abs(fout_lorentz.G2),2)) ' $ kHz' newline...
+            'A1 =' num2str(round(fout_lorentz.A1,2)) newline...
+            'A2 =' num2str(round(fout_lorentz.A2,2))];
+        legend(pFit,str,'location','best','interpreter','latex');
     end
     
     %% Lorentzian
@@ -971,7 +1010,7 @@ end
     
     if length(X)>4 && Rabi_oscillation       
         
-        guess_freq = 1/.04;
+        guess_freq = 1/.08;
         guess_tau = 0.5;
 %     
 %         myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t))/2;           
