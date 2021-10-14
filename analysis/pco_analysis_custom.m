@@ -343,8 +343,8 @@ end
             ystr=['N_9'];
             figName=ystr;
          case 3
-            Y=N(:,1)+N(:,2);
-            ystr=['N_9+N_7'];
+            Y=N(:,1)-N(:,2);
+            ystr=['N_9-N_7'];
             figName=ystr;
          case 4
             Y=N(:,1)./(N(:,1)+N(:,2));
@@ -640,7 +640,7 @@ end
         A=bg-Ymin;
         xC=X(ind);
         % Assign guess
-        G=[A 10 -130 A 10 -155 bg];
+        G=[A 10 -130 A 10 -145 bg];
         opt.StartPoint=G;
         opt.Robust='bisquare';
         opt.Lower=[0 0 -inf 0 0 -inf 0];
@@ -916,11 +916,11 @@ end
         G2 = 13;        
                        
         A1 = (max(Y)-min(Y));   
-        A2 = A1/10;
+        A2 = A1/20;
         
         inds=[Y>.9*max(Y)];
         x1 = -130;mean(X(inds)); 
-        x2 = x1-30; x2 = -180;
+        x2 = x1-30; x2 = -200;
         
         a1 = -.05;
         a2 = -.05;
