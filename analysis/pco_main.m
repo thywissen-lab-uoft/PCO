@@ -100,7 +100,7 @@ pco_overrideUnit='MHz';
 doSave        = 1;      % Save the figures?
  
 % Animation
-doAnimate     = 1;      % Animate the Cloud
+doAnimate     = 0;      % Animate the Cloud
 
 % Probe Beam
 doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
