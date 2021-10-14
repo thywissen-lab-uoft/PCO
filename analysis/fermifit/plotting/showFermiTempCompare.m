@@ -29,7 +29,9 @@ for kk=1:length(atomdata)
         T(kk,nn)=atomdata(kk).FermiFit{nn}.Temperature;
         Tf(kk,nn)=atomdata(kk).FermiFit{nn}.FermiTemperature;
         Q(kk,nn)=atomdata(kk).FermiFit{nn}.Fit.Q;        
-        Tffreq(kk,nn)=hbar*(2*pi*freqs(kk)).*(6*Natoms(kk,nn)).^(1/3)/kB;
+        Tffreq_pure(kk,nn)=hbar*(2*pi*freqs(kk)).*(6*Natoms(kk,nn)).^(1/3)/kB;
+        Tffreq_mix(kk,nn)=hbar*(2*pi*freqs(kk)).*(6*0.5*Natoms(kk,nn)).^(1/3)/kB;
+
    end        
 end
 
@@ -68,10 +70,14 @@ p1=plot(xvals,T*1E9,'o','color',co(1,:),'linewidth',1,'markersize',8,...
    'markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5);
 p2=plot(xvals,Tf*1E9,'s','color',co(2,:),'linewidth',1,'markersize',8,...
    'markerfacecolor',co(2,:),'markeredgecolor',co(2,:)*.5);
-p3=plot(xvals,Tffreq*1E9,'^','color',co(3,:),'linewidth',1,'markersize',8,...
+p3=plot(xvals,Tffreq_pure*1E9,'^','color',co(3,:),'linewidth',1,'markersize',8,...
    'markerfacecolor',co(3,:),'markeredgecolor',co(3,:)*.5);
-strs={'$T$','$T_{Fa} = T (-6\mathrm{Li}_3(-\zeta))^{1/3} $','$T_{Fb}=\hbar {\bar \omega} (6N)^{1/3}/k_B$ '};
-legend([p1 p2 p3],strs,'location','northeast','interpreter','latex','fontsize',8);
+p4=plot(xvals,Tffreq_mix*1E9,'d','color',co(3,:),'linewidth',1,'markersize',8,...
+   'markerfacecolor',co(3,:),'markeredgecolor',co(3,:)*.5);
+
+strs={'$T$','$T_{Fa} = T (-6\mathrm{Li}_3(-\zeta))^{1/3} $','$T_{Fb}=\hbar {\bar \omega} (6N)^{1/3}/k_B$ ',...
+    '$T_{Fc}=\hbar {\bar \omega} (3N)^{1/3}/k_B$ '};
+legend([p1 p2 p3 p4],strs,'location','northeast','interpreter','latex','fontsize',8);
 
 yL=get(gca,'YLim');
 set(gca,'YLim',[0 yL(2)]);
@@ -88,7 +94,7 @@ hax.Position(2)=hax.Position(2)+5;
 co=get(gca,'colororder');
 p1=plot(xvals,T./Tf,'s','color',co(2,:),'linewidth',1,'markersize',8,...
    'markerfacecolor',co(2,:),'markeredgecolor',co(2,:)*.5);
-p2=plot(xvals,T./Tffreq,'^','color',co(3,:),'linewidth',1,'markersize',8,...
+p2=plot(xvals,T./Tffreq_pure,'^','color',co(3,:),'linewidth',1,'markersize',8,...
    'markerfacecolor',co(3,:),'markeredgecolor',co(3,:)*.5);
 ylim([0 .4]);
 strs={'$T/T_{Fa}$','$T/T_{Fb}$'};
