@@ -82,7 +82,7 @@ if isequal(xVar,'ExecutionDate')
     xlabel('ExecutionDate');
 end
 
-keyboard
+
 
 resizeFig(hF,t,[hax1 hax2]);
 

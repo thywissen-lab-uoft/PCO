@@ -97,7 +97,7 @@ pco_overrideUnit='MHz';
 %% Analysis Flags
 
 % Saving
-doSave        = 0;      % Save the figures?
+doSave        = 1;      % Save the figures?
  
 % Animation
 doAnimate     = 0;      % Animate the Cloud
@@ -111,7 +111,7 @@ doLandauZener = 0;      % Landau Zener Analysis on BOX
 doRamanSpec   = 0;      % Raman box count count analyis
 
 % Gaussian
-doGaussFit    = 0;      % Enable gauss fitting
+doGaussFit    = 1;      % Enable gauss fitting
 doGaussRabi   = 0;      % Enable gauss rabi
 doBEC         = 0;      % Enable BEC analysis
 

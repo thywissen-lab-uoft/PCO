@@ -22,6 +22,14 @@ if doBoxCount
     ylim([0 max(get(gca,'YLim'))]);    
     if doSave;saveFigure(hF_number_box,'box_number',saveOpts);end
     
+    hF_number_box_time = showAtomNumber(...
+        chDataXVar(box_data,'ExecutionDate'),'ExecutionDate',boxPopts);  
+    hF_number_box_time.Position(2)=700;
+    ylim([0 max(get(gca,'YLim'))]);    
+    if doSave;saveFigure(hF_number_box_time,'erf_number_time',saveOpts);end
+    
+    
+    
     % Plot the ratios if there are more than one ROI.
     if size(ROI,1)>1    
         hF_number_box_ratio=showNumberRatio(box_data,pco_xVar,boxPopts);
@@ -60,6 +68,14 @@ if doGaussFit
     hF_number_gauss = showAtomNumber(gauss_data,pco_xVar,gaussPopts);  
     ylim([0 max(get(gca,'YLim'))]);    
     if doSave;saveFigure(hF_number_gauss,'gauss_number',saveOpts);end
+    
+    
+    hF_number_gauss_time = showAtomNumber(...
+        chDataXVar(gauss_data,'ExecutionDate'),'ExecutionDate',gaussPopts);  
+    ylim([0 max(get(gca,'YLim'))]);  
+    hF_number_gauss_time.Position(2)=700;
+    if doSave;saveFigure(hF_number_gauss_time,'gauss_number_time',saveOpts);end
+    
     
     % Plot the ratios if there are more than one ROI.
     if size(ROI,1)>1    
@@ -133,6 +149,13 @@ if doErfFit
     hF_number_erf = showAtomNumber(erf_data,pco_xVar,ErfPopts);  
     ylim([0 max(get(gca,'YLim'))]);    
     if doSave;saveFigure(hF_number_erf,'erf_number',saveOpts);end
+    
+    hF_number_erf_time = showAtomNumber(...
+        chDataXVar(erf_data,'ExecutionDate'),'ExecutionDate',ErfPopts);  
+    ylim([0 max(get(gca,'YLim'))]);    
+    hF_number_erf_time.Position(2)=700;
+    if doSave;saveFigure(hF_number_erf_time,'erf_number_time',saveOpts);end
+    
     
     % Plot the ratios if there are more than one ROI.
     if size(erf_data.Natoms,2)>1    
