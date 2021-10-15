@@ -1844,7 +1844,7 @@ end
             disp(' ');
             disp('     New Image!');
             disp(['     Image     : ' data.Name]);            
-            t=datetime(data.Params.ExecutionDate,'InputFormat',...
+            t=datetime(data.Params.ExecutionDateStr,'InputFormat',...
                 'dd-MMM-yyyy HH:mm:SS');
             tstr=datestr(t,'yyyy-MM-dd HH:mm:SS');            
             disp(['     Sequence  : ' tstr]);

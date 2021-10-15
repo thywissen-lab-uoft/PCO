@@ -56,6 +56,10 @@ for nn=1:size(R2,2)
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
 
+if isequal(xVar,'ExecutionDate')
+    datetick('x');
+    xlabel('ExecutionDate');
+end
 
 hax2=subplot(122);
 set(hax2,'box','on','linewidth',1,'fontsize',10,...
@@ -73,6 +77,12 @@ for nn=1:size(SSE,2)
 end
 % ylim([0 1.1]);
 
+if isequal(xVar,'ExecutionDate')
+    datetick('x');
+    xlabel('ExecutionDate');
+end
+
+keyboard
 
 resizeFig(hF,t,[hax1 hax2]);
 

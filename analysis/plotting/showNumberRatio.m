@@ -61,6 +61,10 @@ yL=get(gca,'YLim');
 ylim([0 yL(2)]);
 set(gca,'YColor',[.4 .4 .4]);
 
+if isequal(xVar,'ExecutionDate')
+    datetick('x');
+    xlabel('ExecutionDate');
+end
 
 resizeFig(hF,t,[hax]);
 

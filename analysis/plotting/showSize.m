@@ -49,6 +49,13 @@ for nn=1:size(Xs,2)
    plot(xvals,Xs(:,nn)*1E6,'o-','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
+
+if isequal(xVar,'ExecutionDate')
+    datetick('x');
+    xlabel('ExecutionDate');
+end
+
+
 str=[data.FitType newline ' $\sigma_X (\mu \mathrm{m})$'];
 text(0.02,.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',...
     'interpreter','latex');
@@ -66,10 +73,16 @@ for nn=1:size(Ys,2)
    plot(xvals,Ys(:,nn)*1E6,'o-','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
+
+if isequal(xVar,'ExecutionDate')
+    datetick('x');
+    xlabel('ExecutionDate');
+end
+
+
 str=[data.FitType newline ' $\sigma_Y (\mu \mathrm{m})$'];
 text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',...
     'interpreter','latex');
-
 
 
 % Make axis
@@ -83,10 +96,15 @@ for nn=1:size(A,2)
    plot(xvals,A*1E12,'o-','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
+
+if isequal(xVar,'ExecutionDate')
+    datetick('x');
+    xlabel('ExecutionDate');
+end
+
 str=[data.FitType newline '$\pi \sigma_X \sigma_Y (\mu \mathrm{m}^2)$'];
 text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',...
     'interpreter','latex');
-
 
 % hax1.Position(4)=hax1.Position(4)-15;
 % hax2.Position(4)=hax1.Position(4);

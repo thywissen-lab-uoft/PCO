@@ -86,6 +86,9 @@ end
 legend(legStr,'location','best','fontsize',6);
 
 
-
+if isequal(xVar,'ExecutionDate')
+    datetick('x');
+    xlabel('ExecutionDate');
+end
 end
 

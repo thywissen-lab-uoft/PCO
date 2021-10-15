@@ -38,11 +38,8 @@ end
 %% Make Figure
 
 hF=figure('Name',[pad('Fermi Compare',20) FigLabel],...
-    'units','pixels','color','w','Resize','off');
-hF.Position(1)=500;
-hF.Position(2)=50;
-hF.Position(3)=1200;
-hF.Position(4)=400;
+    'units','pixels','color','w');
+hF.Position = [510 50 1200 400];clf
 drawnow;
 
 % Image directory folder string
@@ -57,13 +54,13 @@ uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
     'position',[2 2 40 20]);
 
 % Plot the temperatures
-hax=subplot(2,8,[1 2 3 9 10 11 ]);
-set(hax,'box','on','linewidth',1,'fontsize',10,'units','pixels','xgrid','on','ygrid','on');
+hax4=subplot(2,8,[1 2 3 9 10 11 ]);
+set(hax4,'box','on','linewidth',1,'fontsize',10,'units','normalized','xgrid','on','ygrid','on');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 ylabel('temperautre (nK)');
-hax.Position(4)=hax.Position(4)-20;
-hax.Position(2)=hax.Position(2)+5;
+% hax4.Position(4)=hax4.Position(4)-20;
+% hax4.Position(2)=hax4.Position(2)+5;
 co=get(gca,'colororder');
 
 p1=plot(xvals,T*1E9,'o','color',co(1,:),'linewidth',1,'markersize',8,...
@@ -74,6 +71,11 @@ p3=plot(xvals,Tffreq_pure*1E9,'^','color',co(3,:),'linewidth',1,'markersize',8,.
    'markerfacecolor',co(3,:),'markeredgecolor',co(3,:)*.3);
 p4=plot(xvals,Tffreq_mix*1E9,'v','color',co(4,:),'linewidth',1,'markersize',8,...
    'markerfacecolor',co(4,:),'markeredgecolor',co(4,:)*.3);
+
+if isequal(xVar,'ExecutionDate')
+    datetick('x');
+    xlabel('ExecutionDate');
+end
 
 drawnow
 
@@ -95,12 +97,12 @@ drawnow
 
 
 % Plot T/Tf
-hax=subplot(2,8,[4 5 6 12 13 14]);
-set(hax,'box','on','linewidth',1,'fontsize',10,'units','pixels','xgrid','on','ygrid','on');
+hax1=subplot(2,8,[4 5 6 12 13 14]);
+set(hax1,'box','on','linewidth',1,'fontsize',10,'units','normalized','xgrid','on','ygrid','on');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
-hax.Position(4)=hax.Position(4)-20;
-hax.Position(2)=hax.Position(2)+5;
+% hax1.Position(4)=hax1.Position(4)-20;
+% hax1.Position(2)=hax1.Position(2)+5;
 co=get(gca,'colororder');
 p1=plot(xvals,T./Tf,'s','color',co(2,:),'linewidth',1,'markersize',12,...
    'markerfacecolor',co(2,:),'markeredgecolor',co(2,:)*.3);
@@ -108,6 +110,12 @@ p2=plot(xvals,T./Tffreq_pure,'^','color',co(3,:),'linewidth',1,'markersize',8,..
    'markerfacecolor',co(3,:),'markeredgecolor',co(3,:)*.3);
 p3=plot(xvals,T./Tffreq_mix,'v','color',co(4,:),'linewidth',1,'markersize',8,...
    'markerfacecolor',co(4,:),'markeredgecolor',co(4,:)*.3);
+
+if isequal(xVar,'ExecutionDate')
+    datetick('x');
+    xlabel('ExecutionDate');
+end
+
 
 ylim([0 .4]);
 strs={'$T/T_{Fa}$','$T/T_{Fb}$','$T/T_{Fc}$'};
@@ -123,31 +131,41 @@ setMarkerColor(p3,co(4,:),.9);
 
 
 % Plot the atom number
-hax=subplot(2,8,[15 16]);
-set(hax,'box','on','linewidth',1,'fontsize',10,'units','pixels',...
+hax2=subplot(2,8,[15 16]);
+set(hax2,'box','on','linewidth',1,'fontsize',10,'units','normalized',...
     'yaxislocation','right','xgrid','on','ygrid','on');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 ylabel('atom number');
-hax.Position(4)=hax.Position(4)-20;
-hax.Position(2)=hax.Position(2)+5;
+% hax2.Position(4)=hax2.Position(4)-20;
+% hax2.Position(2)=hax2.Position(2)+5;
 co=get(gca,'colororder');
 plot(xvals,Natoms,'o','color',co(5,:),'linewidth',1,'markersize',8,...
    'markerfacecolor',co(5,:),'markeredgecolor',co(5,:)*.5);
 
+if isequal(xVar,'ExecutionDate')
+    datetick('x');
+    xlabel('ExecutionDate');
+end
+
 
 % Plot the trap frequency
-hax=subplot(2,8,[7 8]);
-set(hax,'box','on','linewidth',1,'fontsize',10,'units','pixels',...
+hax3=subplot(2,8,[7 8]);
+set(hax3,'box','on','linewidth',1,'fontsize',10,'units','normalized',...
     'yaxislocation','right','xgrid','on','ygrid','on');
 hold on
 xlabel([xVar '(' opts.xUnit ')'],'interpreter','none');
 ylabel('trap frequency');
-hax.Position(4)=hax.Position(4)-20;
-hax.Position(2)=hax.Position(2)+5;
+% hax3.Position(4)=hax3.Position(4)-20;
+% hax3.Position(2)=hax3.Position(2)+5;
 plot(xvals,freqs,'o','color',[.7 .7 .7],'linewidth',1,'markersize',8,...
    'markerfacecolor',[.7 .7 .7],'markeredgecolor',[.7 .7 .7]*.5);
+if isequal(xVar,'ExecutionDate')
+    datetick('x');
+    xlabel('ExecutionDate');
+end
 
+resizeFig(hF,t);
 
 
 

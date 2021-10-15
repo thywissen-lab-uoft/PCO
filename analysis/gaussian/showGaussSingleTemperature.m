@@ -109,10 +109,16 @@ for nn=1:size(Tx,2)
    plot(xvals,Tx(:,nn)*1E6,'o-','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
+
+
+if isequal(xVar,'ExecutionDate')
+    datetick('x');
+    xlabel('ExecutionDate');
+end
+
 str='$T_X (\mu \mathrm{K})$';
 text(0.02,.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',...
     'interpreter','latex');
-
 
 % Make axis
 
@@ -128,10 +134,15 @@ for nn=1:size(Ty,2)
    plot(xvals,Ty(:,nn)*1E6,'o-','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
+
+if isequal(xVar,'ExecutionDate')
+    datetick('x');
+    xlabel('ExecutionDate');
+end
+
 str='$T_y (\mu \mathrm{K})$';
 text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',...
     'interpreter','latex');
-
 
 
 % Make axis
@@ -145,10 +156,16 @@ for nn=1:size(Ty,2)
    plot(xvals,sqrt(Tx(:,nn).*Ty(:,nn))*1E6,'o-','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
+
+
+if isequal(xVar,'ExecutionDate')
+    datetick('x');
+    xlabel('ExecutionDate');
+end
+
 str='$\sqrt{T_xT_y} (\mu \mathrm{K})$';
 text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',...
     'interpreter','latex');
-
 
 resizeFig(hF,t,[hax1 hax2 hax3]);
 

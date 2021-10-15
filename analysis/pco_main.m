@@ -64,10 +64,10 @@ end
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-  pco_xVar='Raman_AOM3_freq';
+%   pco_xVar='Raman_AOM3_freq';
 % pco_xVar='Pulse_Time';
 
-% pco_xVar='ExecutionDate';
+pco_xVar='ExecutionDate';
 % pco_xVar = 'rf_tof_srs_power';
 % pco_xVar = 'rf_tof_delta_freq';
 
@@ -97,7 +97,7 @@ pco_overrideUnit='MHz';
 %% Analysis Flags
 
 % Saving
-doSave        = 1;      % Save the figures?
+doSave        = 0;      % Save the figures?
  
 % Animation
 doAnimate     = 0;      % Animate the Cloud
@@ -116,14 +116,14 @@ doGaussRabi   = 0;      % Enable gauss rabi
 doBEC         = 0;      % Enable BEC analysis
 
 % Erf Fit
-doErfFit      = 1;      % En
+doErfFit      = 0;      % En
 
 % Fermi
-doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
+doFermiFitLong = 1;     % Enable Fermi Fit for XDT TOF
 
 
 % Custom Box counts
-doCustom =  1;          % Custom Box Count
+doCustom =  0;          % Custom Box Count
 
 doRabiAbsolute = 0;
 doRabiContrast = 0;
@@ -178,9 +178,18 @@ for kk=1:length(files)
         disp(' ');
     end    
     
-    if isequal(pco_xVar,'ExecutionDate')
-        data.Params.(pco_xVar)=datenum(data.Params.(pco_xVar))*24*60*60;
-    end  
+    % Make sure executiondate is a number
+    data.Params.ExecutionDate = datenum(data.Params.ExecutionDate);
+    data.Params.ExecutionDateStr = datestr(data.Params.ExecutionDate);
+    
+    data.Units.ExecutionDate =  'days';
+    data.Units.ExecutionDateStr = 'str';
+
+    
+    
+%     if isequal(pco_xVar,'ExecutionDate')
+%         data.Params.(pco_xVar)=datenum(data.Params.(pco_xVar))*24*60*60;
+%     end  
     
     % Append pixel size and resonant cross section
     data.PixelSize = PixelSize;
@@ -192,25 +201,20 @@ disp(' ');
 
 atomdata = matchParamsFlags(atomdata);
 
-
-if isequal(pco_xVar,'ExecutionDate')
-   p=[atomdata.Params] ;
-   tmin=min([p.ExecutionDate]);
-   for kk=1:length(atomdata)
-      atomdata(kk).Params.ExecutionDate= ...
-          atomdata(kk).Params.ExecutionDate-tmin;
-   end     
-end
+% if isequal(pco_xVar,'ExecutionDate')
+%    p=[atomdata.Params] ;
+%    tmin=min([p.ExecutionDate]);
+%    for kk=1:length(atomdata)
+%       atomdata(kk).Params.ExecutionDate= ...
+%           atomdata(kk).Params.ExecutionDate-tmin;
+%    end     
+% end
 
 % Grab the unit information
 if pco_autoUnit && isfield(atomdata(1),'Units') 
     pco_unit=atomdata(1).Units.(pco_xVar);
 else
     pco_unit=pco_overrideUnit;
-end
-
-if isequal(pco_xVar,'ExecutionDate')
-   pco_unit='s'; 
 end
 
 % Sort the data by your given parameter
@@ -302,6 +306,9 @@ atomdata=atomdata(inds);
 %     820 920 370 410]; % BMZ AM SPEC 10 ms TOF
 
 
+ROI = [730 1050 660 940]; % BM 25 ms TOF
+
+
 % 12ms tof SG from lattice #850 900 300 560;
 % ROI = [830 900 695 760;
 %        830 900 630 695];
@@ -323,9 +330,12 @@ atomdata=atomdata(inds);
 % % % % % 
 % % %   ROI=[800 950 490 620;
 % % %        800 950 1520 1650];   %  band map 15 ms TOF 9box, 7 box
-     ROI=[800 950 490 620;
-       800 950 1540 1670];   %  band map 15 ms TOF 9box, 7 box
-%    ROI = ROI(1,:); % 9 only 
+
+%      ROI=[800 950 490 620;
+%        800 950 1540 1670];   %  band map 15 ms TOF 9box, 7 box
+
+   
+   %    ROI = ROI(1,:); % 9 only 
 %    ROI = ROI(2,:); % 7 only
 
 %  band map 15 ms TOF 9box, 7 box
@@ -671,6 +681,7 @@ end
 % can be used as a check.
 
 fermiFitOpts=struct;
+fermiFitOpts.FigLabel=FigLabel;
 fermiFitOpts.xUnit=pco_unit;
 fermiFitOpts.ShowDetails=1;         % Plot shot-by-shot details?
 fermiFitOpts.SaveDetails=1;         % Save shot-by-shot details?
@@ -718,13 +729,12 @@ end
 
 % Plotting
 if doFermiFitLong
-    hF_fermi_temp=showFermiTemp(atomdata,pco_xVar,fermiFitOpts);    
-    if doSave;saveFigure(hF_fermi_temp,'fermi_temperature',saveOpts);end
-    
     hF_fermi_error=showFermiError(atomdata,pco_xVar,fermiFitOpts);    
-    if doSave;saveFigure(hF_fermi_error,'fermi_error',saveOpts);end       
-
+    if doSave;saveFigure(hF_fermi_error,'fermi_error',saveOpts);end      
     
+    hF_fermi_temp=showFermiTemp(atomdata,pco_xVar,fermiFitOpts);    
+    if doSave;saveFigure(hF_fermi_temp,'fermi_temperature',saveOpts);end    
+
     hF_fermi_temp2=showFermiTempCompare(atomdata,pco_xVar,fermiFitOpts);    
     if doSave;saveFigure(hF_fermi_temp2,'fermi_compare',saveOpts);end
 end

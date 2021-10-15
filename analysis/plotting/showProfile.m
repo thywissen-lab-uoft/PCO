@@ -243,11 +243,18 @@ for kk=1:(ceil(length(atomdata)/pMax))
         
         % Draw the analysis string box
         iterNum=(kk-1)*pMax+ii;
+        
+        % x variable string
+        if isequal(xVar,'ExecutionDate')
+            xstr = datestr(atomdataSUB(ii).Params.(xVar),'mm/DD HH:MM:ss');
+        else
+            xstr = num2str(atomdataSUB(ii).Params.(xVar));
+        end
 
         % Draw the iteration number and variable value
         text(3, ax.Position(4)-2, ...
             ['{\bf(' num2str(iterNum) ')' newline ...
-            num2str(atomdataSUB(ii).Params.(xVar)) '}'], ...
+            xstr '}'], ...
             'Units', 'pixels',...
             'FontSize', 8,...
             'verticalalignment','cap','HorizontalAlignment','left');

@@ -65,6 +65,12 @@ for nn=1:size(nPeak,2)
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
 
+if isequal(xVar,'ExecutionDate')
+    datetick('x');
+    xlabel('ExecutionDate');
+end
+
+
 str=['$n=\frac{N}{(2\pi)^{3/2}\sigma_X \sigma_Y \sigma_Z}$' newline '$\sigma_z=\sigma_y$'];
 text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',...
     'interpreter','latex');

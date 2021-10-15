@@ -28,10 +28,10 @@ end
 
 hF=figure('Name',[pad('Fermi Temp',20) FigLabel],...
     'units','pixels','color','w','Resize','off');
-hF.Position(1)=500;
-hF.Position(2)=50;
-hF.Position(3)=650;
-hF.Position(4)=350;
+hF.Position(1)=5;
+hF.Position(2)=380;
+hF.Position(3)=500;
+hF.Position(4)=300;
 drawnow;
 
 % Image directory folder string
@@ -65,6 +65,10 @@ p2=plot(xvals,Tf*1E9,'s','color',co(2,:),'linewidth',1,'markersize',8,...
 p3=plot(xvals,Tg*1E9,'v','color',co(4,:),'linewidth',1,'markersize',8,...
    'markerfacecolor',co(4,:),'markeredgecolor',co(4,:)*.5);
 
+if isequal(xVar,'ExecutionDate')
+    datetick('x');
+    xlabel('ExecutionDate');
+end
 
 
  ylim([0 400]);
@@ -85,6 +89,7 @@ ylabel('T/TF');
 
 % set(gca,'YColor',co(3,:))
 set(gca,'YColor','k')
+resizeFig(hF,t,[hax]);
 
 end
 

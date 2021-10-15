@@ -60,9 +60,16 @@ for nn=1:size(Xc,2)
    plot(xvals,Xc(:,nn),'o','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
+
+if isequal(xVar,'ExecutionDate')
+    datetick('x');
+    xlabel('ExecutionDate');
+end
+
 str='X centre (px)';
 text(0.02,.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',...
     'interpreter','latex');
+
 
 %% Table X
 
@@ -90,6 +97,12 @@ for nn=1:size(Yc,2)
    plot(xvals,Yc(:,nn),'o','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
+
+if isequal(xVar,'ExecutionDate')
+    datetick('x');
+    xlabel('ExecutionDate');
+end
+
 str='Y centre (px)';
 text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',...
     'interpreter','latex');

@@ -88,22 +88,20 @@ t.Position(4)=t.Extent(4);
 t.Position(3)=hF.Position(3);
 t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
 
+% Draw PCO label
 uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
     'w','horizontalalignment','left','fontsize',12,'fontweight','bold',...
     'position',[2 2 40 20]);
 
 % Make axis
-hax=axes;
-set(hax,'box','on','linewidth',1,'fontsize',10,'xgrid','on',...
-    'ygrid','on');
+hax=axes;co=get(gca,'colororder');
+set(hax,'box','on','linewidth',1,'fontsize',10,...
+    'xgrid','on','ygrid','on');
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 ylabel([data.FitType ' atom number']);
-
-
         
-co=get(gca,'colororder');
-
+% Plot the data
 for nn=1:size(Natoms,2)
    plot(X,Natoms(:,nn),'o','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
@@ -150,9 +148,11 @@ if doLorentzianFit
     hax.YLim(1)=0;
 end
 
-
+if isequal(xVar,'ExecutionDate')
+    datetick('x');
+    xlabel('ExecutionDate');
+end
 
 resizeFig(hF,t,[hax]);
-
 end
 
