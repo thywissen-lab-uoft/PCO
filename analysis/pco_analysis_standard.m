@@ -184,3 +184,26 @@ if doErfFit
     if doSave;saveFigure(hF_density,'erf_density',saveOpts);end 
       
 end
+
+%% Fermi Fit Analysis
+   
+if doFermiFitLong
+    % This is the default fermi analysis.
+
+    fermiPopts=struct;
+    fermiPopts.FigLabel = FigLabel;
+    fermiPopts.xUnit=pco_unit;
+
+    % Error 
+    hF_fermi_error=showFermiError(fermi_data,pco_xVar,fermiPOpts);    
+    if doSave;saveFigure(hF_fermi_error,'fermi_error',saveOpts);end      
+    
+    % Temperature
+    hF_fermi_temp=showFermiTemp(fermi_data,pco_xVar,fermiPOpts);    
+    if doSave;saveFigure(hF_fermi_temp,'fermi_temperature',saveOpts);end    
+
+    % Summary
+    hF_fermi_temp2=showFermiTempCompare(fermi_data,pco_xVar,fermiPOpts);    
+    if doSave;saveFigure(hF_fermi_temp2,'fermi_compare',saveOpts);end
+end 
+

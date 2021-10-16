@@ -39,6 +39,7 @@ for kk=1:length(atomdata)
             nbg(kk,nn)=fout.bg;                         % Background
             
             % Grab the atom number and temperature
+            Freqs(kk,nn)            = fermi.Freq;
             Natoms(kk,nn)           = fermi.AtomNumber;
             T(kk,nn)                = fermi.Temperature;
             Tf_shape(kk,nn)         = fermi.FermiTemperature_shape;
@@ -97,6 +98,7 @@ output.FitSSE       = SSEs;
 
 % Assign fermi fit outputs
 output.Natoms               = Natoms;
+output.Freq                 = Freqs;
 output.Temperature          = T;
 output.Tf_shape             = Tf_shape;
 output.Tf_N_Freq_Pure       = Tf_N_Freq_Pure;

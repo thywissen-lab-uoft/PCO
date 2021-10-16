@@ -275,11 +275,13 @@ warning on
 
 % Use Trap Frequency and atom number for Fermi Temperature
 if isfield(opts,'Freq')
+    fitFermi.Freq = opts.Freq;
     fitFermi.FermiTemperature_N_Freq_Pure = ...
         hbar*(2*pi*opts.Freq).*(6*Natoms).^(1/3)/kB;
     fitFermi.FermiTemperature_N_Freq_Mix = ...
         hbar*(2*pi*opts.Freq).*(6*0.5*Natoms).^(1/3)/kB;
 else
+    fitFermi.Freq = NaN;
     fitFermi.FermiTemperature_N_Freq_Pure = NaN;
     fitFermi.FermiTemperature_N_Freq_Mix = NaN;
 end

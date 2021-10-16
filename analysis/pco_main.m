@@ -777,26 +777,6 @@ if doFermiFitLong
 end
 
 
-
-
-
-
-%%
-
-% Plotting
-if doFermiFitLong
-    hF_fermi_error=showFermiError(atomdata,pco_xVar,fermiFitOpts);    
-    if doSave;saveFigure(hF_fermi_error,'fermi_error',saveOpts);end      
-    
-    hF_fermi_temp=showFermiTemp(atomdata,pco_xVar,fermiFitOpts);    
-    if doSave;saveFigure(hF_fermi_temp,'fermi_temperature',saveOpts);end    
-
-    hF_fermi_temp2=showFermiTempCompare(atomdata,pco_xVar,fermiFitOpts);    
-    if doSave;saveFigure(hF_fermi_temp2,'fermi_compare',saveOpts);end
-end
-
-
-
 %% OD Profiles w or w/o Fits 
 profile_opts = struct;
 profile_opts.Style = 'cut'; 'sum';  % Cut or sum?
