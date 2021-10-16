@@ -104,7 +104,7 @@ fitGopts.Upper=[2*A 5*W 5*W Xc+10 Yc+10 .05];
 if isfield(opts,'GaussFit')
     foutG=opts.GaussFit;
     fitGopts.Start=[foutG.A foutG.Xs foutG.Ys foutG.Xc foutG.Yc foutG.nbg];
-end  
+end 
 
 
 % Perform the fit

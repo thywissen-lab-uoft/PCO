@@ -137,24 +137,29 @@ doUpload = 1;       % Upload to google drive?
 % Choose the directory where the images to analyze are stored
 disp([datestr(now,13) ' Choose an image analysis folder...']);
 dialog_title='Choose the root dire ctory of the images';
-newdir=uigetdir(getImageDir(datevec(now)),dialog_title);
 
-saveOpts = struct;
+if getImageDir(datevec(now))
+    newdir=uigetdir(getImageDir(datevec(now)),dialog_title);
+    saveOpts = struct;
 
-if isequal(newdir,0)
-    disp('Canceling.');    
-    return 
+    if isequal(newdir,0)
+        disp('Canceling.');    
+        return; 
+    else
+        imgdir = newdir;
+        saveDir = [imgdir filesep 'figures'];
+
+        if ~exist(saveDir,'dir'); mkdir(saveDir);end    
+
+        saveOpts.saveDir=saveDir;
+        saveOpts.Quality = 'auto';
+
+        strs=strsplit(imgdir,filesep);
+        FigLabel=[strs{end-1} filesep strs{end}];
+    end
 else
-    imgdir = newdir;
-    saveDir = [imgdir filesep 'figures'];
-    
-    if ~exist(saveDir,'dir'); mkdir(saveDir);end    
-        
-    saveOpts.saveDir=saveDir;
-    saveOpts.Quality = 'auto';
-
-    strs=strsplit(imgdir,filesep);
-    FigLabel=[strs{end-1} filesep strs{end}];
+    disp('Canceling.');
+    return;
 end
 
 %% Load the data
@@ -680,52 +685,94 @@ end
 % However, if the trap frequency is known via an independent measure, it
 % can be used as a check.
 
+% Determine which ROI to do Fermi Fit
+if isfield(atomdata(1),'Flags') 
+    switch atomdata(1).Flags.image_atomtype
+        case 0; DFGinds = zeros(size(ROI,1),1);
+        case 1; DFGinds = ones(size(ROI,1),1);
+        case 2; DFGinds = (ROI(:,3)<1024);   
+    end
+end
+
 fermiFitOpts=struct;
-fermiFitOpts.FigLabel=FigLabel;
-fermiFitOpts.xUnit=pco_unit;
+% fermiFitOpts.FigLabel=FigLabel;
+% fermiFitOpts.xUnit=pco_unit;
 fermiFitOpts.ShowDetails=1;         % Plot shot-by-shot details?
 fermiFitOpts.SaveDetails=1;         % Save shot-by-shot details?
 fermiFitOpts.AutoROI=1;             % Automatically choose ROI from Gaussian Fit to optimize fitting speed
+fermiFitOpts.DFGinds=DFGinds;
 
-% Determine which ROIs to perform BEC analysis on (for double shutter)
-if isfield(atomdata(1),'Flags') 
-    switch atomdata(1).Flags.image_atomtype
-        case 0
-            DFGinds=zeros(size(ROI,1),1);
-        case 1
-            DFGinds=ones(size(ROI,1),1);
-        case 2
-            DFGinds=zeros(size(ROI,1),1);
-            for nn=1:size(ROI)
-                if ROI(nn,3)<1024
-                   DFGinds(nn)=1; 
-                end                
-            end
-    end
-end
     
-% Do the analysis
-if doFermiFitLong    
-    fermiFitOpts.DFGinds=DFGinds;
+% Do the fermi fit
+if doFermiFitLong        
+    xdt_end_power_var = 'Evap_End_Power';
+%     xdt_end_power_var = 'power_val';
+    xdt_pow2freq = @(P) 61.5*sqrt(P./(0.085)); % Calibrated 2021.02.25
+    
+    for kk=1:length(atomdata)
+        disp(repmat('-',1,60));   
+        disp(['(' num2str(kk) ') ' atomdata(kk).Name]);
+        for nn=1:size(atomdata(kk).ROI,1)   % Iterate over all ROIs
+            if DFGinds(nn)
+                % Grab the ROI
+                sROI = atomdata(kk).ROI(nn,:);   
 
-    % Calculate trap frequencies
-    params=[atomdata.Params];
+                % Grab the Gauss Fit if it exists (better initial guess)
+                if isfield(atomdata(kk),'GaussFit')
+                    gFit = atomdata(kk).GaussFit{nn};
+                    
+                    fermiFitOpts.GaussFit = gFit;
+                    
+                    % Determine the auto ROI if necessary
+                    if FermiFitOpts.AutoROI
+                        sROI=[[-1 1]*5*gFit.Xs [-1 1]*5*gFit.Ys] + ...
+                            [[1 1]*gFit.Xc [1 1]*gFit.Yc];
+                        sROI=round(sROI);
 
-    % Evaporation end power
-    powers=[params.Evap_End_Power];
+                        sROI(1)=max([sROI(1) 1]);           
+                        sROI(2)=min([sROI(2) size(atomdata(kk).OD,2)]);
+                        sROI(3)=max([sROI(3) 1]);
+                        sROI(4)=min([sROI(4) size(atomdata(kk).OD,1)]); 
+                    end
+                else
+                    rmfield(fermiFitOpts,'GaussFit');
+                end        
+                
+                % Grab the data
+                Dx = sROI(1):sROI(2);Dy = sROI(3):sROI(4);
+                Z = atomdata(kk).OD(Dy,Dx);               
+                
+                % Important Meta Data
+                fermiFitOpts.TOF = atomdata(kk).tof*1e-3;
+                fermiFitOpts.Freq = xdt_pow2freq(atomdata(kk).Params.(xdt_end_power_var));
+                fermiFitOpts.PixelSize = PixelSize;
+                
+                % Perform the fit  
+                [fitFermi,fitGauss,hF]=fermiFit(Dx,Dy,Z,fermiFitOpts);    
 
-    % For ODT ramp back up
-    % powers=[params.power_val];
-
-    foo = @(P) 61.5*sqrt(P./(0.085)); % Calibrated 2021.02.25
-    freqs=foo(powers);        
-    fermiFitOpts.Freqs=freqs;  
+                
+%                 [fout,gof,output,N]=erfFit2D(Dx,Dy,Z);    % Perform the fit  
+                
+%                 Natoms = N*(PixelSize^2/CrossSection);
+%                 atomdata(kk).ErfFit{nn} = fout; % Assign the fit object       
+%                 atomdata(kk).ErfGOF{nn} = gof; % Assign the fit object
+%                 atomdata(kk).ErfNum{nn} = Natoms;
+            end
+        end
+    end    
     
     disp(repmat('-',1,60));    
     disp('Performing Fermi-Fit long tof');
     disp(repmat('-',1,60));       
     atomdata=computeFermiFit(atomdata,fermiFitOpts); 
 end
+
+
+
+
+
+
+%%
 
 % Plotting
 if doFermiFitLong

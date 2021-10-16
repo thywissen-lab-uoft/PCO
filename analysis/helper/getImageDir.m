@@ -1,9 +1,15 @@
 function [dirDay] = getImageDir(mydatevec)
 
-dirYear  = ['Y:\Data' filesep num2str(mydatevec(1))];
+dirSource = 'Y:\Data';
+dirYear  = [dirSource filesep num2str(mydatevec(1))];
 dirMonth = [dirYear filesep num2str(mydatevec(1)) '.' sprintf('%2.2d',mydatevec(2))];
 dirDay   = [dirMonth filesep sprintf('%2.2d',mydatevec(2)) '.' sprintf('%2.2d',mydatevec(3))];
 
+if ~exist(dirSource)
+   warning('No data server found.');
+   dirDay = 0;
+   return;  
+end
 
 if exist(dirYear)~=7
    mkdir(dirYear); 
