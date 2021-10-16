@@ -1,4 +1,4 @@
-function hF=showFermiTemp(atomdata,xVar,opts)
+function hF=showFermiTemp(data,xVar,opts)
 if nargin == 3 && isfield(opts,'FigLabel') 
     FigLabel = opts.FigLabel;
 else
@@ -6,23 +6,17 @@ else
 end
 
 
-%% Sort the data by the parameter given
-params=[atomdata.Params];
-xvals=[params.(xVar)];
+%% Grab the Data
+params=[data.Params];
+X=[params.(xVar)];
 
-[xvals,inds]=sort(xvals,'ascend');
-atomdata=atomdata(inds);
-
-%% Grab the fermi fit outputs
-for kk=1:length(atomdata)
-   for nn=1:length(atomdata(kk).FermiFit)
-        Natoms(kk,nn)=atomdata(kk).FermiFit{nn}.AtomNumber;
-        T(kk,nn)=atomdata(kk).FermiFit{nn}.Temperature;
-        Tf(kk,nn)=atomdata(kk).FermiFit{nn}.FermiTemperature;
-        Q(kk,nn)=atomdata(kk).FermiFit{nn}.Fit.Q;        
-        Tg(kk,nn)=atomdata(kk).FermiFitGauss{nn}.Temperature;
-   end        
-end
+Natoms = data.Natoms;
+T = data.Temperature;
+Tfa = data.Tf_shape;
+Tfb = data.Tf_N_Freq_Pure;
+Tfc = data.Tf_N_Freq_Mix;
+Tg = data.Gauss_Temperature;
+Freqs = data.Freq;
 
 %% Make Figure
 
@@ -58,11 +52,11 @@ hax.Position(4)=hax.Position(4)-20;
 co=get(gca,'colororder');
 
 
-p1=plot(xvals,T*1E9,'o','color',co(1,:),'linewidth',1,'markersize',8,...
+p1=plot(X,T*1E9,'o','color',co(1,:),'linewidth',1,'markersize',8,...
     'markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5);
-p2=plot(xvals,Tf*1E9,'s','color',co(2,:),'linewidth',1,'markersize',8,...
+p2=plot(X,Tfa*1E9,'s','color',co(2,:),'linewidth',1,'markersize',8,...
     'markerfacecolor',co(2,:),'markeredgecolor',co(2,:)*.5);
-p3=plot(xvals,Tg*1E9,'v','color',co(4,:),'linewidth',1,'markersize',8,...
+p3=plot(X,Tg*1E9,'v','color',co(4,:),'linewidth',1,'markersize',8,...
    'markerfacecolor',co(4,:),'markeredgecolor',co(4,:)*.5);
 
 if isequal(xVar,'ExecutionDate')
@@ -77,7 +71,7 @@ end
 yyaxis right
 
 
-   plot(xvals,T./Tf,'^','color','k','linewidth',1,'markersize',8,...
+   plot(X,T./Tfa,'^','color','k','linewidth',1,'markersize',8,...
        'markerfacecolor',[.6 .6 .6],'markeredgecolor','k');
 
 

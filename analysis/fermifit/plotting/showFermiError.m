@@ -1,4 +1,4 @@
-function hF=showFermiError(atomdata,xVar,opts)
+function hF=showFermiError(data,xVar,opts)
 
 if nargin == 3 && isfield(opts,'FigLabel') 
     FigLabel = opts.FigLabel;
@@ -6,27 +6,15 @@ else
     FigLabel = '';
 end
 
-%% Sort the data by the parameter given
-params=[atomdata.Params];
-xvals=[params.(xVar)];
+%% Grab the Data
+params=[data.Params];
+X=[params.(xVar)];
 
-[xvals,inds]=sort(xvals,'ascend');
-atomdata=atomdata(inds);
+sse = data.FitSSE;
+sseg = data.GaussFit_SSE;
+r2 = data.FitR2;
+r2g = data.GaussFit_R2;
 
-%% Grab the fermi fit outputs
-for kk=1:length(atomdata)
-    nn=1;
-        Natoms(kk,nn)=atomdata(kk).FermiFit{nn}.AtomNumber;
-        T(kk,nn)=atomdata(kk).FermiFit{nn}.Temperature;
-        Tf(kk,nn)=atomdata(kk).FermiFit{nn}.FermiTemperature;
-        Q(kk,nn)=atomdata(kk).FermiFit{nn}.Fit.Q;
-        
-        Tg(kk,nn)=atomdata(kk).FermiFitGauss{nn}.Temperature;
-        sse(kk,nn)=atomdata(kk).FermiFit{nn}.SSE;
-        sseg(kk,nn)=atomdata(kk).FermiFitGauss{nn}.SSE;
-        r2(kk,nn)=atomdata(kk).FermiFit{nn}.R2;
-        r2g(kk,nn)=atomdata(kk).FermiFitGauss{nn}.R2;
-end
 
 %% Make Figure
 hF=figure('Name',[pad('Fermi Error',20) FigLabel],...
@@ -60,9 +48,9 @@ ylabel('rsquared');
 hax1.Position(4)=hax1.Position(4)-20;
 co=get(gca,'colororder');
 
-p1=plot(xvals,r2,'o','color',co(1,:),'linewidth',1,'markersize',8,...
+p1=plot(X,r2,'o','color',co(1,:),'linewidth',1,'markersize',8,...
    'markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5);
-p2=plot(xvals,r2g,'v','color',co(4,:),'linewidth',1,'markersize',8,...
+p2=plot(X,r2g,'v','color',co(4,:),'linewidth',1,'markersize',8,...
    'markerfacecolor',co(4,:),'markeredgecolor',co(4,:)*.5);
 set(gca,'YScale','Log');
 
@@ -89,9 +77,9 @@ ylabel('sse');
 hax2.Position(4)=hax2.Position(4)-20;
 co=get(gca,'colororder');
 
-p1=plot(xvals,sse,'o','color',co(1,:),'linewidth',1,'markersize',8,...
+p1=plot(X,sse,'o','color',co(1,:),'linewidth',1,'markersize',8,...
    'markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5);
-p2=plot(xvals,sseg,'v','color',co(4,:),'linewidth',1,'markersize',8,...
+p2=plot(X,sseg,'v','color',co(4,:),'linewidth',1,'markersize',8,...
    'markerfacecolor',co(4,:),'markeredgecolor',co(4,:)*.5);
 
 if isequal(xVar,'ExecutionDate')

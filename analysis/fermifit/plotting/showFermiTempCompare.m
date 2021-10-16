@@ -10,12 +10,12 @@ end
 params=[data.Params];
 X=[params.(xVar)];
 
-Natoms = data.AtomNumber;
+Natoms = data.Natoms;
 T = data.Temperature;
-Tfa = data.FermiTemperature_shape;
-Tfb = data.FermiTemperature_N_Freq_Pure;
-Tfc = data.FermiTemperature_N_Freq_Mix;
-Freqs = data.Freqs;
+Tfa = data.Tf_shape;
+Tfb = data.Tf_N_Freq_Pure;
+Tfc = data.Tf_N_Freq_Mix;
+Freqs = data.Freq;
 
 %% Make Figure
 
