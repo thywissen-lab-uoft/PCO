@@ -56,31 +56,18 @@ Xc=mean(X(Zx>.9*max(Zx)));
 % Y Center Guess - Find average of >90%
 Yc=mean(Y(Zy>.9*max(Zy)));
 
-% Y Width
+% Gauss Y Width Guess
 Xs=1.0*sqrt(sum((X-Xc).^2.*Zx)/sum(Zx)); % X standard deviation * 1.5
 
-% X Width
+% Gauss X Width Guess
 Ys=1.0*sqrt(sum((Y-Yc).^2.*Zy)/sum(Zy)); % Y standard deviation * 1.5
 
-% Width
-W = mean([Xs Ys]);
-
-% Fugacity guess (always guess to 1, FREE PARAMTER)
-z = 1; % Whhen z=1, T/Tf is about 0.5;
-% z=10^-5;
-
-Q = log(z); % Fit using ln(fugacity), numerically simpler (see writeups)
-Q = 1;
-Trel=real((-6*polylog(3,-z))^(-1/3));
-
-% Amplitude Guess - Find average of >80%.
+% Gauss Amplitude Guess
 A = median(Z(Z>.8*max(max(Z))))/.9;
-% Ag = -A/(polylog(2,-1)*Trel^2);        % Scale by amplitude of polylog
-A1 = -A/(polylog(2,-1)*(1E-2)^2);
-% A2 = -A/(polylog(2,-1)*(1E2)^2);
 
-% The guess vector
-% gg=[Ag W Q Xc Yc];
+% Maximum Fermi Amplitude
+A_max = -A/(polylog(2,-1)*(1E-2)^2);
+
 
 %% Gauss Fit 2D
 
@@ -92,15 +79,20 @@ fitGopts.MaxIter=1000;
 fitGopts.DiffMaxChange=0.5;
 fitGopts.MaxFunEvals=1000;
 
-% Set the fitting parameters bounds
-fitGopts.Start=[A W W Xc Yc 0];
-fitGopts.Lower=[0 W/5 W/5 Xc-10 Yc-10 -.05];
-fitGopts.Upper=[2*A 5*W 5*W Xc+10 Yc+10 .05];    
 
+% Grab old fit parameters if available
 if isfield(opts,'GaussFit')
     foutG=opts.GaussFit;
-    fitGopts.Start=[foutG.A foutG.Xs foutG.Ys foutG.Xc foutG.Yc foutG.nbg];
+    A = foutG.A;
+    Xs = foutG.Xs; Ys = foutG.Ys;
+    Xc = foutG.Xc; Yc = foutG.Xc;
+    nb = foutG.nbg;
 end 
+
+% Set the fitting parameters bounds
+fitGopts.Start=[A Xs Ys Xc Yc 0];
+fitGopts.Lower=[0 Xs/5 Ys/5 Xc-10 Yc-10 -.05];
+fitGopts.Upper=[2*A 5*Xs 5*Ys Xc+10 Yc+10 .05];    
 
 % Perform the fit
 fprintf('Performing gaussian benchmark fit ... ');
@@ -161,8 +153,7 @@ W_g = mean([foutG.Wx foutG.Wy]);
 W_g = W_g*1; % Fudge Factor 
 
 % Fermi Center Guess
-Xc_g=foutG.Xc;
-Yc_g=foutG.Yc;
+Xc_g=foutG.Xc; Yc_g=foutG.Yc;
 
 % Fermi Background Guess
 bg=foutG.bg;
@@ -228,20 +219,6 @@ disp(' ');
 
 %% Fermi-Fit 
 
-% % Define the fit object
-% fitFermi=fittype(@(A,W,Q,Xc,Yc,X,Y) ODfunc(X,Y,A,W,Q,Xc,Yc),...
-%     'coefficients',{'A','W','Q','Xc','Yc'},'independent',{'X','Y'});
-% fitopts=fitoptions(fitFermi);
-% 
-% % Make the initial guess
-% fitopts.Start=gg;
-% fitopts.Lower=[0 W/5 -14 Xc-10 Yc-10];
-% fitopts.Upper=[A1 5*W 20 Xc+10 Yc+10];
-% fitopts.TolFun=1E-9;
-% fitopts.MaxIter=1000;
-% fitopts.DiffMaxChange=0.5;
-% fitopts.MaxFunEvals=1000;
-
 % Define the fit object
 fitFermi_obj=fittype(@(A,W,Q,Xc,Yc,bg,X,Y) ODfunc(X,Y,A,W,Q,Xc,Yc)+bg,...
     'coefficients',{'A','W','Q','Xc','Yc','bg'},'independent',{'X','Y'});
@@ -250,7 +227,7 @@ fitopts=fitoptions(fitFermi_obj);
 % Make the initial guess
 fitopts.Start=[gg fitGauss.Fit.bg];
 fitopts.Lower=[0 W/5 -14 Xc-10 Yc-10 fitGauss.Fit.bg-.02];
-fitopts.Upper=[A1 5*W 20 Xc+10 Yc+10 fitGauss.Fit.bg+.02];
+fitopts.Upper=[A_max 5*W 20 Xc+10 Yc+10 fitGauss.Fit.bg+.02];
 % fitopts.TolFun=1E-7;
 fitopts.MaxIter=1000;
 fitopts.DiffMaxChange=0.5;
@@ -268,8 +245,6 @@ disp(' ');
 warning off
 Zfit=feval(fout,xx,yy);
 warning on
-
-
 
 % Confidence Intervals
 c=confint(fout);
