@@ -1,4 +1,4 @@
-function hF=showFermiTempCompare(atomdata,xVar,opts)
+function hF=showFermiTempCompare(data,xVar,opts)
 
 if nargin == 3 && isfield(opts,'FigLabel') 
     FigLabel = opts.FigLabel;
@@ -6,34 +6,16 @@ else
     FigLabel = '';
 end
 
-kB=1.38064852E-23;
-amu=1.66053907E-27 ;
-mK=40*amu;
-h=6.62607004E-34;
-hbar=h/(2*pi);
+%% Grab the Data
+params=[data.Params];
+X=[params.(xVar)];
 
-freqs=opts.Freqs;
-
-
-%% Sort the data by the parameter given
-params=[atomdata.Params];
-xvals=[params.(xVar)];
-
-[xvals,inds]=sort(xvals,'ascend');
-atomdata=atomdata(inds);
-
-%% Grab the fermi fit outputs
-for kk=1:length(atomdata)
-   for nn=1:length(atomdata(kk).FermiFit)
-        Natoms(kk,nn)=atomdata(kk).FermiFit{nn}.AtomNumber;
-        T(kk,nn)=atomdata(kk).FermiFit{nn}.Temperature;
-        Tf(kk,nn)=atomdata(kk).FermiFit{nn}.FermiTemperature;
-        Q(kk,nn)=atomdata(kk).FermiFit{nn}.Fit.Q;        
-        Tffreq_pure(kk,nn)=hbar*(2*pi*freqs(kk)).*(6*Natoms(kk,nn)).^(1/3)/kB;
-        Tffreq_mix(kk,nn)=hbar*(2*pi*freqs(kk)).*(6*0.5*Natoms(kk,nn)).^(1/3)/kB;
-
-   end        
-end
+Natoms = data.Natoms;
+T = data.Temperature;
+Tfa = data.Tf_shape;
+Tfb = data.Tf_N_Freq_Pure;
+Tfc = data.Tf_N_Freq_Mix;
+Freqs = data.Freq;
 
 %% Make Figure
 
@@ -63,13 +45,13 @@ ylabel('temperautre (nK)');
 % hax4.Position(2)=hax4.Position(2)+5;
 co=get(gca,'colororder');
 
-p1=plot(xvals,T*1E9,'o','color',co(1,:),'linewidth',1,'markersize',8,...
+p1=plot(X,T*1E9,'o','color',co(1,:),'linewidth',1,'markersize',8,...
    'markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.3);
-p2=plot(xvals,Tf*1E9,'s','color',co(2,:),'linewidth',1,'markersize',12,...
+p2=plot(X,Tfa*1E9,'s','color',co(2,:),'linewidth',1,'markersize',12,...
    'markerfacecolor',co(2,:),'markeredgecolor',co(2,:)*.3);
-p3=plot(xvals,Tffreq_pure*1E9,'^','color',co(3,:),'linewidth',1,'markersize',8,...
+p3=plot(X,Tfb*1E9,'^','color',co(3,:),'linewidth',1,'markersize',8,...
    'markerfacecolor',co(3,:),'markeredgecolor',co(3,:)*.3);
-p4=plot(xvals,Tffreq_mix*1E9,'v','color',co(4,:),'linewidth',1,'markersize',8,...
+p4=plot(X,Tfc*1E9,'v','color',co(4,:),'linewidth',1,'markersize',8,...
    'markerfacecolor',co(4,:),'markeredgecolor',co(4,:)*.3);
 
 if isequal(xVar,'ExecutionDate')
@@ -104,11 +86,11 @@ xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 % hax1.Position(4)=hax1.Position(4)-20;
 % hax1.Position(2)=hax1.Position(2)+5;
 co=get(gca,'colororder');
-p1=plot(xvals,T./Tf,'s','color',co(2,:),'linewidth',1,'markersize',12,...
+p1=plot(X,T./Tfa,'s','color',co(2,:),'linewidth',1,'markersize',12,...
    'markerfacecolor',co(2,:),'markeredgecolor',co(2,:)*.3);
-p2=plot(xvals,T./Tffreq_pure,'^','color',co(3,:),'linewidth',1,'markersize',8,...
+p2=plot(X,T./Tfb,'^','color',co(3,:),'linewidth',1,'markersize',8,...
    'markerfacecolor',co(3,:),'markeredgecolor',co(3,:)*.3);
-p3=plot(xvals,T./Tffreq_mix,'v','color',co(4,:),'linewidth',1,'markersize',8,...
+p3=plot(X,T./Tfc,'v','color',co(4,:),'linewidth',1,'markersize',8,...
    'markerfacecolor',co(4,:),'markeredgecolor',co(4,:)*.3);
 
 if isequal(xVar,'ExecutionDate')
@@ -140,7 +122,7 @@ ylabel('atom number');
 % hax2.Position(4)=hax2.Position(4)-20;
 % hax2.Position(2)=hax2.Position(2)+5;
 co=get(gca,'colororder');
-plot(xvals,Natoms,'o','color',co(5,:),'linewidth',1,'markersize',8,...
+plot(X,Natoms,'o','color',co(5,:),'linewidth',1,'markersize',8,...
    'markerfacecolor',co(5,:),'markeredgecolor',co(5,:)*.5);
 
 if isequal(xVar,'ExecutionDate')
@@ -158,7 +140,7 @@ xlabel([xVar '(' opts.xUnit ')'],'interpreter','none');
 ylabel('trap frequency');
 % hax3.Position(4)=hax3.Position(4)-20;
 % hax3.Position(2)=hax3.Position(2)+5;
-plot(xvals,freqs,'o','color',[.7 .7 .7],'linewidth',1,'markersize',8,...
+plot(X,Freqs,'o','color',[.7 .7 .7],'linewidth',1,'markersize',8,...
    'markerfacecolor',[.7 .7 .7],'markeredgecolor',[.7 .7 .7]*.5);
 if isequal(xVar,'ExecutionDate')
     datetick('x');

@@ -74,8 +74,7 @@ for kk=1:length(atomdata)
             if inputopts.SaveDetails                
                 fName=['fermilong_' atomdata(kk).Name];
 %                 saveFigure(hF,fName)
-            end               
-            
+            end   
         end        
         
         atomdata(kk).FermiFit{nn}=fitFermi; % Assign the fit object       

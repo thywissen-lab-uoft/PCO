@@ -106,7 +106,7 @@ for kk=1:(ceil(length(atomdata)/pMax))
             Xc(end+1) = fermiFit.Xc;            
             doFermi = 1;
             
-            fermiFitGauss  = atomdataSUB(ii).FermiFitGauss{rNum}.Fit;
+            fermiFitGauss  = atomdataSUB(ii).FermiGaussFit{rNum}.Fit;
         end  
         
         % Get the box count
