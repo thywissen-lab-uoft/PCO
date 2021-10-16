@@ -22,12 +22,13 @@ if doBoxCount
     ylim([0 max(get(gca,'YLim'))]);    
     if doSave;saveFigure(hF_number_box,'box_number',saveOpts);end
     
-    hF_number_box_time = showAtomNumber(...
-        chDataXVar(box_data,'ExecutionDate'),'ExecutionDate',boxPopts);  
-    hF_number_box_time.Position(2)=700;
-    ylim([0 max(get(gca,'YLim'))]);    
-    if doSave;saveFigure(hF_number_box_time,'erf_number_time',saveOpts);end
-    
+    if ~isequal(pco_xVar,'ExecutionDate')
+        hF_number_box_time = showAtomNumber(...
+            chDataXVar(box_data,'ExecutionDate'),'ExecutionDate',boxPopts);  
+        hF_number_box_time.Position(2)=700;
+        ylim([0 max(get(gca,'YLim'))]);    
+        if doSave;saveFigure(hF_number_box_time,'erf_number_time',saveOpts);end
+    end
     
     
     % Plot the ratios if there are more than one ROI.
@@ -69,13 +70,13 @@ if doGaussFit
     ylim([0 max(get(gca,'YLim'))]);    
     if doSave;saveFigure(hF_number_gauss,'gauss_number',saveOpts);end
     
-    
-    hF_number_gauss_time = showAtomNumber(...
-        chDataXVar(gauss_data,'ExecutionDate'),'ExecutionDate',gaussPopts);  
-    ylim([0 max(get(gca,'YLim'))]);  
-    hF_number_gauss_time.Position(2)=700;
-    if doSave;saveFigure(hF_number_gauss_time,'gauss_number_time',saveOpts);end
-    
+    if ~isequal(pco_xVar,'ExecutionDate')
+        hF_number_gauss_time = showAtomNumber(...
+            chDataXVar(gauss_data,'ExecutionDate'),'ExecutionDate',gaussPopts);  
+        ylim([0 max(get(gca,'YLim'))]);  
+        hF_number_gauss_time.Position(2)=700;
+        if doSave;saveFigure(hF_number_gauss_time,'gauss_number_time',saveOpts);end
+    end
     
     % Plot the ratios if there are more than one ROI.
     if size(ROI,1)>1    
@@ -150,12 +151,13 @@ if doErfFit
     ylim([0 max(get(gca,'YLim'))]);    
     if doSave;saveFigure(hF_number_erf,'erf_number',saveOpts);end
     
-    hF_number_erf_time = showAtomNumber(...
-        chDataXVar(erf_data,'ExecutionDate'),'ExecutionDate',ErfPopts);  
-    ylim([0 max(get(gca,'YLim'))]);    
-    hF_number_erf_time.Position(2)=700;
-    if doSave;saveFigure(hF_number_erf_time,'erf_number_time',saveOpts);end
-    
+    if ~isequal(pco_xVar,'ExecutionDate')    
+        hF_number_erf_time = showAtomNumber(...
+            chDataXVar(erf_data,'ExecutionDate'),'ExecutionDate',ErfPopts);  
+        ylim([0 max(get(gca,'YLim'))]);    
+        hF_number_erf_time.Position(2)=700;
+        if doSave;saveFigure(hF_number_erf_time,'erf_number_time',saveOpts);end
+    end
     
     % Plot the ratios if there are more than one ROI.
     if size(erf_data.Natoms,2)>1    
@@ -201,9 +203,19 @@ if doFermiFitLong
     % Temperature
     hF_fermi_temp=showFermiTemp(fermi_data,pco_xVar,fermiPopts);    
     if doSave;saveFigure(hF_fermi_temp,'fermi_temperature',saveOpts);end    
+    
+    % Statistics
+    hF_fermi_stats=showFermiStats(fermi_data,fermiPopts);    
+    if doSave;saveFigure(hF_fermi_stats,'fermi_stats',saveOpts);end    
+
 
     % Summary
-    hF_fermi_temp2=showFermiTempCompare(fermi_data,pco_xVar,fermiPopts);    
-    if doSave;saveFigure(hF_fermi_temp2,'fermi_compare',saveOpts);end
+    hF_fermi_summary=showFermiTempCompare(fermi_data,pco_xVar,fermiPopts);    
+    if doSave;saveFigure(hF_fermi_summary,'fermi_summary',saveOpts);end
+    
+    if ~isequal(pco_xVar,'ExecutionDate')
+        hF_fermi_summary_time=showFermiTempCompare(fermi_data,pco_xVar,fermiPopts);    
+        if doSave;saveFigure(hF_fermi_summary_time,'fermi_summary_time',saveOpts);end
+    end
 end 
 

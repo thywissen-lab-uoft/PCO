@@ -97,7 +97,7 @@ pco_overrideUnit='MHz';
 %% Analysis Flags
 
 % Saving
-doSave        = 0;      % Save the figures?
+doSave        = 1;      % Save the figures?
  
 % Animation
 doAnimate     = 0;      % Animate the Cloud
@@ -736,7 +736,9 @@ if doFermiFitLong
                         sROI(4)=min([sROI(4) size(atomdata(kk).OD,1)]); 
                     end
                 else
-                    rmfield(fermiFitOpts,'GaussFit');
+                    if isfield(fermiFitOpts,'GaussFit')
+                        rmfield(fermiFitOpts,'GaussFit');
+                    end
                 end        
                 
                 % Grab the data
