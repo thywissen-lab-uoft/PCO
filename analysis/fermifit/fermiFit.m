@@ -85,7 +85,7 @@ if isfield(opts,'GaussFit')
     foutG=opts.GaussFit;
     A = foutG.A;
     Xs = foutG.Xs; Ys = foutG.Ys;
-    Xc = foutG.Xc; Yc = foutG.Xc;
+    Xc = foutG.Xc; Yc = foutG.Yc;
     nb = foutG.nbg;
 end 
 
@@ -128,10 +128,10 @@ N=2*pi*foutG.Wx*foutG.Wy*foutG.A;
 Natoms=N*(opts.PixelSize^2/crosssec);  
 
 % Fermi Temperature
-Tfg=hbar*(2*pi*opts.Freq).*(.5*6*Natoms).^(1/3)/kB;   
+Tf_g=hbar*(2*pi*opts.Freq).*(.5*6*Natoms).^(1/3)/kB;   
 T_g =fitGauss.Temperature;
-TTf_g = T_g/Tfg;   
-TTf_g = 1*TTf_g; % Fudge Factor
+TTf_g = T_g/Tf_g;   
+TTf_g = .5*TTf_g; % Fudge Factor
 
 % Find fugacity (z) and the Q
 qVec=linspace(-10,20,100);zVec=exp(qVec);
@@ -141,16 +141,17 @@ Tfvec=real((-6*polylog3spline(-zVec)).^(-1/3));     % Look up table
 warning on
 
 % Find the Q for our estimated T/Tf
-Q_g=interp1(Tfvec,qVec,TTf_g);
+Q_g = interp1(Tfvec,qVec,TTf_g);
+Q_g = 8;
 
 % Fermi Amplitude Guesss
 warning off
-A_g=-foutG.A/(TTf_g^2*polylog2spline(-exp(Q_g)));
+A_g=-2*foutG.A/(TTf_g^2*polylog2spline(-exp(Q_g)));
 warning on
 
 % Fermi Width Guess
 W_g = mean([foutG.Wx foutG.Wy]);
-W_g = W_g*1; % Fudge Factor 
+W_g = .5*W_g; % Fudge Factor 
 
 % Fermi Center Guess
 Xc_g=foutG.Xc; Yc_g=foutG.Yc;
@@ -171,12 +172,18 @@ Zg=ODfunc(xx,yy,gg(1),gg(2),gg(3),gg(4),gg(5))+bg;
 
 disp(' ');
 disp(['     Fermi-Fit Guess']);
-disp(['     Center (px)  : ' '[' num2str(round(Xc_g,1)) ','...
+disp(['     Center (px)       : ' '[' num2str(round(Xc_g,1)) ','...
     num2str(round(Yc_g,1)) ']']);
-disp(['     Fugacity     : ' num2str(round(exp(Q_g),2))]);
-disp(['     Temp. (nK)   : ' num2str(round(T_g*1e9,1))]);
-disp(['     Temp. (Tf)   : ' num2str(round(TTf_g,3))]);
-disp(['     Width (px)   : ' num2str(round(W_g,3))]);
+disp(['     Fugacity          : ' num2str(round(exp(Q_g),2))]);
+disp(['     Width (px)        : ' num2str(round(W_g,3))]);
+disp(['     Atom Number       : ' num2str(Natoms,'%e')]);
+% disp(['     Temp. (nK)        : ' num2str(round(T_g*1e9,2))]);
+% disp(['     Fermi Temp. (nK)  : ' num2str(round(Tf_g*1e9,3))]);
+disp(['     T/Tf              : ' num2str(round(TTf_g,3))]);
+
+if isfield(opts,'Freq')
+    disp(['     Freq (Hz)         : ' num2str(round(opts.Freq,2))]);
+end
 
 if opts.ShowDetails
 
@@ -224,10 +231,12 @@ fitFermi_obj=fittype(@(A,W,Q,Xc,Yc,bg,X,Y) ODfunc(X,Y,A,W,Q,Xc,Yc)+bg,...
     'coefficients',{'A','W','Q','Xc','Yc','bg'},'independent',{'X','Y'});
 fitopts=fitoptions(fitFermi_obj);
 
+W_gauss = sqrt(fitGauss.Fit.Wx*fitGauss.Fit.Wy);
+
 % Make the initial guess
 fitopts.Start=[gg fitGauss.Fit.bg];
-fitopts.Lower=[0 W/5 -14 Xc-10 Yc-10 fitGauss.Fit.bg-.02];
-fitopts.Upper=[A_max 5*W 20 Xc+10 Yc+10 fitGauss.Fit.bg+.02];
+fitopts.Lower=[0 W_gauss/5 -14 Xc-10 Yc-10 fitGauss.Fit.bg-.02];
+fitopts.Upper=[A_max 5*W_gauss 20 Xc+10 Yc+10 fitGauss.Fit.bg+.02];
 % fitopts.TolFun=1E-7;
 fitopts.MaxIter=1000;
 fitopts.DiffMaxChange=0.5;
