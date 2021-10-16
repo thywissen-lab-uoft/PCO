@@ -27,7 +27,7 @@ for kk=1:length(atomdata)
             fits{kk,nn}=fout;
             
             % Goodness of Fermi Fit
-            GOFs{kk,nn}=atomdata(kk).FermiGOF{nn};            
+            GOFs{kk,nn}= fermi.GOF;            
             R2s(kk,nn) = GOFs{kk,nn}.rsquare;
             SSEs(kk,nn) = GOFs{kk,nn}.sse;
            
@@ -51,7 +51,7 @@ for kk=1:length(atomdata)
             fits_gauss{kk,nn}=fout;
             
             % Goodness of Fermi Fit
-            GOFs_gauss{kk,nn}=atomdata(kk).FermiGaussGOF{nn};            
+            GOFs_gauss{kk,nn}= gauss.GOF;            
             R2s_gauss(kk,nn) = GOFs_gauss{kk,nn}.rsquare;
             SSEs_gauss(kk,nn) = GOFs_gauss{kk,nn}.sse;
            

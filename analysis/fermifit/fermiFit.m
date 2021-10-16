@@ -1,4 +1,4 @@
-function [fitFermi, gofFermi, fitGauss, gofGauss, hF]=fermiFit(X,Y,Z,opts)
+function [fitFermi, fitGauss, hF]=fermiFit(X,Y,Z,opts)
 % Fits an image of optical density to a time of flight of a Fermi-Dirac
 % distribution in a harmonic trap
 %

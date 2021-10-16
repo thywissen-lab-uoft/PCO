@@ -749,31 +749,30 @@ if doFermiFitLong
                 fermiFitOpts.PixelSize = PixelSize;
                 
                 % Perform the fit  
-                [fitFermi,gofFermi, fitGauss, gofGauss, hF] = ...
+                [fitFermi, fitGauss, hF] = ...
                     fermiFit(Dx,Dy,Z,fermiFitOpts); 
                 
                 % Append the output
                 atomdata(kk).FermiFit{nn} = fitFermi; 
-                atomdata(kk).FermiGOF{nn} = gofFermi;
                 atomdata(kk).FermiGaussFit{nn} = fitGauss;
-                atomdata(kk).FermiGaussGOF{nn} = gofGauss;
             end
-        end
-        
-        % Get a summary of the erf fit data
-        fermi_data=getFermiData(atomdata,pco_xVar);  
-        if doSave
-            save([saveDir filesep 'fermi_data'],'fermi_data');
-        end  
+        end        
+    end    
+    
 
-        if doSave && doUpload && exist(GDrive_root,'dir')
-            gDir = [fileparts(getImageDir2(datevec(now),GDrive_root)) filesep FigLabel];
-            gFile = [gDir filesep 'fermi_data'];        
-            if ~exist(gDir,'dir')
-               mkdir(gDir) 
-            end
-            save(gFile,'fermi_data');
+    % Get a summary of the erf fit data
+    fermi_data=getFermiData(atomdata,pco_xVar);  
+    if doSave
+        save([saveDir filesep 'fermi_data'],'fermi_data');
+    end  
+
+    if doSave && doUpload && exist(GDrive_root,'dir')
+        gDir = [fileparts(getImageDir2(datevec(now),GDrive_root)) filesep FigLabel];
+        gFile = [gDir filesep 'fermi_data'];        
+        if ~exist(gDir,'dir')
+           mkdir(gDir) 
         end
+        save(gFile,'fermi_data');
     end    
 end
 
