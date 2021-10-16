@@ -15,15 +15,16 @@ disp(' ');
 disp('fermiFit.m')
 %% Physical constants
 
-kB=1.38064852E-23;
-amu=1.66053907E-27 ;
-m=40*amu;
-h=6.62607004E-34;
-hbar=h/(2*pi);
+% Fundamental Constants
+kB                  = 1.38064852E-23;
+amu                 = 1.66053907E-27 ;
+m                   = 40*amu;
+h                   = 6.62607004E-34;
+hbar                = h/(2*pi);
 
 % Image constants
-lambda=767E-9;
-crosssec=lambda^2*(3/(2*pi));
+lambda              = 767E-9;
+crosssec            = lambda^2*(3/(2*pi));
 
 %% Load polylogfunctions
 % polylog is slow and therefore fitting the distribution which calls many
@@ -33,27 +34,26 @@ global polylog2spline
 global polylog3spline
 
 warning off
-polylog2spline = loadLi2;
-polylog3spline = loadLi3;
+polylog2spline = loadLi2;polylog3spline = loadLi3;
 warning on
 
-
 %% Make initial guessing
-
 
 % Mesh grid
 [xx,yy]=meshgrid(X,Y);
 
-% X Center Guess - Find average of >90%
+% Sum X Profile
 Zx=sum(Z,1);
 Zx(Zx<0)=0;
-Xc=mean(X(Zx>.9*max(Zx)));
 
-
-% Y Center Guess - Find average of >90%
+% Sum Y Profile
 Zy=sum(Z,2)';
 Zy(Zy<0)=0;
 
+% X Center Guess - Find average of >90%
+Xc=mean(X(Zx>.9*max(Zx)));
+
+% Y Center Guess - Find average of >90%
 Yc=mean(Y(Zy>.9*max(Zy)));
 
 % Y Width
@@ -65,9 +65,6 @@ Ys=1.0*sqrt(sum((Y-Yc).^2.*Zy)/sum(Zy)); % Y standard deviation * 1.5
 % Width
 W = mean([Xs Ys]);
 
-% Temperature Guess
-% Tg=m*(W*opts.PixelSize/opts.TOF)^2/kB;
-
 % Fugacity guess (always guess to 1, FREE PARAMTER)
 z = 1; % Whhen z=1, T/Tf is about 0.5;
 % z=10^-5;
@@ -78,15 +75,14 @@ Trel=real((-6*polylog(3,-z))^(-1/3));
 
 % Amplitude Guess - Find average of >80%.
 A = median(Z(Z>.8*max(max(Z))))/.9;
-Ag = -A/(polylog(2,-1)*Trel^2);        % Scale by amplitude of polylog
+% Ag = -A/(polylog(2,-1)*Trel^2);        % Scale by amplitude of polylog
 A1 = -A/(polylog(2,-1)*(1E-2)^2);
-A2 = -A/(polylog(2,-1)*(1E2)^2);
+% A2 = -A/(polylog(2,-1)*(1E2)^2);
 
 % The guess vector
-gg=[Ag W Q Xc Yc];
+% gg=[Ag W Q Xc Yc];
 
 %% Gauss Fit 2D
-
 
 gaussFit=fittype('A*exp(-(X-Xc).^2/(2*Wx^2))*exp(-(Y-Yc).^2/(2*Wy^2))+bg',...
     'coefficients',{'A','Wx','Wy','Xc','Yc','bg'},'independent',{'X','Y'});
@@ -100,11 +96,11 @@ fitGopts.MaxFunEvals=1000;
 fitGopts.Start=[A W W Xc Yc 0];
 fitGopts.Lower=[0 W/5 W/5 Xc-10 Yc-10 -.05];
 fitGopts.Upper=[2*A 5*W 5*W Xc+10 Yc+10 .05];    
+
 if isfield(opts,'GaussFit')
     foutG=opts.GaussFit;
     fitGopts.Start=[foutG.A foutG.Xs foutG.Ys foutG.Xc foutG.Yc foutG.nbg];
 end 
-
 
 % Perform the fit
 fprintf('Performing gaussian benchmark fit ... ');
@@ -112,68 +108,67 @@ fprintf('Performing gaussian benchmark fit ... ');
 disp('done');
 
 % Make output structure
-fitGauss=struct;
-fitGauss.Fit=foutG;
-fitGauss.GOF=gofG;
-fitGauss.AtomNumber = (foutG.A*2*pi*foutG.Wx*foutG.Wy)*(opts.PixelSize^2/crosssec);
-fitGauss.Temperature = m/kB*(sqrt(foutG.Wx*foutG.Wy)*opts.PixelSize/opts.TOF)^2;
-fitGauss.SSE=gofG.sse;
-fitGauss.R2=gofG.rsquare;
-fitGauss.AspectRatio=foutG.Wx/foutG.Wy;
+fitGauss                = struct;
+fitGauss.Fit            = foutG;
+fitGauss.GOF            = gofG;
+fitGauss.AtomNumber     = (foutG.A*2*pi*foutG.Wx*foutG.Wy)*...
+    (opts.PixelSize^2/crosssec);
+fitGauss.Temperature    = m/kB*(sqrt(foutG.Wx*foutG.Wy)*...
+    opts.PixelSize/opts.TOF)^2;
+fitGauss.SSE            = gofG.sse;
+fitGauss.R2             = gofG.rsquare;
+fitGauss.AspectRatio    = foutG.Wx/foutG.Wy;
 
 disp(['     Gauss Fit Result']);
 disp(['     TOF (ms)        : ' num2str(round(opts.TOF*1E3,2))]);
-disp(['     Center (px)     : ' '[' num2str(round(foutG.Xc,1)) ',' num2str(round(foutG.Yc,1)) ']']);
-disp(['     Width (px)      : ' '[' num2str(round(foutG.Wx,1)) ',' num2str(round(foutG.Wy,1)) ']']);
+disp(['     Center (px)     : ' '[' num2str(round(foutG.Xc,1)) ',' ...
+    num2str(round(foutG.Yc,1)) ']']);
+disp(['     Width (px)      : ' '[' num2str(round(foutG.Wx,1)) ',' ...
+    num2str(round(foutG.Wy,1)) ']']);
 disp(['     Temp (uK)       : ' num2str(round(fitGauss.Temperature*1E6,4))]);
 disp(['     Atom Number     : ' num2str(fitGauss.AtomNumber,'%e')]);
 disp(['     sum square err  : ' num2str(gofG.sse)]);
-
      
 %% Use Gauss Fit to Make Fermi Fit
 
+% Atom Number
+N=2*pi*foutG.Wx*foutG.Wy*foutG.A; 
+Natoms=N*(opts.PixelSize^2/crosssec);  
 
-N=2*pi*foutG.Wx*foutG.Wy*foutG.A; % Number of counts
-Natoms=N*(opts.PixelSize^2/crosssec);  % Atom number  
-
-Tfg=hbar*(2*pi*opts.Freq).*(6*Natoms*0.5).^(1/3)/kB;     %Fermi temperature
-TTf=fitGauss.Temperature/Tfg;   % Relative temperature
+% Fermi Temperature
+Tfg=hbar*(2*pi*opts.Freq).*(6*Natoms).^(1/3)/kB;    
+TTf_g=fitGauss.Temperature/Tfg;   
+TTf_g = TTf_g/2; % Fudge Factor
 
 % Find fugacity (z) and the Q
-qVec=linspace(-10,20,100);
-zVec=exp(qVec);
+qVec=linspace(-10,20,100);zVec=exp(qVec);
+
 warning off
 Tfvec=real((-6*polylog3spline(-zVec)).^(-1/3));     % Look up table
 warning on
 
-Qg=interp1(Tfvec,qVec,TTf);
+% Find the Q for our estimated T/Tf
+Q_g=interp1(Tfvec,qVec,TTf_g);
 
-
-% Ag=foutG.A*sqrt(1/TTf);
-
-Ag=foutG.A;
-% warning off
-% 
-% Z=-A*T^2*polylog2spline(-z*zz);
-
-% Z=-A*T^2*polylog2spline(-exp(Qg));
+% Fermi Amplitude Guesss
 warning off
-Ag=-foutG.A/(TTf^2*polylog2spline(-exp(Qg)));
+A_g=-foutG.A/(TTf_g^2*polylog2spline(-exp(Q_g)));
 warning on
 
-% Ag=max(max(Z));
-Wg=mean([foutG.Wx foutG.Wy]);
-Xcg=foutG.Xc;
-Ycg=foutG.Yc;
+% Fermi Width Guess
+W_g=mean([foutG.Wx foutG.Wy]);
+
+% Fermi Center Guess
+Xc_g=foutG.Xc;
+Yc_g=foutG.Yc;
+
+% Fermi Background Guess
 bg=foutG.bg;
 
-gg=[Ag Wg Qg Xcg Ycg];
+% Fermi Guess
+gg=[A_g W_g Q_g Xc_g Yc_g];
 
-
-
-
-
-%% Fermi-Fit Iniitial Guess
+%% Show Fermi-Fit Iniitial Guess
 
 disp(' ');
 disp('Initializing guesses for Fermi-Fit ...');
@@ -183,11 +178,11 @@ Zg=ODfunc(xx,yy,gg(1),gg(2),gg(3),gg(4),gg(5))+bg;
 
 disp(' ');
 disp(['     Fermi-Fit Guess']);
-disp(['     Center (px)  : ' '[' num2str(round(Xc,1)) ','...
-    num2str(round(Yc,1)) ']']);
-disp(['     Fugacity     : ' num2str(round(z,2))]);
-disp(['     Temp. (Tf)   : ' num2str(round(Trel,3))]);
-disp(['     Width (px)   : ' num2str(round(W,3))]);
+disp(['     Center (px)  : ' '[' num2str(round(Xc_g,1)) ','...
+    num2str(round(Yc_g,1)) ']']);
+disp(['     Fugacity     : ' num2str(round(exp(Q_g),2))]);
+disp(['     Temp. (Tf)   : ' num2str(round(TTf_g,3))]);
+disp(['     Width (px)   : ' num2str(round(W_g,3))]);
 
 if opts.ShowDetails
 
