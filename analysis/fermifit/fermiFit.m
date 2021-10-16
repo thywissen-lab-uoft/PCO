@@ -136,9 +136,10 @@ N=2*pi*foutG.Wx*foutG.Wy*foutG.A;
 Natoms=N*(opts.PixelSize^2/crosssec);  
 
 % Fermi Temperature
-Tfg=hbar*(2*pi*opts.Freq).*(6*Natoms).^(1/3)/kB;    
-TTf_g=fitGauss.Temperature/Tfg;   
-TTf_g = TTf_g/2; % Fudge Factor
+Tfg=hbar*(2*pi*opts.Freq).*(.5*6*Natoms).^(1/3)/kB;   
+T_g =fitGauss.Temperature;
+TTf_g = T_g/Tfg;   
+TTf_g = 1*TTf_g; % Fudge Factor
 
 % Find fugacity (z) and the Q
 qVec=linspace(-10,20,100);zVec=exp(qVec);
@@ -156,7 +157,8 @@ A_g=-foutG.A/(TTf_g^2*polylog2spline(-exp(Q_g)));
 warning on
 
 % Fermi Width Guess
-W_g=mean([foutG.Wx foutG.Wy]);
+W_g = mean([foutG.Wx foutG.Wy]);
+W_g = W_g*1; % Fudge Factor 
 
 % Fermi Center Guess
 Xc_g=foutG.Xc;
@@ -181,6 +183,7 @@ disp(['     Fermi-Fit Guess']);
 disp(['     Center (px)  : ' '[' num2str(round(Xc_g,1)) ','...
     num2str(round(Yc_g,1)) ']']);
 disp(['     Fugacity     : ' num2str(round(exp(Q_g),2))]);
+disp(['     Temp. (nK)   : ' num2str(round(T_g*1e9,1))]);
 disp(['     Temp. (Tf)   : ' num2str(round(TTf_g,3))]);
 disp(['     Width (px)   : ' num2str(round(W_g,3))]);
 
