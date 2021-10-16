@@ -136,7 +136,7 @@ disp(['     sum square err  : ' num2str(gofG.sse)]);
 N=2*pi*foutG.Wx*foutG.Wy*foutG.A; % Number of counts
 Natoms=N*(opts.PixelSize^2/crosssec);  % Atom number  
 
-Tfg=hbar*(2*pi*opts.Freq).*(6*Natoms).^(1/3)/kB;     %Fermi temperature
+Tfg=hbar*(2*pi*opts.Freq).*(6*Natoms*0.5).^(1/3)/kB;     %Fermi temperature
 TTf=fitGauss.Temperature/Tfg;   % Relative temperature
 
 % Find fugacity (z) and the Q
@@ -193,7 +193,7 @@ if opts.ShowDetails
 
     % Plot the initial guess
     hF_guess = figure(1200);
-    hF_guess.Position=[50 500 1000 300];
+    hF_guess.Position=[660 50 1000 300];
     clf
     set(hF_guess,'color','w','Name','Fermi-Fit Guess');
 
@@ -287,15 +287,16 @@ fitFermi.FermiTemperature_shape=(fitFermi.QtoT(fout.Q)^(-1))*fitFermi.Temperatur
 
 % Find atom number
 warning off
-fitFermi.AtomNumber=real(1/crosssec*2*pi*(fout.W*opts.PixelSize)^2*fout.A/6^(2/3)*(-polylog(3,-exp(fout.Q)))^(1/3));
+Natoms = real(1/crosssec*2*pi*(fout.W*opts.PixelSize)^2*fout.A/6^(2/3)*(-polylog(3,-exp(fout.Q)))^(1/3));
+fitFermi.AtomNumber = Natoms;
 warning on
 
 % Use Trap Frequency and atom number for Fermi Temperature
 if isfield(opts,'Freq')
     fitFermi.FermiTemperature_N_Freq_Pure = ...
-        hbar*(2*pi*opts.Freq).*(6*Natoms(kk,nn)).^(1/3)/kB;
+        hbar*(2*pi*opts.Freq).*(6*Natoms).^(1/3)/kB;
     fitFermi.FermiTemperature_N_Freq_Mix = ...
-        hbar*(2*pi*opts.Freq).*(6*0.5*Natoms(kk,nn)).^(1/3)/kB;
+        hbar*(2*pi*opts.Freq).*(6*0.5*Natoms).^(1/3)/kB;
 else
     fitFermi.FermiTemperature_N_Freq_Pure = NaN;
     fitFermi.FermiTemperature_N_Freq_Mix = NaN;
@@ -312,7 +313,7 @@ disp(['     Fugacity          : ' num2str(exp(fout.Q),'%e')]);
 disp(['     Width        (px) : ' num2str(round(fout.W,3))]);
 disp(['     Atom Number       : ' num2str(fitFermi.AtomNumber,'%e')]);
 disp(['     Temp.        (nK) : ' num2str(fitFermi.Temperature*1E9)]);
-disp(['     Fermi Temp.  (nK) : ' num2str(fitFermi.FermiTemperature*1E9)]);
+disp(['     Fermi Temp.  (nK) : ' num2str(fitFermi.FermiTemperature_shape*1E9)]);
 disp(['     T/Tf              : ' num2str(fitFermi.Temperature/fitFermi.FermiTemperature_shape)]);
 disp(['     sum square err  : ' num2str(gof.sse)]);
 
@@ -322,8 +323,8 @@ if opts.ShowDetails
     hF = figure(1917);
     clf
     set(hF,'color','w','Name','Fermi-Fit');
-    hF.Position(3:4)=[600 800];
-    hF.Position(1:2)=[100 100];
+    hF.Position(3:4)=[600 950];
+    hF.Position(1:2)=[5 50];
 
     % Plot the data
     subplot(321)
@@ -423,8 +424,8 @@ if opts.ShowDetails
     data{5,3}=round(fitFermi.Temperature*1E9,1);
     data{6,3}=round(fitFermi.SSE,3);
     data{7,3}=round(exp(fitFermi.Fit.Q),2);
-    data{8,3}=round(fitFermi.FermiTemperature*1E9,1);
-    data{9,3}=round(fitFermi.Temperature/fitFermi.FermiTemperature,4);
+    data{8,3}=round(fitFermi.FermiTemperature_shape*1E9,1);
+    data{9,3}=round(fitFermi.Temperature/fitFermi.FermiTemperature_shape,4);
 
     data{10,2}=round(fitGauss.AspectRatio,4);
 
