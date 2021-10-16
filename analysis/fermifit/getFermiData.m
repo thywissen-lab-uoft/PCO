@@ -39,11 +39,11 @@ for kk=1:length(atomdata)
             nbg(kk,nn)=fout.bg;                         % Background
             
             % Grab the atom number and temperature
-            Natoms(kk,nn)   = fermi.AtomNumber;
-            T(kk,nn)        = fermi.Temperature;
-            Tfa(kk,nn)      = fermi.FermiTemperatureA;
-            Tfb(kk,nn)      = fermi.FermiTemperatureB;
-            Tfc(kk,nn)      = fermi.FermiTemperatureC;
+            Natoms(kk,nn)           = fermi.AtomNumber;
+            T(kk,nn)                = fermi.Temperature;
+            Tf_shape(kk,nn)         = fermi.FermiTemperature_shape;
+            Tf_N_Freq_Pure(kk,nn)   = fermi.FermiTemperature_N_Freq_Pure;
+            Tf_N_Freq_Mix(kk,nn)    = fermi.FermiTemperature_N_Freq_Mix;
             
              % Grab the Fermi Gauss Fit
             gauss = atomdata(kk).FermiGaussFit{nn};
@@ -98,9 +98,9 @@ output.FitSSE       = SSEs;
 % Assign fermi fit outputs
 output.Natoms               = Natoms;
 output.Temperature          = T;
-output.Tfa                  = Tfa;
-output.Tfb                  = Tfb;
-output.Tfc                  = Tfc;
+output.Tf_shape             = Tf_shape;
+output.Tf_N_Freq_Pure       = Tf_N_Freq_Pure;
+output.Tf_N_Freq_Mix        = Tf_N_Freq_Mix;
 output.Xc                   = Xc;
 output.Yc                   = Yc;
 output.W                    = W;

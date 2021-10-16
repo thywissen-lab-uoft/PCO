@@ -24,7 +24,6 @@ hbar=h/(2*pi);
 % Image constants
 lambda=767E-9;
 crosssec=lambda^2*(3/(2*pi));
-crosssec=crosssec;
 
 %% Load polylogfunctions
 % polylog is slow and therefore fitting the distribution which calls many
@@ -284,17 +283,26 @@ fitFermi.Fit=fout;
 fitFermi.GOF=gof;
 fitFermi.ConfInt=c;
 fitFermi.Temperature=m*(fout.W*opts.PixelSize/opts.TOF)^2/kB;
-fitFermi.FermiTemperature=(fitFermi.QtoT(fout.Q)^(-1))*fitFermi.Temperature;
+fitFermi.FermiTemperature_shape=(fitFermi.QtoT(fout.Q)^(-1))*fitFermi.Temperature;
 
-
-% fitFermi.NAtoms=sum(sum(Zfit))*(opts.PixelSize^2/crosssec);
+% Find atom number
 warning off
 fitFermi.AtomNumber=real(1/crosssec*2*pi*(fout.W*opts.PixelSize)^2*fout.A/6^(2/3)*(-polylog(3,-exp(fout.Q)))^(1/3));
 warning on
 
+% Use Trap Frequency and atom number for Fermi Temperature
+if isfield(opts,'Freq')
+    fitFermi.FermiTemperature_N_Freq_Pure = ...
+        hbar*(2*pi*opts.Freq).*(6*Natoms(kk,nn)).^(1/3)/kB;
+    fitFermi.FermiTemperature_N_Freq_Mix = ...
+        hbar*(2*pi*opts.Freq).*(6*0.5*Natoms(kk,nn)).^(1/3)/kB;
+else
+    fitFermi.FermiTemperature_N_Freq_Pure = NaN;
+    fitFermi.FermiTemperature_N_Freq_Mix = NaN;
+end
+
 fitFermi.SSE=gof.sse;
 fitFermi.R2=gof.rsquare;
-
 %% Display Fermi Fit Result
 
 % disp('%%%%%%%%%%%%%%%%')
@@ -305,7 +313,7 @@ disp(['     Width        (px) : ' num2str(round(fout.W,3))]);
 disp(['     Atom Number       : ' num2str(fitFermi.AtomNumber,'%e')]);
 disp(['     Temp.        (nK) : ' num2str(fitFermi.Temperature*1E9)]);
 disp(['     Fermi Temp.  (nK) : ' num2str(fitFermi.FermiTemperature*1E9)]);
-disp(['     T/Tf              : ' num2str(fitFermi.Temperature/fitFermi.FermiTemperature)]);
+disp(['     T/Tf              : ' num2str(fitFermi.Temperature/fitFermi.FermiTemperature_shape)]);
 disp(['     sum square err  : ' num2str(gof.sse)]);
 
 %% Plot the results
