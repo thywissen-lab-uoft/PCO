@@ -97,7 +97,7 @@ pco_overrideUnit='MHz';
 %% Analysis Flags
 
 % Saving
-doSave        = 1;      % Save the figures?
+doSave        = 0;      % Save the figures?
  
 % Animation
 doAnimate     = 0;      % Animate the Cloud
@@ -724,7 +724,7 @@ if doFermiFitLong
                     fermiFitOpts.GaussFit = gFit;
                     
                     % Determine the auto ROI if necessary
-                    if FermiFitOpts.AutoROI
+                    if fermiFitOpts.AutoROI
                         sROI=[[-1 1]*5*gFit.Xs [-1 1]*5*gFit.Ys] + ...
                             [[1 1]*gFit.Xc [1 1]*gFit.Yc];
                         sROI=round(sROI);
@@ -743,7 +743,7 @@ if doFermiFitLong
                 Z = atomdata(kk).OD(Dy,Dx);               
                 
                 % Important Meta Data
-                fermiFitOpts.TOF = atomdata(kk).tof*1e-3;
+                fermiFitOpts.TOF = atomdata(kk).Params.tof*1e-3;
                 fermiFitOpts.Freq = xdt_pow2freq(atomdata(kk).Params.(xdt_end_power_var));
                 fermiFitOpts.PixelSize = PixelSize;
                 
@@ -761,10 +761,10 @@ if doFermiFitLong
         end
     end    
     
-    disp(repmat('-',1,60));    
-    disp('Performing Fermi-Fit long tof');
-    disp(repmat('-',1,60));       
-    atomdata=computeFermiFit(atomdata,fermiFitOpts); 
+%     disp(repmat('-',1,60));    
+%     disp('Performing Fermi-Fit long tof');
+%     disp(repmat('-',1,60));       
+%     atomdata=computeFermiFit(atomdata,fermiFitOpts); 
 end
 
 
