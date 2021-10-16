@@ -1,4 +1,4 @@
-function [fitFermi, fitGauss, hF]=fermiFit(X,Y,Z,opts)
+function [fitFermi, gofFermi, fitGauss, gofGauss, hF]=fermiFit(X,Y,Z,opts)
 % Fits an image of optical density to a time of flight of a Fermi-Dirac
 % distribution in a harmonic trap
 %
@@ -246,9 +246,9 @@ disp(' ');
 % fitopts.MaxFunEvals=1000;
 
 % Define the fit object
-fitFermi=fittype(@(A,W,Q,Xc,Yc,bg,X,Y) ODfunc(X,Y,A,W,Q,Xc,Yc)+bg,...
+fitFermi_obj=fittype(@(A,W,Q,Xc,Yc,bg,X,Y) ODfunc(X,Y,A,W,Q,Xc,Yc)+bg,...
     'coefficients',{'A','W','Q','Xc','Yc','bg'},'independent',{'X','Y'});
-fitopts=fitoptions(fitFermi);
+fitopts=fitoptions(fitFermi_obj);
 
 % Make the initial guess
 fitopts.Start=[gg fitGauss.Fit.bg];
@@ -262,7 +262,7 @@ fitopts.MaxFunEvals=1000;
 % Actually do the fit
 fprintf('Performing Fermi-Fit ...');
 tic
-[fout, gof, ~]=fit([xx(:),yy(:)],Z(:),fitFermi,fitopts);
+[fout, gof, ~]=fit([xx(:),yy(:)],Z(:),fitFermi_obj,fitopts);
 disp('done');
 toc
 disp(' ');

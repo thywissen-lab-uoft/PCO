@@ -658,6 +658,7 @@ if doErfFit
             atomdata(kk).ErfNum{nn} = Natoms;
         end
     end    
+    
     % Get a summary of the erf fit data
     erf_data=getErfData(atomdata,pco_xVar);  
     if doSave
@@ -695,8 +696,8 @@ if isfield(atomdata(1),'Flags')
 end
 
 fermiFitOpts=struct;
-% fermiFitOpts.FigLabel=FigLabel;
-% fermiFitOpts.xUnit=pco_unit;
+fermiFitOpts.FigLabel=FigLabel;
+fermiFitOpts.xUnit=pco_unit;
 fermiFitOpts.ShowDetails=1;         % Plot shot-by-shot details?
 fermiFitOpts.SaveDetails=1;         % Save shot-by-shot details?
 fermiFitOpts.AutoROI=1;             % Automatically choose ROI from Gaussian Fit to optimize fitting speed
@@ -748,23 +749,32 @@ if doFermiFitLong
                 fermiFitOpts.PixelSize = PixelSize;
                 
                 % Perform the fit  
-                [fitFermi,fitGauss,hF]=fermiFit(Dx,Dy,Z,fermiFitOpts);    
-
+                [fitFermi,gofFermi, fitGauss, gofGauss, hF] = ...
+                    fermiFit(Dx,Dy,Z,fermiFitOpts); 
                 
-%                 [fout,gof,output,N]=erfFit2D(Dx,Dy,Z);    % Perform the fit  
-                
-%                 Natoms = N*(PixelSize^2/CrossSection);
-%                 atomdata(kk).ErfFit{nn} = fout; % Assign the fit object       
-%                 atomdata(kk).ErfGOF{nn} = gof; % Assign the fit object
-%                 atomdata(kk).ErfNum{nn} = Natoms;
+                % Append the output
+                atomdata(kk).FermiFit{nn} = fitFermi; 
+                atomdata(kk).FermiGOF{nn} = gofFermi;
+                atomdata(kk).FermiGaussFit{nn} = fitGauss;
+                atomdata(kk).FermiGaussGOF{nn} = gofGauss;
             end
         end
+        
+        % Get a summary of the erf fit data
+        fermi_data=getFermiData(atomdata,pco_xVar);  
+        if doSave
+            save([saveDir filesep 'fermi_data'],'fermi_data');
+        end  
+
+        if doSave && doUpload && exist(GDrive_root,'dir')
+            gDir = [fileparts(getImageDir2(datevec(now),GDrive_root)) filesep FigLabel];
+            gFile = [gDir filesep 'fermi_data'];        
+            if ~exist(gDir,'dir')
+               mkdir(gDir) 
+            end
+            save(gFile,'fermi_data');
+        end
     end    
-    
-%     disp(repmat('-',1,60));    
-%     disp('Performing Fermi-Fit long tof');
-%     disp(repmat('-',1,60));       
-%     atomdata=computeFermiFit(atomdata,fermiFitOpts); 
 end
 
 
