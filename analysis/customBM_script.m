@@ -150,8 +150,8 @@ fit_RabiOscillation = 0;
 doLandauZener = 0;
 
 % Lorentzian Fit
-lorentz_assymetric_single=1;
-lorentz_assymetric_double=0;
+lorentz_assymetric_single=0;
+lorentz_assymetric_double=1;
 Lorentz_triple=0; 
 
 %% Plot the Data
@@ -329,8 +329,8 @@ if length(atomdata)>4 && lorentz_assymetric_double
     [~,i]=max(Y);
     x0=X(i);
     %         x0=mean(X(inds));     
-    opt.StartPoint=[.05 x0 G0 A0,...
-                    .05 x0-150 G0 A0/50 bg];  
+    opt.StartPoint=[.05 -130 G0 A0,...
+                    .05 -155 G0 A0/50 bg];  
     opt.Robust='bisquare';
     %         opts.Weights=w;
 

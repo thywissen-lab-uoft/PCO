@@ -127,7 +127,7 @@ doCustom =  1;          % Custom Box Count
 
 doRabiAbsolute = 0;
 doRabiContrast = 0;
-doCustom_BM = 1;    % Custom Band map
+doCustom_BM = 0;    % Custom Band map
 
 % Wavemeter
 doWavemeter   = 1;

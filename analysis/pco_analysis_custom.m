@@ -264,7 +264,7 @@ if doCustom
     lorentz_triple=0;    
     
     lorentz_asym_single= 0;
-    lorentz_asym_double= 0;
+    lorentz_asym_double= 1;
 
     fit_lorentz_assymetric_4=0;
     
@@ -920,7 +920,7 @@ end
         
         inds=[Y>.9*max(Y)];
         x1 = -130;mean(X(inds)); 
-        x2 = x1-30; x2 = -200;
+        x2 = x1-30; x2 = -155;
         
         a1 = -.05;
         a2 = -.05;
