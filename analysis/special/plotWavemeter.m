@@ -1,4 +1,4 @@
-function plotWavemeter(t1,t2)
+function hF=plotWavemeter(t1,t2)
 %TEMPHUMIDITYPLOTTER Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -23,30 +23,29 @@ fldr='Y:\LabJack\Logging\WA-1000';
 
 % Load the logs
 tic
-rawTbl=loadLogs(t1,t2);
+rawTbl=loadLogs(t1-1,t2+1);
 toc
-keyboard
 
-pTable=rawTbl; 
+if ~isempty(rawTbl)
 
-
-hF=figure;
-hF.Position(3:4)=[1000 400];
-set(hF,'color','w');
-
-y=pTable.(ch);
-y=y-391.0163*1e3;
-
-pT=plot(pTable.Time,y);
-hold on
-ylabel('frequency - 391.0163 THz (GHz)');
+    pTable=rawTbl; 
 
 
-title(ch);
+    hF=figure;
+    hF.Position=[300 700 600 300];
+    set(hF,'color','w');
 
-% lstr=['averaging : ' num2str(dt) ' min'];
-% text(5,5,lstr,'units','pixels','fontsize',14,'interpreter','none',...
-%     'verticalalignment','bottom');
+    y=pTable.(ch);
+    y=y-391.0163*1e3;
+
+    pT=plot(pTable.Time,y);
+    
+    xlim([datetime(datestr(t1)) datetime(datestr(t2))]);
+    hold on
+    ylabel('frequency - 391.0163 THz (GHz)');
+
+%     title(ch);
+end
 
     function out=loadLogs(t1,t2)
 

@@ -54,7 +54,7 @@ if doCustomX
 
         % Choose the mf States
         mF1 = -7/2;
-        mF2 = -5/2;
+        mF2 = -9/2;
         x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
     end
     
@@ -280,8 +280,8 @@ B = Bfb + Bshim + Boff;
 % B=201;
 
 % Choose the mf States
-mF1 = -5/2;
-mF2 = -7/2;
+mF1 = -7/2;
+mF2 = -9/2;
 
 x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
 
@@ -328,7 +328,7 @@ end
     % Default total atom number is just the sum
     Ntot = sum(N,2);       
 
-     dataMode= 1;         
+     dataMode= 5;         
      switch dataMode
          case 0     
              Y=(N(:,1)-N(:,2))./N(:,1);
@@ -877,7 +877,7 @@ end
         a1 = -0.05; % Long on right
 %         a1 = +0.05; % Long on left
         
-        opt.StartPoint=[bg a1 x2 G1 A1];  
+        opt.StartPoint=[bg a1 x1 G1 A1];  
         opt.Robust='bisquare';
         
         fout_lorentz=fit(X,Y,myfit,opt)
