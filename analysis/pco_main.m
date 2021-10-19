@@ -64,10 +64,10 @@ end
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-%   pco_xVar='Raman_AOM3_freq';
+pco_xVar='Raman_AOM3_freq';
 % pco_xVar='Pulse_Time';
 
-pco_xVar='ExecutionDate';
+% pco_xVar='ExecutionDate';
 % pco_xVar = 'rf_tof_srs_power';
 % pco_xVar = 'rf_tof_delta_freq';
 
@@ -100,7 +100,7 @@ pco_overrideUnit='MHz';
 doSave        = 1;      % Save the figures?
  
 % Animation
-doAnimate     = 0;      % Animate the Cloud
+doAnimate     = 1;      % Animate the Cloud
 
 % Probe Beam
 doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
@@ -111,23 +111,26 @@ doLandauZener = 0;      % Landau Zener Analysis on BOX
 doRamanSpec   = 0;      % Raman box count count analyis
 
 % Gaussian
-doGaussFit    = 1;      % Enable gauss fitting
+doGaussFit    = 0;      % Enable gauss fitting
 doGaussRabi   = 0;      % Enable gauss rabi
 doBEC         = 0;      % Enable BEC analysis
 
 % Erf Fit
-doErfFit      = 0;      % En
+doErfFit      = 1;      % En
 
 % Fermi
-doFermiFitLong = 1;     % Enable Fermi Fit for XDT TOF
+doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
 
 
 % Custom Box counts
-doCustom =  0;          % Custom Box Count
+doCustom =  1;          % Custom Box Count
 
 doRabiAbsolute = 0;
 doRabiContrast = 0;
-doCustom_BM = 0;    % Custom Band map
+doCustom_BM = 1;    % Custom Band map
+
+% Wavemeter
+doWavemeter   = 1;
 
 %% GDrive Settings
 GDrive_root = 'G:\My Drive\Lattice Shared\LabData';
@@ -311,7 +314,7 @@ atomdata=atomdata(inds);
 %     820 920 370 410]; % BMZ AM SPEC 10 ms TOF
 
 
-ROI = [730 1050 660 940]; % BM 25 ms TOF
+% ROI = [730 1050 660 940]; % BM 25 ms TOF
 
 
 % 12ms tof SG from lattice #850 900 300 560;
@@ -336,8 +339,8 @@ ROI = [730 1050 660 940]; % BM 25 ms TOF
 % % %   ROI=[800 950 490 620;
 % % %        800 950 1520 1650];   %  band map 15 ms TOF 9box, 7 box
 
-%      ROI=[800 950 490 620;
-%        800 950 1540 1670];   %  band map 15 ms TOF 9box, 7 box
+     ROI=[800 950 490 620;
+       800 950 1540 1670];   %  band map 15 ms TOF 9box, 7 box
 
    
    %    ROI = ROI(1,:); % 9 only 
@@ -505,6 +508,16 @@ if doProbeFit
    atomdata=analyzeProbeBeam(atomdata);
    [hF_probe]=showProbeAnalysis(atomdata,pco_xVar,probe_opts);   
    if doSave;saveFigure(hF_probe,'probe_details',saveOpts);end
+end
+
+%% Wavemeter
+
+if doWavemeter
+    P=[atomdata.Params];
+    t1 = min([P.ExecutionDate]);
+    t2 = max([P.ExecutionDate]);    
+    hF_wave=plotWavemeter(t1,t2);
+   if doSave;saveFigure(hF_wave,'wavemeter',saveOpts);end
 end
 
 %% Box Count

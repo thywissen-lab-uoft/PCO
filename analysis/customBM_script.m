@@ -9,94 +9,85 @@
      855         900        1547        1597    % 7 center
      810         940        1547        1597    % 7 center + H wing
      855         900        1510        1645];  % 7 center + V wing
-
-    
-[atomdata.ROI]=deal(ROI);
-
-
-outdata=struct;
-     
+        
 %% Box count analysis
 
-doBoxCount=1;   % Enable box count analysis
-doSubBG=1;      % Subtract background based on reference spot?
-boxOpts.bgROI=[700 790 500 600];
+boxOpts = struct;
+boxOpts.doSubBG = 1;
+boxOpts.bgROI = [700 790 500 600];
 
-if doBoxCount
-    disp(repmat('-',1,60));    
-    disp('Performing box count analysis');
-    disp(repmat('-',1,60));        
-    
-    if doSubBG
-        atomdata=boxCount(atomdata,boxOpts);
-    else
-        atomdata=boxCount(atomdata);
-    end  
-end
+disp(repmat('-',1,60));    
+disp('Performing box count analysis');
+disp(repmat('-',1,60));    
+atomdata_BM = atomdata;
+[atomdata_BM.ROI]=deal(ROI);
 
-%% Grab the Data
+atomdata_BM=boxCount(atomdata_BM,boxOpts);
+box_data_bm = getBoxData(atomdata_BM,pco_xVar);
 
-% Sort the data
-params=[atomdata.Params];
-xvals=[params.(pco_xVar)];
+data = box_data_bm;
 
-[X,inds]=sort(xvals,'ascend');
-atomdata=atomdata(inds);
-N = zeros(length(atomdata),size(ROI,1));
-Natoms = zeros(length(atomdata),size(ROI,1));
-
-X=X';
-
-% Grab the gaussian fit outputs
-for kk=1:length(atomdata)
-   for nn=1:size(atomdata(kk).ROI,1)
-        BC = atomdata(kk).BoxCount(nn);
-
-        N(kk,nn)=BC.Ncounts;        
-        if BC.Ncounts<0
-            warning(['Negative box count detected atomdata(' num2str(kk) ')' ...
-               ' ROI : ' num2str(nn) '. Setting to 0']);
-           N(kk,nn)=0;
-        end        
-        Natoms(kk,nn)=N(kk,nn)*(PixelSize^2/CrossSection);  % Atom number  
-   end        
-end
-
-%% Process X Data as Raman
+%% Process X Data
 
 % Center frequency for expected RF field (if relevant)
-B = atomdata(1).Params.HF_FeshValue_Initial_Lattice;
-B = 205;
-x0= (BreitRabiK(B,9/2,-7/2)-BreitRabiK(B,9/2,-9/2))/6.6260755e-34/1E6; 
-disp(x0)
+% Calibrated 2021/09/25-26
+Bfb   = data.Params(1).HF_FeshValue_Initial_Lattice;
+Bshim = data.Params(1).HF_zshim_Initial_Lattice*2.35;
+Boff  = 0.11;
+
+B = Bfb + Bshim + Boff;
+
+% Choose the mf States
+mF1 = -7/2;
+mF2 = -9/2;
+
+x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
 
 switch pco_xVar
     case 'Raman_AOM3_freq'
         % Calculate relative to the Raman condition
+        X=data.X;
         X = 2*X - 80;  %Raman AOM condition
         X = X - x0;   
         X = X*1e3;
         xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)']; 
     case 'Pulse_Time'
+        X=data.X;
         xstr=['pulse time (ms)'];    
-end
-
+   case 'rf_rabi_time_HF'
+        X=data.X;
+        xstr=['pulse time (ms)'];    
+    case 'rf_freq_HF'
+        X=data.X;
+        X = X - x0;   
+        X = X*1e3;
+        xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)']; 
+    case 'rf_tof_freq'
+      X=data.X;
+        X = X - x0;   
+        X = X*1e3;
+        xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];  
+    otherwise
+        X = data.X;
+        xstr = pco_xVar;
+end    
 
 %% Process Y Data
     
- N1=Natoms(:,1); % 9 center
- N2=Natoms(:,2); % 9 center + H wings
- N3=Natoms(:,3); % 9 center + V wings
- N4=Natoms(:,4); % 7 center
- N5=Natoms(:,5); % 7 center + H wings
- N6=Natoms(:,6); % 7 center + V wings    
+Natoms = data.Natoms;
+
+N1=Natoms(:,1); % 9 center
+N2=Natoms(:,2); % 9 center + H wings
+N3=Natoms(:,3); % 9 center + V wings
+N4=Natoms(:,4); % 7 center
+N5=Natoms(:,5); % 7 center + H wings
+N6=Natoms(:,6); % 7 center + V wings    
+
+Ratio_79=1.0; 
+N4 = N4/Ratio_79;
+N5 = N5/Ratio_79;
+N6 = N6/Ratio_79;
  
- Ratio_79=0.5; 
- N4 = N4/Ratio_79;
- N5 = N5/Ratio_79;
- N6 = N6/Ratio_79;
- 
-%  Ntot = (N3+N2-2*N1)+(N6+N5-2*N4);
 Ntot = (N3+N2-2*N1)+N4;
 
 outdata.N1=N1;
@@ -109,11 +100,11 @@ outdata.X=X;
 outdata.xVar=pco_xVar;
 outdata.Ratio_79=0.5;
 
-
 outdata.Ntot = Ntot;
 
 outdata.RelCenter9=N1./Ntot;
 outdata.RelCenter7=N4./Ntot;
+
 outdata.RelExciteY9=(N2-N1)./Ntot;
 outdata.RelExciteZ9=(N3-N1)./Ntot;
 
@@ -130,12 +121,12 @@ outdata.RelExciteZ9=(N3-N1)./Ntot;
         fstr='down_center';
      case 1
         % 9 Py
-        Y = (N2-N1)./Ntot;
+        Y = outdata.RelExciteY9;
         ystr=['9 excited y'];
         fstr='down_y_excite';
     case 2
         % 9 Pz
-        Y = (N3-N1)./Ntot;
+        Y = outdata.RelExciteZ9;
         ystr=['9 excited z'];
         fstr='down_z_excite';  
      case 3
@@ -159,7 +150,7 @@ fit_RabiOscillation = 0;
 doLandauZener = 0;
 
 % Lorentzian Fit
-lorentz_assymetric_single=0;
+lorentz_assymetric_single=1;
 lorentz_assymetric_double=0;
 Lorentz_triple=0; 
 
@@ -194,8 +185,6 @@ set(gca,'fontsize',12,'linewidth',1,'box','on','xgrid','on','ygrid','on');
 yL=get(gca,'YLim');
 hold on 
 xlim([min(X) max(X)]);
-
-
 
 
 %% Perform the Fit
