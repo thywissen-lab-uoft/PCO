@@ -22,7 +22,7 @@ end
 %% Data Type
 % Choose the data source
 
-file_name = 'erf_data.mat';
+% file_name = 'erf_data.mat';
 file_name = 'custom_data.mat';
 
 %% Directories
@@ -124,6 +124,7 @@ hF=figure;
 hF.Color='w';
 hF.Position=[100 50 1600 400];
 co=get(gca,'colororder');
+fouts={};
 for nn=1:length(data)
     X = data(nn).X;
     Y = data(nn).Y;
@@ -150,12 +151,12 @@ for nn=1:length(data)
         'fontsize',8);
     xlabel(xstr);
     ylabel(ystr);
-    ylim([0 .65]);
+    ylim([0 .7]);
     
     lstr = [runNames{nn}(1:2) runNames{nn}(end-8:end)];
-    text(.02,.98,lstr,'units','normalized','fontsize',12,...
-        'verticalalignment','cap');
-    
+%     text(.02,.98,lstr,'units','normalized','fontsize',12,...
+%         'verticalalignment','cap');
+    title(lstr);
      
     lorentz_asym_double=1;
     % Assymetric lorentzian fit
@@ -195,6 +196,7 @@ for nn=1:length(data)
 %         opts.Weights=w;
         
         fout_lorentz=fit(X,Y,myfit,opt);
+        fouts{end+1}=fout_lorentz;
         ci = confint(fout_lorentz,0.95);   
         
         XF=linspace(min(X)-5,max(X)+5,1000);
@@ -205,10 +207,22 @@ for nn=1:length(data)
             '$f_2 = ' num2str(round(fout_lorentz.x2,2)) '\pm' num2str(round((ci(2,7)-ci(1,7))/2,2)) '$ kHz' newline ...
             '$\mathrm{FWHM} = ' num2str(round(abs(fout_lorentz.G2),2)) ' $ kHz' newline...
             'A = (' num2str(round(fout_lorentz.A1,2)) ',' num2str(round(fout_lorentz.A2,2)) ')'];
-%         legend(pFit,str,'location','best','interpreter','latex','fontsize',6);
+        legend(pFit,str,'location','northwest','interpreter','latex','fontsize',6);
    
         
     end
     
     
 end
+
+%%
+hF2= figure;
+
+data=[-47.8 -48.9 -50.1 -50.5 -50.9 -52.1];
+relHeight=[];
+for kk=1:length(fouts)
+   relHeight(kk) = fouts{kk}.A2/fouts{kk}.A1; 
+end
+
+plot(data(2:end),relHeight(2:end),'ko')
+ylim([0 .35]);
