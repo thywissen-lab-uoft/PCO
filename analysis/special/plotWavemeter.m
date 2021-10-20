@@ -1,4 +1,4 @@
-function hF=plotWavemeter(t1,t2)
+function [hF]=plotWavemeter(t1,t2,opts)
 %TEMPHUMIDITYPLOTTER Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -14,6 +14,11 @@ function hF=plotWavemeter(t1,t2)
 % t1=[2021 10 17 00 0 0];
 % t2=[2021 10 19 11 59 00];
 
+if nargin ==3 && isfield(opts,'FigLabel');
+    FigLabel = opts.FigLabel;
+else
+    FigLabel = '';
+end
 ch='frequency (GHz)';
 
  %%
@@ -29,22 +34,33 @@ toc
 if ~isempty(rawTbl)
 
     pTable=rawTbl; 
+    pTable = pTable(pTable.Time>datetime(datestr(t1)),:);
+    pTable = pTable(pTable.Time<datetime(datestr(t2)),:);
 
+            
+    y=pTable.(ch);
+    y=y-391.0163*1e3;
+    yMed = median(y);
 
     hF=figure;
     hF.Position=[300 700 600 300];
-    set(hF,'color','w');
-
-    y=pTable.(ch);
-    y=y-391.0163*1e3;
-
-    pT=plot(pTable.Time,y);
-    
+    set(hF,'color','w'); 
+     
+    pT=plot(pTable.Time,y);  
     xlim([datetime(datestr(t1)) datetime(datestr(t2))]);
     hold on
     ylabel('frequency - 391.0163 THz (GHz)');
+    
+    ylim([-1 1]*.5+yMed);    
+    set(gca,'xgrid','on','ygrid','on','fontsize',10,'box','on','linewidth',1);
+    drawnow;
+    % Image directory folder string
+    t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
+        'w','horizontalalignment','left','fontsize',6);
+    t.Position(4)=t.Extent(4);
+    t.Position(3)=hF.Position(3);
+    t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
 
-%     title(ch);
 end
 
     function out=loadLogs(t1,t2)
