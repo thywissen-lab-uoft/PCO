@@ -513,10 +513,13 @@ end
 %% Wavemeter
 
 if doWavemeter
+    waveOpts = struct;
+    waveOpts.FigLabel = FigLabel;
+    
     P=[atomdata.Params];
     t1 = min([P.ExecutionDate]);
     t2 = max([P.ExecutionDate]);    
-    hF_wave=plotWavemeter(t1,t2);
+    [hF_wave]=plotWavemeter(t1,t2,waveOpts);
    if doSave;saveFigure(hF_wave,'wavemeter',saveOpts);end
 end
 
