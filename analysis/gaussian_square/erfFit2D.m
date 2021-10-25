@@ -65,7 +65,7 @@ fprintf(' erf fitting...');
 t1=now;
 [fout,gof,output]=fit([xx(:) yy(:)],Z(:),myfit,opt);
 t2=now;
-disp([' done (' num2str(round((t2-t1)*24*60*60,1)) ' sec.).']);
+disp([' done (' num2str(round((t2-t1)*24*60*60,2)) ' sec.).']);
 
 % Compute number
 Zf = feval(fout,xx,yy);
