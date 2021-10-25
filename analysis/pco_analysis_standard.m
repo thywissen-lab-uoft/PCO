@@ -187,6 +187,74 @@ if doErfFit
       
 end
 
+%% 2D Band Map Analysis
+
+if doBMFit  
+% This is the default bm analysis.
+    
+    bmPopts = struct;
+    bmPopts.FigLabel = FigLabel;
+    bmPopts.xUnit=pco_unit;
+    bmPopts.NumberExpFit = 0;        % Fit exponential decay to atom number
+    bmPopts.NumberLorentzianFit=0;   % Fit atom number to lorentzian
+    bmPopts.CenterSineFit = 0;       % Fit sine fit to cloud center
+    bmPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
+    bmPopts.CenterParabolaFit = 0;
+    bmPopts.CenterLinearFit = 0;     % Linear fit to cloud center
+    bmPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
+    
+    % Plot the statistics of bmian fit
+    hF_stats_bm=showBMStats(bm_data,bmPopts);     
+    if doSave;saveFigure(hF_stats_bm,'bm_stats',saveOpts);end       
+    
+    % Atom number
+    hF_number_bm = showAtomNumber(bm_data,pco_xVar,bmPopts);  
+    ylim([0 max(get(gca,'YLim'))]);    
+    if doSave;saveFigure(hF_number_bm,'bm_number',saveOpts);end
+    
+    % Atom number in time
+    if ~isequal(pco_xVar,'ExecutionDate')    
+        hF_number_bm_time = showAtomNumber(...
+            chDataXVar(bm_data,'ExecutionDate'),'ExecutionDate',bmPopts);  
+        ylim([0 max(get(gca,'YLim'))]);    
+        hF_number_bm_time.Position(2)=700;
+        if doSave;saveFigure(hF_number_bm_time,'bm_number_time',saveOpts);end
+    end
+    
+    % Plot the ratios if there are more than one ROI.
+    if size(bm_data.Natoms,2)>1    
+        hF_number_bm_ratio=showNumberRatio(bm_data,pco_xVar,bmPopts);
+        if doSave;saveFigure(hF_number_bm_ratio,'bm_number_ratio',saveOpts);end
+    end    
+    
+    % Atom number bands
+    hF_number_bm_bands = showAtomNumberBands(bm_data,pco_xVar,bmPopts);  
+    ylim([0 max(get(gca,'YLim'))]);    
+    if doSave;saveFigure(hF_number_bm_bands,'bm_number_bands',saveOpts);end
+    
+    % Atom number bands in time
+    if ~isequal(pco_xVar,'ExecutionDate')    
+        hF_number_bm_bands_time = showAtomNumberBands(...
+            chDataXVar(bm_data,'ExecutionDate'),'ExecutionDate',bmPopts);  
+        ylim([0 max(get(gca,'YLim'))]);    
+        hF_number_bm_bands_time.Position(2)=700;
+        if doSave;saveFigure(hF_number_bm_bands_time,'bm_number_bands_time',saveOpts);end
+    end    
+        
+    % Plot the ratios if there are more than one ROI.
+    hF_number_bm_bands_ratio=showNumberBandsRatio(bm_data,pco_xVar,bmPopts);
+    if doSave;saveFigure(hF_number_bm_bands_ratio,'bm_number_bands_ratio',saveOpts);end
+     
+    % Cloud Error
+    hF_Error=showError(bm_data,pco_xVar,bmPopts);    
+    if doSave;saveFigure(hF_Error,'bm_error',saveOpts);end  
+   
+    % Cloud centre
+    hF_Centre=showAtomCentre(bm_data,pco_xVar,bmPopts);    
+    if doSave;saveFigure(hF_Centre,'bm_position',saveOpts);end 
+    
+end
+
 %% Fermi Fit Analysis
    
 if doFermiFitLong

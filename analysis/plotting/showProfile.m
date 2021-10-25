@@ -97,6 +97,16 @@ for kk=1:(ceil(length(atomdata)/pMax))
             doErf = 1;
         end
         
+        % Get the band map fit
+        clear bmFit
+        doBM = 0;
+        if isfield(atomdataSUB(ii),'BMFit')
+            bmFit = atomdataSUB(ii).BMFit{rNum};
+            Yc(end+1) = bmFit.Yc;
+            Xc(end+1) = bmFit.Xc;
+            doBM = 1;
+        end
+        
         % Get the fermi fit
         clear doFermi
         doFermi = 0;
@@ -176,6 +186,27 @@ for kk=1:(ceil(length(atomdata)/pMax))
             end            
         end
         
+        %%%% Get bm profile %%%%
+        if doBM 
+            zzF_bm = feval(bmFit,xx,yy);
+
+            if isequal(direction,'X') && isequal(style,'cut')
+                YF_erf = zzF_bm(iY,:);
+            end
+            
+            if isequal(direction,'X') && isequal(style,'sum')
+                YF_erf = sum(zzF_bm,1);
+            end
+            
+            if isequal(direction,'Y') && isequal(style,'cut')
+                YF_erf = zzF_bm(:,iX);
+            end
+            
+            if isequal(direction,'Y') && isequal(style,'sum')
+                YF_erf = sum(zzF_bm,2);
+            end            
+        end
+        
         %%%% Get fermi profile %%%%
         if doFermi   
             zzF_fermi = feval(fermiFit,xx,yy);
@@ -226,6 +257,10 @@ for kk=1:(ceil(length(atomdata)/pMax))
         
         if doErf
             plot(X,YF_erf,'b','LineWidth',2);
+        end
+        
+        if doBM
+            plot(X,YF_erf,'magenta','LineWidth',2);
         end
         
         if doFermi
@@ -297,6 +332,18 @@ for kk=1:(ceil(length(atomdata)/pMax))
                    'erf {\bf c: }'  num2str(round(erfFit.Yc)) ...
                     'px  ' ...
                     '{\bf \sigma: }' num2str(round(erfFit.Ys)) ...
+                    'px'];   
+            end
+        end
+        
+        if doBM
+            if isequal(direction,'X')
+               lstr = [lstr newline ...
+                   'bm {\bf c: }'  num2str(round(bmFit.Xc)) ...
+                    'px'];   
+            else
+                lstr = [lstr newline ...
+                   'bm {\bf c: }'  num2str(round(bmFit.Yc)) ...
                     'px'];   
             end
         end

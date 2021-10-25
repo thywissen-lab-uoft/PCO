@@ -2,12 +2,12 @@ function [fout,gof,output,N] = bandmapFit2D(X,Y,Z,opts)
 
 if nargin==3
    opts = struct;
-   opts.tof = 15;
-   opts.PixelSize = 6.45;
+   opts.TOF = 15E-3;
+   opts.PixelSize = 6.45E-6;
    opts.doScale = 1;
    opts.Scale = 0.4;
    opts.doSmooth = 0;
-   opts.Sooth = 1;
+   opts.Smooth = 1;
 end
 
 %% Prepare data
@@ -17,7 +17,7 @@ X = double(X);Y = double(Y); Z = double(Z);
 
 % Rescale the image for computation time
 if opts.doScale
-    sc=0.4;
+    sc=opts.Scale;
     X=imresize(X,sc);Y=imresize(Y,sc);Z=imresize(Z,sc);
 end
 
@@ -26,7 +26,7 @@ end
 
 % Smooth the data
 if opts.doSmooth
-    sSmooth=1;
+    sSmooth = opts.Smooth;
     Z=imgaussfilt(Z,sSmooth); 
 end
 
@@ -36,7 +36,8 @@ end
 vR = 9.46; 
 
 % Convert recoil velocity to pixels
-sG = vR/(opts.PixelSize/opts.tof);
+sG = vR/((opts.PixelSize*1e6)/(opts.TOF*1e3));
+
 
 %% Initial Guess
 
