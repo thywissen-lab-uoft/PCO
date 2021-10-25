@@ -191,19 +191,19 @@ for kk=1:(ceil(length(atomdata)/pMax))
             zzF_bm = feval(bmFit,xx,yy);
 
             if isequal(direction,'X') && isequal(style,'cut')
-                YF_erf = zzF_bm(iY,:);
+                YF_bm = zzF_bm(iY,:);
             end
             
             if isequal(direction,'X') && isequal(style,'sum')
-                YF_erf = sum(zzF_bm,1);
+                YF_bm = sum(zzF_bm,1);
             end
             
             if isequal(direction,'Y') && isequal(style,'cut')
-                YF_erf = zzF_bm(:,iX);
+                YF_bm = zzF_bm(:,iX);
             end
             
             if isequal(direction,'Y') && isequal(style,'sum')
-                YF_erf = sum(zzF_bm,2);
+                YF_bm = sum(zzF_bm,2);
             end            
         end
         
@@ -260,7 +260,7 @@ for kk=1:(ceil(length(atomdata)/pMax))
         end
         
         if doBM
-            plot(X,YF_erf,'magenta','LineWidth',2);
+            plot(X,YF_bm,'magenta','LineWidth',2);
         end
         
         if doFermi
