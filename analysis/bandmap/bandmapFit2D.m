@@ -4,7 +4,6 @@ if nargin==3
    opts = struct;
    opts.tof = 15;
    opts.PixelSize = 6.45;
-   opts.NEBands = [1 1]; % Number of bands, horizontal vs vertical
    opts.doScale = 1;
    opts.Scale = 0.4;
    opts.doSmooth = 0;
