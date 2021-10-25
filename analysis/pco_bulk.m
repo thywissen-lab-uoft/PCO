@@ -44,12 +44,14 @@ file_name = 'custom_data.mat';
 %     2021 09 26 06];
 
 runs =[
-    2021 10 19 08;
-    2021 10 19 07;
-    2021 10 19 04;
-    2021 10 19 09;
-    2021 10 19 06;
-    2021 10 19 05];
+    2021 10 24 9;
+    2021 10 24 10;
+    2021 10 24 11;
+    2021 10 24 12;
+    2021 10 24 13;
+    2021 10 24 14;
+    2021 10 24 15;
+    2021 10 24 16];
 
 %% Display Intentions
 disp(' Performing bulk analysis');
@@ -122,7 +124,7 @@ end
 
 hF=figure;
 hF.Color='w';
-hF.Position=[100 50 1600 400];
+hF.Position=[100 50 800 400];
 co=get(gca,'colororder');
 fouts={};
 for nn=1:length(data)
@@ -142,23 +144,30 @@ for nn=1:length(data)
    
     
     
-    subplot(1,length(data),nn);
-    errorbar(ux,Yu(:,1),Yu(:,2),'o','markerfacecolor',co(nn,:),...
-        'markeredgecolor',co(nn,:)*.5,'color',co(nn,:),...
-        'linewidth',1,'markersize',8);    
+       subplot(3,ceil(length(data)/3),nn);
+ %     subplot(ceil(length(data)/2),2,nn);
+
+    myco = co(mod(nn-1,7)+1,:);
+    errorbar(ux,Yu(:,1),Yu(:,2),'o','markerfacecolor',myco,...
+        'markeredgecolor',myco*.5,'color',myco,...
+        'linewidth',1,'markersize',6);    
     hold on
     set(gca,'xgrid','on','ygrid','on','fontname','times',...
         'fontsize',8);
     xlabel(xstr);
     ylabel(ystr);
-    ylim([0 .7]);
+    ylim([-.2 .15]);
+    xlim([-20 45]);
     
-    lstr = [runNames{nn}(1:2) runNames{nn}(end-8:end)];
+%     lstr = [runNames{nn}(1:2) runNames{nn}(end-8:end)];
+%     lstr = [runNames{nn}];
 %     text(.02,.98,lstr,'units','normalized','fontsize',12,...
 %         'verticalalignment','cap');
-    title(lstr);
-     
-    lorentz_asym_double=1;
+%     title(lstr);
+    
+    lbl = [runNames{nn}(1:2) ' ' runNames{nn}(30:35)];
+     title(lbl);
+    lorentz_asym_double=0;
     % Assymetric lorentzian fit
     if length(X)>9 && lorentz_asym_double
         g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
@@ -180,12 +189,12 @@ for nn=1:length(data)
         G1 = 19;
         G2 = 5;        
                        
-        A1 = (max(Y)-min(Y));   
-        A2 = .5;
+        A2 = (max(Y)-min(Y));   
+        A1 = .5;
         
         inds=[Y>.9*max(Y)];
-        x1 = -124;mean(X(inds)); 
-        x2 = x1-30; 
+        x1 = 70;mean(X(inds)); 
+        x2 = 115; 
         
         a1 = -.05;
         a2 = -.05;
@@ -211,18 +220,119 @@ for nn=1:length(data)
    
         
     end
+    gauss_double=1;
+    if length(X)>4 && gauss_double
+        myfit=fittype('bg+A1*exp(-(x-x1).^2/G1.^2)+A2*exp(-(x-x2).^2/G2.^2)',...
+            'coefficients',{'A1','G1','x1','A2','G2','x2','bg'},'independent','x');
+        opt=fitoptions(myfit);
+        % Background is max
+        bg=min(Y);
+        % Find center
+        [Ymin,ind]=min(Y);
+        A=bg-Ymin;
+        xC=X(ind);
+        % Assign guess
+        G=[A 10 -2 A/5 10 20 bg];
+        opt.StartPoint=G;
+        opt.Robust='bisquare';
+%         opt.Lower=[0 0 -inf 0 0 -inf 0];
+        % Perform the fit
+        
+        
+%         W = ones(length(Y),1);
+%         opt.Weights = X>-15;
+        
+        fout=fit(X,Y,myfit,opt);
+        disp(fout);
+        ci = confint(fout,0.95);
+        disp(ci)
+        % Plot the fit
+        tt=linspace(min(X),max(X),1000);
+        pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
+        str=['$f_1 = ' num2str(round(fout.x1,2)) '\pm' num2str(round((ci(2,3)-ci(1,3))/2,2)) '$ kHz' newline ...
+            '$\mathrm{FWHM} = ' num2str(round(abs(fout.G1),2)) ' $ kHz' newline ...
+            '$f_2 = ' num2str(round(fout.x2,2)) '\pm' num2str(round((ci(2,6)-ci(1,6))/2,2)) '$ kHz' newline ...
+            '$\mathrm{FWHM} = ' num2str(round(abs(fout.G2),2)) ' $ kHz' newline...
+            'A1 =' num2str(round(fout.A1,2)) newline...
+            'A2 =' num2str(round(fout.A2,2))];
+        
+        str = ['$(f_1,f_2,\Delta f)$' newline '$(' num2str(round(fout.x1,1)) ...
+            ',' num2str(round(fout.x2,1)) ',' num2str(round(fout.x2-fout.x1,1)) ')' ...
+            '~\mathrm{kHz}$'];
+        %legend(pF,str,'location','best','interpreter','latex');
+        text(.98,.98,str,'units','normalized','verticalalignment','cap',...
+            'horizontalalignment','right','interpreter','latex','fontsize',10);
+    
+
+        fouts{nn}=fout;
+    end
+    
     
     
 end
 
 %%
-hF2= figure;
 
-data=[-47.8 -48.9 -50.1 -50.5 -50.9 -52.1];
-relHeight=[];
-for kk=1:length(fouts)
-   relHeight(kk) = fouts{kk}.A2/fouts{kk}.A1; 
+df=[];
+f1=[];
+if gauss_double
+    for kk=1:length(fouts)
+        
+                p = data(kk).Source.Params(1);
+
+        Bfb   = data(kk).Source.Params(1).HF_FeshValue_Initial_Lattice;
+        
+        if isfield(p,'HF_FeshValue_Spectroscopy');
+        Bfb   = data(kk).Source.Params(1).HF_FeshValue_Spectroscopy;
+        end
+        
+        Boff  = 0.11;
+        B = Bfb + Boff;
+
+        % Choose the mf States
+        mF1 = -7/2;
+        mF2 = -9/2;
+
+        x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34;
+%         x0 = x0*1e-6; %Mhz
+        ci = confint(fouts{kk},0.95);
+
+        
+         f1(kk) = 1e3*fouts{kk}.x1 + x0;
+                 
+         df(kk) = 1e3*(fouts{kk}.x2-fouts{kk}.x1);
+    end
+ 
 end
 
-plot(data(2:end),relHeight(2:end),'ko')
-ylim([0 .35]);
+
+B = rf2B(f1,-9/2,-7/2);
+ i=B>199.2;
+
+ B=B(i);
+ df=df(i);
+
+hF2=figure;
+hF2.Color='w';
+
+hF2.Position=[800 400 500 300];
+plot(B,df*1e-3,'ko','markerfacecolor',[.5 .5 .5],...
+    'markersize',8,'linewidth',2)
+ylim([0 40]);
+
+ylabel('$\Delta f$ (kHz)','interpreter','latex');
+xlabel(['fitted field (G)']);
+
+set(gca,'fontname','times','xgrid','on','ygrid','on',...
+    'box','on','linewidth',1);
+
+% hF2= figure;
+% 
+% data=[-47.8 -48.9 -50.1 -50.5 -50.9 -52.1];
+% relHeight=[];
+% for kk=1:length(fouts)
+%    relHeight(kk) = fouts{kk}.A2/fouts{kk}.A1; 
+% end
+% 
+% plot(data(2:end),relHeight(2:end),'ko')
+% ylim([0 .35]);

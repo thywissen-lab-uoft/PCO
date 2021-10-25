@@ -264,7 +264,7 @@ if doCustom
     lorentz_triple=0;    
     
     lorentz_asym_single= 0;
-    lorentz_asym_double= 1;
+    lorentz_asym_double= 0;
 
     fit_lorentz_assymetric_4=0;
     
@@ -273,11 +273,17 @@ if doCustom
 % Center frequency for expected RF field (if relevant)
 % Calibrated 2021/09/25-26
 Bfb   = data.Params(1).HF_FeshValue_Initial_Lattice;
+% Bfb   = data.Params(1).HF_FeshValue_Spectroscopy;
+
 Bshim = data.Params(1).HF_zshim_Initial_Lattice*2.35;
+Bshim =0;
+
 Boff  = 0.11;
 
+
 B = Bfb + Bshim + Boff;
-% B=201;
+ 
+%B=200.2 +0.11;
 
 % Choose the mf States
 mF1 = -7/2;
@@ -326,7 +332,8 @@ end
     end
     
     % Default total atom number is just the sum
-    Ntot = sum(N,2);       
+    Ntot = sum(N,2);     
+     N(:,2) = N(:,2)*8.6/7.2; %fudge factor
 
      dataMode= 5;         
      switch dataMode
@@ -343,13 +350,13 @@ end
             ystr=['N_9'];
             figName=ystr;
          case 3
-            Y=N(:,1)-N(:,2);
-            ystr=['N_9-N_7'];
+            Y=N(:,1)+N(:,2);
+            ystr=['N_9+N_7'];
             figName=ystr;
          case 4
-            Y=N(:,1)./(N(:,1)+N(:,2));
+            Y=N(:,2)./(N(:,1)+N(:,2));
 %             ystr=['Transfer Fraction'];
-            ystr=['N_9/(N_7+N_9)'];
+            ystr=['N_7/(N_7+N_9)'];
             figName='Transfer Fraction';
          case 5 % random customized stuffs 
 %              N(:,2)=N(:,2)*0.6;
@@ -374,6 +381,16 @@ end
              Y =(N(:,1)+N(:,2))./(N(:,1)+N(:,2)+N(:,3));
              ystr=['y excited fraction'];
              figName='y excited ratio';
+             
+          case 9 % 
+             Y =(N(:,2)- N(:,1))./(N(:,1)+N(:,2));
+             ystr=['(N_7-N_9)/(N_7+N_9)'];
+             figName='custom7';
+             
+          case 10 % 
+             Y =(N(:,2))./(N(:,1)+N(:,2));
+             ystr=['(N_7)/(N_7+N_9)'];
+             figName='custom72';
      end
 
     custom_data=struct;    
@@ -421,11 +438,14 @@ end
     set(gca,'fontsize',12,'linewidth',1,'box','on','xgrid','on','ygrid','on');
     yL=get(gca,'YLim');
     ylim([-0.2 yL(2)]);
-%     ylim([1.1E5 2.5E5]);
+    ylim([-0.25 0.2]);
+
+
+    %     ylim([1.1E5 2.5E5]);
 
     hold on    
     xlim([min(X) max(X)]);
-        
+%         xlim([-20 40]);    
 
 %% Exponential Fit
     if T2exp
@@ -640,10 +660,10 @@ end
         A=bg-Ymin;
         xC=X(ind);
         % Assign guess
-        G=[A 10 -130 A 10 -145 bg];
+        G=[A 10 -5 A/3 10 30 bg];
         opt.StartPoint=G;
         opt.Robust='bisquare';
-        opt.Lower=[0 0 -inf 0 0 -inf 0];
+%         opt.Lower=[0 0 -inf 0 0 -inf 0];
         % Perform the fit
         fout=fit(X,Y,myfit,opt);
         disp(fout);
@@ -652,13 +672,26 @@ end
         % Plot the fit
         tt=linspace(min(X),max(X),1000);
         pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
-        str=['$f_1 = ' num2str(round(fout.x1,2)) '\pm' num2str(round((ci(2,3)-ci(1,3))/2,2)) '$ kHz' newline ...
-            '$\mathrm{FWHM} = ' num2str(round(abs(fout.G1),2)) ' $ kHz' newline ...
-            '$f_2 = ' num2str(round(fout.x2,2)) '\pm' num2str(round((ci(2,6)-ci(1,6))/2,2)) '$ kHz' newline ...
-            '$\mathrm{FWHM} = ' num2str(round(abs(fout.G2),2)) ' $ kHz' newline...
-            'A1 =' num2str(round(fout.A1,2)) newline...
-            'A2 =' num2str(round(fout.A2,2))];
+        
+        str=['$(A_i,f_i,\Gamma_i)$' newline ....
+            '$(' num2str(fout.A1,2) ',' ...
+            num2str(round(fout.x1,1)) '\pm ' ...
+            num2str(round((ci(2,3)-ci(1,3))/2,1)) ...
+            ',' num2str(round(fout.G1,1)) ')$' newline ...
+            '$(' num2str(fout.A2,2) ',' ...
+            num2str(round(fout.x2,1)) '\pm ' ...
+            num2str(round((ci(2,6)-ci(1,6))/2,1)) ...
+            ',' num2str(round(fout.G2,1)) ')$'];
+            
+        
+%         str=['$f_1 = ' num2str(round(fout.x1,2)) '\pm ' num2str(round((ci(2,3)-ci(1,3))/2,2)) '$ kHz' newline ...
+%             '$\mathrm{FWHM} = ' num2str(round(abs(fout.G1),2)) ' $ kHz' newline ...
+%             '$f_2 = ' num2str(round(fout.x2,2)) '\pm ' num2str(round((ci(2,6)-ci(1,6))/2,2)) '$ kHz' newline ...
+%             '$\mathrm{FWHM} = ' num2str(round(abs(fout.G2),2)) ' $ kHz' newline...
+%             'A1 =' num2str(round(fout.A1,2)) newline...
+%             'A2 =' num2str(round(fout.A2,2))];
         legend(pF,str,'location','best','interpreter','latex');
+        
     end
     
     %% Negative Lorentzian
@@ -916,13 +949,23 @@ end
         G2 = 13;        
                        
         A1 = (max(Y)-min(Y));   
-        A2 = A1/20;
+        A2 = A1/40;
         
+                
         inds=[Y>.9*max(Y)];
-        x1 = -130;mean(X(inds)); 
-        x2 = x1-30; x2 = -155;
+        x1 =0; mean(X(inds)); 
+        x2 = 10; %x2 = -155;
         
-        a1 = -.05;
+         A2 = (max(Y)-min(Y));   
+        A1 = A2/30;
+        
+                
+        inds=[Y>.9*max(Y)];
+        x1 =0; mean(X(inds)); 
+        x2 = 15; %x2 = -155;
+
+        
+        a1 = -.1;
         a2 = -.05;
         
         
@@ -934,7 +977,7 @@ end
         ci = confint(fout_lorentz,0.95);   
         
         XF=linspace(min(X)-5,max(X)+5,1000);
-        xlim([min(X)-0.1 max(X)+0.1]);
+%         xlim([min(X)-0.1 max(X)+0.1]);
         pFit=plot(XF,feval(fout_lorentz,XF),'r-','linewidth',2);
         str=['$f_1 = ' num2str(round(fout_lorentz.x1,2)) '\pm' num2str(round((ci(2,3)-ci(1,3))/2,2)) '$ kHz' newline ...
             '$\mathrm{FWHM} = ' num2str(round(abs(fout_lorentz.G1),2)) ' $ kHz' newline ...
@@ -990,7 +1033,7 @@ end
         G=[A 10 0 bg];
         opt.StartPoint=G;
         opt.Robust='bisquare';
-        opt.Lower=[0 0 -inf 0 0 -inf 0];
+%         opt.Lower=[0 0 -inf 0 0 -inf 0];
         % Perform the fit
         fout=fit(X,Y,myfit,opt);
         disp(fout);

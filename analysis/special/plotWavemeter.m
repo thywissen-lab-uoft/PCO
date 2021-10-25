@@ -46,7 +46,7 @@ if ~isempty(rawTbl)
     hF.Position=[300 700 600 300];
     set(hF,'color','w'); 
      
-    pT=plot(pTable.Time,y);  
+    pT=plot(pTable.Time,y,'ko');  
     xlim([datetime(datestr(t1)) datetime(datestr(t2))]);
     hold on
     ylabel('frequency - 391.0163 THz (GHz)');
