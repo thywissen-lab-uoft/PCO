@@ -273,7 +273,7 @@ if doCustom
 % Center frequency for expected RF field (if relevant)
 % Calibrated 2021/09/25-26
 Bfb   = data.Params(1).HF_FeshValue_Initial_Lattice;
-% Bfb   = data.Params(1).HF_FeshValue_Spectroscopy;
+Bfb   = data.Params(1).HF_FeshValue_Spectroscopy;
 
 Bshim = data.Params(1).HF_zshim_Initial_Lattice*2.35;
 Bshim =0;
@@ -283,7 +283,7 @@ Boff  = 0.11;
 
 B = Bfb + Bshim + Boff;
  
-%B=200.2 +0.11;
+% B=200.4 +0.11;
 
 % Choose the mf States
 mF1 = -7/2;
@@ -335,7 +335,7 @@ end
     Ntot = sum(N,2);     
      N(:,2) = N(:,2)*8.6/7.2; %fudge factor
 
-     dataMode= 5;         
+     dataMode= 9;         
      switch dataMode
          case 0     
              Y=(N(:,1)-N(:,2))./N(:,1);
@@ -660,7 +660,7 @@ end
         A=bg-Ymin;
         xC=X(ind);
         % Assign guess
-        G=[A 10 -5 A/3 10 30 bg];
+        G=[A 10 -1 A/20 10 75 bg];
         opt.StartPoint=G;
         opt.Robust='bisquare';
 %         opt.Lower=[0 0 -inf 0 0 -inf 0];

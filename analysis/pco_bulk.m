@@ -44,14 +44,8 @@ file_name = 'custom_data.mat';
 %     2021 09 26 06];
 
 runs =[
-    2021 10 24 9;
-    2021 10 24 10;
-    2021 10 24 11;
-    2021 10 24 12;
-    2021 10 24 13;
-    2021 10 24 14;
-    2021 10 24 15;
-    2021 10 24 16];
+    2021 10 25 05;
+    2021 10 25 07];
 
 %% Display Intentions
 disp(' Performing bulk analysis');
@@ -165,7 +159,10 @@ for nn=1:length(data)
 %         'verticalalignment','cap');
 %     title(lstr);
     
-    lbl = [runNames{nn}(1:2) ' ' runNames{nn}(30:35)];
+    lbl = [runNames{nn}(1:2) ' ' runNames{nn}(38:52)];
+    
+    
+    
      title(lbl);
     lorentz_asym_double=0;
     % Assymetric lorentzian fit
@@ -220,7 +217,7 @@ for nn=1:length(data)
    
         
     end
-    gauss_double=1;
+    gauss_double=0;
     if length(X)>4 && gauss_double
         myfit=fittype('bg+A1*exp(-(x-x1).^2/G1.^2)+A2*exp(-(x-x2).^2/G2.^2)',...
             'coefficients',{'A1','G1','x1','A2','G2','x2','bg'},'independent','x');
