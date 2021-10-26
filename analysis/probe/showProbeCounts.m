@@ -42,7 +42,7 @@ hF=figure('Name',[pad('Probe Counts',20) FigLabel],...
     'numbertitle','off');
 hF.Position(1)=0;
 hF.Position(2)=750;
-hF.Position(3)=300;
+hF.Position(3)=600;
 hF.Position(4)=300;
 drawnow;
 

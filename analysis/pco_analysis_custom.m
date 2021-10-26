@@ -257,7 +257,7 @@ if doCustom
     gauss_4=0;
     gauss_neg_double=0;
     gauss_neg_single=0;
-    gauss_double = 0;
+    gauss_double = 1;
     
     lorentz_neg_single=0;    
     lorentz_neg_double=0;  
@@ -663,7 +663,7 @@ end
         A=bg-Ymin;
         xC=X(ind);
         % Assign guess
-        G=[A 10 -1 A/20 10 75 bg];
+        G=[A 10 -3 A/5 10 15 bg];
         opt.StartPoint=G;
         opt.Robust='bisquare';
 %         opt.Lower=[0 0 -inf 0 0 -inf 0];

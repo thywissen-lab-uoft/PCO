@@ -76,7 +76,6 @@ pco_xVar='rf_freq_HF';
 %  pco_xVar = 'Evap_End_Power';
 % pco_xVar = 'rf_pulse_length';
 % pco_xVar = 'rf_rabi_time_HF';
-pco_xVar = 'rf_freq_HF';
 
 % 
 % pco_xVar = 'latt_ramp_time';
@@ -98,7 +97,7 @@ pco_overrideUnit='MHz';
 %% Analysis Flags
 
 % Saving
-doSave        = 0;      % Save the figures?
+doSave        = 1;      % Save the figures?
  
 % Animation
 doAnimate     = 1;      % Animate the Cloud
@@ -117,7 +116,7 @@ doGaussRabi   = 0;      % Enable gauss rabi
 doBEC         = 0;      % Enable BEC analysis
 
 % Erf Fit
-doErfFit      = 1;      % Erf
+doErfFit      = 0;      % Erf
 
 % Band Map Fit
 doBMFit       = 1;
@@ -134,7 +133,7 @@ doRabiContrast = 0;
 doCustom_BM = 0;    % Custom Band map
 
 % Wavemeter
-doWavemeter   = 0;
+doWavemeter   = 1;
 
 %% GDrive Settings
 GDrive_root = 'G:\My Drive\Lattice Shared\LabData';
@@ -505,8 +504,8 @@ probe_opts.xUnit=pco_unit;
 probe_opts.PixelSize = PixelSize;
 probe_opts.FigLabel = FigLabel;
 
-[hF_probe,counts]=showProbeCounts(atomdata,pco_xVar,probe_opts);
-saveFigure(hF_probe,'probe',saveOpts)
+[hF_probe_counts,counts]=showProbeCounts(atomdata,pco_xVar,probe_opts);
+if doSave;saveFigure(hF_probe_counts,'probe_counts',saveOpts);end
 
 if doProbeFit
    atomdata=analyzeProbeBeam(atomdata);
@@ -910,8 +909,8 @@ if doAnimate && doSave
      animateOpts.Order='ascend';
     
     % Color limits
-    animateOpts.CLim=[0 .2;
-        0 .2];   
+    animateOpts.CLim=[0 .3;
+        0 .3];   
 %     animateOpts.CLim=[0 .2;
 %         0 .5]; 
     
