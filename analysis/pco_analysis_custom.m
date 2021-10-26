@@ -9,7 +9,8 @@
 
 % data_source = 'box';
 % data_source = 'gauss';
-data_source = 'erf';
+% data_source = 'erf';
+data_source = 'bm';
 
 switch data_source
     case 'box'        
@@ -18,6 +19,8 @@ switch data_source
         data = gauss_data;
     case 'erf'
         data = erf_data;
+    case 'bm'
+        data = bm_data;
 end
 
 %% Generate Custom Data
