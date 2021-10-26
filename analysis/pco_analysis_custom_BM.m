@@ -301,7 +301,7 @@ Y(25).FigName    = 'bm_custom_Ntot';
 Y(25).Y          = N0;
 % Assign to output
 data.Y = Y;
-data.YLabel = {Y.Yname};        
+data.YLabel = {Y.YName};        
 
 %% Plot it 
 bm_custom_opts=struct;
