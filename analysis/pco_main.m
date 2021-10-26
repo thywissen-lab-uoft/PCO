@@ -64,8 +64,9 @@ end
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-pco_xVar='Raman_AOM3_freq';
+% pco_xVar='Raman_AOM3_freq';
 % pco_xVar='Pulse_Time';
+pco_xVar='rf_freq_HF';
 
 % pco_xVar='ExecutionDate';
 % pco_xVar = 'rf_tof_srs_power';
@@ -97,7 +98,7 @@ pco_overrideUnit='MHz';
 %% Analysis Flags
 
 % Saving
-doSave        = 1;      % Save the figures?
+doSave        = 0;      % Save the figures?
  
 % Animation
 doAnimate     = 0;      % Animate the Cloud
@@ -118,6 +119,9 @@ doBEC         = 0;      % Enable BEC analysis
 % Erf Fit
 doErfFit      = 1;      % Erf
 
+% Band Map Fit
+doBMFit       = 1;
+
 % Fermi
 doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
 
@@ -130,7 +134,7 @@ doRabiContrast = 0;
 doCustom_BM = 0;    % Custom Band map
 
 % Wavemeter
-doWavemeter   = 1;
+doWavemeter   = 0;
 
 %% GDrive Settings
 GDrive_root = 'G:\My Drive\Lattice Shared\LabData';
@@ -691,6 +695,64 @@ if doErfFit
     end
 end
 
+%% 2D Band Map Fit
+% Fit the cloud to a band map fit.  The current code fits the FBZ as well
+% as the first excited band in the horizontal and vertical directions
+
+bm_opts = struct;
+bm_opts.PixelSize = PixelSize;  % Pixel size in meters
+bm_opts.doScale = 1;            % Enable rescale of data (smaller img --> faster)
+bm_opts.Scale = 0.4;            % Length Scale factor
+bm_opts.doSmooth = 0;           % Enable smoothing?
+bm_opts.Smooth = 1;             % Smoothing radius
+   
+% Perform the Erf Fit
+if doBMFit
+    disp(repmat('-',1,60));    
+    disp('Performing 2D Band Map fit');
+    disp(repmat('-',1,60)); 
+
+    for kk=1:length(atomdata)
+        disp(repmat('-',1,60));   
+        disp(['(' num2str(kk) ') ' atomdata(kk).Name]);
+        
+        % Time of flight
+        bm_opts.TOF = atomdata(kk).Params.tof*1e-3;
+        
+        for nn=1:size(atomdata(kk).ROI,1)       % Iterate over all ROIs
+            sROI=atomdata(kk).ROI(nn,:);        % Grab the analysis ROI
+            Dx=sROI(1):sROI(2);                 % X Vector
+            Dy=sROI(3):sROI(4);                 % Y Vector
+            data=atomdata(kk).OD(Dy,Dx);        % Optical density        
+            
+            % Perform the fit  
+            [fout,gof,output,N]=bandmapFit2D(Dx,Dy,data,bm_opts);    
+            
+            % Assign ouputs
+            Natoms = N*(PixelSize^2/CrossSection);
+            atomdata(kk).BMFit{nn} = fout; % Assign the fit object       
+            atomdata(kk).BMGOF{nn} = gof; % Assign the fit object
+            atomdata(kk).BMNum{nn} = Natoms;
+        end
+    end    
+    
+    % Get a summary of the erf fit data
+    bm_data=getBMData(atomdata,pco_xVar);  
+    if doSave
+        save([saveDir filesep 'bm_data'],'bm_data');
+    end  
+    
+    if doSave && doUpload && exist(GDrive_root,'dir')
+        gDir = [fileparts(getImageDir2(datevec(now),GDrive_root)) filesep FigLabel];
+        gFile = [gDir filesep 'bm_data'];        
+        if ~exist(gDir,'dir')
+           mkdir(gDir) 
+        end
+        save(gFile,'bm_data');
+    end
+end
+
+
 %% Fermi-Fitter Long TOF
 % This section of code fits the optical density to the distribution
 % expected from a degenerate cloud of 40K from a harmonic trap.
@@ -802,7 +864,7 @@ profile_opts.FigLabel = FigLabel;
 
 clear hF_X;clear hF_Y;
 hF_X=[];hF_Y=[];
-for rNum=1:size(ROI,1)
+for rNum=1:size(atomdata(1).ROI,1)
     profile_opts.ROINum = rNum;
 
     hF_Xs_rNum=showProfile(atomdata,'X',pco_xVar,profile_opts);
@@ -832,9 +894,9 @@ if doAnimate && doSave
     animateOpts=struct;
     animateOpts.FigLabel = FigLabel;
     animateOpts.saveDir = saveDir;
-    animateOpts.StartDelay=3;   % Time to hold on first picture
-    animateOpts.MidDelay=1;    % Time to hold in middle picutres
-    animateOpts.EndDelay=2;     % Time to hold final picture
+    animateOpts.StartDelay=1;   % Time to hold on first picture
+    animateOpts.MidDelay=.5;    % Time to hold in middle picutres
+    animateOpts.EndDelay=1;     % Time to hold final picture
     animateOpts.doAverage=1;    % Average over duplicates?
     animateOpts.doRotate=0;     % Rotate the image?
     animateOpts.xUnit=pco_unit;
@@ -853,7 +915,7 @@ if doAnimate && doSave
 %     animateOpts.CLim=[0 .2;
 %         0 .5]; 
     
-    animateCloudDouble(atomdata,pco_xVar,animateOpts);    
+    animateCloud(atomdata,pco_xVar,animateOpts);    
 end
 
 %% Analysis

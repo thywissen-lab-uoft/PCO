@@ -9,7 +9,8 @@
 
 % data_source = 'box';
 % data_source = 'gauss';
-data_source = 'erf';
+% data_source = 'erf';
+data_source = 'bm';
 
 switch data_source
     case 'box'        
@@ -18,6 +19,8 @@ switch data_source
         data = gauss_data;
     case 'erf'
         data = erf_data;
+    case 'bm'
+        data = bm_data;
 end
 
 %% Generate Custom Data
@@ -335,7 +338,7 @@ end
     Ntot = sum(N,2);     
      N(:,2) = N(:,2)*8.6/7.2; %fudge factor
 
-     dataMode= 5;         
+     dataMode= 9;         
      switch dataMode
          case 0     
              Y=(N(:,1)-N(:,2))./N(:,1);
