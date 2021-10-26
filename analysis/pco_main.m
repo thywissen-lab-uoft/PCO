@@ -64,9 +64,9 @@ end
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-% pco_xVar='Raman_AOM3_freq';
+%pco_xVar='Raman_AOM3_freq';
 % pco_xVar='Pulse_Time';
-pco_xVar='rf_freq_HF';
+ pco_xVar='rf_freq_HF';
 
 % pco_xVar='ExecutionDate';
 % pco_xVar = 'rf_tof_srs_power';
@@ -120,6 +120,7 @@ doErfFit      = 0;      % Erf
 
 % Band Map Fit
 doBMFit       = 1;
+doCustom_BM   = 1;    % Custom Band map
 
 % Fermi
 doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
@@ -130,7 +131,6 @@ doCustom =  1;          % Custom Box Count
 
 doRabiAbsolute = 0;
 doRabiContrast = 0;
-doCustom_BM = 0;    % Custom Band map
 
 % Wavemeter
 doWavemeter   = 1;
@@ -923,4 +923,8 @@ pco_analysis_standard;
 
 if doCustom
     pco_analysis_custom;
+end
+
+if doCustom_BM
+   pco_analysis_custom_BM; 
 end

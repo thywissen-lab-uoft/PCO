@@ -1119,8 +1119,3 @@ end
     end
     
 end
-
-%% Custom BM
-if doCustom_BM
-    customBM_script;
-end

@@ -10,15 +10,85 @@ src_data = bm_data;
 
 %% Y Data Select Flags 
 
+y_Lbl = {};
+%%%%%%%%% Aboslute numbers
+y_Lbl{01}     = 'N9';
+y_Lbl{02}     = 'N7';
+%%%%%%%%% Relative Numbers total 
+y_Lbl{03}     = 'N9/(N7+N9)';
+y_Lbl{04}     = 'N7/(N7+N9)';
+y_Lbl{05}     = '(N7-N9)/(N7+N9)';
+y_Lbl{06}     = '(N9-N7)/(N7+N9)';
+%%%%%%%%%% Relative ground band 7s, 9s
+y_Lbl{07}     = 'N7s/(N7+N9)';
+y_Lbl{08}     = 'N9s/(N7+N9)';
+%%%%%%%%% Relative differential excited 9s to 7p
+y_Lbl{09}     = '(N7pH-N9s)/(N7+N9)';
+y_Lbl{10}     = '(N7pV-N9s)/(N7+N9)';
+y_Lbl{11}     = '(N7p-N9s)/(N7+N9)';
+%%%%%%%%% Relative differential excited 7s to 9p
+y_Lbl{12}     = '(N9pH-N7s)/(N7+N9)';
+y_Lbl{13}     = '(N9pV-N7s)/(N7+N9)';
+y_Lbl{14}     = '(N9p-N7s)/(N7+N9)';
+%%%%%%%%% Relative Excited 9
+y_Lbl{15}     = 'N9pH/(N7+N9)';
+y_Lbl{16}     = 'N9pV/(N7+N9)';
+y_Lbl{17}     = 'N9p/(N7+N9)';
+%%%%%%%%% Relative Excited 7
+y_Lbl{18}     = 'N7pH/(N7+N9)';
+y_Lbl{19}     = 'N7pV/(N7+N9)';
+y_Lbl{20}     = 'N7p/(N7+N9)';
+%%%%%%%%%% Relative differential ground band 7s, 9s
+y_Lbl{21}     = '(N7s-N9s)/(N7+N9)';
+y_Lbl{22}     = '(N9s-N7s)/(N7+N9)';
+%%%%%%%%%% Relative ground band 7s, 9s
+y_Lbl{23}     = '-N7s/(N7+N9)';
+y_Lbl{24}     = '-N9s/(N7+N9)';
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%% Choose what to plot %%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% p_inds is a list where each element is a plot idnex to show. The 
+% number corresponds to the plot index as defined above. 
+    
+% Excitations to 7
+p_inds = {05,24,07,18,19};
+
+% Excitations to 9
+% p_inds = {06,23,08,15,16};
+
 %% Fit Flags
 
-%% Generate Custom Data
+FitFlags = struct;
+
+FitFlags.T2exp=0;
+FitFlags.Rabi_oscillation = 0;
+
+FitFlags.gauss_single=0;
+FitFlags.gauss_4=0;
+FitFlags.gauss_neg_double=0;
+FitFlags.gauss_neg_single=0;
+FitFlags.gauss_double = 1;
+FitFlags.gauss_triple = 0;
+
+FitFlags.lorentz_neg_single=0;    
+FitFlags.lorentz_neg_double=0;  
+
+FitFlags.lorentz_single=0;
+FitFlags.lorentz_double=0;    
+FitFlags.lorentz_triple=0;    
+
+FitFlags.lorentz_asym_single= 0;
+FitFlags.lorentz_asym_double= 0;
+
+FitFlags.fit_lorentz_assymetric_4=0;
+
+%% X Data
 
 doCustomX = 1;
 
 data = struct;
 data.Source = src_data;
-data.FitType = 'custom';
+data.FitType = 'bm_custom';
 
 % Assign atom number
 data.Natoms = N;   
@@ -33,19 +103,21 @@ if doCustomX
     % Select mF states
     mF1 = -7/2;
     mF2 = -9/2;
+     
+   
+
+%     Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
+%     Bshim = src_data.Params(1).HF_zshim_Initial_Lattice*2.35;
+%     Boff  = 0.11;
+%             B = Bfb + Bshim + Boff;
+
+    Bfb   = src_data.Params(1).HF_FeshValue_Spectroscopy;
+    Bshim =0;
+    Boff  = 0.11;
+    B = Bfb + Bshim + Boff;
+
+%     B = 205 + 0 + 0.11; 
     
-    % Determine the magnetic field
-    if isfield(src_data.Params(1),'HF_FeshValue_Initial_lattice') && ...
-            isfield(src_data.Params(1),'HF_zshim_Initial_Lattice')
-        Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
-        Bshim = src_data.Params(1).HF_zshim_Initial_Lattice*2.35;
-        Boff  = 0.11;
-
-        B = Bfb + Bshim + Boff;
-    else
-        B = 205 + 0 + 0.11; 
-    end
-
     % Transition Energy
     x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
 
@@ -90,7 +162,7 @@ if doCustomX
     data.XUnit = xunit;
 end    
 
-%% Define Y Data
+%% Y Data
 
 % Total atom number
 N0 = sum(data.Natoms,2);
@@ -110,95 +182,150 @@ N9pV = (data.NatomsBands(:,4,1)+data.NatomsBands(:,5,1));
 Y = struct;
 
 %%%%%%%%% Aboslute numbers
-Y(1).YName      = 'N9';
-Y(1).FigName    = 'custom_bm_N9';
+Y(1).YName      = y_Lbl{01};
+Y(1).FigName    = 'bm_custom_N9';
 Y(1).Y          = N9;
 
-Y(2).YName      = 'N7';
-Y(2).FigName    = 'custom_bm_N7';
+Y(2).YName      = y_Lbl{02};
+Y(2).FigName    = 'bm_custom_N7';
 Y(2).Y          = N7;
 
 %%%%%%%%% Relative Numbers total bands
-Y(3).YName      = 'N9/(N7+N9)';
-Y(3).FigName    = 'custom_bm_N9_rel';
+Y(3).YName      = y_Lbl{03};
+Y(3).FigName    = 'bm_custom_N9_rel';
 Y(3).Y          = N9./N0;
 
-Y(4).YName      = 'N7/(N7+N9)';
-Y(4).FigName    = 'custom_bm_N7_rel';
+Y(4).YName      = y_Lbl{04};
+Y(4).FigName    = 'bm_custom_N7_rel';
 Y(4).Y          = N7./N0;
 
-Y(5).YName      = '(N7-N9)/(N7+N9)';
-Y(5).FigName    = 'custom_bm_diff_79_rel';
+Y(5).YName      = y_Lbl{05};
+Y(5).FigName    = 'bm_custom_diff_79_rel';
 Y(5).Y          = (N7-N9)./N0;
 
-Y(6).YName      = '(N9-N7)/(N7+N9)';
-Y(6).FigName    = 'custom_bm_diff_97_rel';
+Y(6).YName      = y_Lbl{06};
+Y(6).FigName    = 'bm_custom_diff_97_rel';
 Y(6).Y          = (N9-N7)./N0;
 
 %%%%%%%%%% Relative ground band 7s, 9s
-Y(7).YName      = 'N7s/(N7+N9)';
-Y(7).FigName    = 'custom_bm_N7s_rel';
-Y(7).Y          = N7s/N0;
+Y(7).YName      = y_Lbl{07};
+Y(7).FigName    = 'bm_custom_N7s_rel';
+Y(7).Y          = N7s./N0;
 
-Y(8).YName      = 'N9s/(N7+N9)';
-Y(8).FigName    = 'custom_bm_N9s_rel';
-Y(8).Y          = N9s/N0;
+Y(8).YName      = y_Lbl{08};
+Y(8).FigName    = 'bm_custom_N9s_rel';
+Y(8).Y          = N9s./N0;
 
 %%%%%%%%% Relative differential excited 9s to 7p
-Y(9).YName      = '(N7pH-N9s)/(N7+N9)';
-Y(9).FigName    = 'custom_bm_diff_7pH9s_rel';
-Y(9).Y          = (N7pH-N9s)/N0;
+Y(9).YName      = y_Lbl{09};
+Y(9).FigName    = 'bm_custom_diff_7pH9s_rel';
+Y(9).Y          = (N7pH-N9s)./N0;
 
-Y(10).YName      = '(N7pV-N9s)/(N7+N9)';
-Y(10).FigName    = 'custom_bm_diff_7pV9s_rel';
-Y(10).Y          = (N7pV-N9s)/N0;
+Y(10).YName      = y_Lbl{10};
+Y(10).FigName    = 'bm_custom_diff_7pV9s_rel';
+Y(10).Y          = (N7pV-N9s)./N0;
 
-Y(11).YName      = '(N7p-N9s)/(N7+N9)';
-Y(11).FigName    = 'custom_bm_diff_7pT9s_rel';
-Y(11).Y          = (N7pV+N7pH-N9s)/N0;
+Y(11).YName      = y_Lbl{11};
+Y(11).FigName    = 'bm_custom_diff_7pT9s_rel';
+Y(11).Y          = (N7pV+N7pH-N9s)./N0;
 
 %%%%%%%%% Relative differential excited 7s to 9p
-Y(12).YName      = '(N9pH-N7s)/(N7+N9)';
-Y(12).FigName    = 'custom_bm_diff_9pH7s_rel';
-Y(12).Y          = (N9pH-N7s)/N0;
+Y(12).YName      = y_Lbl{12};
+Y(12).FigName    = 'bm_custom_diff_9pH7s_rel';
+Y(12).Y          = (N9pH-N7s)./N0;
 
-Y(13).YName      = '(N9pV-N7s)/(N7+N9)';
-Y(13).FigName    = 'custom_bm_diff_9pV7s_rel';
-Y(13).Y          = (N9pV-N7s)/N0;
+Y(13).YName      = y_Lbl{13};
+Y(13).FigName    = 'bm_custom_diff_9pV7s_rel';
+Y(13).Y          = (N9pV-N7s)./N0;
 
-Y(14).YName      = '(N9p-N7s)/(N7+N9)';
-Y(14).FigName    = 'custom_bm_diff_9pT7s_rel';
-Y(14).Y          = (N9pV+N9pH-N7s)/N0;
+Y(14).YName      = y_Lbl{14};
+Y(14).FigName    = 'bm_custom_diff_9pT7s_rel';
+Y(14).Y          = (N9pV+N9pH-N7s)./N0;
 
 %%%%%%%%% Relative Excited 9
-Y(15).YName      = 'N9pH/(N7+N9)';
-Y(15).FigName    = 'custom_bm_9pH_rel';
-Y(15).Y          = N9pH/N0;
+Y(15).YName      = y_Lbl{15};
+Y(15).FigName    = 'bm_custom_9pH_rel';
+Y(15).Y          = N9pH./N0;
 
-Y(16).YName      = 'N9pV/(N7+N9)';
-Y(16).FigName    = 'custom_bm_9pV_rel';
-Y(16).Y          = N9pH/N0;
+Y(16).YName      = y_Lbl{16};
+Y(16).FigName    = 'bm_custom_9pV_rel';
+Y(16).Y          = N9pV./N0;
 
-Y(17).YName      = 'N9p/(N7+N9)';
-Y(17).FigName    = 'custom_bm_9pT_rel';
-Y(17).Y          = (N9pH+N9pV)/N0;
+Y(17).YName      = y_Lbl{17};
+Y(17).FigName    = 'bm_custom_9pT_rel';
+Y(17).Y          = (N9pH+N9pV)./N0;
 
 %%%%%%%%% Relative Excited 7
-Y(18).YName      = 'N7pH/(N7+N9)';
-Y(18).FigName    = 'custom_bm_7pH_rel';
-Y(18).Y          = N7pH/N0;
+Y(18).YName      = y_Lbl{18};
+Y(18).FigName    = 'bm_custom_7pH_rel';
+Y(18).Y          = N7pH./N0;
 
-Y(19).YName      = 'N7pV/(N7+N9)';
-Y(19).FigName    = 'custom_bm_7pV_rel';
-Y(19).Y          = N7pH/N0;
+Y(19).YName      = y_Lbl{19};
+Y(19).FigName    = 'bm_custom_7pV_rel';
+Y(19).Y          = N7pV./N0;
 
-Y(20).YName      = 'N9p/(N7+N9)';
-Y(20).FigName    = 'custom_bm_7pT_rel';
-Y(20).Y          = (N7pH+N7pV)/N0;
+Y(20).YName      = y_Lbl{20};
+Y(20).FigName    = 'bm_custom_7pT_rel';
+Y(20).Y          = (N7pH+N7pV)./N0;
+
+Y(21).YName      = y_Lbl{21};
+Y(21).FigName    = 'bm_custom_diff_7s9s_rel';
+Y(21).Y          = (N7s-N9s)./N0;
+
+Y(22).YName      = y_Lbl{22};
+Y(22).FigName    = 'bm_custom_dff_9s7s_rel';
+Y(22).Y          = (N9s-N7s)./N0;
+
+%%%%%%%%%% Relative ground band 7s, 9s
+Y(23).YName      = y_Lbl{23};
+Y(23).FigName    = 'bm_custom_-N7s_rel';
+Y(23).Y          = -N7s./N0;
+
+Y(24).YName      = y_Lbl{24};
+Y(24).FigName    = 'bm_custom_-N9s_rel';
+Y(24).Y          = -N9s./N0;
 
 % Assign to output
 data.Y = Y;
-    
-%% Plot the unique values
 
+%% Plot it 
+bm_custom_opts=struct;
+fouts={};
+clear hFs
+for nn=1:length(p_inds)
+    % Figure Name
+    if length(p_inds{nn})>1
+        FigName = ['bm_custom' num2str(nn)];
+    else
+        FigName = Y(p_inds{nn}).FigName;        
+    end
     
+    % Name of data
+    names = {Y(p_inds{nn}).YName};
+    
+    % Assign Options
+    bm_custom_opts.Names = names;
+    bm_custom_opts.FigLabel = FigLabel;
+    bm_custom_opts.FigName = FigName;
+    bm_custom_opts.FitFlags = FitFlags;
+    bm_custom_opts.xstr = xstr;
+    bm_custom_opts.Ind = nn;
+    
+    [hFs(nn),fouts{nn}] = customFit(X,[Y(p_inds{nn}).Y],bm_custom_opts);   
+    if doSave;saveFigure(hFs(nn),FigName,saveOpts);end
+
+end
+
+%% Save Data
+    if doSave
+        save([saveDir filesep 'bm_custom'],'data');
+    end
+    
+    if doSave && doUpload && exist(GDrive_root,'dir')
+        gDir = [fileparts(getImageDir2(datevec(now),GDrive_root)) filesep FigLabel];
+        gFile = [gDir filesep 'bm_custom'];        
+        if ~exist(gDir,'dir')
+           mkdir(gDir) 
+        end
+        save(gFile,'data');
+    end
