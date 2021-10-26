@@ -1,9 +1,11 @@
 function [hF,fout] = customFit(X,Y,opts)
-
+fout={};
 FitFlags = opts.FitFlags;
 %% Process Data
 [ux,ia,ib]=unique(X);    
 Yu=zeros(length(ux),2,size(Y,2));    
+
+
 for kk=1:length(ux)
     inds=find(X==ux(kk));
     
@@ -109,11 +111,11 @@ if length(X)>8 && FitFlags.gauss_neg_double
     % Find center
     [Ymin,ind]=min(Y);
     A=bg-Ymin;
-    xC=X(ind);
+    xC1=X(ind);
 
     % Assign guess        
-    xC1 = 0;
-    xC2 = 40;
+%     xC1 = 0;
+    xC2 = -40;
     G=[A 15 xC1 A/2 50 xC2 bg];
 
     opt.StartPoint=G;
@@ -276,7 +278,7 @@ if length(X)>4 && FitFlags.gauss_double
     A=bg-Ymin;
     xC=X(ind);
     % Assign guess
-    G=[A 10 -3 A/5 10 15 bg];
+    G=[A 10 -3 A/5 10 20 bg];
     opt.StartPoint=G;
     opt.Robust='bisquare';
 %         opt.Lower=[0 0 -inf 0 0 -inf 0];
@@ -311,10 +313,27 @@ if length(X)>4 && FitFlags.gauss_triple
     bg=min(Y);
     % Find center
     [Ymin,ind]=min(Y);
-    A=bg-Ymin;
+    
     xC=X(ind);
     % Assign guess
-    G=[A 7 -5 A/8 10 40 bg .04 10 75];
+
+    A1 = range(Y);
+    G1 = 5;
+    x1 = -5;
+
+    A2 = A1/5;
+    G2 = 3;
+    x2 = 10;
+    
+    A3 = A1/5;
+    G3 = 6;
+    x3 = 22;  
+    
+    
+        
+    G=[A1 G1 x1 A2 G2 x2 bg A3 G3 x3];
+
+%     G=[A 7 -5 A/8 10 20 bg .04 10 40];
     opt.StartPoint=G;
     opt.Robust='bisquare';
 %         opt.Lower=[0 0 -inf 0 0 -inf 0];
@@ -544,23 +563,24 @@ if length(X)>4 && FitFlags.lorentz_asym_single
     opt=fitoptions(myfit);
 
     % Background
-    bg=min(Y);max(Y);
+    bg=min(Y);
+%     bg=max(Y);
 
     % Linewidth
     G1=30;
 
     % Contrast
-    A1=(max(Y)-min(Y));
+    A1 = range(Y);
 
     % Center Point
-    inds=[Y>.9*max(Y)];         
+    inds=[Y>.99*max(Y)];         
     x1=mean(X(inds));    
 
     % Assymetry
     a1 = -0.05; % Long on right
 %         a1 = +0.05; % Long on left
 
-    opt.StartPoint=[bg a1 x1 G1 A1];  
+    opt.StartPoint=[bg a1 -130 G1 A1];  
     opt.Robust='bisquare';
 
     fout=fit(X,Y,myfit,opt)
@@ -574,7 +594,14 @@ if length(X)>4 && FitFlags.lorentz_asym_single
         '$\mathrm{FWHM} = ' ...
         num2str(round(abs(fout.G1),2)) ' $ kHz' newline ...
         '$a = ' num2str(round(fout.a1,3)) '$ kHz'];
-    legend(pExp,{str},'interpreter','latex','location','northwest','fontsize',10);         
+   str=['$f_0 = ' num2str(round(fout.x1,2)) '\pm' ...
+        num2str(round((ci(2,2)-ci(1,2))/2,2)) '$ kHz,'  ...
+        '$\mathrm{FWHM} = ' ...
+        num2str(round(abs(fout.G1),2)) ' $ kHz,'  ...
+        '$a = ' num2str(round(fout.a1,3)) '$ kHz'];
+    
+    legend(pExp,{str},'interpreter','latex','location','best',...
+        'fontsize',10,'orientation','horizontal');         
 end
 %%
 % Assymetric lorentzian fit
@@ -600,13 +627,14 @@ if length(X)>9 && FitFlags.lorentz_asym_double
 
     % Amlitudes
     A1 = (max(Y)-min(Y));   
-    A2 = A1/10;A2 = .02;
+%     A2 = A1/10;A2 = .02;
+A2 = 0.01;
         
     % Center
     [~,imax]=max(Y);
     x1 = mean(X(imax)); 
     x2 = x1;
-    x2=-70;
+    x2=0;
     
     % Asymmetry
     a1 = .05;

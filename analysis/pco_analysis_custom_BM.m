@@ -44,6 +44,9 @@ y_Lbl{22}     = '(N9s-N7s)/(N7+N9)';
 %%%%%%%%%% Relative ground band 7s, 9s
 y_Lbl{23}     = '-N7s/(N7+N9)';
 y_Lbl{24}     = '-N9s/(N7+N9)';
+%%%%%%%%%% Total Number
+y_Lbl{25}     = 'N7+N9';
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%% Choose what to plot %%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -54,7 +57,14 @@ y_Lbl{24}     = '-N9s/(N7+N9)';
 p_inds = {05,24,07,18,19};
 
 % Excitations to 9
+% p_inds = {05,24,07,18,19};
+
+% Loss from 7
 % p_inds = {06,23,08,15,16};
+
+% Total number
+% p_inds = {01,02,25};
+
 
 %% Fit Flags
 
@@ -67,9 +77,9 @@ FitFlags.gauss_single=0;
 FitFlags.gauss_4=0;
 FitFlags.gauss_neg_double=0;
 FitFlags.gauss_neg_single=0;
-FitFlags.gauss_double = 1;
-FitFlags.gauss_triple = 0;
-
+FitFlags.gauss_double = 0;
+FitFlags.gauss_triple = 1;
+ 
 FitFlags.lorentz_neg_single=0;    
 FitFlags.lorentz_neg_double=0;  
 
@@ -91,12 +101,12 @@ data.Source = src_data;
 data.FitType = 'bm_custom';
 
 % Assign atom number
-data.Natoms = N;   
+data.Natoms = src_data.Natoms;   
 data.NatomsBands = src_data.NatomsBands;
 
 % Get the default X data;
 data.X = src_data.X;
-data.XLabel = src_data.xVar;
+data.XStr = src_data.xVar;
 data.XUnit = src_data.Units(1).(pco_xVar);
 
 if doCustomX
@@ -104,8 +114,9 @@ if doCustomX
     mF1 = -7/2;
     mF2 = -9/2;
      
-   
-
+%     mF1 = -7/2;
+%     mF2 = -5/2;
+% 
 %     Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
 %     Bshim = src_data.Params(1).HF_zshim_Initial_Lattice*2.35;
 %     Boff  = 0.11;
@@ -285,8 +296,12 @@ Y(24).YName      = y_Lbl{24};
 Y(24).FigName    = 'bm_custom_-N9s_rel';
 Y(24).Y          = -N9s./N0;
 
+Y(25).YName      = y_Lbl{25};
+Y(25).FigName    = 'bm_custom_Ntot';
+Y(25).Y          = N0;
 % Assign to output
 data.Y = Y;
+data.YLabel = {Y.Yname};        
 
 %% Plot it 
 bm_custom_opts=struct;
