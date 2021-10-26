@@ -303,26 +303,39 @@ drawnow;
 
 %% Rescale data
 
-% 
-% % Resize the image
-% sc = 1.0;
-% 
-% X_a = imresize(X_a,sc);
-% Y_a = imresize(Y_a,sc);
-% ODs_a_sc = zeros(length(Y_a),length(X_a),size(ODs_a,3));
-% for kk=1:size(ODs_a,3)
-%     ODs_a_sc(:,:,kk) = imresize(ODs_a(:,:,kk),sc);
-% end
-% 
-% if doubleImage
-%     X_b = imresize(X_b,sc);
-%     Y_b = imresize(Y_b,sc);
-%     ODs_b_sc = zeros(length(Y_b),length(X_b),size(ODs_b,3));
-%     for kk=1:size(ODs_b,3)
-%         ODs_b_sc(:,:,kk) = imresize(ODs_b(:,:,kk),sc);
-%     end
-% end
 
+% Resize the image
+sc = 1;
+
+if ~isequal(sc,1)
+
+    X_a_sc = imresize(X_a,sc);
+    Y_a_sc = imresize(Y_a,sc);
+    OD_a_sc = zeros(length(Y_a_sc),length(X_a_sc),size(OD_a_u,3));
+    for kk=1:size(OD_a_u,3)
+        OD_a_sc(:,:,kk) = imresize(OD_a_u(:,:,kk),sc);
+    end
+
+    if doubleImage
+        X_b_sc = imresize(X_b,sc);
+        Y_b_sc = imresize(Y_b,sc);
+        OD_b_sc = zeros(length(Y_b_sc),length(X_b_sc),size(OD_b_u,3));
+        for kk=1:size(OD_b_u,3)
+            OD_b_sc(:,:,kk) = imresize(OD_b_u(:,:,kk),sc);
+        end
+    end
+else
+    X_a_sc = X_a;
+    Y_a_sc = Y_a;
+    OD_a_sc = OD_a_u;
+    
+    if doubleImage
+        X_b_sc = X_b;
+        Y_b_sc = Y_b;
+        OD_b_sc = OD_b_u; 
+    end
+
+end
 %% Animate
 % Make the figure name with the location
 
@@ -337,28 +350,28 @@ for kk=1:length(xvals)   % Iterate over all unique xvalues
 
     if doubleImage
         if opts.doRotate
-            set(hImg1,'XData',Y_a,'YData',flip(X_a),...
-                'CData',imrotate(OD_a_u(:,:,kk),90));  % Image data
+            set(hImg1,'XData',Y_a_sc,'YData',flip(X_a_sc),...
+                'CData',imrotate(OD_a_sc(:,:,kk),90));  % Image data
             set(ax1,'XDir','Normal','YDir','normal');
             
-            set(hImg2,'XData',Y_b,'YData',flip(X_b),...
-                'CData',imrotate(OD_b_u(:,:,kk),90));  % Image data
+            set(hImg2,'XData',Y_b_sc,'YData',flip(X_b_sc),...
+                'CData',imrotate(OD_b_sc(:,:,kk),90));  % Image data
             set(ax2,'XDir','Normal','YDir','normal');
         else
             
-            set(hImg1,'XData',X_a,'YData',Y_a,'CData',OD_a_u(:,:,kk));  % Image data
+            set(hImg1,'XData',X_a_sc,'YData',Y_a_sc,'CData',OD_a_sc(:,:,kk));  % Image data
             set(ax1,'XDir','normal','YDir','Reverse');
             
-            set(hImg2,'XData',X_b,'YData',Y_b,'CData',OD_b_u(:,:,kk));  % Image data
+            set(hImg2,'XData',X_b_sc,'YData',Y_b_sc,'CData',OD_b_sc(:,:,kk));  % Image data
             set(ax2,'XDir','normal','YDir','Reverse');          
         end        
     else
         if opts.doRotate
-            set(hImg1,'XData',Y_a,'YData',flip(X_a),...
-                'CData',imrotate(OD_a_u(:,:,kk),90));  % Image data
+            set(hImg1,'XData',Y_a_sc,'YData',flip(X_a_sc),...
+                'CData',imrotate(OD_a_sc(:,:,kk),90));  % Image data
             set(gca,'XDir','Normal','YDir','normal');
         else
-            set(hImg1,'XData',X_a,'YData',Y_a,'CData',OD_a_u(:,:,kk));  % Image data
+            set(hImg1,'XData',X_a_sc,'YData',Y_a_sc,'CData',OD_a_sc(:,:,kk));  % Image data
             set(gca,'XDir','normal','YDir','Reverse');
         end          
     end        
