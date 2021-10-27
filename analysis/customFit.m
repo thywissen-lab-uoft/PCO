@@ -278,7 +278,7 @@ if length(X)>4 && FitFlags.gauss_double
     A=bg-Ymin;
     xC=X(ind);
     % Assign guess
-    G=[A 10 -3 A/5 10 20 bg];
+    G=[A 10 -3 A/10 10 8 bg];
     opt.StartPoint=G;
     opt.Robust='bisquare';
 %         opt.Lower=[0 0 -inf 0 0 -inf 0];
@@ -635,6 +635,8 @@ A2 = 0.01;
     x1 = mean(X(imax)); 
     x2 = x1;
     x2=0;
+    x1 = -120;
+    x2 = 0;
     
     % Asymmetry
     a1 = .05;

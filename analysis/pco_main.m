@@ -64,7 +64,7 @@ end
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-% pco_xVar='Raman_AOM3_freq';
+pco_xVar='Raman_AOM3_freq';
 % pco_xVar='Pulse_Time';
  pco_xVar='rf_freq_HF';
 

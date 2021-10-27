@@ -1,4 +1,6 @@
 %% PCO_remote
+
+%{
 % This is an imaging analysis script. It analyzes processed data that is
 % outputted from the main analysis script pco_main.m
 
@@ -125,7 +127,24 @@ for kk=1:size(runs,1)
        end        
     end 
 end
+%}
+%% Load Data
+file_name = 'bm_custom.mat';
+runs =[
+    2021 10 24  9; 
+    2021 10 24 10;
+    2021 10 24 11;
+    2021 10 24 12;
+    2021 10 24 13;
+    2021 10 25 05;
+    2021 10 24 14;
+    2021 10 24 15;   
+    2021 10 25 10;
+    2021 10 25 11;
+    2021 10 26 05;
+];
 
+[data,dirNames,dirDates] = loadBulk(runs,file_name);
 %% Plot
 % THIS IS CRAYPPY AND CORA WILL UPDATE IT BECAUSE THIS IS JUST TEMPORARILY,
 % PLEASE DONT THINK THISIS PERMANENT OKAY THX LOLOLOLOL
