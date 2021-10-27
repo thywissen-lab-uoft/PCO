@@ -52,9 +52,10 @@ y_Lbl{25}     = 'N7+N9';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % p_inds is a list where each element is a plot idnex to show. The 
 % number corresponds to the plot index as defined above. 
-    
+p_inds=[];
+
 % Excitations to 7
-p_inds = {05,24,07,18,19};
+% p_inds = {05,24,07,18,19};
 
 % Excitations to 9
 % p_inds = {05,24,07,18,19};
@@ -62,8 +63,8 @@ p_inds = {05,24,07,18,19};
 % Loss from 7
 % p_inds = {06,23,08,15,16};
 
-% Total number
-% p_inds = {01,02,25};
+% Absolute number
+p_inds = {01,02,25};
 
 
 %% Fit Flags
@@ -75,7 +76,7 @@ FitFlags.Rabi_oscillation = 0;
 
 FitFlags.gauss_single=0;
 FitFlags.gauss_4=0;
-FitFlags.gauss_neg_double=0;
+FitFlags.gauss_neg_double=1;
 FitFlags.gauss_neg_single=0;
 FitFlags.gauss_double = 0;
 FitFlags.gauss_triple = 0;
@@ -112,22 +113,22 @@ custom_data_bm.XUnit = src_data.Units(1).(src_data.xVar);
 if doCustomX
     % Select mF states
     mF1 = -7/2;
-    mF2 = -9/2;
+    mF2 = -5/2;
      
 %     mF1 = -7/2;
 %     mF2 = -5/2;
-% % 
-%     Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
-%     Bshim = src_data.Params(1).HF_zshim_Initial_Lattice*2.35;
-%     Boff  = 0.11;
-%             B = Bfb + Bshim + Boff;
-
-    Bfb   = src_data.Params(1).HF_FeshValue_Spectroscopy;
-    Bshim =0;
+% 
+    Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
+    Bshim = src_data.Params(1).HF_zshim_Initial_Lattice*2.35;
     Boff  = 0.11;
-    B = Bfb + Bshim + Boff;
+            B = Bfb + Bshim + Boff;
 
-%     B = 205 + 0 + 0.11; 
+%     Bfb   = src_data.Params(1).HF_FeshValue_Spectroscopy;
+%     Bshim =0;
+%     Boff  = 0.11;
+%     B = Bfb + Bshim + Boff;
+
+%     B = 198.5 + 0 + 0.11; 
     
     % Transition Energy
     x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 

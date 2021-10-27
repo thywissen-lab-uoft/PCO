@@ -64,7 +64,7 @@ end
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-pco_xVar='Raman_AOM3_freq';
+% pco_xVar='Raman_AOM3_freq';
 % pco_xVar='Pulse_Time';
  pco_xVar='rf_freq_HF';
 
@@ -100,7 +100,7 @@ pco_overrideUnit='MHz';
 doSave        = 0;      % Save the figures?
  
 % Animation
-doAnimate     = 1;      % Animate the Cloud
+doAnimate     = 0;      % Animate the Cloud
 
 % Probe Beam
 doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
