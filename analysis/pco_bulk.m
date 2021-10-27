@@ -25,7 +25,7 @@ end
 % file_name = 'erf_data.mat';
 % file_name = 'custom_data.mat';
 
-file_name = 'bm_custom.mat';
+file_name = 'custom_data_bm.mat';
 
 %% Directories
 % Choose the directories to analyze 
@@ -130,6 +130,9 @@ end
 % THIS IS CRAYPPY AND CORA WILL UPDATE IT BECAUSE THIS IS JUST TEMPORARILY,
 % PLEASE DONT THINK THISIS PERMANENT OKAY THX LOLOLOLOL
 
+npeaks = [1 1 2  2 2  2 2 2 3 3 3];
+Yname = '(N7-N9)/(N7+N9)';
+
 hF=figure;
 hF.Color='w';
 hF.Position=[100 50 800 400];
@@ -137,12 +140,16 @@ co=get(gca,'colororder');
 fouts={};
 for nn=1:length(data)
     X = data(nn).X;
-    Y = data(nn).Y;
     
-%     xstr = data(nn).Xstr;
-        xstr = data(nn).XLabel;
-
-%     ystr = data(nn).YStr;
+    % Ydata
+    ilist = strfind(data(nn).YLabel,Yname);
+    Index = find(not(cellfun('isempty',ilist)));
+    Y = data(nn).Y;
+    Y = Y(Index).Y;
+    
+    % X data
+    xstr = data(nn).XStr;
+    ystr = Yname;
     
     
     [ux,ia,ib]=unique(X);    
@@ -167,20 +174,19 @@ for nn=1:length(data)
         'fontsize',8);
     xlabel(xstr);
     ylabel(ystr);
-    ylim([-.2 .15]);
-    xlim([-20 90]);
+    ylim([-.3 .1]);
+    xlim([-20 100]);
     
-%     lstr = [runNames{nn}(1:2) runNames{nn}(end-8:end)];
-%     lstr = [runNames{nn}];
-%     text(.02,.98,lstr,'units','normalized','fontsize',12,...
-%         'verticalalignment','cap');
-%     title(lstr);
-    
-    lbl = [runNames{nn}(1:2) ' ' runNames{nn}(38:52)];
-    lbl = [runNames{nn}(1:2) ' ' runNames{nn}(29:35)];
 
-%     lbl = runNames{nn};
+    lbl = [num2str(runs(nn,2)) '/' num2str(runs(nn,3)) ' ' runNames{nn}(1:2)];
     
+    p = data(nn).Source.Params(1);
+    if isfield(p,'HF_FeshValue_Spectroscopy')
+        lbl = [lbl ' ' num2str(p.HF_FeshValue_Spectroscopy) ' G'];
+    else
+        lbl = [lbl ' ' num2str(p.HF_FeshValue_Initial_Lattice) ' G'];
+
+    end    
     
      title(lbl);
     lorentz_asym_double=0;
@@ -239,17 +245,7 @@ for nn=1:length(data)
     
     doGaussFit = [0 0 0];
 
-    if nn<=2
-        doGaussFit(1)=1;
-    end
-
-    if nn>2 && nn<9
-        doGaussFit(2) = 1;
-    end
-
-    if nn>=9
-        doGaussFit(3) = 1;
-    end
+    doGaussFit(npeaks(nn))=1;
     
     %Gauss Single
     if length(X)>4 && doGaussFit(1)
@@ -348,6 +344,8 @@ for nn=1:length(data)
         A2 = .045;
         G2 = 3;
         x2 = 13;
+        
+        
         if nn==7
             x2 = 12.5;
             A2 = .02;
@@ -376,7 +374,9 @@ for nn=1:length(data)
         if nn==10
             x3 = 75; 
         end
-        
+          if nn==4
+            x3 = 40; 
+        end      
         
         
         % Assign guess
@@ -463,9 +463,6 @@ end
 
 B = rf2B(f1,-9/2,-7/2);
  i=B>199.2;
-% 
-%  B=B(i);
-%  df=df(i);
 
 hF2=figure;
 hF2.Color='w';
@@ -477,7 +474,7 @@ hold on
 plot(B,df(:,2),'ko','markerfacecolor',[.5 .5 .5],...
     'markersize',8,'linewidth',2)
 ylim([0 80]);
-xlim([199.4 200.6]);
+xlim([199.4 202.6]);
 
 ylabel('$\Delta f$ (kHz)','interpreter','latex');
 xlabel(['fitted field (G)']);
@@ -485,13 +482,42 @@ xlabel(['fitted field (G)']);
 set(gca,'fontname','times','xgrid','on','ygrid','on',...
     'box','on','linewidth',1);
 
-% hF2= figure;
-% 
-% data=[-47.8 -48.9 -50.1 -50.5 -50.9 -52.1];
-% relHeight=[];
-% for kk=1:length(fouts)
-%    relHeight(kk) = fouts{kk}.A2/fouts{kk}.A1; 
-% end
-% 
-% plot(data(2:end),relHeight(2:end),'ko')
-% ylim([0 .35]);
+df2 = df;
+df2(9,1) = df(9,2);
+df2(11,1) = df(11,2);
+
+df2 = df2(:,1);
+%%  crappy fit
+
+hF3=figure;
+hF3.Color='w';
+
+plot(B,df2,'ko','markerfacecolor',[.5 .5 .5],...
+    'markersize',8,'linewidth',2)
+ylim([0 80]);
+xlim([199.4 202.6]);
+
+ylabel('$\Delta f$ (kHz)','interpreter','latex');
+xlabel(['fitted field (G)']);
+
+set(gca,'fontname','times','xgrid','on','ygrid','on',...
+    'box','on','linewidth',1);
+
+myfit = fittype('A/(x-x0)','independent','x',...
+    'coefficients',{'A','x0'});
+
+inds = isnan(df2);
+
+x = B;
+y = df2;
+
+x(inds)=[];
+y(inds)=[];
+
+opt=fitoptions(myfit);
+
+opt.StartPoint = [-10 201];
+fo = fit(x',y,myfit,opt)
+
+hold on
+plot(fo)

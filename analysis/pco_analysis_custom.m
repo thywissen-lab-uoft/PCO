@@ -276,7 +276,7 @@ if doCustom
 % Center frequency for expected RF field (if relevant)
 % Calibrated 2021/09/25-26
 Bfb   = data.Params(1).HF_FeshValue_Initial_Lattice;
-Bfb   = data.Params(1).HF_FeshValue_Spectroscopy;
+% Bfb   = data.Params(1).HF_FeshValue_Spectroscopy;
 
 Bshim = data.Params(1).HF_zshim_Initial_Lattice*2.35;
 Bshim =0;

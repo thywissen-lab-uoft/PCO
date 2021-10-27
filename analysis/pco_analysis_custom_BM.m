@@ -78,7 +78,7 @@ FitFlags.gauss_4=0;
 FitFlags.gauss_neg_double=0;
 FitFlags.gauss_neg_single=0;
 FitFlags.gauss_double = 0;
-FitFlags.gauss_triple = 1;
+FitFlags.gauss_triple = 0;
  
 FitFlags.lorentz_neg_single=0;    
 FitFlags.lorentz_neg_double=0;  
@@ -96,18 +96,18 @@ FitFlags.fit_lorentz_assymetric_4=0;
 
 doCustomX = 1;
 
-data = struct;
-data.Source = src_data;
-data.FitType = 'bm_custom';
+custom_data_bm = struct;
+custom_data_bm.Source = src_data;
 
 % Assign atom number
-data.Natoms = src_data.Natoms;   
-data.NatomsBands = src_data.NatomsBands;
+custom_data_bm.Natoms = src_data.Natoms;   
+custom_data_bm.NatomsBands = src_data.NatomsBands;
 
 % Get the default X data;
-data.X = src_data.X;
-data.XStr = src_data.xVar;
-data.XUnit = src_data.Units(1).(pco_xVar);
+custom_data_bm.X = src_data.X;
+custom_data_bm.XVar = src_data.xVar;
+custom_data_bm.XStr = src_data.xVar;
+custom_data_bm.XUnit = src_data.Units(1).(src_data.xVar);
 
 if doCustomX
     % Select mF states
@@ -116,7 +116,7 @@ if doCustomX
      
 %     mF1 = -7/2;
 %     mF2 = -5/2;
-% 
+% % 
 %     Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
 %     Bshim = src_data.Params(1).HF_zshim_Initial_Lattice*2.35;
 %     Boff  = 0.11;
@@ -133,62 +133,63 @@ if doCustomX
     x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
 
     % Convert x variable into transition energy
-    switch pco_xVar
+    switch src_data.xVar
         case 'Raman_AOM3_freq'
-            X=data.X;
+            X=custom_data_bm.X;
             X = 2*X - 80;
             X = X - x0;   
             X = X*1e3;
             xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)']; 
             xunit = 'kHz';
         case 'Pulse_Time'
-            X=data.X;
+            X=custom_data_bm.X;
             xstr='pulse time (ms)';    
             xunit = 'ms';
        case 'rf_rabi_time_HF'
-            X=data.X;
+            X=custom_data_bm.X;
             xstr='pulse time (ms)';    
             xunit = 'ms';
         case 'rf_freq_HF'
-            X=data.X;
+            X=custom_data_bm.X;
             X = X - x0;   
             X = X*1e3;
             xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)']; 
             xunit = 'kHz';
         case 'rf_tof_freq'
-          X=data.X;
+          X=custom_data_bm.X;
             X = X - x0;   
             X = X*1e3;
             xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];  
             xunit = 'kHz';
         otherwise
-            X = data.X;
+            X = custom_data_bm.X;
             xstr = pco_xVar;        
     end 
     
     % Assign outputs
-    data.x0 = x0;
-    data.X = X;
-    data.XLabel = xstr;        
-    data.XUnit = xunit;
+    custom_data_bm.x0 = x0;
+    custom_data_bm.X = X;
+    custom_data_bm.XStr = xstr;        
+    custom_data_bm.XLabel = xstr;        
+    custom_data_bm.XUnit = xunit;
 end    
 
 %% Y Data
 
 % Total atom number
-N0 = sum(data.Natoms,2);
+N0 = sum(custom_data_bm.Natoms,2);
 
 % 7 States
-N7 = data.Natoms(:,2);
-N7s = data.NatomsBands(:,1,2);
-N7pH = (data.NatomsBands(:,2,2)+data.NatomsBands(:,3,2));
-N7pV = (data.NatomsBands(:,4,2)+data.NatomsBands(:,5,2));
+N7 = custom_data_bm.Natoms(:,2);
+N7s = custom_data_bm.NatomsBands(:,1,2);
+N7pH = (custom_data_bm.NatomsBands(:,2,2)+custom_data_bm.NatomsBands(:,3,2));
+N7pV = (custom_data_bm.NatomsBands(:,4,2)+custom_data_bm.NatomsBands(:,5,2));
 
 % 9 States
-N9 = data.Natoms(:,1);
-N9s = data.NatomsBands(:,1,1);
-N9pH = (data.NatomsBands(:,2,1)+data.NatomsBands(:,3,1));
-N9pV = (data.NatomsBands(:,4,1)+data.NatomsBands(:,5,1));
+N9 = custom_data_bm.Natoms(:,1);
+N9s = custom_data_bm.NatomsBands(:,1,1);
+N9pH = (custom_data_bm.NatomsBands(:,2,1)+custom_data_bm.NatomsBands(:,3,1));
+N9pV = (custom_data_bm.NatomsBands(:,4,1)+custom_data_bm.NatomsBands(:,5,1));
 
 Y = struct;
 
@@ -300,8 +301,8 @@ Y(25).YName      = y_Lbl{25};
 Y(25).FigName    = 'bm_custom_Ntot';
 Y(25).Y          = N0;
 % Assign to output
-data.Y = Y;
-data.YLabel = {Y.YName};        
+custom_data_bm.Y = Y;
+custom_data_bm.YLabel = {Y.YName};        
 
 %% Plot it 
 bm_custom_opts=struct;
@@ -333,12 +334,12 @@ end
 
 %% Save Data
     if doSave
-        save([saveDir filesep 'bm_custom'],'data');
+        save([saveDir filesep 'custom_data_bm'],'custom_data_bm');
     end
     
     if doSave && doUpload && exist(GDrive_root,'dir')
         gDir = [fileparts(getImageDir2(datevec(now),GDrive_root)) filesep FigLabel];
-        gFile = [gDir filesep 'bm_custom'];        
+        gFile = [gDir filesep 'custom_data_bm'];        
         if ~exist(gDir,'dir')
            mkdir(gDir) 
         end
