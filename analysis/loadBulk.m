@@ -80,17 +80,17 @@ for kk=1:size(runs,1)
                    'figures' filesep file_name];
                
                if isfile(dataFile)
-                   disp(' loaded');
-                  data_temp = load(dataFile);
-                    fnames=fieldnames(data_temp);
-                    fname = fnames{1};
-                    try
-                        data(kk)=data_temp.(fname);
-                    catch ME
-                       warning(ME.message); 
-                    end
-                    dirNames{kk} = myRuns{nn};
-                    dirDates(kk,:) = runs(kk,:);
+                disp(' loaded');
+                data_temp = load(dataFile);
+                fnames=fieldnames(data_temp);
+                fname = fnames{1};
+                try
+                    data(kk)=data_temp.(file_name);
+                catch ME
+                    warning(ME.message); 
+                end
+                dirNames{kk} = myRuns{nn};
+                dirDates(kk,:) = runs(kk,:);
                else
 %                    disp(' unable to find processed data');
                    warning(['Unable to find' newline dataFile]);
