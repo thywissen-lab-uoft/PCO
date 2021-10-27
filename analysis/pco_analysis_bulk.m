@@ -15,20 +15,46 @@ runs =[
     2021 10 25 11;
     2021 10 26 05;
 ];
-
 [data,dirNames,dirDates] = loadBulk(runs,file_name);
+
+%% Define fit objects
+fitTypes = {
+    @customPosGauss;
+    @customPosGauss;
+    @customPosGauss;
+    @customPosGauss;
+    @customPosGauss;
+    @customPosGauss;
+    @customPosGauss;
+    @customPosGauss;
+    @customPosGauss;
+    @customPosGauss;
+    @customPosGauss};
+
+
 %% Plot
 % THIS IS CRAYPPY AND CORA WILL UPDATE IT BECAUSE THIS IS JUST TEMPORARILY,
 % PLEASE DONT THINK THISIS PERMANENT OKAY THX LOLOLOLOL
 
 npeaks = [1 1 2  2 2  2 2 2 3 3 3];
 Yname = '(N7-N9)/(N7+N9)';
+% Yname = '(N7+N9)';
+Yname = 'N7';
+% Yname = 'N9';
 
 hF=figure;
 hF.Color='w';
 hF.Position=[100 50 800 400];
 co=get(gca,'colororder');
 fouts={};
+
+t=uicontrol('style','text','string',Yname,'units','pixels',...
+    'backgroundcolor','w','horizontalalignment','left','fontsize',10);
+t.Position(3:4)=[hF.Position(3) t.Extent(4)];
+t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
+
+resizeFig(hF,t);
+
 for nn=1:length(data)
     X = data(nn).X;
     
@@ -40,8 +66,7 @@ for nn=1:length(data)
     
     % X data
     xstr = data(nn).XStr;
-    ystr = Yname;
-    
+    ystr = Yname;    
     
     [ux,ia,ib]=unique(X);    
     Yu=zeros(length(ux),2);    
@@ -62,18 +87,16 @@ for nn=1:length(data)
         'fontsize',8);
     xlabel(xstr);
     ylabel(ystr);
-    ylim([-.3 .1]);
-    xlim([-20 100]);
-    
+%     ylim([-.3 .1]);
+    xlim([-20 100]);    
 
-    lbl = [num2str(runs(nn,2)) '/' num2str(runs(nn,3)) ' ' runNames{nn}(1:2)];
+    lbl = [num2str(runs(nn,2)) '/' num2str(runs(nn,3)) ' ' dirNames{nn}(1:2)];
     
     p = data(nn).Source.Params(1);
     if isfield(p,'HF_FeshValue_Spectroscopy')
         lbl = [lbl ' ' num2str(p.HF_FeshValue_Spectroscopy) ' G'];
     else
         lbl = [lbl ' ' num2str(p.HF_FeshValue_Initial_Lattice) ' G'];
-
     end    
     
      title(lbl);
@@ -132,8 +155,7 @@ for nn=1:length(data)
     end
     
     doGaussFit = [0 0 0];
-
-    doGaussFit(npeaks(nn))=1;
+%     doGaussFit(npeaks(nn))=1;
     
     %Gauss Single
     if length(X)>4 && doGaussFit(1)
@@ -290,11 +312,14 @@ for nn=1:length(data)
    
 %         legend(pF,str,'location','best','interpreter','latex');   
         fouts{nn}=fout;
-    end  
+    end
+    
+    
 end
 
 %%
 
+%{
 df=NaN(length(fouts),2);
 f1=[];
 for kk=1:length(fouts)
@@ -392,3 +417,5 @@ fo = fit(x',y,myfit,opt)
 
 hold on
 plot(fo)
+
+%}

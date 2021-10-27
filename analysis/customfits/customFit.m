@@ -1,8 +1,9 @@
 function [hF,fout] = customFit(X,Y,opts)
 fout={};
 FitFlags = opts.FitFlags;
+
 %% Process Data
-[ux,ia,ib]=unique(X);    
+[ux,~,~]=unique(X);    
 Yu=zeros(length(ux),2,size(Y,2));    
 
 
