@@ -118,10 +118,15 @@ if doCustomX
 %     mF1 = -7/2;
 %     mF2 = -5/2;
 % 
-    Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
-    Bshim = src_data.Params(1).HF_zshim_Initial_Lattice*2.35;
-    Boff  = 0.11;
-            B = Bfb + Bshim + Boff;
+
+
+    B = 201.5+.11;
+
+
+%     Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
+%     Bshim = src_data.Params(1).HF_zshim_Initial_Lattice*2.35;
+%     Boff  = 0.11;
+%             B = Bfb + Bshim + Boff;
 
 %     Bfb   = src_data.Params(1).HF_FeshValue_Spectroscopy;
 %     Bshim =0;

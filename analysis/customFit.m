@@ -31,10 +31,7 @@ t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
 
 % Create axes object
 ax=axes;
-
-% Color order
 co=get(gca,'colororder');    
-
 % Plot Data
 for kk=1:size(Yu,3)
     p(kk)=errorbar(ux,Yu(:,1,kk),Yu(:,2,kk),'o','markerfacecolor',co(kk,:),...
@@ -42,9 +39,10 @@ for kk=1:size(Yu,3)
         'linewidth',2,'markersize',8); 
     hold on
 end
+
 % Axis options
 xlabel(opts.xstr,'interpreter','latex');
-% ylabel(opts.ystr);
+
 set(gca,'fontsize',12,'linewidth',1,'box','on','xgrid','on','ygrid','on');
 
 % Y Limits
@@ -71,10 +69,6 @@ resizeFig(hF,t,[ax]);
 %% Exponential Fit
 if FitFlags.T2exp
     myfit=fittype('A+(1-A)*exp(-pi*t/tau)',...
-        'coefficients',{'A','tau'},...
-        'independent','t');
-
-    myfit=fittype('0.5+0.5*exp(-pi*t/tau)-A',...
         'coefficients',{'A','tau'},...
         'independent','t');
 
@@ -106,30 +100,35 @@ if length(X)>8 && FitFlags.gauss_neg_double
         'coefficients',{'A1','s1','x1','A2','s2','x2','bg'},...
         'independent','x');
     opt=fitoptions(myfit);
+    
     % Background is max
-    bg=max(Y);
-    % Find center
-    [Ymin,ind]=min(Y);
-    A=bg-Ymin;
-    xC1=X(ind);
-
-    % Assign guess        
-%     xC1 = 0;
-    xC2 = -40;
-    G=[A 15 xC1 A/2 50 xC2 bg];
-
+    bg = max(Y);
+    
+    % Peak 1
+    A1 = range(Y);
+    [~,ind]=min(Y);
+    x1 = X(ind);
+    s1 = 10;
+    
+    % Peak 2
+    A2 = A1*.3;
+    x2 = -90;
+    s2 = 10;
+    
+    % Fit Guesses
+    G = [A1 s1 x1 A2 s2 x2 bg];
+    
     opt.StartPoint=G;
     opt.Robust='bisquare';
-%         opt.Lower=[0 0 -inf 0 0 -inf 0];
+    
     % Perform the fit
-    fout=fit(X,Y,myfit,opt);
-    disp(fout);
+    fout=fit(X,Y,myfit,opt)
     ci = confint(fout,0.95);
-    disp(ci)
+    
     % Plot the fit
     tt=linspace(min(X),max(X),1000);
     pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
-%         ylim([-0.1 2])
+
     lStr=['xC=(' num2str(round(fout.x1,2)) ' ± ' num2str(abs(round(ci(1,3)-fout.x1,2))) ', '...
         num2str(round(fout.x2,2)) ' ± ' num2str(abs(round(ci(1,6)-fout.x2,2))) ')' ...
         ' \sigma=(' num2str(round(fout.s1,1)) ', ' num2str(round(fout.s2,1)) ')' ];

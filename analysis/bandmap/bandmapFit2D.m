@@ -40,17 +40,19 @@ sG = vR/((opts.PixelSize*1e6)/(opts.TOF*1e3));
 
 
 %% Initial Guess
-
+Zg = Z;
+Zg = Z - min(min(Z));
 % X Center
-Zx = sum(Z,1)/sum(sum(Z));
+Zx = sum(Zg,1)/sum(sum(Zg));
 XcG = sum(Zx.*X);
 
 % Y center
-Zy = sum(Z,2)'/sum(sum(Z));
+Zy = sum(Zg,2)'/sum(sum(Zg));
 YcG = sum(Zy.*Y);
 
 % Background Amplitude
 AbgG = 0;
+AbgG = mean([min(min(Z)) 0]);
 
 % Center Zone Amplitude
 Ic = (abs(XX-XcG)<sG).*(abs(YY-YcG)<sG);
@@ -59,18 +61,22 @@ AcG = sum(sum(Ic.*Z))/sum(sum(Ic))-AbgG;
 % Right Zone Amplitude
 Ir = (abs(XX-(XcG+1.5*sG))<0.3*sG).*(abs(YY-YcG)<sG);
 Ax1G = sum(sum(Ir.*Z))/sum(sum(Ir))-AbgG;
+Ax1G = max([Ax1G 0]);
 
 % Left Zone Amplitude
 Il = (abs(XX-(XcG-1.5*sG))<0.3*sG).*(abs(YY-YcG)<sG);
 Ax2G = sum(sum(Il.*Z))/sum(sum(Il))-AbgG;
+Ax2G = max([Ax2G 0]);
 
 % Up Zone Amplitude
 Iu = (abs(YY-(YcG-1.5*sG))<0.3*sG).*(abs(XX-XcG)<sG);
 Ay1G = sum(sum(Iu.*Z))/sum(sum(Iu))-AbgG;
+Ay1G = max([Ax1G 0]);
 
 % Down Zone Amplitude
 Id = (abs(YY-(YcG+1.5*sG))<0.3*sG).*(abs(XX-XcG)<sG);
 Ay2G = sum(sum(Id.*Z))/sum(sum(Id))-AbgG;
+Ay2G = max([Ax2G 0]);
 
 
 %% Define Fit Functions
@@ -100,7 +106,14 @@ fitopt.StartPoint = [1.0*AcG XcG+00 YcG+00 sG+0 07.0  09.0 ...
 fitopt.Lower      = [0.0*AcG XcG-10 YcG-10 sG-1 00.1  00.1 ...
     AbgG-0.05 0.0*Ax1G 0.0*Ax2G 0.0*Ay1G 0.0*Ay2G];
 fitopt.Upper      = [1.5*AcG XcG+10 YcG+10 sG+1 10.0  10.0 ...
-    AbgG+0.05 1.5*Ax1G 1.5*Ax2G 1.5*Ay1G 1.5*Ay2G];
+    AbgG+0.05 1.5*Ax1G+.05 1.5*Ax2G+.05 1.5*Ay1G+.05 1.5*Ay2G+.05];
+
+if sum((fitopt.Upper-fitopt.Lower)<0)
+   warning('Upper bound lower than lower bound!');
+   fitopt.Upper=[];
+   fitopt.Lower=[];
+   keyboard
+end
 
 %% Perform the Fit
 fprintf(' band map fitting ... ')

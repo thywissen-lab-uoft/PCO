@@ -96,11 +96,14 @@ pco_overrideUnit='MHz';
 
 %% Analysis Flags
 
+% Standard Analysis
+doStandard     = 1;
+
 % Saving
-doSave        = 0;      % Save the figures?
+doSave        = 1;      % Save the figures?
  
 % Animation
-doAnimate     = 0;      % Animate the Cloud
+doAnimate     = 1;      % Animate the Cloud
 
 % Probe Beam
 doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
@@ -116,21 +119,17 @@ doGaussRabi   = 0;      % Enable gauss rabi
 doBEC         = 0;      % Enable BEC analysis
 
 % Erf Fit
-doErfFit      = 0;      % Erf
+doErfFit      = 0;    
 
 % Band Map Fit
 doBMFit       = 1;
-doCustom_BM   = 1;    % Custom Band map
+doCustom_BM   = 1;    
 
 % Fermi
 doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
 
-% Standard Analysis
-doStandard = 0;
-
 % Custom Box counts
-doCustom =  0;          % Custom Box Count
-
+doCustom       =  0;          % Custom Box Count
 doRabiAbsolute = 0;
 doRabiContrast = 0;
 
@@ -346,8 +345,7 @@ atomdata=atomdata(inds);
 
      ROI=[800 950 490 620;
        800 950 1540 1670];   %  band map 15 ms TOF 9box, 7 box
-
-   
+ 
    %    ROI = ROI(1,:); % 9 only 
 %    ROI = ROI(2,:); % 7 only
 
