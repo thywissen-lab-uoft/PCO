@@ -58,13 +58,13 @@ p_inds=[];
 % p_inds = {05,24,07,18,19};
 
 % Excitations to 9
-% p_inds = {05,24,07,18,19};
+p_inds = {05,24,07,18,19};
 
 % Loss from 7
 % p_inds = {06,23,08,15,16};
 
 % Absolute number
-p_inds = {01,02,25};
+% p_inds = {01,02,25};
 
 
 %% Fit Flags
@@ -76,9 +76,9 @@ FitFlags.Rabi_oscillation = 0;
 
 FitFlags.gauss_single=0;
 FitFlags.gauss_4=0;
-FitFlags.gauss_neg_double=1;
+FitFlags.gauss_neg_double=0;
 FitFlags.gauss_neg_single=0;
-FitFlags.gauss_double = 0;
+FitFlags.gauss_double = 1;
 FitFlags.gauss_triple = 0;
  
 FitFlags.lorentz_neg_single=0;    
@@ -113,14 +113,14 @@ custom_data_bm.XUnit = src_data.Units(1).(src_data.xVar);
 if doCustomX
     % Select mF states
     mF1 = -7/2;
-    mF2 = -5/2;
+    mF2 = -9/2;
      
 %     mF1 = -7/2;
 %     mF2 = -5/2;
 % 
 
 
-    B = 201.5+.11;
+    B = 200.5+.11;
 
 
 %     Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;

@@ -134,7 +134,7 @@ doRabiAbsolute = 0;
 doRabiContrast = 0;
 
 % Wavemeter
-doWavemeter   = 0;
+doWavemeter   = 1;
 
 %% GDrive Settings
 GDrive_root = 'G:\My Drive\Lattice Shared\LabData';

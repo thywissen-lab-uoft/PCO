@@ -112,7 +112,7 @@ if length(X)>8 && FitFlags.gauss_neg_double
     
     % Peak 2
     A2 = A1*.3;
-    x2 = -90;
+    x2 = 30;
     s2 = 10;
     
     % Fit Guesses
@@ -277,7 +277,7 @@ if length(X)>4 && FitFlags.gauss_double
     A=bg-Ymin;
     xC=X(ind);
     % Assign guess
-    G=[A 10 -3 A/10 10 8 bg];
+    G=[A 20 -3 A/2 10 32 bg];
     opt.StartPoint=G;
     opt.Robust='bisquare';
 %         opt.Lower=[0 0 -inf 0 0 -inf 0];
