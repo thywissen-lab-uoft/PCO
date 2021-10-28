@@ -70,7 +70,7 @@ pco_xVar='Raman_AOM3_freq';
 
 % pco_xVar='ExecutionDate';
 % pco_xVar = 'rf_tof_srs_power';
-% pco_xVar = 'rf_tof_delta_freq';
+% pco_xVar = 'rf_tof_freq';
 
 % pco_xVar='HF_kdet_shift';
 %  pco_xVar = 'Evap_End_Power';
@@ -97,9 +97,8 @@ pco_overrideUnit='MHz';
 %% Analysis Flags
 
 % Standard Analysis
-doStandard     = 0;
+doStandard     = 1;
 doODProfile    = 0;
-
 
 % Saving
 doSave        = 1;      % Save the figures?
@@ -347,13 +346,21 @@ atomdata=atomdata(inds);
 
      ROI=[800 950 490 620;
        800 950 1540 1670];   %  band map 15 ms TOF 9box, 7 box
- 
+   
+     ROI=[780 970 470 630;
+       780 970 1520 1690];   %  band map 15 ms TOF 9box, 7 box 
+   
    %    ROI = ROI(1,:); % 9 only 
 %    ROI = ROI(2,:); % 7 only
 
 %  band map 15 ms TOF 9box, 7 box
 %     ROI=[800 950 490 660];
 %     ROI(2,:)=ROI(1,:)+[0 0 1050 1050];
+
+
+%      ROI=[750 1000 620 860;
+%        750 1000 1670 1910];   %  band map 20 ms TOF 9box, 7 box
+
    % 
 % ROI = [810 870 510 590;
 %     880 930 510 590;
