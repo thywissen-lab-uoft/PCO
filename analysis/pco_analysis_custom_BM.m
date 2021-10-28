@@ -60,12 +60,18 @@ p_inds=[];
 % Excitations to 9
 p_inds = [06,23,08,15,16];
 
+
 % Loss from 7
 % p_inds = [06,23,08,15,16];
 
 % Absolute number
 % p_inds = [01,02,25];
 
+% Rabi oscillations 7 to 9
+% p_inds = {01,02,07,08,15,16,17};
+
+% Raman spec
+p_inds = {06,12,13,14,08,15,16,17};
 
 %% Fit Flags
 
@@ -120,7 +126,8 @@ if doCustomX
 % 
 
 
-%     B = 200.5+.11;
+
+%     B = 198+.11;
 
 
     Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;

@@ -61,7 +61,7 @@ if doCustomX
         x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
     end
     
-        B = 200.2 + 0 + 0.11;
+        B = 197 + 0 + 0.11;
 
         % Choose the mf States
         mF1 = -7/2;
