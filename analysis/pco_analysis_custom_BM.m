@@ -58,7 +58,7 @@ p_inds=[];
 % p_inds = {05,24,07,18,19};
 
 % Excitations to 9
-p_inds = {05,24,07,18,19};
+% p_inds = {05,24,07,18,19,25};
 
 % Loss from 7
 % p_inds = {06,23,08,15,16};
@@ -66,6 +66,11 @@ p_inds = {05,24,07,18,19};
 % Absolute number
 % p_inds = {01,02,25};
 
+% Rabi oscillations 7 to 9
+% p_inds = {01,02,07,08,15,16,17};
+
+% Raman spec
+p_inds = {06,12,13,14,08,15,16,17};
 
 %% Fit Flags
 
@@ -78,7 +83,7 @@ FitFlags.gauss_single=0;
 FitFlags.gauss_4=0;
 FitFlags.gauss_neg_double=0;
 FitFlags.gauss_neg_single=0;
-FitFlags.gauss_double = 1;
+FitFlags.gauss_double = 0;
 FitFlags.gauss_triple = 0;
  
 FitFlags.lorentz_neg_single=0;    
@@ -120,13 +125,13 @@ if doCustomX
 % 
 
 
-    B = 200.5+.11;
+%     B = 198+.11;
 
 
-%     Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
-%     Bshim = src_data.Params(1).HF_zshim_Initial_Lattice*2.35;
-%     Boff  = 0.11;
-%             B = Bfb + Bshim + Boff;
+    Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
+    Bshim = src_data.Params(1).HF_zshim_Initial_Lattice*2.35;
+    Boff  = 0.11;
+            B = Bfb + Bshim + Boff;
 
 %     Bfb   = src_data.Params(1).HF_FeshValue_Spectroscopy;
 %     Bshim =0;

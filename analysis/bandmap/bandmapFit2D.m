@@ -35,8 +35,15 @@ end
 % Recoil velocity of 1054nm 40 amu in um/ms
 vR = 9.46; 
 
+if min(Y)>1024
+   dt = 1e-3;
+else 
+    dt=0;
+end
+
 % Convert recoil velocity to pixels
-sG = vR/((opts.PixelSize*1e6)/(opts.TOF*1e3));
+sG = vR/((opts.PixelSize*1e6)/((opts.TOF+dt)*1e3));
+
 
 
 %% Initial Guess
@@ -105,7 +112,7 @@ fitopt.StartPoint = [1.0*AcG XcG+00 YcG+00 sG+0 07.0  09.0 ...
     AbgG+0.00 1.0*Ax1G 1.0*Ax2G 1.0*Ay1G 1.0*Ay2G];
 fitopt.Lower      = [0.0*AcG XcG-10 YcG-10 sG-1 00.1  00.1 ...
     AbgG-0.05 0.0*Ax1G 0.0*Ax2G 0.0*Ay1G 0.0*Ay2G];
-fitopt.Upper      = [1.5*AcG XcG+10 YcG+10 sG+1 10.0  10.0 ...
+fitopt.Upper      = [1.5*AcG XcG+10 YcG+10 sG+1 15.0  15.0 ...
     AbgG+0.05 1.5*Ax1G+.05 1.5*Ax2G+.05 1.5*Ay1G+.05 1.5*Ay2G+.05];
 
 if sum((fitopt.Upper-fitopt.Lower)<0)
