@@ -55,16 +55,17 @@ y_Lbl{25}     = 'N7+N9';
 p_inds=[];
 
 % Excitations to 7
-% p_inds = {05,24,07,18,19};
+% p_inds = [05,24,07,18,19];
 
 % Excitations to 9
-% p_inds = {05,24,07,18,19,25};
+p_inds = [06,23,08,15,16];
+
 
 % Loss from 7
-% p_inds = {06,23,08,15,16};
+% p_inds = [06,23,08,15,16];
 
 % Absolute number
-% p_inds = {01,02,25};
+% p_inds = [01,02,25];
 
 % Rabi oscillations 7 to 9
 % p_inds = {01,02,07,08,15,16,17};
@@ -94,7 +95,7 @@ FitFlags.lorentz_double=0;
 FitFlags.lorentz_triple=0;    
 
 FitFlags.lorentz_asym_single= 0;
-FitFlags.lorentz_asym_double= 0;
+FitFlags.lorentz_asym_double= 1;
 
 FitFlags.fit_lorentz_assymetric_4=0;
 
@@ -123,6 +124,7 @@ if doCustomX
 %     mF1 = -7/2;
 %     mF2 = -5/2;
 % 
+
 
 
 %     B = 198+.11;
@@ -318,34 +320,32 @@ custom_data_bm.YLabel = {Y.YName};
 %% Plot it 
 bm_custom_opts=struct;
 fouts={};
+names={};
 clear hFs
 for nn=1:length(p_inds)
     % Figure Name
-    if length(p_inds{nn})>1
-        FigName = ['bm_custom' num2str(nn)];
-    else
-        FigName = Y(p_inds{nn}).FigName;        
-    end
+    FigName = Y(p_inds(nn)).FigName;        
+
     
     % Name of data
-    names = {Y(p_inds{nn}).YName};
+    names{nn} = Y(p_inds(nn)).YName;
     
     % Assign Options
-    bm_custom_opts.Names = names;
+    bm_custom_opts.Name = Y(p_inds(nn)).YName;
     bm_custom_opts.FigLabel = FigLabel;
     bm_custom_opts.FigName = FigName;
     bm_custom_opts.FitFlags = FitFlags;
     bm_custom_opts.xstr = xstr;
     bm_custom_opts.Ind = nn;
     
-    [hFs(nn),fouts{nn}] = customFit(X,[Y(p_inds{nn}).Y],bm_custom_opts);   
+    [hFs(nn),fouts{nn}] = customFit(X,Y(p_inds(nn)).Y,bm_custom_opts);   
     if doSave;saveFigure(hFs(nn),FigName,saveOpts);end
 
 end
 
 %% Save Data
     if doSave
-        save([saveDir filesep 'custom_data_bm'],'custom_data_bm');
+        save([saveDir filesep 'custom_data_bm'],'custom_data_bm','fouts','names');
     end
     
     if doSave && doUpload && exist(GDrive_root,'dir')

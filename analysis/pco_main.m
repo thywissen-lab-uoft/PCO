@@ -64,9 +64,9 @@ end
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-% pco_xVar='Raman_AOM3_freq';
+pco_xVar='Raman_AOM3_freq';
 % pco_xVar='Pulse_Time';
- pco_xVar='rf_freq_HF';
+%  pco_xVar='rf_freq_HF';
 
 % pco_xVar='ExecutionDate';
 % pco_xVar = 'rf_tof_srs_power';
@@ -97,13 +97,15 @@ pco_overrideUnit='MHz';
 %% Analysis Flags
 
 % Standard Analysis
-doStandard     = 1;
+doStandard     = 0;
+doODProfile    = 0;
+
 
 % Saving
 doSave        = 1;      % Save the figures?
  
 % Animation
-doAnimate     = 1;      % Animate the Cloud
+doAnimate     = 0;      % Animate the Cloud
 
 % Probe Beam
 doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
@@ -134,7 +136,7 @@ doRabiAbsolute = 0;
 doRabiContrast = 0;
 
 % Wavemeter
-doWavemeter   = 1;
+doWavemeter   = 0;
 
 %% GDrive Settings
 GDrive_root = 'G:\My Drive\Lattice Shared\LabData';
@@ -863,31 +865,34 @@ profile_opts.FigLabel = FigLabel;
 
 clear hF_X;clear hF_Y;
 hF_X=[];hF_Y=[];
-for rNum=1:size(atomdata(1).ROI,1)
-    profile_opts.ROINum = rNum;
 
-    hF_Xs_rNum=showProfile(atomdata,'X',pco_xVar,profile_opts);
-    
-    if doSave
-        for kk=1:length(hF_Xs_rNum) 
-            saveFigure(hF_Xs_rNum(kk),['OD_R' num2str(rNum) '_X' num2str(kk)],saveOpts);
-            pause(0.1);
-        end 
-    end
-    
-    hF_Ys_rNum=showProfile(atomdata,'Y',pco_xVar,profile_opts);          
-%   Save the figures (this can be slow)
-    if doSave        
-        for kk=1:length(hF_Ys_rNum)
-            saveFigure(hF_Ys_rNum(kk),['OD_R' num2str(rNum) '_Y' num2str(kk)],saveOpts);
-            pause(0.1);
+if doODProfile
+
+    for rNum=1:size(atomdata(1).ROI,1)
+        profile_opts.ROINum = rNum;
+
+        hF_Xs_rNum=showProfile(atomdata,'X',pco_xVar,profile_opts);
+
+        if doSave
+            for kk=1:length(hF_Xs_rNum) 
+                saveFigure(hF_Xs_rNum(kk),['OD_R' num2str(rNum) '_X' num2str(kk)],saveOpts);
+                pause(0.1);
+            end 
         end
-    end
-    hF_X=[hF_X; hF_Xs_rNum];
-    hF_Y=[hF_Y; hF_Ys_rNum];
-end  
- 
 
+        hF_Ys_rNum=showProfile(atomdata,'Y',pco_xVar,profile_opts);          
+    %   Save the figures (this can be slow)
+        if doSave        
+            for kk=1:length(hF_Ys_rNum)
+                saveFigure(hF_Ys_rNum(kk),['OD_R' num2str(rNum) '_Y' num2str(kk)],saveOpts);
+                pause(0.1);
+            end
+        end
+        hF_X=[hF_X; hF_Xs_rNum];
+        hF_Y=[hF_Y; hF_Ys_rNum];
+    end  
+ 
+end
 %% Animate cloud
 if doAnimate && doSave
     animateOpts=struct;

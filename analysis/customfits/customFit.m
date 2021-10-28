@@ -1,8 +1,9 @@
 function [hF,fout] = customFit(X,Y,opts)
 fout={};
 FitFlags = opts.FitFlags;
+
 %% Process Data
-[ux,ia,ib]=unique(X);    
+[ux,~,~]=unique(X);    
 Yu=zeros(length(ux),2,size(Y,2));    
 
 
@@ -55,11 +56,8 @@ xlim([min(X) max(X)]);
 
 hold on    
 
-if size(Yu,3)>1
-    legend(p,opts.Names,'fontsize',8)
-else
-    ylabel(opts.Names{1})
-end
+ylabel(opts.Name)
+
 
 resizeFig(hF,t,[ax]);
 
@@ -267,17 +265,19 @@ end
  %% Double Gauss
  
 if length(X)>4 && FitFlags.gauss_double
-    myfit=fittype('bg+A1*exp(-(x-x1).^2/G1.^2)+A2*exp(-(x-x2).^2/G2.^2)',...
+    myfit=fittype('bg+Af1*exp(-(x-x1).^2/G1.^2)+A2*exp(-(x-x2).^2/G2.^2)',...
         'coefficients',{'A1','G1','x1','A2','G2','x2','bg'},'independent','x');
     opt=fitoptions(myfit);
     % Background is max
     bg=min(Y);
     % Find center
-    [Ymin,ind]=min(Y);
+    [Ymin,ind]=max(Y);
     A=bg-Ymin;
     xC=X(ind);
+    
+    
     % Assign guess
-    G=[A 20 -3 A/2 10 32 bg];
+    G=[A 20 xC A/3 10 -75 bg];
     opt.StartPoint=G;
     opt.Robust='bisquare';
 %         opt.Lower=[0 0 -inf 0 0 -inf 0];
@@ -632,10 +632,11 @@ A2 = 0.01;
     % Center
     [~,imax]=max(Y);
     x1 = mean(X(imax)); 
-    x2 = x1;
-    x2=0;
-    x1 = -120;
-    x2 = 0;
+%     x2 = x1;
+%     x2=0;
+    
+%     x1 = -120;
+    x2 = -160;
     
     % Asymmetry
     a1 = .05;
