@@ -4,6 +4,8 @@ FitFlags = opts.FitFlags;
 
 %% Process Data
 [ux,~,~]=unique(X);    
+ux=unique(X);    
+
 Yu=zeros(length(ux),2,size(Y,2));    
 
 
@@ -15,6 +17,8 @@ for kk=1:length(ux)
         Yu(kk,2,nn)=std(Y(inds,nn));       
     end
 end
+
+
     
 %% Plot Data
 hF=figure;
@@ -42,7 +46,7 @@ for kk=1:size(Yu,3)
 end
 
 % Axis options
-xlabel(opts.xstr,'interpreter','latex');
+xlabel(opts.xstr,'interpreter','none');
 
 set(gca,'fontsize',12,'linewidth',1,'box','on','xgrid','on','ygrid','on');
 
@@ -102,16 +106,22 @@ if length(X)>8 && FitFlags.gauss_neg_double
     % Background is max
     bg = max(Y);
     
-    % Peak 1
-    A1 = range(Y);
-    [~,ind]=min(Y);
-    x1 = X(ind);
-    s1 = 10;
     
     % Peak 2
-    A2 = A1*.3;
-    x2 = 30;
+    A2 =range(Y);
+    x2 = -10;
     s2 = 10;
+    
+    
+    % Peak 1
+    A1 = A2/20;
+    [~,ind]=min(Y);
+    x1 = X(ind);
+    x1 = -37.5;
+
+    s1 = 10;
+    
+
     
     % Fit Guesses
     G = [A1 s1 x1 A2 s2 x2 bg];
@@ -146,7 +156,7 @@ if length(X)>4 && FitFlags.gauss_neg_single
     A=bg-Ymin;
     xC=X(ind);
     % Assign guess
-    G=[A 10 38 bg];
+    G=[A 10 0 bg];
     opt.StartPoint=G;
     opt.Robust='bisquare';
     opt.Lower=[0 0 -inf 0 0 -inf 0];
@@ -277,7 +287,7 @@ if length(X)>4 && FitFlags.gauss_double
     
     
     % Assign guess
-    G=[A 20 xC A/3 10 -75 bg];
+    G=[A 20 -10 A/3 10 20 bg];
     opt.StartPoint=G;
     opt.Robust='bisquare';
 %         opt.Lower=[0 0 -inf 0 0 -inf 0];
@@ -635,7 +645,7 @@ A2 = 0.01;
 %     x2 = x1;
 %     x2=0;
     
-%     x1 = -120;
+    x1 = -130;
     x2 = -80;
     
     % Asymmetry
@@ -662,11 +672,11 @@ A2 = 0.01;
 %     
 
     str=['$(A_i,f_i,\Gamma_i)$' newline ....
-    '$(' num2str(fout.A1,2) ',' ...
+    '$(' num2str(fout.A1,3) ',' ...
     num2str(round(fout.x1,1)) '\pm ' ...
     num2str(round((ci(2,3)-ci(1,3))/2,1)) ...
     ',' num2str(round(fout.G1,1)) ')$' newline ...
-    '$(' num2str(fout.A2,2) ',' ...
+    '$(' num2str(fout.A2,3) ',' ...
     num2str(round(fout.x2,1)) '\pm ' ...
     num2str(round((ci(2,6)-ci(1,6))/2,1)) ...
     ',' num2str(round(fout.G2,1)) ')$'];
@@ -728,7 +738,7 @@ if length(X)>4 && FitFlags.gauss_single
     % Plot the fit
     tt=linspace(min(X),max(X),1000);
     pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
-    lStr=['xC=(' num2str(round(fout.x1,2)) 'Â±' ...
+    lStr=['xC=(' num2str(round(fout.x1,2)) '±' ...
         num2str(abs(round(ci(1,3)-fout.x1,2))) ','...
          ')' ...
         ' FWHM=(' num2str(round(fout.G1,1)) ')' ];
@@ -739,13 +749,13 @@ end
 
 if length(X)>4 && FitFlags.Rabi_oscillation       
 
-    guess_freq = 1/.08;
+    guess_freq = 1/.12;
     guess_tau = 0.5;
 %     
 %         myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t))/2;           
 %         fitFuncStr = '$0.5N_0\left(1-\exp(-\pi t / \tau)\cos(2 \pi f t)\right)$';
 
-myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t+pi))/2;   
+myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t))/2;   
 fitFuncStr = '$0.5N_0\left(1-\exp(-\pi t / \tau)\cos(2 \pi f t)\right)$';
 
 

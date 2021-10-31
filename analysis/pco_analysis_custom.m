@@ -10,7 +10,7 @@
 % data_source = 'box';
 % data_source = 'gauss';
 % data_source = 'erf';
-data_source = 'bm';
+data_source = 'erf';
 
 switch data_source
     case 'box'        
@@ -123,7 +123,7 @@ if beep
     process_data.Ratio_79=Ratio_79;    
     process_data.Natoms = N;        
 
-    dataMode= 2;         
+    dataMode= 1;         
     switch dataMode
         case 0     
              process_data.Function = @(N) (N(:,1)-N(:,2))./N(:,1);
@@ -257,7 +257,7 @@ if doCustom
     gauss_4=0;
     gauss_neg_double=0;
     gauss_neg_single=0;
-    gauss_double = 1;
+    gauss_double = 0;
     
     lorentz_neg_single=0;    
     lorentz_neg_double=0;  
@@ -290,7 +290,7 @@ B = Bfb + Bshim + Boff;
 
 % Choose the mf States
 mF1 = -7/2;
-mF2 = -9/2;
+mF2 = -5/2;
 
 x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
 
@@ -309,6 +309,11 @@ switch pco_xVar
         X=data.X;
         xstr=['pulse time (ms)'];    
     case 'rf_freq_HF'
+        X=data.X;
+        X = X - x0;   
+        X = X*1e3;
+        xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];        
+    case 'rf_rabi_freq_HF'
         X=data.X;
         X = X - x0;   
         X = X*1e3;
@@ -338,7 +343,7 @@ end
     Ntot = sum(N,2);     
      N(:,2) = N(:,2)*8.6/7.2; %fudge factor
 
-     dataMode= 9;         
+     dataMode= 1;         
      switch dataMode
          case 0     
              Y=(N(:,1)-N(:,2))./N(:,1);
@@ -440,8 +445,8 @@ end
     
     set(gca,'fontsize',12,'linewidth',1,'box','on','xgrid','on','ygrid','on');
     yL=get(gca,'YLim');
-    ylim([-0.2 yL(2)]);
-    ylim([-0.25 0.2]);
+%     ylim([-0.2 yL(2)]);
+%     ylim([-0.25 0.2]);
 
 
     %     ylim([1.1E5 2.5E5]);

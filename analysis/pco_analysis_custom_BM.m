@@ -46,6 +46,14 @@ y_Lbl{23}     = '-N7s/(N7+N9)';
 y_Lbl{24}     = '-N9s/(N7+N9)';
 %%%%%%%%%% Total Number
 y_Lbl{25}     = 'N7+N9';
+%%%%%%%%%% Relative excited band only
+y_Lbl{26}     = 'N9pH/(N7pH+N9pH)';
+y_Lbl{27}     = 'N7pH/(N7pH+N9pH)';
+
+%%%%%%%%%% Relative ground band only
+y_Lbl{28}     = 'N9s/(N7s+N9s)';
+y_Lbl{29}     = 'N7s/(N7s+N9s)';
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%% Choose what to plot %%%%%%%%%%%%%
@@ -55,10 +63,13 @@ y_Lbl{25}     = 'N7+N9';
 p_inds=[];
 
 % Excitations to 7
-% p_inds = [05,24,07,18,19];
+p_inds = [01,02,05,08,11,15,18,19,07,25];
+
 
 % Excitations to 9
-% p_inds = [06,23,08,15,16];
+% p_inds = [06,23,08,15,16,17,25];
+% p_inds = [17];
+
 
 
 % Loss from 7
@@ -71,7 +82,12 @@ p_inds=[];
 % p_inds = [01,02,07,08,15,16,17];
 
 % Raman spec
-p_inds = [06,12,13,14,08,15,16,17];
+% p_inds = [06,12,13,14,08,15,16,17];
+
+% RF spec
+% p_inds = [03,04,26,27,28,29];
+% p_inds = [01,02];
+
 
 %% Fit Flags
 
@@ -95,7 +111,7 @@ FitFlags.lorentz_double=0;
 FitFlags.lorentz_triple=0;    
 
 FitFlags.lorentz_asym_single= 0;
-FitFlags.lorentz_asym_double= 1;
+FitFlags.lorentz_asym_double= 0;
 
 FitFlags.fit_lorentz_assymetric_4=0;
 
@@ -133,14 +149,14 @@ if doCustomX
     Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
     Bshim = src_data.Params(1).HF_zshim_Initial_Lattice*2.35;
     Boff  = 0.11;
-            B = Bfb + Bshim + Boff;
+    B = Bfb + Bshim + Boff;
 
 %     Bfb   = src_data.Params(1).HF_FeshValue_Spectroscopy;
 %     Bshim =0;
 %     Boff  = 0.11;
 %     B = Bfb + Bshim + Boff;
 
-%     B = 198.5 + 0 + 0.11; 
+    B = 199.9 + 0 + 0.11; 
     
     % Transition Energy
     x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
@@ -168,6 +184,12 @@ if doCustomX
             X = X*1e3;
             xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)']; 
             xunit = 'kHz';
+        case 'rf_rabi_freq_HF'
+            X=custom_data_bm.X;
+            X = X - x0;   
+            X = X*1e3;
+            xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)']; 
+            xunit = 'kHz';
         case 'rf_tof_freq'
           X=custom_data_bm.X;
             X = X - x0;   
@@ -176,7 +198,8 @@ if doCustomX
             xunit = 'kHz';
         otherwise
             X = custom_data_bm.X;
-            xstr = pco_xVar;        
+            xstr = pco_xVar;
+            xunit = 'ms';
     end 
     
     % Assign outputs
@@ -313,6 +336,31 @@ Y(24).Y          = -N9s./N0;
 Y(25).YName      = y_Lbl{25};
 Y(25).FigName    = 'bm_custom_Ntot';
 Y(25).Y          = N0;
+
+
+
+
+Y(26).YName      = y_Lbl{26};
+Y(26).FigName    = 'bm_custom_N9ph_rel_p';
+Y(26).Y          = (N9pH)./(N9pH+N7pH);
+
+
+Y(27).YName      = y_Lbl{27};
+Y(27).FigName    = 'bm_custom_N7ph_rel_p';
+Y(27).Y          = (N7pH)./(N9pH+N7pH);
+
+
+
+Y(28).YName      = y_Lbl{28};
+Y(28).FigName    = 'bm_custom_N9s_rel_s';
+Y(28).Y          = N9s./(N7s+N9s);
+
+
+Y(29).YName      = y_Lbl{29};
+Y(29).FigName    = 'bm_custom_N7s_rel_s';
+Y(29).Y          = N7s./(N7s+N9s);
+
+
 % Assign to output
 custom_data_bm.Y = Y;
 custom_data_bm.YLabel = {Y.YName};        

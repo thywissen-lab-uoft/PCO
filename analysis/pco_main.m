@@ -64,9 +64,9 @@ end
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-pco_xVar='Raman_AOM3_freq';
+% pco_xVar='Raman_AOM3_freq';
 % pco_xVar='Pulse_Time';
-%  pco_xVar='rf_freq_HF';
+ pco_xVar='rf_freq_HF';
 
 % pco_xVar='ExecutionDate';
 % pco_xVar = 'rf_tof_srs_power';
@@ -76,6 +76,8 @@ pco_xVar='Raman_AOM3_freq';
 %  pco_xVar = 'Evap_End_Power';
 % pco_xVar = 'rf_pulse_length';
 % pco_xVar = 'rf_rabi_time_HF';
+% pco_xVar = 'rf_rabi_freq_HF';
+
 
 % 
 % pco_xVar = 'latt_ramp_time';
@@ -84,7 +86,8 @@ pco_xVar='Raman_AOM3_freq';
 % pco_xVar = 'rf_rabi_freq_HF';
 %   pco_xVar = 'rf_delta_freq_HF';
 % pco_xVar = 'HF_FeshValue_Final_ODT';
-%   pco_xVar='HF_prob_pwr2';
+%   pco_xVar='HF_Raman_sweep_time';
+%   pco_xVar='latt_rampdown_time';
 
 
 % Should the analysis attempt to automatically find the unit?
@@ -104,7 +107,7 @@ doODProfile    = 0;
 doSave        = 1;      % Save the figures?
  
 % Animation
-doAnimate     = 0;      % Animate the Cloud
+doAnimate     = 1;      % Animate the Cloud
 
 % Probe Beam
 doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
@@ -135,7 +138,7 @@ doRabiAbsolute = 0;
 doRabiContrast = 0;
 
 % Wavemeter
-doWavemeter   = 0;
+doWavemeter   = 1;
 
 %% GDrive Settings
 GDrive_root = 'G:\My Drive\Lattice Shared\LabData';
@@ -350,6 +353,10 @@ atomdata=atomdata(inds);
      ROI=[780 970 470 630;
        780 970 1520 1690];   %  band map 15 ms TOF 9box, 7 box 
    
+      
+%      ROI=[780 970 470 750;
+%        780 970 1520 1780];   %  band map 15 ms TOF 9box, 7 box  larger boxes
+%    
    %    ROI = ROI(1,:); % 9 only 
 %    ROI = ROI(2,:); % 7 only
 
