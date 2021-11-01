@@ -66,9 +66,9 @@ end
 
 % pco_xVar='Raman_AOM3_freq';
 % pco_xVar='Pulse_Time';
- pco_xVar='rf_freq_HF';
+%  pco_xVar='rf_freq_HF';
 
-% pco_xVar='ExecutionDate';
+pco_xVar='ExecutionDate';
 % pco_xVar = 'rf_tof_srs_power';
 % pco_xVar = 'rf_tof_freq';
 
@@ -126,11 +126,11 @@ doBEC         = 0;      % Enable BEC analysis
 doErfFit      = 0;    
 
 % Band Map Fit
-doBMFit       = 1;
-doCustom_BM   = 1;    
+doBMFit       = 0;
+doCustom_BM   = 0;    
 
 % Fermi
-doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
+doFermiFitLong = 1;     % Enable Fermi Fit for XDT TOF
 
 % Custom Box counts
 doCustom       =  0;          % Custom Box Count
