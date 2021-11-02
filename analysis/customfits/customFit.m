@@ -118,10 +118,7 @@ if length(X)>8 && FitFlags.gauss_neg_double
     [~,ind]=min(Y);
     x1 = X(ind);
     x1 = -37.5;
-
-    s1 = 10;
-    
-
+    s1 = 10;   
     
     % Fit Guesses
     G = [A1 s1 x1 A2 s2 x2 bg];
@@ -243,39 +240,49 @@ if length(X)>10 && FitFlags.gauss_4
 
     opt.StartPoint = zeros(1,13);
 
-    % ampitude
-    opt.StartPoint(1) = -2.5e4;
-    opt.StartPoint(2) = -1.2e4;
-    opt.StartPoint(3) = -1e4;
-    opt.StartPoint(4) = -2e4;
-
     % sigma
-    opt.StartPoint(5) = 10;
-    opt.StartPoint(6) = 10;
-    opt.StartPoint(7) = 10;
-    opt.StartPoint(8) = 10;
+    opt.StartPoint(5) = 3;
+    opt.StartPoint(6) = 3;
+    opt.StartPoint(7) = 3;
+    opt.StartPoint(8) = 3;
 
     % center
-    opt.StartPoint(9) = -4.5;
-    opt.StartPoint(10) = 60;
-    opt.StartPoint(11) = 126;
-    opt.StartPoint(12) = 190;
+    opt.StartPoint(9) = -2.5;
+    opt.StartPoint(10) = -15;
+    opt.StartPoint(11) = 12.5;
+    opt.StartPoint(12) = 32.5;  
 
-    % bkacground
-    opt.StartPoint(end) = 4E4;       
+    % background
+    opt.StartPoint(end) = min(Y);  
+    
+    % ampitude
+    opt.StartPoint(1) = .2;
+    opt.StartPoint(2) = .02;
+    opt.StartPoint(3) = .02;
+    opt.StartPoint(4) = .02;
 
     fout=fit(X,Y,myfit,opt);
 
     XF=linspace(min(X)-5,max(X)+5,1000);
     xlim([min(X)-0.1 max(X)+0.1]);
-    pExp=plot(XF,feval(fout,XF),'r-','linewidth',2);
-         
+    pF=plot(XF,feval(fout,XF),'r-','linewidth',2);
+
+    str=['$(A_i,f_i,\sigma_i)$' newline ....
+        '$(' num2str(fout.a1,2) ',' num2str(round(fout.x1,1)) ',' num2str(round(fout.s1,1)) ')$' newline ...
+        '$(' num2str(fout.a2,2) ',' num2str(round(fout.x2,1)) ',' num2str(round(fout.s2,1)) ')$' newline ...
+        '$(' num2str(fout.a3,2) ',' num2str(round(fout.x3,1)) ',' num2str(round(fout.s2,1)) ')$' newline ...
+        '$(' num2str(fout.a4,2) ',' num2str(round(fout.x4,1)) ',' num2str(round(fout.s2,1)) ')$'];
+
+    text(.01,.98,str,'units','normalized','verticalalignment','top',...
+        'interpreter','latex');
+    
+%     legend(pF,str,'location','best','interpreter','latex');           
 end
     
  %% Double Gauss
  
 if length(X)>4 && FitFlags.gauss_double
-    myfit=fittype('bg+Af1*exp(-(x-x1).^2/G1.^2)+A2*exp(-(x-x2).^2/G2.^2)',...
+    myfit=fittype('bg+A1*exp(-(x-x1).^2/G1.^2)+A2*exp(-(x-x2).^2/G2.^2)',...
         'coefficients',{'A1','G1','x1','A2','G2','x2','bg'},'independent','x');
     opt=fitoptions(myfit);
     % Background is max
@@ -287,7 +294,7 @@ if length(X)>4 && FitFlags.gauss_double
     
     
     % Assign guess
-    G=[A 20 -10 A/3 10 20 bg];
+    G=[A 20 -3 A/10 10 10 bg];
     opt.StartPoint=G;
     opt.Robust='bisquare';
 %         opt.Lower=[0 0 -inf 0 0 -inf 0];
@@ -637,7 +644,7 @@ if length(X)>9 && FitFlags.lorentz_asym_double
     % Amlitudes
     A1 = (max(Y)-min(Y));   
 %     A2 = A1/10;A2 = .02;
-A2 = 0.01;
+A2 = 0.005;
         
     % Center
     [~,imax]=max(Y);
@@ -645,8 +652,8 @@ A2 = 0.01;
 %     x2 = x1;
 %     x2=0;
     
-    x1 = -130;
-    x2 = -80;
+    x1 = -0;
+    x2 = 32;
     
     % Asymmetry
     a1 = .05;
@@ -726,7 +733,7 @@ if length(X)>4 && FitFlags.gauss_single
     A=bg-Ymin;
     xC=X(ind);
 
-    G=[A 10 0 bg];
+    G=[A 10 -7.5 bg];
     opt.StartPoint=G;
     opt.Robust='bisquare';
 %         opt.Lower=[0 0 -inf 0 0 -inf 0];

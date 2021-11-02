@@ -63,7 +63,9 @@ y_Lbl{29}     = 'N7s/(N7s+N9s)';
 p_inds=[];
 
 % Excitations to 7
-p_inds = [01,02,05,08,11,15,18,19,07,25];
+% p_inds = [01,02,05,08,11,15,18,19,07,25];
+p_inds = [05];
+
 
 
 % Excitations to 9
@@ -86,7 +88,7 @@ p_inds = [01,02,05,08,11,15,18,19,07,25];
 
 % RF spec
 % p_inds = [03,04,26,27,28,29];
-% p_inds = [01,02];
+% p_inds = [01,02,03,04];
 
 
 %% Fit Flags
@@ -97,7 +99,7 @@ FitFlags.T2exp=0;
 FitFlags.Rabi_oscillation = 0;
 
 FitFlags.gauss_single=0;
-FitFlags.gauss_4=0;
+FitFlags.gauss_4=1;
 FitFlags.gauss_neg_double=0;
 FitFlags.gauss_neg_single=0;
 FitFlags.gauss_double = 0;
@@ -141,22 +143,17 @@ if doCustomX
 %     mF2 = -5/2;
 % 
 
-
-
-%     B = 198+.11;
-
-
-    Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
-    Bshim = src_data.Params(1).HF_zshim_Initial_Lattice*2.35;
-    Boff  = 0.11;
-    B = Bfb + Bshim + Boff;
-
-%     Bfb   = src_data.Params(1).HF_FeshValue_Spectroscopy;
-%     Bshim =0;
+%     Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
+%     Bshim = src_data.Params(1).HF_zshim_Initial_Lattice*2.35;
 %     Boff  = 0.11;
 %     B = Bfb + Bshim + Boff;
 
-    B = 199.9 + 0 + 0.11; 
+    Bfb   = src_data.Params(1).HF_FeshValue_Spectroscopy;
+    Bshim =0;
+    Boff  = 0.11;
+    B = Bfb + Bshim + Boff;
+
+%     B = 199.9 + 0 + 0.11; 
     
     % Transition Energy
     x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 

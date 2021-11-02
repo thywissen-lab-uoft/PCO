@@ -66,9 +66,9 @@ end
 
 % pco_xVar='Raman_AOM3_freq';
 % pco_xVar='Pulse_Time';
-%  pco_xVar='rf_freq_HF';
+pco_xVar='rf_freq_HF';
+%  pco_xVar='ExecutionDate';
 
-pco_xVar='ExecutionDate';
 % pco_xVar = 'rf_tof_srs_power';
 % pco_xVar = 'rf_tof_freq';
 
@@ -126,11 +126,11 @@ doBEC         = 0;      % Enable BEC analysis
 doErfFit      = 0;    
 
 % Band Map Fit
-doBMFit       = 0;
-doCustom_BM   = 0;    
+doBMFit       = 1;
+doCustom_BM   = 1;    
 
 % Fermi
-doFermiFitLong = 1;     % Enable Fermi Fit for XDT TOF
+doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
 
 % Custom Box counts
 doCustom       =  0;          % Custom Box Count
@@ -248,6 +248,16 @@ end
 % Sort it
 [~, inds]=sort(x);
 atomdata=atomdata(inds);
+
+%% Variable Number
+rpt_opts=struct;
+rpt_opts.xUnit=pco_unit;
+rpt_opts.PixelSize = PixelSize;
+rpt_opts.FigLabel = FigLabel;
+
+[hF_var_counts]=showRepeats(atomdata,pco_xVar,rpt_opts);
+if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
+
 
 %% Analysis ROI
 % Analysis ROI is an Nx4 matrix of [X1 X2 Y1 Y2] which specifies a region

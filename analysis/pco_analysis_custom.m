@@ -668,7 +668,7 @@ end
         A=bg-Ymin;
         xC=X(ind);
         % Assign guess
-        G=[A 10 -3 A/5 10 15 bg];
+        G=[A 10 -3 A/5 10 30 bg];
         opt.StartPoint=G;
         opt.Robust='bisquare';
 %         opt.Lower=[0 0 -inf 0 0 -inf 0];
