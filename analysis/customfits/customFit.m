@@ -65,6 +65,41 @@ ylabel(opts.Name)
 
 resizeFig(hF,t,[ax]);
 
+%% New Gauss
+
+if FitFlags.NGaussPeak
+    gauss_opts = struct;
+    
+    % Center guesses
+    gauss_opts.Guess_Xc = [-17.5 -2.5 12.5 27.5];
+    
+    % Guess the sigmas (one for all, or give one for each)
+    gauss_opts.Guess_Sigma = 2;
+    
+    % Sign of peaks
+    gauss_opts.Sign = 'auto';   % Automatically detect
+%     gauss_opts.Sign = 'pos';  % Positive peaks
+%     gauss_opts.Sign = 'neg';  % Negative peaks
+
+    % Perform the fit    
+    [fout,output,str]=customGaussPeak(X,Y,gauss_opts);    
+    
+    % Plot the fit
+    tt=linspace(min(X),max(X),1000);
+    if ~isempty(fout)
+        pF=plot(tt,feval(fout,tt),'r-','linewidth',2);
+        
+                % Plot Legend
+    %     text(.01,.98,str,'units','normalized','verticalalignment','top',...
+    %         'interpreter','latex');
+
+        % Plot Legend
+        legend(pF,str,'location','best','fontsize',8,...
+            'interpreter','latex'); 
+    end
+
+end
+
 %% Fit the data
 % fouts ={};
 

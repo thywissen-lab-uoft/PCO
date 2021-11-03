@@ -63,8 +63,8 @@ y_Lbl{29}     = 'N7s/(N7s+N9s)';
 p_inds=[];
 
 % Excitations to 7
-% p_inds = [01,02,05,08,11,15,18,19,07,25];
-p_inds = [05];
+p_inds = [01,02,05,08,11,15,18,19,07,25];
+% p_inds = [05];
 
 
 
@@ -97,9 +97,10 @@ FitFlags = struct;
 
 FitFlags.T2exp=0;
 FitFlags.Rabi_oscillation = 0;
+FitFlags.NGaussPeak=1;
 
 FitFlags.gauss_single=0;
-FitFlags.gauss_4=1;
+FitFlags.gauss_4=0;
 FitFlags.gauss_neg_double=0;
 FitFlags.gauss_neg_single=0;
 FitFlags.gauss_double = 0;
