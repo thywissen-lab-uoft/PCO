@@ -125,11 +125,9 @@ end
 fitopt = fitoptions(myfit);
 fitopt.StartPoint = StartPoint;    
 
-if length(X) > L
-    
-    
-
-    [fout,gof,output] = fit(X,Y,myfit,fitopt)
+if length(X) > L      
+    [fout,gof,output] = fit(X,Y,myfit,fitopt);
+    disp(fout);
 
     str = ['$(A_i,f_i,\sigma_i)$'];
 
@@ -140,7 +138,7 @@ if length(X) > L
        str = [str newline '$(' num2str(round(fout.(As),2)) ',' num2str(round(fout.(Cs),2)) ',' num2str(round(fout.(Ss),2)) ')$'];
     end
 else
-    fout=[]
+    fout=[];
     gof=[];
     str=[];
     warning('insufficient number of data point to fit');
