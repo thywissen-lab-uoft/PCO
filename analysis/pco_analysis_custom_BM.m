@@ -55,6 +55,10 @@ y_Lbl{28}     = 'N9s/(N7s+N9s)';
 y_Lbl{29}     = 'N7s/(N7s+N9s)';
 
 
+%%%%%%%%%% N7/N9
+y_Lbl{30}     = 'N7/N9';
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%% Choose what to plot %%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -63,7 +67,7 @@ y_Lbl{29}     = 'N7s/(N7s+N9s)';
 p_inds=[];
 
 % Excitations to 7
-p_inds = [01,02,05,08,11,15,18,19,07,25];
+p_inds = [01,02,05,08,15,18,19,07,30];
 % p_inds = [05];
 
 
@@ -97,7 +101,7 @@ FitFlags = struct;
 
 FitFlags.T2exp=0;
 FitFlags.Rabi_oscillation = 0;
-FitFlags.NGaussPeak=1;
+FitFlags.NGaussPeak=0;
 
 FitFlags.gauss_single=0;
 FitFlags.gauss_4=0;
@@ -357,6 +361,10 @@ Y(28).Y          = N9s./(N7s+N9s);
 Y(29).YName      = y_Lbl{29};
 Y(29).FigName    = 'bm_custom_N7s_rel_s';
 Y(29).Y          = N7s./(N7s+N9s);
+
+Y(30).YName      = y_Lbl{30};
+Y(30).FigName    = 'bm_custom_N7N9_ratio';
+Y(30).Y          = N7./N9;
 
 
 % Assign to output
