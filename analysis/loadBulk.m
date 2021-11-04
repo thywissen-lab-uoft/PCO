@@ -41,6 +41,7 @@ clear data
 clear dirNames
 clear runNames
 dirDates=zeros(1,4);
+data = struct;
 for kk=1:size(runs,1)
     % Construct strings for year, month, day, and run
     yStr = num2str(runs(kk,1));
@@ -83,10 +84,11 @@ for kk=1:size(runs,1)
                 disp(' loaded');
                 data_temp = load(dataFile);
                 fnames=fieldnames(data_temp);
-                fname = fnames{1};
                 try
-                    data(kk)=data_temp.(file_name);
-                catch ME
+                    for n=1:length(fnames)
+                        data(kk).(fnames{n})=data_temp.(fnames{n});
+                    end
+                catch ME                    
                     warning(ME.message); 
                 end
                 dirNames{kk} = myRuns{nn};
@@ -99,5 +101,6 @@ for kk=1:size(runs,1)
        end        
     end 
 end
+
 end
 

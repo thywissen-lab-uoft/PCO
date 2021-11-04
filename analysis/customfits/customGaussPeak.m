@@ -7,7 +7,6 @@ if nargin==2
    opts.Sign = 'auto';
 %    opts.Sign = 'pos';
 %    opts.Sign = 'neg';
-
 end
 
 xC = opts.Guess_Xc;
@@ -123,7 +122,11 @@ end
 %% Perform the Fit
 
 fitopt = fitoptions(myfit);
-fitopt.StartPoint = StartPoint;    
+fitopt.StartPoint = StartPoint;  
+
+if isfield(opts,'Upper')
+   fitopt.Upper = opts.Upper; 
+end
 
 if length(X) > L      
     [fout,gof,output] = fit(X,Y,myfit,fitopt);
