@@ -71,7 +71,7 @@ if FitFlags.NGaussPeak
     gauss_opts = struct;
     
     % Center guesses
-    gauss_opts.Guess_Xc = [-30 -2.5 12.5];
+    gauss_opts.Guess_Xc = [-25 -2];
     
     % Guess the sigmas (one for all, or give one for each)
     gauss_opts.Guess_Sigma = 2;
