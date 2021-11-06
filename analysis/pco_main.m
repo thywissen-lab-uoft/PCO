@@ -133,8 +133,9 @@ doCustom       =  0;          % Custom Box Count
 doRabiAbsolute = 0;
 doRabiContrast = 0;
 
-% Wavemeter
-doWavemeter   = 1;
+% Raman Common Mode Detuning
+doWavemeter    = 1;
+doCavity       = 1;
 
 %% GDrive Settings
 GDrive_root = 'G:\My Drive\Lattice Shared\LabData';
@@ -535,18 +536,68 @@ if doProbeFit
    if doSave;saveFigure(hF_probe,'probe_details',saveOpts);end
 end
 
-%% Wavemeter
+%% Raman Laser Common Mode Detuning
 
 if doWavemeter
-    waveOpts = struct;
-    waveOpts.FigLabel = FigLabel;
-    
-    P=[atomdata.Params];
-    t1 = min([P.ExecutionDate]);
-    t2 = max([P.ExecutionDate]);    
-    [hF_wave]=plotWavemeter(t1,t2,waveOpts);
-   if doSave;saveFigure(hF_wave,'wavemeter',saveOpts);end
+    % Get the location of the wavemeter repository (can specify manuually);
+    wavedir = 'Y:\LabJack\Logging\WA-1000';
+    addpath(wavedir);
 end
+
+if doCavity
+    % Get the location of the labjack repository (can specify manuually);
+    userProfile = getenv('USERPROFILE');
+    cavitydir = sprintf('%s\\Documents\\GitHub\\labjackcavitylock',userProfile);
+    addpath(cavitydir);
+end   
+
+
+if doWavemeter && ~doCavity
+    wave_opts = struct;
+    wave_opts.FigLabel = FigLabel;
+    wave_opts.dt = 0;
+    wave_opts.doPlot = 1;
+    P = [atomdata.Params];
+    t = [P.ExecutionDate];t1 = min(t);t2 = max(t);    
+    [hF_wave,wave_data] = wavemeter_plot(t1,t2,wave_opts);
+    if doSave;saveFigure(hF_wave,'wavemeter',saveOpts);end
+end
+
+if ~doWavemeter && doCavity
+    cavity_opts = struct;
+    cavity_opts.FigLabel = FigLabel;
+    cavity_opts.dt = .2;
+    cavity_opts.doPlot = 1;
+    P = [atomdata.Params];
+    t = [P.ExecutionDate];t1 = min(t);t2 = max(t);    
+    [hF_cavity,cavity_data] = labjack_cavity_plot(t1,t2,cavity_opts);
+    
+    if doSave;saveFigure(hF_cavity,'cavity',saveOpts);end
+
+end
+
+if doWavemeter && doCavity
+    wave_cavity_opts = struct;
+    wave_cavity_opts.FigLabel = FigLabel;
+    wave_cavity_opts.dt = 0;
+    wave_cavity_opts.doPlot = 0; 
+    P = [atomdata.Params];
+    t = [P.ExecutionDate];t1 = min(t);t2 = max(t);
+    
+    if t1 == t2
+       t1 = t2 - 1/(24*60); 
+    end
+    
+    wave_cavity_opts.tLim = [t1 t2];
+
+    [~,wave_data] = wavemeter_plot(t1,t2,wave_cavity_opts);
+    [~,cavity_data] = labjack_cavity_plot(t1,t2,wave_cavity_opts);
+    
+    hF_wave_cavity = wave_cavity_plot(wave_data,cavity_data,wave_cavity_opts);
+    if doSave;saveFigure(hF_wave_cavity,'wavemeter_cavity',saveOpts);end
+
+end
+    
 
 %% Box Count
 % This section of code computes the box counts on all your data and ROIs.
