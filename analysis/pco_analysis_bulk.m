@@ -23,7 +23,8 @@ runs =[
     2021 11 03 05;
      2021 11 03 08;
      2021 11 03 10;
-          2021 11 03 12;
+%      2021 11 03 12;
+     2021 11 04 02;
 
 ];
 
@@ -44,7 +45,7 @@ runs =[
 Guess_Xc={
     [-2],
     [-2],
-    [-2.5,7.5],
+    [-2.5,10],
     [-3,10,45],
     [-4,14.1],
     [-3,14.7],
@@ -53,16 +54,16 @@ Guess_Xc={
     [-2.9,13.2,32.6],
     [-3,75,39.3],
     [-3,15,39],
-    [-17.5,-2.5,12.5,32.5],
-    [-17.5,-2.5,10,27.5],
-    [-22.5,-2.5,17.5],
+    [-2.5,-17.5,12.5,32.5],
+    [-2.5,-17.5,10,27.5],
+    [-2.5,-22.5,17.5],
     [-2.5,10],
-    [-32.5,-2.5,15,35],
-    [-45,-2.5,7.5],
+    [-2.5,-32.5,15,35],
+    [-2.5,-45,7.5],
     [-2.5,7.5],
     [-2.5 -12.5],
     [-2.5 -12],
-    [-2.5 -45]};
+    [-2.5 -25]};
 
 
 %% Plot
@@ -150,89 +151,106 @@ for nn=1:length(data)
     
     gauss_opts.Sign = 'pos';   % Automatically detect
     gauss_opts.Guess_Xc = Guess_Xc{nn};
+
+    p = inf(1,1+length(Guess_Xc{nn})*3);
+    n = -p;
     
+%     gauss_opts.Upper = p
+%     gauss_opts.Lower = n
+    
+%     gauss_opts.Lower(4) = 1;       
+%     gauss_opts.Lower(7) = 1; 
+%     gauss_opts.Lower(10) = 1; 
+    
+%     gauss_opts.Upper(2) = range(Y)*1.1;       
+
     if nn==11
        gauss_opts.Upper = inf(1,10);
        gauss_opts.Upper(2) = .25;       
     end
     
-    % Perform the fit    
-    [fout,output,str]=customGaussPeak(X,Y,gauss_opts);   
     
-    
-     % Plot the fit
-    tt=linspace(min(X),max(X),1000);
-    pF=plot(tt,feval(fout,tt),'k-','linewidth',1);
+    if length(Guess_Xc{nn})>0
+        % Perform the fit    
+        if nn<=17
+         [fout,output,str]=customGaussPeak(X,Y,gauss_opts);   
+        else    
+        [fout,output,str]=customLorentzPeak(X,Y,gauss_opts);   
+        end
 
-    text(.98,.98,str,'units','normalized','verticalalignment','cap',...
-        'horizontalalignment','right','interpreter','latex','fontsize',8);   
-    fouts{nn}=fout;    
-    
-    
-    % Process Peaks and magnetic field
-    nF = length(Guess_Xc{nn});    
-    fs = zeros(nF,1);
-    ss = zeros(nF,1);
-    for ll=1:nF
-        fs(ll) = fout.(['x' num2str(ll)]);
-        ss(ll) = fout.(['s' num2str(ll)]);
-    end   
-    
-    % Get the magnetic field
-    p = data(nn).Source.Params(1);
-    Bfb   = data(nn).Source.Params(1).HF_FeshValue_Initial_Lattice;
-    if isfield(p,'HF_FeshValue_Spectroscopy')
-        Bfb   = data(nn).Source.Params(1).HF_FeshValue_Spectroscopy;
+         % Plot the fit
+        tt=linspace(min(X),max(X),1000);
+        pF=plot(tt,feval(fout,tt),'k-','linewidth',1);
+
+        text(.98,.98,str,'units','normalized','verticalalignment','cap',...
+            'horizontalalignment','right','interpreter','latex','fontsize',8);   
+        fouts{nn}=fout;    
+
+
+        % Process Peaks and magnetic field
+        nF = length(Guess_Xc{nn});    
+        fs = zeros(nF,1);
+        ss = zeros(nF,1);
+        for ll=1:nF
+            fs(ll) = fout.(['x' num2str(ll)]);
+            ss(ll) = fout.(['s' num2str(ll)]);
+        end   
+
+        % Get the magnetic field
+        p = data(nn).Source.Params(1);
+        Bfb   = data(nn).Source.Params(1).HF_FeshValue_Initial_Lattice;
+        if isfield(p,'HF_FeshValue_Spectroscopy')
+            Bfb   = data(nn).Source.Params(1).HF_FeshValue_Spectroscopy;
+        end
+
+        % Calculate the theoretical singlon feature.
+        Boff  = 0.11;
+        B = Bfb + Boff;    
+
+        % Choose the mf States
+        mF1 = -7/2;
+        mF2 = -9/2;
+
+        % What the written rf freq is
+        x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34;
+        x0 = data(nn).x0; % in MHz    
+
+
+        % Find frequency closest to zero, that's the singlon feature
+        [~,i0] = min(abs(fs--3.5));
+        f0 = fs(i0);    
+
+        % Convert rf to B
+        B = rf2B(1e3*f0+x0*1e6,-9/2,-7/2);
+
+        % Slope dB/df in G/kHz
+        dBdf = rf2B(1e6*x0+0.5E3,-9/2,-7/2)-rf2B(1e6*x0-0.5E3,-9/2,-7/2);
+
+        % Error given by sigma of gaussian
+         s0 = ss(i0);
+         B_e = s0*dBdf;    
+    %      B_e = sqrt(2*log(2))*
+
+        % Find all df
+        df = fs - f0;
+        df_e = sqrt(s0.^2+ss.^2);
+
+        % Remove df = 0
+        i0 = [df ==0];
+        df(i0)=[];
+        df_e(i0)=[];
+
+        B_e  = B_e*ones(length(df),1);
+        Bv  = B*ones(length(df),1);
+        ccv = repmat(myco,[length(df) 1]);
+        dfv = df;   
+
+        B_all = [B_all; Bv];
+        B_err = [B_err; B_e];
+        df_all = [df_all;dfv];    
+        df_err = [df_err;df_e];    
+        cc_all = [cc_all;ccv];
     end
-    
-    % Calculate the theoretical singlon feature.
-    Boff  = 0.11;
-    B = Bfb + Boff;    
-
-    % Choose the mf States
-    mF1 = -7/2;
-    mF2 = -9/2;
-
-    % What the written rf freq is
-    x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34;
-    x0 = data(nn).x0; % in MHz    
-    
-    
-    % Find frequency closest to zero, that's the singlon feature
-    [~,i0] = min(abs(fs--3.5));
-    f0 = fs(i0);    
-        
-    % Convert rf to B
-    B = rf2B(1e3*f0+x0*1e6,-9/2,-7/2);
-    
-    % Slope dB/df in G/kHz
-    dBdf = rf2B(1e6*x0+0.5E3,-9/2,-7/2)-rf2B(1e6*x0-0.5E3,-9/2,-7/2);
-    
-    % Error given by sigma of gaussian
-     s0 = ss(i0);
-     B_e = s0*dBdf;    
-%      B_e = sqrt(2*log(2))*
-    
-    % Find all df
-    df = fs - f0;
-    df_e = sqrt(s0.^2+ss.^2);
-    
-    % Remove df = 0
-    i0 = [df ==0];
-    df(i0)=[];
-    df_e(i0)=[];
-    
-    B_e  = B_e*ones(length(df),1);
-    Bv  = B*ones(length(df),1);
-    ccv = repmat(myco,[length(df) 1]);
-    dfv = df;   
-
-    B_all = [B_all; Bv];
-    B_err = [B_err; B_e];
-    df_all = [df_all;dfv];    
-    df_err = [df_err;df_e];    
-    cc_all = [cc_all;ccv];
-    
     lbl = [num2str(runs(nn,2)) '/' num2str(runs(nn,3)) ' ' dirNames{nn}(1:2)];
     
     p = data(nn).Source.Params(1);
@@ -265,10 +283,10 @@ fitopt2.StartPoint = [92 5 200.5 0];
 fitopt2.Robust = 'bisquare';
 
 fitopt2.Upper = inf(1,length(coeffnames(myfit)));
-% fitopt2.Upper(1) = 93;
+%   fitopt2.Upper(1) = 93;
 
 fitopt2.Lower = -inf(1,length(coeffnames(myfit)));
-% fitopt2.Lower(1) = 91;
+%   fitopt2.Lower(1) = 91;
 
 fout2 = fit(Bn,dfn,myfit,fitopt2)
 
