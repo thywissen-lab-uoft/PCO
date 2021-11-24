@@ -1,4 +1,4 @@
-function [fout,gof,str] = customGaussPeak(X,Y,opts)
+function [fout,gof,str,A] = customGaussPeak(X,Y,opts)
 
 if nargin==2
    opts = struct;
@@ -146,5 +146,18 @@ else
     str=[];
     warning('insufficient number of data point to fit');
 end
-    
+
+%% Compute Spectral Intensities
+switch nPeaks  
+    case 1
+        A = sqrt(2*pi)*fout.s1*fout.A1;      
+    case 2
+        A = sqrt(2*pi)*[fout.s1*fout.A1; fout.s1*fout.A2];
+    case 3
+        A = sqrt(2*pi)*[fout.s1*fout.A1; fout.s1*fout.A2; fout.s3*fout.A3];    
+    case 4
+        A = sqrt(2*pi)*[fout.s1*fout.A1; fout.s1*fout.A2; fout.s3*fout.A3; fout.s4*fout.A4];
+
+end
+
 end

@@ -1,4 +1,4 @@
-function [fout,gof,str] = customLorentzPeak(X,Y,opts)
+function [fout,gof,str,A] = customLorentzPeak(X,Y,opts)
 
 if nargin==2
    opts = struct;
@@ -161,6 +161,19 @@ else
     gof=[];
     str=[];
     warning('insufficient number of data point to fit');
+end
+
+%% Compute Spectral Intensities
+switch nPeaks  
+    case 1
+        A = pi*fout.s1*fout.A1;      
+    case 2
+        A = pi*[fout.s1*fout.A1; fout.s1*fout.A2];
+    case 3
+        A = pi*[fout.s1*fout.A1; fout.s1*fout.A2; fout.s3*fout.A3];    
+    case 4
+        A = pi*[fout.s1*fout.A1; fout.s1*fout.A2; fout.s3*fout.A3; fout.s4*fout.A4];
+
 end
     
 end

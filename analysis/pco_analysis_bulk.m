@@ -1,8 +1,36 @@
-%% Load Data
-file_name = 'custom_data_bm.mat';
+%% 300Er
+% 300Er data
 
-% p-wave spectroscopy
-runs =[
+runs300=[2021 11 11 09;
+    2021 11 11 10;
+    2021 11 11 11;
+    2021 11 11 14;
+    2021 11 11 15;
+    2021 11 11 17
+    ];
+
+% Note when selecting peak freuqencies, LIST THE SINGLON PEAK FIRST
+Guess_Xc_300={
+    [-2.5, -27, 30],
+    [-2.5, -27, 30],
+    [-2.5, -35, 22.5],
+    [-2.5, -20, 38],
+    [-2.5, -35, 22.5 7.5],
+    [-2.5, -25, 35 7.5]
+    };
+
+fit_type300 = {
+    'lorentz',
+    'lorentz',
+    'lorentz',
+    'lorentz',
+    'lorentz',
+    'lorentz'
+    };
+out_name300 = 'data_300Er.mat';
+
+%% 200 Er
+runs200 =[
     2021 10 24  9; 
     2021 10 24 10;
     2021 10 24 11;
@@ -21,28 +49,13 @@ runs =[
     2021 11 03 03;
     2021 11 03 04;
     2021 11 03 05;
-     2021 11 03 08;
-     2021 11 03 10;
-%      2021 11 03 12;
-     2021 11 04 02;
-
+    2021 11 03 08;
+    2021 11 03 10;
+    2021 11 04 02;  
 ];
 
-% p-wave spectroscopy
-% runs =[
-%     2021 10 23  9; 
-%     2021 10 23  10; 
-%     2021 10 24  1; 
-%     2021 10 13  9; 
-%     2021 10 13  10; 
-%     2021 10 13  11; 
-%     2021 10 13  12; 
-% ];
-[all_data,dirNames,dirDates] = loadBulk(runs,file_name);
-
-%% Some Guesses
-
-Guess_Xc={
+%  LIST THE SINGLON PEAK FIRST
+Guess_Xc_200={
     [-2],
     [-2],
     [-2.5,10],
@@ -63,54 +76,152 @@ Guess_Xc={
     [-2.5,7.5],
     [-2.5 -12.5],
     [-2.5 -12],
-    [-2.5 -25]};
+    [-2.5 -25]}; 
 
+fit_type200 = {
+    'gauss',
+    'gauss',
+    'gauss',
+    'gauss',
+    'gauss',
+    'gauss',
+    'gauss',
+    'gauss',
+    'gauss',
+    'gauss',
+    'gauss',
+    'gauss',
+    'gauss',
+    'gauss',
+    'gauss',
+    'gauss',
+    'gauss',
+    'lorentz',
+    'lorentz',
+    'lorentz',
+    'lorentz'};
 
-%% Plot
-% THIS IS CRAYPPY AND CORA WILL UPDATE IT BECAUSE THIS IS JUST TEMPORARILY,
-% PLEASE DONT THINK THISIS PERMANENT OKAY THX LOLOLOLOL
+out_name200 = 'data_200Er.mat';
+%% 100Er
 
+runs100=[
+    2021 10 26 12;
+    2021 10 26 13;
+    2021 10 26 14;
+    2021 10 26 15;
+    2021 11 10 04;
+    2021 11 10 05;
+    2021 11 10 03;
+    2021 11 10 02;
+    2021 11 11 06;
+    2021 11 11 07;
+    2021 11 11 08];
 
-nPlotMax = 6;
+% LIST THE SINGLON PEAK FIRST
+Guess_Xc_100={
+    [-2, 20],
+    [-2, 15],
+    [-2, 7],
+    [-2, 25],
+    [-2, -15, 7],
+    [-2, -15, 10],
+    [-2 10],
+    [-2 32 -27.5 -12.5],
+    [-2 15],
+    [-2 -11];
+    [-5 37]};
 
-npeaks = [1 1 2  2 2  2 2 2 3 3 3 3 3 3];
+fit_type100 = {
+    'lorentz',
+    'lorentz',
+    'lorentz',
+    'lorentz',
+    'lorentz',
+    'lorentz',
+    'gauss',
+    'lorentz',
+    'lorentz',
+    'gauss',
+    'gauss'};
+
+out_name100 = 'data_100Er.mat';
+
+%% Select
+runs = runs300;
+Guess_Xc = Guess_Xc_300;
+out_name = out_name300;
+fit_type = fit_type300;
+data_label = '300Er';
+
+% 
+%  runs = runs200;
+%  Guess_Xc = Guess_Xc_200;
+%  out_name = out_name200;
+%  fit_type = fit_type200;
+% data_label = '200Er';
+
+%  runs = runs100;
+%  Guess_Xc = Guess_Xc_100;
+%  out_name = out_name100;
+%  fit_type = fit_type100;
+% data_label = '100Er';
+
+%% Load the data
+
+file_name = 'custom_data_bm.mat';
+[all_data,dirNames,dirDates] = loadBulk(runs,file_name);
+data = [all_data.custom_data_bm];
+
+%% Plot and Analyze
+
+% Observable to analyzes
 Yname = '(N7-N9)/(N7+N9)';
 % Yname = '(N7+N9)';
 % Yname = 'N7';
 % Yname = 'N9';
 
+% Output data objects
+data_out = struct;
 
+% Magnetic field and error
+all_B=[];
+all_B_err = [];
 
-B_all=[];
-df_all=[];
-cc_all=[];
+% Frequency center and error
+all_f_c = [];
+all_f_c_err = [];
 
-B_err = [];
-df_err = [];
+% Frequency shift and error
+all_df=[];
+all_df_err = [];
 
-data = [all_data.custom_data_bm];
+% Area and amplitude
+all_area=[];
+all_amplitude=[];
+
+% Fit objects output
+fouts={};
 
 cmaps = hsv(length(data));
-% cmaps = repmat([.5 .5 .5],[length(data) 1]);
+nPlotMax = 6;
 
-for nn=1:length(data)
-    % Grab the data
-    
+clear hFs
+j=1;
+for nn=1:length(data)   
+    myco = cmaps(nn,:);
+
     % X Data
     X = data(nn).X;
-        
+    xstr = data(nn).XStr;
+
     % Ydata
     ilist = strfind(data(nn).YLabel,Yname);
     Index = find(not(cellfun('isempty',ilist)));
     Y = data(nn).Y;
-    Y = Y(Index).Y;
-    
-    % X data
-    xstr = data(nn).XStr;
+    Y = Y(Index).Y;    
     ystr = Yname;    
     
-    % Find Unique Value
-    
+    % Find Unique Value    
     [ux,ia,ib]=unique(X);    
     Yu=zeros(length(ux),2);    
     for kk=1:length(ux)
@@ -119,24 +230,25 @@ for nn=1:length(data)
         Yu(kk,2)=std(Y(inds));       
     end 
     
+    % Make a new figure if necessary
     if ~mod(nn-1,nPlotMax)
         % Plot Data    
-        hF=figure(100+floor(nn/nPlotMax));
+        hFs(j)=figure(100+floor(nn/nPlotMax));
         clf
-        hF.Color='w';
-        hF.Position=[100 50 800 400];
+        hFs(j).Color='w';
+        hFs(j).Position=[100 50 800 400];
+        hFs(j).Name = [data_label '_' num2str(j)];
         co=get(gca,'colororder');
-        fouts={};
         t=uicontrol('style','text','string',Yname,'units','pixels',...
             'backgroundcolor','w','horizontalalignment','left','fontsize',10);
-        t.Position(3:4)=[hF.Position(3) t.Extent(4)];
-        t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
-        resizeFig(hF,t);
-    end
-    % Make Axis
+        t.Position(3:4)=[hFs(j).Position(3) t.Extent(4)];
+        t.Position(1:2)=[5 hFs(j).Position(4)-t.Position(4)];
+        resizeFig(hFs(j),t);
+        j=j+1;
+    end    
+    
+    % Make Axis and Plot Data
     subplot(3,2,mod(nn-1,nPlotMax)+1);
-    myco = co(mod(nn-1,7)+1,:);
-    myco = cmaps(nn,:);
     errorbar(ux,Yu(:,1),Yu(:,2),'o','markerfacecolor',myco,...
         'markeredgecolor',myco*.5,'color',myco,...
         'linewidth',1,'markersize',6);    
@@ -144,113 +256,155 @@ for nn=1:length(data)
     set(gca,'xgrid','on','ygrid','on','fontname','times',...
         'fontsize',8);
     xlabel(xstr);
-    ylabel(ystr);
+    ylabel(ystr);    
     
-    gauss_opts = struct;  
-    gauss_opts.Guess_Sigma = 3;    
-    
-    gauss_opts.Sign = 'pos';   % Automatically detect
-    gauss_opts.Guess_Xc = Guess_Xc{nn};
+    % Prepare fit guesses
 
-    p = inf(1,1+length(Guess_Xc{nn})*3);
-    n = -p;
-    
-%     gauss_opts.Upper = p
-%     gauss_opts.Lower = n
-    
-%     gauss_opts.Lower(4) = 1;       
-%     gauss_opts.Lower(7) = 1; 
-%     gauss_opts.Lower(10) = 1; 
-    
-%     gauss_opts.Upper(2) = range(Y)*1.1;       
+%     p = inf(1,1+length(Guess_Xc{nn})*3);
+%     n = -p;
+  
+    gauss_opts.Upper=[];
 
-    if nn==11
-       gauss_opts.Upper = inf(1,10);
-       gauss_opts.Upper(2) = .25;       
-    end
-    
-    
-    if length(Guess_Xc{nn})>0
-        % Perform the fit    
-        if nn<=17
-         [fout,output,str]=customGaussPeak(X,Y,gauss_opts);   
-        else    
-        [fout,output,str]=customLorentzPeak(X,Y,gauss_opts);   
-        end
-
-         % Plot the fit
-        tt=linspace(min(X),max(X),1000);
-        pF=plot(tt,feval(fout,tt),'k-','linewidth',1);
-
-        text(.98,.98,str,'units','normalized','verticalalignment','cap',...
-            'horizontalalignment','right','interpreter','latex','fontsize',8);   
-        fouts{nn}=fout;    
-
-
-        % Process Peaks and magnetic field
+    % Perform the fit
+    if length(Guess_Xc{nn})>0 
         nF = length(Guess_Xc{nn});    
-        fs = zeros(nF,1);
-        ss = zeros(nF,1);
-        for ll=1:nF
-            fs(ll) = fout.(['x' num2str(ll)]);
-            ss(ll) = fout.(['s' num2str(ll)]);
-        end   
 
         % Get the magnetic field
-        p = data(nn).Source.Params(1);
-        Bfb   = data(nn).Source.Params(1).HF_FeshValue_Initial_Lattice;
-        if isfield(p,'HF_FeshValue_Spectroscopy')
-            Bfb   = data(nn).Source.Params(1).HF_FeshValue_Spectroscopy;
+%         p = data(nn).Source.Params(1);
+%         Bfb   = data(nn).Source.Params(1).HF_FeshValue_Initial_Lattice;
+%         if isfield(p,'HF_FeshValue_Spectroscopy')
+%             Bfb   = data(nn).Source.Params(1).HF_FeshValue_Spectroscopy;
+%         end
+%         
+%         % Calculate the theoretical singlon feature.
+%         Boff  = 0.11;
+%         B = Bfb + Boff;    
+% 
+%         % Choose the mf States
+%         mF1 = -7/2; mF2 = -9/2;
+% 
+%         % What the written rf freq is
+%         x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34;
+
+        % Grab the offset frequency
+        x0 = data(nn).x0; % in MHz   
+
+        % Gaussian Fit
+        if isequal(fit_type{nn},'gauss')
+           freq_hwhm=zeros(nF,1);
+            freq_center=zeros(nF,1);
+            freq_delta=zeros(nF,1);
+            amp=zeros(nF,1);
+            A=zeros(nF,1);
+            freq_delta_err=zeros(nF,1);
+
+            gauss_opts = struct;  
+            gauss_opts.Guess_Sigma = 3;   
+            gauss_opts.Sign = 'pos';   % Automatically detect
+            gauss_opts.Guess_Xc = Guess_Xc{nn};
+            [fout,output,str,A]=customGaussPeak(X,Y,gauss_opts); 
+            fouts{nn}=fout;  
+            
+            % Calculate hwhm, frequency, ampliude, and area
+            for kk=1:nF
+                freq_hwhm(kk) = sqrt(2*log(2))*fout.(['s' num2str(kk)]);     % hwhm
+                freq_center(kk) = x0 + fout.(['x' num2str(kk)])*1e-3;          % frequency
+                freq_delta(kk)= fout.(['x' num2str(kk)]);    % Offset frequency
+                amp(kk)  = fout.(['A' num2str(kk)]);                    % amplitude
+                A(kk)    = amp(kk)*sqrt(2*pi)*fout.(['s' num2str(kk)]); % area
+                freq_delta_err(kk) = sqrt(freq_hwhm(1)^2 + freq_hwhm(kk).^2);
+            end
+            % Specify frequencies relative to the first one
+            freq_delta = freq_delta - freq_delta(1);
+            freq_delta_err(1)  = NaN;
+        end
+ 
+        % Lorentzian Fit
+        if isequal(fit_type{nn},'lorentz')
+            freq_hwhm=zeros(nF,1);
+            freq_center=zeros(nF,1);
+            freq_delta=zeros(nF,1);
+            amp=zeros(nF,1);
+            A=zeros(nF,1);
+            freq_delta_err=zeros(nF,1);
+            lorentz_opts = struct;
+            lorentz_opts.Guess_Sigma = 5;
+            lorentz_opts.Sign ='pos';
+            lorentz_opts.Guess_Xc = Guess_Xc{nn};            
+            [fout,output,str,A]=customLorentzPeak(X,Y,lorentz_opts);
+            fouts{nn}=fout;     
+            for kk=1:nF
+                freq_hwhm(kk) = fout.(['s' num2str(kk)]);               % hwhm
+                freq_center(kk) = x0 + fout.(['x' num2str(kk)])*1e-3;   % frequency
+                amp(kk)  = fout.(['A' num2str(kk)]);                    % amplitude
+                A(kk)    = amp(kk)*pi*fout.(['s' num2str(kk)]);         % area
+                freq_delta(kk)= fout.(['x' num2str(kk)]);               % Offset frequency  
+                freq_delta_err(kk) = sqrt(freq_hwhm(1)^2 + freq_hwhm(kk).^2);
+
+            end
+            % Specify frequencies relative to the first one
+            freq_delta = freq_delta - freq_delta(1);
+            freq_delta_err(1)  = NaN;
         end
 
-        % Calculate the theoretical singlon feature.
-        Boff  = 0.11;
-        B = Bfb + Boff;    
+        % Plot the fit
+        tt=linspace(min(X),max(X),1000);
+        pF=plot(tt,feval(fout,tt),'k-','linewidth',1);
+        text(.98,.98,str,'units','normalized','verticalalignment','cap',...
+            'horizontalalignment','right','interpreter','latex','fontsize',8);  
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %%%% Magnetic field and Magnetic Field Error %%%%
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Assume the singlon peak is the first peak listed
+        i0 = 1;
+        f0 = freq_center(i0);
+        % Magnetic field
+        B = rf2B(f0*1e6,-9/2,-7/2) ;
+        % dBdf
+        dBdf = rf2B(f0*1e6+0.5E3,-9/2,-7/2)-...
+            rf2B(f0*1e6-0.5E3,-9/2,-7/2);
+        % Magnetic field error
+        s0 = freq_hwhm(i0);
+        B_e = s0*dBdf;    
 
-        % Choose the mf States
-        mF1 = -7/2;
-        mF2 = -9/2;
+        % Turn magnetic field and error in vector
+        B_e  = B_e*ones(nF,1);
+        Bv  = B*ones(nF,1);
+        
+        % Remove singlon feature fom data
+        Bv(1)               = [];
+        B_e(1)              = [];
+        freq_hwhm(1)        = [];
+        freq_center(1)      = [];
+        freq_delta(1)       = [];
+        freq_delta_err(1)   = [];
+        amp(1)              = [];
+        A(1)                = [];         
+                
+        % Magnetic field and magnetic field error
+        all_B           =   [all_B; Bv];
+        all_B_err       =   [all_B_err; B_e];        
+        
+        % Frequency center and frequency center error        
+        all_f_c         =   [all_f_c;freq_center];   
+        all_f_c_err     =   [all_f_c_err;freq_hwhm];  
 
-        % What the written rf freq is
-        x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34;
-        x0 = data(nn).x0; % in MHz    
-
-
-        % Find frequency closest to zero, that's the singlon feature
-        [~,i0] = min(abs(fs--3.5));
-        f0 = fs(i0);    
-
-        % Convert rf to B
-        B = rf2B(1e3*f0+x0*1e6,-9/2,-7/2);
-
-        % Slope dB/df in G/kHz
-        dBdf = rf2B(1e6*x0+0.5E3,-9/2,-7/2)-rf2B(1e6*x0-0.5E3,-9/2,-7/2);
-
-        % Error given by sigma of gaussian
-         s0 = ss(i0);
-         B_e = s0*dBdf;    
-    %      B_e = sqrt(2*log(2))*
-
-        % Find all df
-        df = fs - f0;
-        df_e = sqrt(s0.^2+ss.^2);
-
-        % Remove df = 0
-        i0 = [df ==0];
-        df(i0)=[];
-        df_e(i0)=[];
-
-        B_e  = B_e*ones(length(df),1);
-        Bv  = B*ones(length(df),1);
-        ccv = repmat(myco,[length(df) 1]);
-        dfv = df;   
-
-        B_all = [B_all; Bv];
-        B_err = [B_err; B_e];
-        df_all = [df_all;dfv];    
-        df_err = [df_err;df_e];    
-        cc_all = [cc_all;ccv];
+        % Frequency shift and frequency shift error
+        all_df          =   [all_df;freq_delta];    
+        all_df_err      =   [all_df_err;freq_delta_err];   
+        
+        % Area and amplitude
+        all_area        =   [all_area;A];   
+        all_amplitude   =   [all_amplitude;amp];
+        
+        data_out(nn).X = X;
+        data_out(nn).Y = Y;
+        data_out(nn).XStr = Y;
+        data_out(nn).YStr = Yname;
+        data_out(nn).Fit = fout;
     end
+    
     lbl = [num2str(runs(nn,2)) '/' num2str(runs(nn,3)) ' ' dirNames{nn}(1:2)];
     
     p = data(nn).Source.Params(1);
@@ -258,124 +412,116 @@ for nn=1:length(data)
         lbl = [lbl ' ' num2str(p.HF_FeshValue_Spectroscopy) ' G'];
     else
         lbl = [lbl ' ' num2str(p.HF_FeshValue_Initial_Lattice) ' G'];
-    end        
-    
+    end  
     lbl = [lbl ' (' num2str(round(B,2)) ' G)'];
     
     title(lbl);
     
 end
 
-%% Get Negative Values and FIt
+data_process = struct;
+data_process.B = all_B;
+data_process.B_err = all_B_err;
+data_process.f_center = all_f_c;
+data_process.f_center_err = all_f_c_err;
+data_process.df = all_df;
+data_process.df_err = all_df_err;
+data_process.Area = all_area;
+data_process.Amplitude = all_amplitude;
 
-iNeg = [df_all<0];
+%% Plot the differential frequencies
 
-Bn = B_all(iNeg);
-dfn = df_all(iNeg);
-Bn_err = B_err(iNeg);
-dfn_err = df_err(iNeg);
-
-myfit = fittype('0.5*m*(x-x0) - 0.5*sqrt((m*(x-x0))^2+O^2) + b',...
-    'independent','x','coefficients',{'m','O','x0','b'});
-
-fitopt2= fitoptions(myfit);
-fitopt2.StartPoint = [92 5 200.5 0];
-fitopt2.Robust = 'bisquare';
-
-fitopt2.Upper = inf(1,length(coeffnames(myfit)));
-%   fitopt2.Upper(1) = 93;
-
-fitopt2.Lower = -inf(1,length(coeffnames(myfit)));
-%   fitopt2.Lower(1) = 91;
-
-fout2 = fit(Bn,dfn,myfit,fitopt2)
-
-%%
-
-
-hf=figure(10);
+hf1=figure(10);
 clf
-hf.Color='w';
-plot(B_all,df_all,'o','markerfacecolor',[.5 .5 .5],...
-    'markeredgecolor','k','markersize',8,'linewidth',2);
+hf1.Color='w';
+hf1.Position = [100 100 500 400];
 
-% plot(B_all,df_all,'o','markerfacecolor',[1 1 1],...
-%     'markeredgecolor','k','markersize',8,'linewidth',2);
-
-
-errorbar(B_all,df_all,df_err,df_err,B_err,B_err,'o','markerfacecolor',[.5 .5 .5],...
+errorbar(all_B,all_df,...
+    all_df_err,all_df_err,...
+    all_B_err,all_B_err,...
+    'o','markerfacecolor',[.5 .5 .5],...
     'markeredgecolor','k','color','k',...
     'linewidth',2,'markersize',8); 
 
 hold on
-% scatter(B_all,df_all,20,cc_all,'filled');
-
 xlabel('magnetic field (G)');
 ylabel('frequency shift (kHz)');
 
 ylim([-55 55]);
-xlim([199.5 200.7]);
+xlim([round(min(all_B)-0.15,1) round(max(all_B)+0.15,1)]);
 
 set(gca,'xgrid','on','ygrid','on','box','on','linewidth',1,...
     'fontsize',10);
 
-hf2 = figure(11);
+
+%% Plot the frequency shift versus amplitude
+
+hf2=figure(11);
 clf
 hf2.Color='w';
+hf2.Position = [100 100 600 600];
 
-tt=linspace(195,250,1000);
-
-b = fout2.b;
-x0 = fout2.x0;
-m = fout2.m;
-
-pB = plot([190 205],[1 1]*b,'g-');
-hold on
-pX0 = plot([1 1]*x0,[-200 200],'k-');
-pL = plot(tt,(tt-x0)*m+b,'b-');
-
-
-pF=plot(tt,feval(fout2,tt),'r-','linewidth',2);
-hold on
-plot(Bn,dfn,'o','markerfacecolor',[.5 .5 .5],...
-    'markeredgecolor','k','markersize',8,'linewidth',2);
-
-
-errorbar(Bn,dfn,dfn_err,dfn_err,Bn_err,Bn_err,'o','markerfacecolor',[.5 .5 .5],...
+subplot(311);
+errorbar(all_df,all_amplitude,...
+    0*all_amplitude,0*all_amplitude,...
+    all_df_err,all_df_err,...
+    'o','markerfacecolor',[.5 .5 .5],...
     'markeredgecolor','k','color','k',...
     'linewidth',2,'markersize',8); 
-
+hold on
+xlabel('frequency shift (kHz)');
+ylabel('amplitude (arb.)');
+xlim([-55 55]);
 set(gca,'xgrid','on','ygrid','on','box','on','linewidth',1,...
     'fontsize',10);
+yL = get(gca,'YLim');
+ylim([0 yL(2)]);
+
+subplot(312);
+errorbar(all_df,all_area,...
+    0*all_area,0*all_area,...
+    all_df_err,all_df_err,...
+    'o','markerfacecolor',[.5 .5 .5],...
+    'markeredgecolor','k','color','k',...
+    'linewidth',2,'markersize',8); 
 hold on
-ylim([-65 15]);
-xlim([199.4 201]);
-xlabel('magnetic field (G)');
-ylabel('frequency shift (kHz)');
+xlabel('frequency shift (kHz)');
+ylabel('area (arb.)');
+xlim([-55 55]);
+set(gca,'xgrid','on','ygrid','on','box','on','linewidth',1,...
+    'fontsize',10);
+yL = get(gca,'YLim');
+ylim([0 yL(2)]);
 
+subplot(313);
+errorbar(all_df,all_f_c_err,...
+    0*all_f_c_err,0*all_f_c_err,...
+    all_df_err,all_df_err,...
+    'o','markerfacecolor',[.5 .5 .5],...
+    'markeredgecolor','k','color','k',...
+    'linewidth',2,'markersize',8); 
+hold on
+xlabel('frequency shift (kHz)');
+ylabel('hwhm (khz)');
+xlim([-55 55]);
+set(gca,'xgrid','on','ygrid','on','box','on','linewidth',1,...
+    'fontsize',10);
+yL = get(gca,'YLim');
+ylim([0 yL(2)]);
 
+%% UPload data
+doUpload = 1;
 
-tStr = ['$y(x) = b+0.5 (m(x-x_0)) $' newline '$- 0.5\sqrt{(m(x-x_0))^2+\Omega^2}$'];
-text(.98,.02,tStr,'units','normalized','interpreter','latex',...
-    'horizontalalignment','right','verticalalignment','bottom','fontsize',12);
+GDrive_root = 'G:\My Drive\Lattice Shared\SharedData\Composite P-wave';
 
+if  doUpload && exist(GDrive_root,'dir')   
+    gFile = [GDrive_root filesep out_name]; 
+    save(gFile,'data_process','data_out');
+    saveas(hf1,[GDrive_root filesep data_label '_shifts.png'])
+    saveas(hf2,[GDrive_root filesep data_label '_shapes.png'])
+    
+    for jj=1:length(hFs)
+        saveas(hFs(jj),[GDrive_root filesep hFs(jj).Name '.png'])
+    end
 
-lStr_b = ['offset $(b) ~~~~~~~: (' num2str(round(b,1)) '~\mathrm{kHz})$'];
-lStr_L = ['linear $(m,x_0) ~: (' num2str(round(m,1)) '~\mathrm{kHz/G},~' ...
-    num2str(round(x0,2)) '~\mathrm{G})$'];
-
-lStr = ['$(m,\Omega) = (' num2str(round(fout2.m,0)) '~\mathrm{kHz/G}, ' ...
-    num2str(round(fout2.O,0)) '~\mathrm{kHz})$' newline ...
-    '$(x_0,b) = (' num2str(round(fout2.x0,2)) '~\mathrm{G},' num2str(round(fout2.b,1)) '~\mathrm{kHz})$'];
-lStr = ['fit $(b,m,x_0,\Omega) : $' newline ...
-    '$(' num2str(round(fout2.b,1)) '~\mathrm{kHz},' ...
-    num2str(round(fout2.m,1)) '~\mathrm{kHz}, ' ...
-    num2str(round(fout2.x0,1)) '~\mathrm{G}, ' ...
-    num2str(round(fout2.O,1)) '~\mathrm{kHz})$'];
-legend([pB pL pF],{lStr_b,lStr_L,lStr},'interpreter','latex','fontsize',10);
-
-
-
-
-
-
+end
