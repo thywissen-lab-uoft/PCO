@@ -71,7 +71,7 @@ if FitFlags.NGaussPeak
     gauss_opts = struct;
     
     % Center guesses
-    gauss_opts.Guess_Xc = [-25 -2];
+    gauss_opts.Guess_Xc = [-15 -2 10 20];
     
     % Guess the sigmas (one for all, or give one for each)
     gauss_opts.Guess_Sigma = 2;
@@ -625,13 +625,14 @@ if length(X)>4 && FitFlags.lorentz_asym_single
 
     % Center Point
     inds=[Y>.99*max(Y)];         
-    x1=mean(X(inds));    
+    x1=mean(X(inds)); 
+    x1 = -151;
 
     % Assymetry
     a1 = -0.05; % Long on right
 %         a1 = +0.05; % Long on left
 
-    opt.StartPoint=[bg a1 -130 G1 A1];  
+    opt.StartPoint=[bg a1 x1 G1 A1];  
     opt.Robust='bisquare';
 
     fout=fit(X,Y,myfit,opt)
@@ -687,8 +688,8 @@ A2 = 0.005;
 %     x2 = x1;
 %     x2=0;
     
-    x1 = -0;
-    x2 = 32;
+    x1 = -130;
+    x2 = -80;
     
     % Asymmetry
     a1 = .05;

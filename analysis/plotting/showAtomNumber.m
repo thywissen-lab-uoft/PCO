@@ -67,7 +67,7 @@ if doLorentzianFit
         inds=[Natoms(:,rr)>.8*max(Natoms(:,rr))];
         x0=mean(X(inds));       
         opt.StartPoint=[A0 G0 x0];    
-        fout_lorentz=fit(X,Natoms(:,rr),myfit,opt);
+        fout_lorentz=fit(X',Natoms(:,rr),myfit,opt);
         fouts_lorentz{rr}=fout_lorentz;
     end
 end

@@ -64,14 +64,20 @@ end
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-% % pco_xVar='Raman_AOM3_freq';
+% pco_xVar='Raman_AOM3_freq';
 % pco_xVar='Pulse_Time';
 % pco_xVar='rf_freq_HF';
 % pco_xVar = 'HF_FeshValue_Spectroscopy';
 pco_xVar='ExecutionDate';
+% pco_xVar='k_op_am';
+% pco_xVar='rb_op_am';
+% pco_xVar = 'RF1B_finalfreq';
+% pco_xVar = 'kdet_shift';
+% pco_xVar = 'k_op_det';
 
 % pco_xVar = 'rf_tof_srs_power';
 % pco_xVar = 'rf_tof_freq';
+% pco_xVar = 'rf_tof_delta_freq';
 
 % pco_xVar='HF_kdet_shift';
 %  pco_xVar = 'Evap_End_Power';
@@ -101,9 +107,11 @@ pco_overrideUnit='MHz';
 
 % Standard Analysis
 doStandard     = 1;
-doODProfile    = 1;
+doODProfile    = 0;
 
 % Saving1% Animate the Cloud
+doAnimate = 1;
+doSave = 1;
 
 % Probe Beam
 doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
@@ -134,8 +142,8 @@ doRabiAbsolute = 0;
 doRabiContrast = 0;
 
 % Raman Common Mode Detuning
-doWavemeter    = 1;
-doCavity       = 1;
+doWavemeter    = 0;
+doCavity       = 0;
 
 %% GDrive Settings
 GDrive_root = 'G:\My Drive\Lattice Shared\LabData';
@@ -266,7 +274,8 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 
 %%%%% RF 1B
-% ROI = [533 1323 230 980];   % RF1B 5 ms TOF
+% ROI = [720 1040 330 640];   % RF1B 5 ms TOF
+
 % ROI =  [700 1100 300 600];
 % ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
 
@@ -282,7 +291,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 % ROI=[649 1160 580 1024];   % XDT TOF 15 ms
 % ROI=[617 1091 258 385];   % XDT1 only TOF 5 ms
-% ROI=[830 920 320 360];    % XDT  TOF 5 ms
+% ROI=[610 1232 180 540];    % XDT  TOF 5 ms
 % ROI=[741 1014 616 858];   % XDT  TOF 15 ms HF imaging
 % ROI=[741 1014 593 858];   % XDT  TOF 20 ms HF imaging
 % ROI=[741 1014 780 1024];  % XDT  TOF 15 ms HF+SG imaging
@@ -291,7 +300,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % ROI=[810 970 740 860];   % XDT  Full TOF analysis
 % ROI = [810 970 420 580]; %XDT Rb after evap 15ms 
 
-%   ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
+  ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 
 % % 12ms tof SG from XDT #850 900 300 560;
 % ROI = [825 900 300 565;
@@ -354,12 +363,12 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % % %   ROI=[800 950 490 620;
 % % %        800 950 1520 1650];   %  band map 15 ms TOF 9box, 7 box
 
-     ROI=[800 950 490 620;
-       800 950 1540 1670];   %  band map 15 ms TOF 9box, 7 box
-   
-     ROI=[780 970 470 630;
-       780 970 1520 1690];   %  band map 15 ms TOF 9box, 7 box 
-   
+%      ROI=[800 950 490 620;
+%        800 950 1540 1670];   %  band map 15 ms TOF 9box, 7 box
+%    
+%      ROI=[780 970 470 630;
+%        780 970 1520 1690];   %  band map 15 ms TOF 9box, 7 box 
+%    
       
 %      ROI=[780 970 470 750;
 %        780 970 1520 1780];   %  band map 15 ms TOF 9box, 7 box  larger boxes
@@ -486,6 +495,11 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 if doFermiFitLong
     ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 end
+
+% % if doFermiFitLong && atomdata(1).Flags.do_stern_gerlach
+%     ROI=[800 960 700 870;
+%         800 960 870 1000];   % XDT  TOF 25 ms evaporation ZOOM
+% % end
 
 % Assign the ROI
 disp('Assigning ROI to data');
@@ -985,8 +999,10 @@ if doAnimate && doSave
      animateOpts.Order='ascend';
     
     % Color limits
-    animateOpts.CLim=[0 .3;
-        0 .3];   
+    animateOpts.CLim=[0 1;
+        0 1];   
+%     animateOpts.CLim=[0 .3;
+%         0 .3];   
 %     animateOpts.CLim=[0 .2;
 %         0 .5]; 
     

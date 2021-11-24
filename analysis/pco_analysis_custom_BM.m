@@ -72,9 +72,9 @@ p_inds = [01,02,05,08,15,18,19,07,30];
 
 
 
-% Excitations to 9
+% % Excitations to 9
 % p_inds = [06,23,08,15,16,17,25];
-% p_inds = [17];
+% p_inds = [03,08,15,16,17];
 
 
 
@@ -147,18 +147,15 @@ if doCustomX
 %     mF1 = -7/2;
 %     mF2 = -5/2;
 % 
-
+% 
 %     Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
-%     Bshim = src_data.Params(1).HF_zshim_Initial_Lattice*2.35;
-%     Boff  = 0.11;
-%     B = Bfb + Bshim + Boff;
-
     Bfb   = src_data.Params(1).HF_FeshValue_Spectroscopy;
-    Bshim =0;
+%     Bfb   = src_data.Params(1).HF_FeshValue_Final_Lattice;
+    Bshim = src_data.Params(1).HF_zshim_Initial_Lattice*2.35;
     Boff  = 0.11;
     B = Bfb + Bshim + Boff;
-
 %     B = 199.9 + 0 + 0.11; 
+
     
     % Transition Energy
     x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
@@ -194,6 +191,11 @@ if doCustomX
             xunit = 'kHz';
         case 'rf_tof_freq'
           X=custom_data_bm.X;
+          B = src_data.Params(1).HF_FeshValue_Final_Lattice + 0 + 0.11; 
+
+    
+            % Transition Energy
+            x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
             X = X - x0;   
             X = X*1e3;
             xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)'];  
