@@ -1,15 +1,101 @@
-function atomdata = analyzeProbeBeam(atomdata)
+function output = analyzeProbeBeam(atomdata,xVar,opts)
+
+if nargin == 1
+   xVar = 'ExecutionDate'; 
+end
+
+%% Sort the data by the parameter given
+params=[atomdata.Params];
+X=[params.(xVar)];
+
+[X,inds]=sort(X,'ascend');
+atomdata=atomdata(inds);
+
+% Make sure its Nx1
+X = reshape(X,[length(X) 1]);
+
+%%
+Fits = {};
+
 
 % Fit the probe beam to a 2D gauss (exp(-2*r^2/w0^2))
     for kk=1:length(atomdata)
-       PWOA=atomdata(kk).PWOA;
-       [h,w]=size(PWOA);
-       Dy=1:h;
-       Dx=1:w;   
-       fout=gaussFit2D(Dx,Dy,PWOA);    
-       atomdata(kk).ProbeBeamFit=fout;
-    end
+        PWOA=atomdata(kk).PWOA;
+        PWA = atomdata(kk).PWA;       
+        if size(PWA,1) == 1024
+            NWA(kk,1)=sum(sum(atomdata(kk).PWA,1),2);
+            NWOA(kk,1)=sum(sum(atomdata(kk).PWOA,1),2);    
+            if opts.doProbeFit
+                [h,w]=size(PWOA);
+                Dy=1:h;
+                Dx=1:w;          
+                fout=gaussFit2D(Dx,Dy,PWOA);   
+                Fits{kk} = fout;
+                
+                A(kk,1) = fout.A;
+                Xc(kk,1) = fout.Xc;
+                Yc(kk,1) = fout.Yc;
+                w0(kk,1) = fout.w0;
+                nbg(kk,1) = fout.nbg;
+                
+                
+            end          
+        else
+            NWA(kk,1)=sum(sum(PWA(1:1024,:),1),2);
+            NWOA(kk,1)=sum(sum(PWOA(1:1024,:),1),2);  
 
+            NWA(kk,2)=sum(sum(PWA(1025:2048,:),1),2);
+            NWOA(kk,2)=sum(sum(PWOA(1025:2048,:),1),2);  
+           if opts.doProbeFit
+                [h,w]=size(PWOA);
+                Dx=1:w;          
+                fout1=gaussFit2D(Dx,1:1024,PWOA(1:1024,:));   
+                fout2=gaussFit2D(Dx,1025:2048,PWOA(1025:2048,:)); 
+                Fits{kk,1} = fout1;
+                Fits{kk,2} = fout2;
+                
+                A(kk,1) = fout1.A;
+                Xc(kk,1) = fout1.Xc;
+                Yc(kk,1) = fout1.Yc;
+                w0(kk,1) = fout1.w0;
+                nbg(kk,1) = fout1.nbg;
+                
+                A(kk,2) = fout2.A;
+                Xc(kk,2) = fout2.Xc;
+                Yc(kk,2) = fout2.Yc;
+                w0(kk,2) = fout2.w0;
+                nbg(kk,2) = fout2.nbg;                
+            end
+        end   
+    end
+    
+%% Process Output
+PixelSize = atomdata(1).PixelSize;
+CrossSection = atomdata(1).CrossSection;
+
+output = struct;
+output.PixelSize    = PixelSize;
+output.CrossSection = CrossSection;
+output.xVar         = xVar;
+output.X            = X;
+output.Params       = params;
+output.Units        = [atomdata.Units];
+output.Flags        = [atomdata.Flags];
+
+
+output.PWOA_Counts  = NWOA;
+output.PWA_Counts   = NWA;
+
+if opts.doProbeFit
+% Assign fit outputs
+    output.Fits         = Fits;
+
+    output.Xc           = Xc;
+    output.Yc           = Yc;
+    output.w0           = w0;
+    output.A            = A;
+    output.nbg          = nbg;
+end
 end
 
 
@@ -78,7 +164,7 @@ opt.Weights=[];
 
 
 % Display initial guess
-str1=['(Xc0,Yc0)=(' num2str(round(Xc)) ',' num2str(round(Yc)) ');'];
+str1=['(Xc0,Yc0)=(' num2str(round(Xc)) ',' num2str(round(Yc)) ')'];
 fprintf([str1 ';']);
 
 % Perform the fit

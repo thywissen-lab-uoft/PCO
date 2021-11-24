@@ -540,16 +540,38 @@ probe_opts=struct;
 probe_opts.xUnit=pco_unit;
 probe_opts.PixelSize = PixelSize;
 probe_opts.FigLabel = FigLabel;
+probe_opts.doProbeFit = doProbeFit;
 
-[hF_probe_counts,counts]=showProbeCounts(atomdata,pco_xVar,probe_opts);
+
+probe_data=analyzeProbeBeam(atomdata,pco_xVar,probe_opts);
+
+[hF_probe_counts]=showProbeCounts(probe_data,probe_opts);
 if doSave;saveFigure(hF_probe_counts,'probe_counts',saveOpts);end
 
+if ~isequal(pco_xVar,'ExecutionDate')
+    [hF_probe_counts_time]=showProbeCounts(...
+        chDataXVar(probe_data,'ExecutionDate'),probe_opts);
+    if doSave;saveFigure(hF_probe_counts_time,'probe_counts_time',saveOpts);end
+end    
+
 if doProbeFit
-   atomdata=analyzeProbeBeam(atomdata);
-   [hF_probe]=showProbeAnalysis(atomdata,pco_xVar,probe_opts);   
-   if doSave;saveFigure(hF_probe,'probe_details',saveOpts);end
+    [hF_probe_fit] = showProbeAnalysis(probe_data,probe_opts);    
+    if doSave;saveFigure(hF_probe_fit,'probe_analysis',saveOpts);end
 end
 
+if doSave
+    save([saveDir filesep 'probe_data'],'probe_data');
+end
+
+if doSave && doUpload && exist(GDrive_root,'dir')
+    gDir = [fileparts(getImageDir2(datevec(now),GDrive_root)) filesep FigLabel];
+    gFile = [gDir filesep 'probe_data'];        
+    if ~exist(gDir,'dir')
+       mkdir(gDir) 
+    end
+    save(gFile,'probe_data');
+end
+    
 %% Raman Laser Common Mode Detuning
 
 if doWavemeter
