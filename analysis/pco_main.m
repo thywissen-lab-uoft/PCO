@@ -65,8 +65,8 @@ end
 % display properties.
 
 % pco_xVar='Raman_AOM3_freq';
-% pco_xVar='lat_mod_freq';
-pco_xVar='Raman_freq';
+ pco_xVar='lat_mod_freq';
+% pco_xVar='Raman_freq';
 
 % pco_xVar='Pulse_Time';
 % pco_xVar='rf_freq_HF';
@@ -135,9 +135,9 @@ doBEC         = 0;      % Enable BEC analysis
 doErfFit      = 0;    
 
 % Band Map Fit
-doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'V';
-doBMFit       = 1;
-doCustom_BM   = 1;    
+doBMFit_AM_Spec  = 1; AM_Spec_Dir = 'H';
+doBMFit       = 0;
+doCustom_BM   = 0;    
 
 % Fermi
 doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
@@ -336,6 +336,8 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
   ROI=[800 950 400 620]; % 15 ms BM TOF
 
+  ROI=[434 755 501 828]; % 15 ms BM TOF
+
 %  ROI = [830 940 230 300;
 %      830 940 540 610];
 
@@ -362,8 +364,8 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %  ROI = [800 950 1520 1630;
 %       800 950 490 600];   %  band map 15 ms TOF  7box, 9 box
 % % % % % 
-  ROI=[800 950 490 620;
-       800 950 1540 1680];   %  band map 15 ms TOF 9box, 7 box  
+%   ROI=[800 950 490 620;
+%        800 950 1540 1680];   %  band map 15 ms TOF 9box, 7 box  
    % ROI = ROI(1,:); % 9 only 
     %ROI = ROI(2,:); % 7 only
 

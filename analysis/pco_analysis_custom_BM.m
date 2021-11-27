@@ -118,7 +118,11 @@ FitFlags.lorentz_double=0;
 FitFlags.lorentz_triple=0;    
 
 FitFlags.lorentz_asym_single= 0;
-FitFlags.lorentz_asym_double= 1;
+FitFlags.lorentz_asym_double= 0;
+FitFlags.lorentz_asym_triple= 0;
+FitFlags.lorentz_asym_quadruple= 0;
+
+
 
 FitFlags.fit_lorentz_assymetric_4=0;
 

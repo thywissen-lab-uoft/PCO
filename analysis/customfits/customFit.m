@@ -626,7 +626,7 @@ if length(X)>4 && FitFlags.lorentz_asym_single
     % Center Point
     inds=[Y>.99*max(Y)];         
     x1=mean(X(inds)); 
-%     x1 = -151;
+     x1 = -125;
 
     % Assymetry
     a1 = 1/-0.05; % Long on right
@@ -655,8 +655,7 @@ if length(X)>4 && FitFlags.lorentz_asym_single
     legend(pExp,{str},'interpreter','latex','location','best',...
         'fontsize',10,'orientation','horizontal');         
 end
-%%
-% Assymetric lorentzian fit
+%% Assymetric lorentzian double
 if length(X)>9 && FitFlags.lorentz_asym_double
     g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
     y=@(x,a,x0,G,A) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1);   
@@ -688,7 +687,7 @@ A2 = 0.005;
 %     x2 = x1;
 %     x2=0;
     
-    x1 = -150;
+    x1 = -125;
     x2 = -0;
     
     % Asymmetry
@@ -723,6 +722,166 @@ A2 = 0.005;
     num2str(round(fout.x2,1)) '\pm ' ...
     num2str(round((ci(2,6)-ci(1,6))/2,1)) ...
     ',' num2str(round(fout.G2,1)) ')$'];
+    
+    legend(pFit,str,'location','best','interpreter','latex');
+end
+
+%% Lorentz assymetric triple
+
+if length(X)>9 && FitFlags.lorentz_asym_triple
+    g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
+    y=@(x,a,x0,G,A) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1);   
+
+    myfit=fittype(@(bg,a1,x1,G1,A1,a2,x2,G2,A2,a3,x3,G3,A3,x) ...
+        y(x,a1,x1,G1,A1)+y(x,a2,x2,G2,A2)+y(x,a3,x3,G3,A3)+bg,...
+        'coefficients',{'bg',...
+        'a1','x1','G1','A1',...
+        'a2','x2','G2','A2',...
+        'a3','x3','G3','A3'},...
+        'independent','x'); 
+    opt=fitoptions(myfit);
+    
+    bg = min(Y);
+
+    % Linewidth
+    G1 = 13; G2 = 13; G3 = 13;        
+
+    % Amlitudes
+    A1 = (max(Y)-min(Y));   
+%     A2 = A1/10;A2 = .02;
+    A2 = 0.005;
+    A3 = 0.005;
+        
+    % Center
+    [~,imax]=max(Y);
+    x1 = mean(X(imax)); 
+%     x2 = x1;
+%     x2=0;
+    
+    x1 = -170;
+    x2 = -85;
+    x3 = -0
+    
+    % Asymmetry
+    a1 = .05;
+    a2 = .05;
+    a3 = .05;
+
+
+    opt.StartPoint=[bg a1 x1 G1 A1 a2 x2 G2 A2 a3 x3 G3 A3];  
+    opt.Robust='bisquare';
+%         opts.Weights=w;
+
+    fout=fit(X,Y,myfit,opt)
+    ci = confint(fout,0.95);   
+
+    XF=linspace(min(X)-5,max(X)+5,1000);
+%         xlim([min(X)-0.1 max(X)+0.1]);
+    pFit=plot(XF,feval(fout,XF),'r-','linewidth',2);
+%     str=['$f_1 = ' num2str(round(fout.x1,2)) '\pm' num2str(round((ci(2,3)-ci(1,3))/2,2)) '$ kHz' newline ...
+%         '$\mathrm{FWHM} = ' num2str(round(abs(fout.G1),2)) ' $ kHz' newline ...
+%         '$f_2 = ' num2str(round(fout.x2,2)) '\pm' num2str(round((ci(2,7)-ci(1,7))/2,2)) '$ kHz' newline ...
+%         '$\mathrm{FWHM} = ' num2str(round(abs(fout.G2),2)) ' $ kHz' newline...
+%         'A1 =' num2str(round(fout.A1,2)) newline...
+%         'A2 =' num2str(round(fout.A2,2))];
+%     
+
+    str=['$(A_i,f_i,\Gamma_i)$' newline ....
+    '$(' num2str(fout.A1,3) ',' ...
+    num2str(round(fout.x1,1)) '\pm ' ...
+    num2str(round((ci(2,3)-ci(1,3))/2,1)) ...
+    ',' num2str(round(fout.G1,1)) ')$' newline ...
+    '$(' num2str(fout.A2,3) ',' ...
+    num2str(round(fout.x2,1)) '\pm ' ...
+    num2str(round((ci(2,6)-ci(1,6))/2,1)) ...
+    ',' num2str(round(fout.G3,1)) ')$' newline ...
+    '$(' num2str(fout.A3,3) ',' ...
+    num2str(round(fout.x3,1)) '\pm ' ...
+    num2str(round((ci(2,9)-ci(1,9))/2,1)) ...
+    ',' num2str(round(fout.G3,1)) ')$'];
+    
+    legend(pFit,str,'location','best','interpreter','latex');
+end
+
+%% Lorentz assymetric quadruple
+
+if length(X)>9 && FitFlags.lorentz_asym_quadruple
+    g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
+    y=@(x,a,x0,G,A) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1);   
+
+    myfit=fittype(@(bg,a1,x1,G1,A1,a2,x2,G2,A2,a3,x3,G3,A3,a4,x4,G4,A4,x) ...
+        y(x,a1,x1,G1,A1)+y(x,a2,x2,G2,A2)+y(x,a3,x3,G3,A3)+y(x,a4,x4,G4,A4)+bg,...
+        'coefficients',{'bg',...
+        'a1','x1','G1','A1',...
+        'a2','x2','G2','A2',...
+        'a3','x3','G3','A3',...
+        'a4','x4','G4','A4'},...
+        'independent','x'); 
+    opt=fitoptions(myfit);
+    
+    bg = min(Y);
+
+    % Linewidth
+    G1 = 13; G2 = 13; G3 = 13;  G4 = 13;      
+
+    % Amlitudes
+    A1 = (max(Y)-min(Y));   
+%     A2 = A1/10;A2 = .02;
+    A2 = 0.005;
+    A3 = 0.005;
+    A4 = 0.005;
+        
+    % Center    
+    x1 = -180;
+    x2 = -120;
+    x3 = -60
+    x4 = -0
+
+    
+    % Asymmetry
+    a1 = .05;
+    a2 = .05;
+    a3 = .05;
+    a4 = .05;
+
+
+
+    opt.StartPoint=[bg a1 x1 G1 A1 a2 x2 G2 A2 a3 x3 G3 A3 a4 x4 G4 A4];  
+    opt.Robust='bisquare';
+%         opts.Weights=w;
+
+    fout=fit(X,Y,myfit,opt)
+    ci = confint(fout,0.95);   
+
+    XF=linspace(min(X)-5,max(X)+5,1000);
+%         xlim([min(X)-0.1 max(X)+0.1]);
+    pFit=plot(XF,feval(fout,XF),'r-','linewidth',2);
+%     str=['$f_1 = ' num2str(round(fout.x1,2)) '\pm' num2str(round((ci(2,3)-ci(1,3))/2,2)) '$ kHz' newline ...
+%         '$\mathrm{FWHM} = ' num2str(round(abs(fout.G1),2)) ' $ kHz' newline ...
+%         '$f_2 = ' num2str(round(fout.x2,2)) '\pm' num2str(round((ci(2,7)-ci(1,7))/2,2)) '$ kHz' newline ...
+%         '$\mathrm{FWHM} = ' num2str(round(abs(fout.G2),2)) ' $ kHz' newline...
+%         'A1 =' num2str(round(fout.A1,2)) newline...
+%         'A2 =' num2str(round(fout.A2,2))];
+%     
+
+    str=['$(A_i,f_i,\Gamma_i)$' newline ....
+    '$(' num2str(fout.A1,3) ',' ...
+    num2str(round(fout.x1,1)) '\pm ' ...
+    num2str(round((ci(2,3)-ci(1,3))/2,1)) ...
+    ',' num2str(round(fout.G1,1)) ')$' newline ...
+    '$(' num2str(fout.A2,3) ',' ...
+    num2str(round(fout.x2,1)) '\pm ' ...
+    num2str(round((ci(2,6)-ci(1,6))/2,1)) ...
+    ',' num2str(round(fout.G3,1)) ')$' newline ...
+    '$(' num2str(fout.A3,3) ',' ...
+    num2str(round(fout.x3,1)) '\pm ' ...
+    num2str(round((ci(2,9)-ci(1,9))/2,1)) ...
+    ',' num2str(round(fout.G3,1)) ')$' newline ...
+    '$(' num2str(fout.A4,3) ',' ...
+    num2str(round(fout.x4,1)) '\pm ' ...
+    num2str(round((ci(2,12)-ci(1,12))/2,1)) ...
+    ',' num2str(round(fout.G4,1)) ')$'
+    ];
     
     legend(pFit,str,'location','best','interpreter','latex');
 end
