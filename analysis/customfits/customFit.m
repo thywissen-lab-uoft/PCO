@@ -604,7 +604,7 @@ end
 
 % Assymetric lorentzian fit, good for AM spec
 if length(X)>4 && FitFlags.lorentz_asym_single
-    g=@(x,a,x0,G) 2*G./(1+exp(a*(x-x0)));
+    g=@(x,a,x0,G) 2*G./(1+exp((x-x0)/a));
     y=@(x,a,x0,G,A,bg) A./(4*(x-x0).^2./g(x,a,x0,G).^2+1);        
 
     myfit=fittype(@(bg,a1,x1,G1,A1,x) y(x,a1,x1,G1,A1)+bg,...
@@ -626,10 +626,10 @@ if length(X)>4 && FitFlags.lorentz_asym_single
     % Center Point
     inds=[Y>.99*max(Y)];         
     x1=mean(X(inds)); 
-    x1 = -151;
+%     x1 = -151;
 
     % Assymetry
-    a1 = -0.05; % Long on right
+    a1 = 1/-0.05; % Long on right
 %         a1 = +0.05; % Long on left
 
     opt.StartPoint=[bg a1 x1 G1 A1];  
@@ -650,7 +650,7 @@ if length(X)>4 && FitFlags.lorentz_asym_single
         num2str(round((ci(2,2)-ci(1,2))/2,2)) '$ kHz,'  ...
         '$\mathrm{FWHM} = ' ...
         num2str(round(abs(fout.G1),2)) ' $ kHz,'  ...
-        '$a = ' num2str(round(fout.a1,3)) '$ kHz'];
+        '$a = ' num2str(round(fout.a1,1)) '$ kHz'];
     
     legend(pExp,{str},'interpreter','latex','location','best',...
         'fontsize',10,'orientation','horizontal');         
@@ -688,8 +688,8 @@ A2 = 0.005;
 %     x2 = x1;
 %     x2=0;
     
-    x1 = -130;
-    x2 = -80;
+    x1 = -150;
+    x2 = -0;
     
     % Asymmetry
     a1 = .05;

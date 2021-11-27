@@ -65,10 +65,15 @@ end
 % display properties.
 
 % pco_xVar='Raman_AOM3_freq';
+% pco_xVar='lat_mod_freq';
+pco_xVar='Raman_freq';
+
 % pco_xVar='Pulse_Time';
 % pco_xVar='rf_freq_HF';
+% pco_xVar = 'HF_hold_time';
 % pco_xVar = 'HF_FeshValue_Spectroscopy';
-pco_xVar='ExecutionDate';
+% pco_xVar='ExecutionDate';
+% pco_xVar = 'HF_K_FM_offset'
 % pco_xVar='k_op_am';
 % pco_xVar='rb_op_am';
 % pco_xVar = 'RF1B_finalfreq';
@@ -107,7 +112,7 @@ pco_overrideUnit='MHz';
 
 % Standard Analysis
 doStandard     = 1;
-doODProfile    = 0;
+doODProfile    = 1;
 
 % Saving1% Animate the Cloud
 doAnimate = 1;
@@ -130,11 +135,12 @@ doBEC         = 0;      % Enable BEC analysis
 doErfFit      = 0;    
 
 % Band Map Fit
-doBMFit       = 0;
-doCustom_BM   = 0;    
+doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'V';
+doBMFit       = 1;
+doCustom_BM   = 1;    
 
 % Fermi
-doFermiFitLong = 1;     % Enable Fermi Fit for XDT TOF
+doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
 
 % Custom Box counts
 doCustom       =  0;          % Custom Box Count
@@ -142,8 +148,8 @@ doRabiAbsolute = 0;
 doRabiContrast = 0;
 
 % Raman Common Mode Detuning
-doWavemeter    = 0;
-doCavity       = 0;
+doWavemeter    = 1;
+doCavity       = 1;
 
 %% GDrive Settings
 GDrive_root = 'G:\My Drive\Lattice Shared\LabData';
@@ -285,7 +291,8 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % ROI = [500 1392 250 360]; % XDT 1/2 insitu long X
 % ROI = [500 1392 300 500]; % XDT 1/2 TOF 10 ms long X9
 
-%%%%% XDT
+%%%%% XDT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % ROI = [700 1050 240 640]; %K XDT 5ms tof
 % ROI = [700 1050 327 645]; %K XDT 15ms tof rb
 
@@ -325,27 +332,22 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %       820 940 680 770];    % K SG 15ms TOF -9,-7,-5 boxes
 
 
-%%%%% LATTICE
-% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%% LATTICE LOW FIELD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  ROI=[800 950 400 620]; % 15 ms BM TOF
+
 %  ROI = [830 940 230 300;
 %      830 940 540 610];
 
-% ROI = [826 953 425 555]; % BM 15 ms TOF
 % ROI= [830 930 230 430;830 930 430 590];  % BM, SG, 10 ms
 % ROI= [820 930 450 550;820 930 350 450];  % BM, SG, 13 ms
 
-% ROI = [820 930 280 510;
-%     820 920 370 410]; % BMZ AM SPEC 10 ms TOF
-
-
 % ROI = [730 1050 660 940]; % BM 25 ms TOF
 
-
-% 12ms tof SG from lattice #850 900 300 560;
+% 12ms tof SG from lattice
+% #850 900 300 560;
 % ROI = [830 900 695 760;
 %        830 900 630 695];
-% 
-
 
 %%%%%%%%%%%%%%%%%%%%% X CAM DOUBLE SHUTTER %%%%%%%%%%%%%%%%%%%%%
 
@@ -360,81 +362,18 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %  ROI = [800 950 1520 1630;
 %       800 950 490 600];   %  band map 15 ms TOF  7box, 9 box
 % % % % % 
-% % %   ROI=[800 950 490 620;
-% % %        800 950 1520 1650];   %  band map 15 ms TOF 9box, 7 box
-
-%      ROI=[800 950 490 620;
-%        800 950 1540 1670];   %  band map 15 ms TOF 9box, 7 box
-%    
-%      ROI=[780 970 470 630;
-%        780 970 1520 1690];   %  band map 15 ms TOF 9box, 7 box 
-%    
-      
-%      ROI=[780 970 470 750;
-%        780 970 1520 1780];   %  band map 15 ms TOF 9box, 7 box  larger boxes
-%    
-   %    ROI = ROI(1,:); % 9 only 
-%    ROI = ROI(2,:); % 7 only
-
-%  band map 15 ms TOF 9box, 7 box
-%     ROI=[800 950 490 660];
-%     ROI(2,:)=ROI(1,:)+[0 0 1050 1050];
-
+  ROI=[800 950 490 620;
+       800 950 1540 1680];   %  band map 15 ms TOF 9box, 7 box  
+   % ROI = ROI(1,:); % 9 only 
+    %ROI = ROI(2,:); % 7 only
 
 %      ROI=[750 1000 620 860;
-%        750 1000 1670 1910];   %  band map 20 ms TOF 9box, 7 box
+%        750 1000 1670 1910];   %  band map 20 ms TOF 9box, 7 box  
 
-   % 
-% ROI = [810 870 510 590;
-%     880 930 510 590;
-%     820 930 1530+25 1620+25]; %  band map 15 ms TOF 9p boxes y, 7 box
-
-%  
-%  ROI = [855 900 525 570;
-%         830 925 500 595;
-%         855 900 1555 1600;
-%         830 925 1530 1625]; %  band map 15 ms TOF x vs y-z bands 
-% 
-%  ROI = [850 900 525 580;
-%         815 940 525 580;
-%         850 900 500 605;
-%         850 900 525+1030 580+1030;
-%         825 930 525+1030 580+1030;
-%         850 900 500+1030 605+1030]; %  band map 15 ms TOF x vs y-z bands 
-%        
-% ROI = [855 900 517 567;
-%         810 940 517 567;
-%         855 900 480 615;
-%         855 900 517+1030 567+1030;
-%         810 940 517+1030 567+1030;
-%         855 900 480+1030 615+1030]; %  band map 15 ms TOF x vs y-z bands 
-
-%     ROI = [        
-%      860         895         510         567    % 9 center
-%      810         940         510         567    % 9 center + H wing
-%      860         895         480         615    % 9 center + V wing
-%      855         900        1547        1597    % 7 center
-%      810         940        1547        1597    % 7 center + H wing
-%      855         900        1510        1645];  % 7 center + V wing
-
-% ROI = [850 900 520 570;
-%         810 940 520 570;
-%         850 900 480 615];
-
-% ROI = [850+10 900+5 525-60 575-65;
-%         810+10 940+5 525-60 575-65;
-%         850+10 900+5 485-60 620-65]; %  band map 15 ms TOF x vs y-z bands 9/2 box
-% %   
 %  ROI=[800 950 1520 1650];   %  band map 15 ms TOF   -7 box   
-
 %  ROI=[800 950 1640 1900];   %  band map 20 ms TOF   -7 box   
-
 %  ROI=[800 950 490 620];   %  band map 15 ms TOF   -9 box   
-
 %  ROI=[800 950 610 830];   %  band map 20 ms TOF   -9 box   
-
-%  
-% ROI=[800 950 1700 1800];
 
 
 %  ROI=[820 950 150 1020;
@@ -449,32 +388,6 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %  ROI=[700 1050 280 680;
 %      700 1050 1504 1904];   %  k 5ms rb 15 ms double shutter
 
-
-%%%%%%%%%% X CAM AM SPEC
-
-% 10 ms tof am spec 75-200 recoil z
-% ROI = [830 920 370 410;
-%     830 920 330 450];
-
-% 10 ms tof am spec 75-200 recoil x lattice y camera
-% ROI = [460 700 600 710;
-%     540 620 600 710];
-
-% % 15 ms TOF AMP spec 75-200 Er Y Lattice
-% ROI = [800 970 430 540;
-%     855 905 430 540];
-
-% % 15 ms TOF AMP spec 75-200 Er Z Lattice
-% ROI = [820 940 380 590;
-%     820 940 460 515];
-
-% 7 ms tof am spec 75-200 recoil x, y camera
-% ROI = [556 619 542 634;
-%     500 676 541 655];
-
-% 10ms tof am spec 25 recoil Z
-% ROI = [830 920 365 415;
-%     830 920 330 450];
 %%%%%%%%%%%%%%%%%%% Y CAM %%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % ROI = [1 1392 400 600]; % XDT Insitu long
@@ -838,6 +751,64 @@ if doBMFit
     end
 end
 
+%% 2D Band Map Fit AM Spec
+% Fit the cloud to a band map fit.  The current code fits the FBZ as well
+% as the first excited band in the horizontal and vertical directions
+
+bm_opts = struct;
+bm_opts.PixelSize = PixelSize;  % Pixel size in meters
+bm_opts.doScale = 1;            % Enable rescale of data (smaller img --> faster)
+bm_opts.Scale = 0.4;            % Length Scale factor
+bm_opts.doSmooth = 0;           % Enable smoothing?
+bm_opts.Smooth = 1;             % Smoothing radius
+bm_opts.ExciteDir = AM_Spec_Dir;
+   
+% Perform the Erf Fit
+if doBMFit_AM_Spec
+    disp(repmat('-',1,60));    
+    disp('Performing 2D Band Map fit');
+    disp(repmat('-',1,60)); 
+
+    for kk=1:length(atomdata)
+        disp(repmat('-',1,60));   
+        disp(['(' num2str(kk) ') ' atomdata(kk).Name]);
+        
+        % Time of flight
+        bm_opts.TOF = atomdata(kk).Params.tof*1e-3;
+        
+        for nn=1:size(atomdata(kk).ROI,1)       % Iterate over all ROIs
+            sROI=atomdata(kk).ROI(nn,:);        % Grab the analysis ROI
+            Dx=sROI(1):sROI(2);                 % X Vector
+            Dy=sROI(3):sROI(4);                 % Y Vector
+            data=atomdata(kk).OD(Dy,Dx);        % Optical density        
+            
+            % Perform the fit  
+            [fout,gof,output,N]=bandmapFit2D_AM_spec(Dx,Dy,data,bm_opts);    
+            
+            % Assign ouputs
+            Natoms = N*(PixelSize^2/CrossSection);
+            atomdata(kk).BMFit{nn} = fout; % Assign the fit object       
+            atomdata(kk).BMGOF{nn} = gof; % Assign the fit object
+            atomdata(kk).BMNum{nn} = Natoms;
+        end
+    end    
+    
+    % Get a summary of the erf fit data
+    bm_am_spec_data=getBMData(atomdata,pco_xVar);  
+    if doSave
+        save([saveDir filesep 'bm_am_spec_data'],'bm_am_spec_data');
+    end  
+    
+    if doSave && doUpload && exist(GDrive_root,'dir')
+        gDir = [fileparts(getImageDir2(datevec(now),GDrive_root)) filesep FigLabel];
+        gFile = [gDir filesep 'bm_am_spec_data'];        
+        if ~exist(gDir,'dir')
+           mkdir(gDir) 
+        end
+        save(gFile,'bm_am_spec_data');
+    end
+end
+
 
 %% Fermi-Fitter Long TOF
 % This section of code fits the optical density to the distribution
@@ -998,11 +969,11 @@ if doAnimate && doSave
     %animateOpts.Order='descend';   
      animateOpts.Order='ascend';
     
-    % Color limits
-    animateOpts.CLim=[0 1;
+%     % Color limits
+    animateOpts.CLim=[0 .1;
         0 1];   
-%     animateOpts.CLim=[0 .3;
-%         0 .3];   
+%     animateOpts.CLim=[0 1;
+%         0 .2];   
 %     animateOpts.CLim=[0 .2;
 %         0 .5]; 
     

@@ -41,18 +41,23 @@ hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 ylabel([data.FitType ' atom number']);
 
+shapes = {'s','v','^'};
 
         
 % Plot the data
+size(NatomsBands)
 for nn=1:size(NatomsBands,3)
     plot(X,NatomsBands(:,1,nn),'o','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
-    
-    plot(X,NatomsBands(:,2,nn)+NatomsBands(:,3,nn),'s','color',co(nn,:),'linewidth',1,'markersize',8,...
-        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
+   
+   for kk = 2:2:size(NatomsBands,2)
+        plot(X,NatomsBands(:,kk,nn)+NatomsBands(:,kk+1,nn),shapes{kk/2},'color',co(nn,:),...
+            'linewidth',1,'markersize',8,...
+            'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
  
-    plot(X,NatomsBands(:,4,nn)+NatomsBands(:,5,nn),'v','color',co(nn,:),'linewidth',1,'markersize',8,...
-        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
+%     plot(X,NatomsBands(:,4,nn)+NatomsBands(:,5,nn),'v','color',co(nn,:),'linewidth',1,'markersize',8,...
+%         'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
+   end
 end
 
 

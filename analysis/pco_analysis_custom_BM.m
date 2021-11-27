@@ -64,10 +64,10 @@ y_Lbl{30}     = 'N7/N9';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % p_inds is a list where each element is a plot idnex to show. The 
 % number corresponds to the plot index as defined above. 
-p_inds=[];
+p_inds=[06 15 16 28];
 
 % Excitations to 7
-p_inds = [01,02,05,08,15,18,19,07,30];
+% p_inds = [01,02,05,08,15,18,19,07,30];
 % p_inds = [05];
 
 
@@ -118,7 +118,7 @@ FitFlags.lorentz_double=0;
 FitFlags.lorentz_triple=0;    
 
 FitFlags.lorentz_asym_single= 0;
-FitFlags.lorentz_asym_double= 0;
+FitFlags.lorentz_asym_double= 1;
 
 FitFlags.fit_lorentz_assymetric_4=0;
 
@@ -148,8 +148,8 @@ if doCustomX
 %     mF2 = -5/2;
 % 
 % 
-%     Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
-    Bfb   = src_data.Params(1).HF_FeshValue_Spectroscopy;
+   Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
+%     Bfb   = src_data.Params(1).HF_FeshValue_Spectroscopy;
 %     Bfb   = src_data.Params(1).HF_FeshValue_Final_Lattice;
     Bshim = src_data.Params(1).HF_zshim_Initial_Lattice*2.35;
     Boff  = 0.11;
