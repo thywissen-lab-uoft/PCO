@@ -103,7 +103,7 @@ FitFlags.T2exp=0;
 FitFlags.Rabi_oscillation = 0;
 FitFlags.NGaussPeak=0;
 
-FitFlags.gauss_single=0;
+FitFlags.gauss_single=1;
 FitFlags.gauss_4=0;
 FitFlags.gauss_neg_double=0;
 FitFlags.gauss_neg_single=0;
@@ -118,7 +118,7 @@ FitFlags.lorentz_double=0;
 FitFlags.lorentz_triple=0;    
 
 FitFlags.lorentz_asym_single= 0;
-FitFlags.lorentz_asym_double= 1;
+FitFlags.lorentz_asym_double= 0;
 
 FitFlags.fit_lorentz_assymetric_4=0;
 

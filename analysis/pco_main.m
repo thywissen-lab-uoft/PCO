@@ -65,8 +65,8 @@ end
 % display properties.
 
 % pco_xVar='Raman_AOM3_freq';
-% pco_xVar='lat_mod_freq';
-pco_xVar='Raman_freq';
+pco_xVar='lat_mod_freq';
+% pco_xVar='Raman_freq';
 
 % pco_xVar='Pulse_Time';
 % pco_xVar='rf_freq_HF';
@@ -122,7 +122,7 @@ doSave = 1;
 doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
 
 % Box Count
-doBoxCount    = 0;      % Box count analysis
+doBoxCount    = 1;      % Box count analysis
 doLandauZener = 0;      % Landau Zener Analysis on BOX
 doRamanSpec   = 0;      % Raman box count count analyis
 
@@ -136,8 +136,8 @@ doErfFit      = 0;
 
 % Band Map Fit
 doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'V';
-doBMFit       = 1;
-doCustom_BM   = 1;    
+doBMFit       = 0;
+doCustom_BM   = 0;    
 
 % Fermi
 doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
@@ -307,7 +307,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % ROI=[810 970 740 860];   % XDT  Full TOF analysis
 % ROI = [810 970 420 580]; %XDT Rb after evap 15ms 
 
-  ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
+%   ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 
 % % 12ms tof SG from XDT #850 900 300 560;
 % ROI = [825 900 300 565;
@@ -334,7 +334,10 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% LATTICE LOW FIELD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  ROI=[800 950 400 620]; % 15 ms BM TOF
+  ROI=[800 950 400 620]; % 15 ms BM TOF x cam
+  
+  ROI=[434 755 501 828]; % 10 ms BM TOF y cam
+
 
 %  ROI = [830 940 230 300;
 %      830 940 540 610];
@@ -361,9 +364,12 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % % % 
 %  ROI = [800 950 1520 1630;
 %       800 950 490 600];   %  band map 15 ms TOF  7box, 9 box
-% % % % % 
-  ROI=[800 950 490 620;
-       800 950 1540 1680];   %  band map 15 ms TOF 9box, 7 box  
+
+
+% ROI=[800 950 490 620;
+%        800 950 1540 1680];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
+%    
+   
    % ROI = ROI(1,:); % 9 only 
     %ROI = ROI(2,:); % 7 only
 

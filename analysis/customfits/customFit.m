@@ -626,7 +626,7 @@ if length(X)>4 && FitFlags.lorentz_asym_single
     % Center Point
     inds=[Y>.99*max(Y)];         
     x1=mean(X(inds)); 
-%     x1 = -151;
+    x1 = -2;
 
     % Assymetry
     a1 = 1/-0.05; % Long on right
@@ -739,6 +739,7 @@ if length(X)>4 && FitFlags.lorentz_single
     A1=(max(Y)-min(Y));
     inds=[Y>.8*max(Y)];
     x0=mean(X(inds));
+    x0 = -4
     opt.StartPoint=[A1/100 G0 x0 bg];   
 %         opt.Upper=[1 3*G0 x0+range(X) 0];   
 
