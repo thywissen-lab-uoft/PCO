@@ -99,16 +99,14 @@ switch opts.ExciteDir
         Ae2 = max([Ae2 0]);        
     case 'H'
         % left Zone amplitude
-        Ie1 = (abs(XX-(XcG-1.5*sG))<0.3*sG).*(abs(YY-YcG)<sG);
+        Ie1 = (abs(XX-(XcG-2.5*sG))<0.3*sG).*(abs(YY-YcG)<sG);
         Ae1 = sum(sum(Ie1.*Z))/sum(sum(Ie1))-AbgG;
         Ae1 = max([Ae1 0]);
-        % right 2 Zone Amlitude
         
-        Ie2 = (abs(XX-(XcG-1.5*sG))<0.3*sG).*(abs(YY-YcG)<sG);
+        % right 2 Zone Amlitude        
+        Ie2 = (abs(XX-(XcG-2.5*sG))<0.3*sG).*(abs(YY-YcG)<sG);
         Ae2 = sum(sum(Ie2.*Z))/sum(sum(Ie2))-AbgG;
-        Ae2 = max([Ae2 0]);
-
-    
+        Ae2 = max([Ae2 0]);    
 end
 
 
@@ -146,12 +144,11 @@ switch opts.ExciteDir
             Ax2*sq2d(Xc+1.5*s,Yc,0.5*s,s,rC,rE,rC,rC,xx,yy) +...    % Left
             Ay1*sq2d(Xc,Yc-1.5*s,s,0.5*s,rC,rC,rE,rC,xx,yy) +...    % Up
             Ay2*sq2d(Xc,Yc+1.5*s,s,0.5*s,rC,rC,rC,rE,xx,yy) +...    % Down      
-            Ae1*sq2d(Xc-2.5*s,Yc,0.5*s,s,rC,rC,rC,rC,xx,yy) +...    % Right
-            Ae2*sq2d(Xc+2.5*s,Yc,0.5*s,s,rC,rC,rC,rC,xx,yy) +...    % Left
+            Ae1*sq2d(Xc-2.5*s,Yc,0.5*s,s,rC,rC,rC,rC,xx,yy) +...    % Right 2
+            Ae2*sq2d(Xc+2.5*s,Yc,0.5*s,s,rC,rC,rC,rC,xx,yy) +...    % Left 2
             Abg,'independent',{'xx','yy'},...
             'coefficients',{'Ac','Xc','Yc','s','rC','rE','Abg','Ax1','Ax2','Ay1','Ay2','Ae1','Ae2'});        
 end
-
 
 % Input Guesses
 fitopt = fitoptions(myfit);
