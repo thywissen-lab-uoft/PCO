@@ -157,6 +157,8 @@ myfit=fittype(@(bg,a1,x1,G1,A1,x) A1*yN(G1,x1,a1,x)+bg,...
 fitopt=fitoptions(myfit);
 fitopt.StartPoint=[bg max([GR GL]) xC min([GR GL]) A1];  
 fitopt.Robust='bisquare';
+fitopt.Lower=[bg-1 max([GR GL])-5 xC-5 min([GR GL])-5 A1-5];
+fitopt.Upper=[bg+1 max([GR GL])+5 xC+5 min([GR GL])+5 A1+5];
 
 fout2=fit(X,Y,myfit,fitopt);
 ci2 = confint(fout2,0.95);   

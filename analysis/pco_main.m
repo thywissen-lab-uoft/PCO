@@ -65,14 +65,16 @@ end
 % display properties.
 
 % pco_xVar='Raman_AOM3_freq';
-pco_xVar='lat_mod_freq';
+% pco_xVar='lat_mod_freq';
+pco_xVar='AM_spec_freq';
+
 % pco_xVar='Raman_freq';
 
 % pco_xVar='Pulse_Time';
 % pco_xVar='rf_freq_HF';
 % pco_xVar = 'HF_hold_time';
 % pco_xVar = 'HF_FeshValue_Spectroscopy';
-% pco_xVar='ExecutionDate';
+%  pco_xVar='ExecutionDate';
 % pco_xVar = 'HF_K_FM_offset'
 % pco_xVar='k_op_am';
 % pco_xVar='rb_op_am';
@@ -135,7 +137,7 @@ doBEC         = 0;      % Enable BEC analysis
 doErfFit      = 0;    
 
 % Band Map Fit
-doBMFit_AM_Spec  = 1; AM_Spec_Dir = 'V';
+doBMFit_AM_Spec  = 1; AM_Spec_Dir = 'H';
 doBMFit       = 0;
 doCustom_BM   = 0;    
 
@@ -334,9 +336,9 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% LATTICE LOW FIELD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-   ROI=[800 950 400 620]; % 15 ms BM TOF x cam
+%    ROI=[750 1000 375 620]; % 15 ms BM TOF x cam
   
-  %ROI=[434 755 501 828]; % 10 ms BM TOF y cam
+  ROI=[434 755 501 828]; % 10 ms BM TOF y cam
 
 
 %  ROI = [830 940 230 300;
