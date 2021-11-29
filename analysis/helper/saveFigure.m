@@ -40,6 +40,7 @@ saveLocation=fullfile(figDir,[filename ext]);
 % Save the figure and the png
 fprintf([datestr(now,13) ' Saving figure handle to ']);
 fprintf([filename ext ' ... ']);
+figure(hF)
 set(0,'CurrentFigure', hF);
 set(hF,'PaperPositionMode','auto');
 print(imgformat,save_qual,saveLocation);

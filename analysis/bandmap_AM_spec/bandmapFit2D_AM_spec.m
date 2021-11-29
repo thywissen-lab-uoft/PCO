@@ -99,12 +99,12 @@ switch opts.ExciteDir
         Ae2 = max([Ae2 0]);        
     case 'H'
         % left Zone amplitude
-        Ie1 = (abs(XX-(XcG-2.5*sG))<0.3*sG).*(abs(YY-YcG)<sG);
+        Ie1 = (abs(XX-(XcG-2.5*sG))<0.2*sG).*(abs(YY-YcG)<sG);
         Ae1 = sum(sum(Ie1.*Z))/sum(sum(Ie1))-AbgG;
         Ae1 = max([Ae1 0]);
         
         % right 2 Zone Amlitude        
-        Ie2 = (abs(XX-(XcG-2.5*sG))<0.3*sG).*(abs(YY-YcG)<sG);
+        Ie2 = (abs(XX-(XcG+2.5*sG))<0.2*sG).*(abs(YY-YcG)<sG);
         Ae2 = sum(sum(Ie2.*Z))/sum(sum(Ie2))-AbgG;
         Ae2 = max([Ae2 0]);    
 end

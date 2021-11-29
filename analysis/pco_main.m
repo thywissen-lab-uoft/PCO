@@ -46,8 +46,8 @@ lambda=mean([lambdaRb lambdaK]);  % mean wavelength
 CrossSection = 3/(2*pi)*lambda^2; 
 
 % Choose your camera
-camaxis='X';
-% camaxis='Y';
+ camaxis='X';
+%camaxis='Y';
 % Choose the pixel size base on the camera
 switch camaxis
     case 'X'
@@ -122,7 +122,7 @@ doSave = 1;
 doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
 
 % Box Count
-doBoxCount    = 1;      % Box count analysis
+doBoxCount    = 0;      % Box count analysis
 doLandauZener = 0;      % Landau Zener Analysis on BOX
 doRamanSpec   = 0;      % Raman box count count analyis
 
@@ -135,7 +135,7 @@ doBEC         = 0;      % Enable BEC analysis
 doErfFit      = 0;    
 
 % Band Map Fit
-doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'V';
+doBMFit_AM_Spec  = 1; AM_Spec_Dir = 'V';
 doBMFit       = 0;
 doCustom_BM   = 0;    
 
@@ -148,8 +148,8 @@ doRabiAbsolute = 0;
 doRabiContrast = 0;
 
 % Raman Common Mode Detuning
-doWavemeter    = 1;
-doCavity       = 1;
+doWavemeter    = 0;
+doCavity       = 0;
 
 %% GDrive Settings
 GDrive_root = 'G:\My Drive\Lattice Shared\LabData';
@@ -334,9 +334,9 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% LATTICE LOW FIELD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  ROI=[800 950 400 620]; % 15 ms BM TOF x cam
+   ROI=[800 950 400 620]; % 15 ms BM TOF x cam
   
-  ROI=[434 755 501 828]; % 10 ms BM TOF y cam
+  %ROI=[434 755 501 828]; % 10 ms BM TOF y cam
 
 
 %  ROI = [830 940 230 300;
@@ -959,6 +959,7 @@ if doODProfile
 
         if doSave
             for kk=1:length(hF_Xs_rNum) 
+                figure(hF_Xs_rNum(kk));
                 saveFigure(hF_Xs_rNum(kk),['OD_R' num2str(rNum) '_X' num2str(kk)],saveOpts);
                 pause(0.1);
             end 
@@ -968,6 +969,7 @@ if doODProfile
     %   Save the figures (this can be slow)
         if doSave        
             for kk=1:length(hF_Ys_rNum)
+                figure(hF_Ys_rNum(kk));
                 saveFigure(hF_Ys_rNum(kk),['OD_R' num2str(rNum) '_Y' num2str(kk)],saveOpts);
                 pause(0.1);
             end

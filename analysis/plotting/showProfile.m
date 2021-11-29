@@ -107,6 +107,8 @@ for kk=1:(ceil(length(atomdata)/pMax))
             doBM = 1;
         end
         
+        
+        
         % Get the fermi fit
         clear doFermi
         doFermi = 0;
@@ -121,8 +123,8 @@ for kk=1:(ceil(length(atomdata)/pMax))
         
         % Get the box count
         clear doBox
-        doBox = 0;
-        if isfield(atomdataSUB(ii),'BoxCount') && ~(doGauss || doErf)
+        doBox = 0;        
+        if isfield(atomdataSUB(ii),'BoxCount') && ~(doGauss || doErf || doBM || doFermi)
             Yc(end+1) = atomdataSUB(ii).BoxCount(rNum).Yc;
             Xc(end+1) = atomdataSUB(ii).BoxCount(rNum).Xc;
             
