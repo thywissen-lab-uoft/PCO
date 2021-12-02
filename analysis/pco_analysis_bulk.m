@@ -1,3 +1,28 @@
+%% 200Er 12/2021
+
+runs200new=[
+    2021 12 01 08;
+    2021 12 01 09;
+    2021 12 01 10;
+
+    ];
+
+% Note when selecting peak freuqencies, LIST THE SINGLON PEAK FIRST
+Guess_Xc_200new={
+    [-2.5, -40, 10],
+    [-2.5, -25, 18],
+    [-2.5, -10, 16, 42]
+    };
+
+fit_type200new = {
+    'lorentz',
+    'lorentz',
+    'lorentz'
+    };
+out_name200new = 'data_200Er_new.mat';
+
+
+
 %% 300Er
 % 300Er data
 
@@ -7,11 +32,8 @@ runs300=[2021 11 11 09;
     2021 11 11 14;
     2021 11 11 15;
     2021 11 11 17;
-    2021 11 24 12;
-    2021 11 24 13;
-    2021 11 24 14;
-    2021 11 24 15;
-    2021 11 25 02;
+    2021 11 30 07;
+    2021 12 01 01;
 
     ];
 
@@ -24,16 +46,10 @@ Guess_Xc_300={
     [-2.5, -35, 22.5, 7.5],
     [-2.5, -25, 35, 7.5],
     [-2.5, -20, 25, 50],
-    [-2.5, -10, 30, 55],
-    [-2.5, -10, 35, 60],
-    [-2.5, -10, 40, 65],
-    [-2.5, -10, 45, 65]
+    [-2.5, -10, 30, 55]
     };
 
 fit_type300 = {
-    'lorentz',
-    'lorentz',
-    'lorentz',
     'lorentz',
     'lorentz',
     'lorentz',
@@ -163,11 +179,18 @@ fit_type100 = {
 out_name100 = 'data_100Er.mat';
 
 %% Select
-runs = runs300;
-Guess_Xc = Guess_Xc_300;
-out_name = out_name300;
-fit_type = fit_type300;
-data_label = '300Er';
+% 
+ runs = runs200new;
+ Guess_Xc = Guess_Xc_200new;
+ out_name = out_name200new;
+ fit_type = fit_type200new;
+ data_label = '200Er_new';
+
+%  runs = runs300;
+%  Guess_Xc = Guess_Xc_300;
+%  out_name = out_name300;
+%  fit_type = fit_type300;
+%  data_label = '300Er';
 
 % 
 %  runs = runs200;
@@ -414,6 +437,8 @@ for nn=1:length(data)
         all_area        =   [all_area;A];   
         all_amplitude   =   [all_amplitude;amp];
         
+        data_out(nn).Directory = dirNames{nn};
+        %data_out(nn).Source = data(nn).Source;
         data_out(nn).X = X;
         data_out(nn).Y = Y;
         data_out(nn).XStr = Y;
