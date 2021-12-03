@@ -130,6 +130,34 @@ if FitFlags.T2exp
         'fontsize',10,'interpreter','latex');
 end
 
+%% Exponential decay
+if FitFlags.expdecay
+    myfit=fittype('A0 + A1*exp(-1*t/tau)',...
+        'coefficients',{'A0','A1','tau'},...
+        'independent','t');
+
+    % Fit options and guess
+    opt=fitoptions(myfit);        
+    Ag = 0.2;
+    A0 = min(X);
+    taug = median(X);
+    G=[A0 Ag taug];        
+    opt.StartPoint=G;
+
+    % Perform the fit
+    fout=fit(X,Y,myfit,opt)
+
+    % Plot the fit
+    tt=linspace(0,max(X),1000);
+    xlim([0 max(X)]);
+    pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
+    lStr=['$ \tau = ' num2str(round(fout.tau,3)) '~\mathrm{ms}$'];
+    legend(pF,lStr,'location','best','interpreter','latex');        
+    str = '$A_0+ A_1\exp(-t/\tau)$';
+    t=text(.02,.03,str,'units','normalized',...
+        'fontsize',10,'interpreter','latex');
+end
+
 %% Negative Double Gauss
 if length(X)>8 && FitFlags.gauss_neg_double
     myfit=fittype(['bg-A1*exp(-(x-x1).^2/(2*s1.^2))- ' ...
@@ -688,8 +716,8 @@ A2 = 0.005;
 %     x2 = x1;
 %     x2=0;
     
-    x1 = -150;
-    x2 = -0;
+    x1 = -120;
+    x2 = -80;
     
     % Asymmetry
     a1 = .05;

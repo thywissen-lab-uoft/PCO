@@ -85,9 +85,10 @@ bg=min(Y);
 A1 = abs(range(Y));
 
 % Center Point
-inds=[Y>.90*max(Y)];         
-xC=median(X(inds)); 
+inds=[Y>.8*max(Y)];     
 
+xC=median(X(inds)); 
+% xC=240
 % Full Width Half Max
 inds = logical([(Y-bg)./range(Y) < 0.6]) & ...
     logical([(Y-bg)./range(Y) > 0.4]);
@@ -126,6 +127,7 @@ a1 = 1/(0.05); % Long on right
 
 fitopt.StartPoint=[bg a1 xC G1 A1];  
 fitopt.Robust='bisquare';
+fitopt.TolFun=1e-10;
 
 fout1=fit(X,Y,myfit,fitopt);
 ci1 = confint(fout1,0.95);   
@@ -153,14 +155,17 @@ yN = @(G,x0,a,xx) y(G,x0,a,xx)./y0(G,a);
 myfit=fittype(@(bg,a1,x1,G1,A1,x) A1*yN(G1,x1,a1,x)+bg,...
     'coefficients',{'bg','a1','x1','G1','A1'},...
     'independent','x'); 
-
+% xC = 268;
+% A1 = 0.05;
 fitopt=fitoptions(myfit);
-fitopt.StartPoint=[bg max([GR GL]) xC min([GR GL]) A1];  
+fitopt.StartPoint=[bg max([GR GL]) xC min([GR GL]) A1];
 fitopt.Robust='bisquare';
-fitopt.Lower=[bg-1 max([GR GL])-5 xC-5 min([GR GL])-5 A1-5];
-fitopt.Upper=[bg+1 max([GR GL])+5 xC+5 min([GR GL])+5 A1+5];
+%  fitopt.Lower=[bg-1 max([GR GL])-10 xC-0.5 min([GR GL])-5 A1-0.02];
+%  fitopt.Upper=[bg+1 max([GR GL])+10 xC+0.5 min([GR GL])+5 A1+0.02];
+% fitopt.TolFun=1e-10;
+% fitopt.DiffMinChange=1e-10;
 
-fout2=fit(X,Y,myfit,fitopt);
+fout2=fit(X,Y,myfit,fitopt)
 ci2 = confint(fout2,0.95);   
 
 %%
