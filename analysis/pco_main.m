@@ -74,7 +74,7 @@ pco_xVar='Raman_AOM3_freq';
 % pco_xVar='Raman_freq';
 
 % pco_xVar='Pulse_Time';
- pco_xVar='rf_freq_HF_shift';
+  pco_xVar='rf_freq_HF_shift';
 % pco_xVar = 'HF_hold_time';
 
 
