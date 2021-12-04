@@ -46,8 +46,8 @@ lambda=mean([lambdaRb lambdaK]);  % mean wavelength
 CrossSection = 3/(2*pi)*lambda^2; 
 
 % Choose your camera
- camaxis='X';
-%camaxis='Y';
+camaxis='X';
+% camaxis='Y';
 % Choose the pixel size base on the camera
 switch camaxis
     case 'X'
@@ -64,17 +64,22 @@ end
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-% pco_xVar='Raman_AOM3_freq';
+pco_xVar='Raman_AOM3_freq';
 % pco_xVar='lat_mod_freq';
-pco_xVar='AM_spec_freq';
+% pco_xVar='AM_spec_freq';
+
+% pco_xVar='AM_spec_depth';
+
 
 % pco_xVar='Raman_freq';
 
 % pco_xVar='Pulse_Time';
-% pco_xVar='rf_freq_HF';
+  pco_xVar='rf_freq_HF_shift';
 % pco_xVar = 'HF_hold_time';
+
+
 % pco_xVar = 'HF_FeshValue_Spectroscopy';
-%  pco_xVar='ExecutionDate';
+% pco_xVar='ExecutionDate';
 % pco_xVar = 'HF_K_FM_offset'
 % pco_xVar='k_op_am';
 % pco_xVar='rb_op_am';
@@ -137,9 +142,9 @@ doBEC         = 0;      % Enable BEC analysis
 doErfFit      = 0;    
 
 % Band Map Fit
-doBMFit_AM_Spec  = 1; AM_Spec_Dir = 'H';
-doBMFit       = 0;
-doCustom_BM   = 0;    
+doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'V';
+doBMFit       = 1;
+doCustom_BM   = 1;    
 
 % Fermi
 doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
@@ -150,7 +155,7 @@ doRabiAbsolute = 0;
 doRabiContrast = 0;
 
 % Raman Common Mode Detuning
-doWavemeter    = 0;
+doWavemeter    = 1;
 doCavity       = 0;
 
 %% GDrive Settings
@@ -338,7 +343,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 %    ROI=[750 1000 375 620]; % 15 ms BM TOF x cam
   
-  ROI=[434 755 501 828]; % 10 ms BM TOF y cam
+%   ROI=[412 755 552 778]; % 10 ms BM TOF y cam
 
 
 %  ROI = [830 940 230 300;
@@ -368,8 +373,8 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %       800 950 490 600];   %  band map 15 ms TOF  7box, 9 box
 
 
-% ROI=[800 950 490 620;
-%        800 950 1540 1680];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
+ROI=[800 950 490 620;
+       800 950 1540 1680];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
 %    
    
    % ROI = ROI(1,:); % 9 only 

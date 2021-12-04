@@ -67,8 +67,8 @@ y_Lbl{30}     = 'N7/N9';
 p_inds=[06 15 16 28];
 
 % Excitations to 7
-% p_inds = [01,02,05,08,15,18,19,07,30];
-% p_inds = [05];
+p_inds = [01,02,05,06,08,15,18,19,07,30];
+% p_inds = [01,02,03,04,06];
 
 
 
@@ -100,10 +100,11 @@ p_inds=[06 15 16 28];
 FitFlags = struct;
 
 FitFlags.T2exp=0;
+FitFlags.expdecay = 0;
 FitFlags.Rabi_oscillation = 0;
 FitFlags.NGaussPeak=0;
 
-FitFlags.gauss_single=1;
+FitFlags.gauss_single=0;
 FitFlags.gauss_4=0;
 FitFlags.gauss_neg_double=0;
 FitFlags.gauss_neg_single=0;
@@ -148,8 +149,8 @@ if doCustomX
 %     mF2 = -5/2;
 % 
 % 
-   Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
-%     Bfb   = src_data.Params(1).HF_FeshValue_Spectroscopy;
+%    Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
+    Bfb   = src_data.Params(1).HF_FeshValue_Spectroscopy;
 %     Bfb   = src_data.Params(1).HF_FeshValue_Final_Lattice;
     Bshim = src_data.Params(1).HF_zshim_Initial_Lattice*2.35;
     Boff  = 0.11;
