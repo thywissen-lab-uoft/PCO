@@ -64,7 +64,7 @@ end
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-pco_xVar='Raman_AOM3_freq';
+% pco_xVar='Raman_AOM3_freq';
 % pco_xVar='lat_mod_freq';
 % pco_xVar='AM_spec_freq';
 
@@ -74,12 +74,12 @@ pco_xVar='Raman_AOM3_freq';
 % pco_xVar='Raman_freq';
 
 % pco_xVar='Pulse_Time';
-  pco_xVar='rf_freq_HF_shift';
+%   pco_xVar='rf_freq_HF_shift';
 % pco_xVar = 'HF_hold_time';
 
 
 % pco_xVar = 'HF_FeshValue_Spectroscopy';
-% pco_xVar='ExecutionDate';
+pco_xVar='ExecutionDate';
 % pco_xVar = 'HF_K_FM_offset'
 % pco_xVar='k_op_am';
 % pco_xVar='rb_op_am';
@@ -101,7 +101,7 @@ pco_xVar='Raman_AOM3_freq';
 % pco_xVar = 'latt_ramp_time';
 % pco_xVar = 'power_val';
 % pco_xVar = 'Lattice_loading_field';
-% pco_xVar = 'rf_rabi_freq_HF';
+% pco_xVar = 'rf_rabi_time_HF';
 %   pco_xVar = 'rf_delta_freq_HF';
 % pco_xVar = 'HF_FeshValue_Final_ODT';
 %   pco_xVar='HF_Raman_sweep_time';
@@ -143,11 +143,11 @@ doErfFit      = 0;
 
 % Band Map Fit
 doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'V';
-doBMFit       = 1;
-doCustom_BM   = 1;    
+doBMFit       = 0;
+doCustom_BM   = 0;    
 
 % Fermi
-doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
+doFermiFitLong = 1;     % Enable Fermi Fit for XDT TOF
 
 % Custom Box counts
 doCustom       =  0;          % Custom Box Count
