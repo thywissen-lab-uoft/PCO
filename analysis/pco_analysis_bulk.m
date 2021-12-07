@@ -1,20 +1,58 @@
+%% 300Er 12/2021
+
+runs300new=[
+    2021 11 30 07;
+    2021 12 01 01;
+    2021 12 03 09;
+    2021 12 03 10;
+    2021 12 03 11
+
+    ];
+
+% Note when selecting peak freuqencies, LIST THE SINGLON PEAK FIRST
+Guess_Xc_300new={
+    [-2.5, -20, 25, 50],
+    [-2.5, -10, 30, 55]
+    [-2.5, -15, 20, 37]
+    [-2.5, -25, 25],
+    [-2.5, -40, 15]
+    };
+
+fit_type300new = {
+    'lorentz',
+    'lorentz',
+    'lorentz'
+    'lorentz',
+    'lorentz'
+
+    };
+out_name300new = 'data_300Er_new.mat';
+
 %% 200Er 12/2021
 
 runs200new=[
     2021 12 01 08;
     2021 12 01 09;
     2021 12 01 10;
-
+    2021 12 02 09;
+    2021 12 02 10;
+    2021 12 02 11;
     ];
 
 % Note when selecting peak freuqencies, LIST THE SINGLON PEAK FIRST
 Guess_Xc_200new={
     [-2.5, -40, 10],
     [-2.5, -25, 18],
-    [-2.5, -10, 16, 42]
+    [-2.5, -10, 16, 42],
+    [-2.5, -10, 16, 45],
+    [-2.5, -7, 27],
+    [-2.5, -10, 35]
     };
 
 fit_type200new = {
+    'lorentz',
+    'lorentz',
+    'lorentz',
     'lorentz',
     'lorentz',
     'lorentz'
@@ -32,8 +70,6 @@ runs300=[2021 11 11 09;
     2021 11 11 14;
     2021 11 11 15;
     2021 11 11 17;
-    2021 11 30 07;
-    2021 12 01 01;
 
     ];
 
@@ -44,14 +80,10 @@ Guess_Xc_300={
     [-2.5, -35, 22.5],
     [-2.5, -20, 38],
     [-2.5, -35, 22.5, 7.5],
-    [-2.5, -25, 35, 7.5],
-    [-2.5, -20, 25, 50],
-    [-2.5, -10, 30, 55]
+    [-2.5, -25, 35, 7.5]
     };
 
 fit_type300 = {
-    'lorentz',
-    'lorentz',
     'lorentz',
     'lorentz',
     'lorentz',
@@ -179,12 +211,17 @@ fit_type100 = {
 out_name100 = 'data_100Er.mat';
 
 %% Select
-% 
- runs = runs200new;
- Guess_Xc = Guess_Xc_200new;
- out_name = out_name200new;
- fit_type = fit_type200new;
- data_label = '200Er_new';
+ runs = runs300new;
+ Guess_Xc = Guess_Xc_300new;
+ out_name = out_name300new;
+ fit_type = fit_type300new;
+ data_label = '300Er_new';
+
+%  runs = runs200new;
+%  Guess_Xc = Guess_Xc_200new;
+%  out_name = out_name200new;
+%  fit_type = fit_type200new;
+%  data_label = '200Er_new';
 
 %  runs = runs300;
 %  Guess_Xc = Guess_Xc_300;
