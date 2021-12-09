@@ -654,7 +654,7 @@ if length(X)>4 && FitFlags.lorentz_asym_single
     % Center Point
     inds=[Y>.99*max(Y)];         
     x1=mean(X(inds)); 
-    x1 = -2;
+    x1 = -150;
 
     % Assymetry
     a1 = 1/-0.05; % Long on right
@@ -716,7 +716,7 @@ A2 = 0.005;
 %     x2 = x1;
 %     x2=0;
     
-    x1 = -120;
+    x1 = -150;
     x2 = -80;
     
     % Asymmetry
@@ -821,7 +821,7 @@ end
 
 if length(X)>4 && FitFlags.Rabi_oscillation       
 
-    guess_freq = 1/.12;
+    guess_freq = 1/.13;
     guess_tau = 0.5;
 %     
 %         myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t))/2;           

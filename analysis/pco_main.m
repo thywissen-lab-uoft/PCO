@@ -75,7 +75,7 @@ end
 
 % pco_xVar='Pulse_Time';
    pco_xVar='rf_freq_HF_shift';
-%  pco_xVar = 'HF_hold_time';
+  pco_xVar = 'HF_hold_time';
 
 
 % pco_xVar = 'HF_FeshValue_Spectroscopy';
