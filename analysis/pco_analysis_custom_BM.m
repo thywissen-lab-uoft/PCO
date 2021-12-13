@@ -79,7 +79,11 @@ p_inds=[01 02]; %total number
 % p_inds = [03,08,15,16,17];
 
 % % lifetime measurements
+<<<<<<< HEAD
 %  p_inds = [03,04,05,06,08,17];
+=======
+%   p_inds = [03,04,06,08,17];
+>>>>>>> 6c921055f65bacec5cc2283c0cf988639c2c94aa
 
 
 
@@ -155,7 +159,7 @@ if doCustomX
 %     mF2 = -5/2;
 % 
 % 
-   Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
+%    Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
     Bfb   = src_data.Params(1).HF_FeshValue_Spectroscopy;
 %     Bfb   = src_data.Params(1).HF_FeshValue_Final_Lattice;
     Bshim = src_data.Params(1).HF_zshim_Initial_Lattice*2.35;
