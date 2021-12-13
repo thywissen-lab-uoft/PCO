@@ -80,7 +80,7 @@ end
 
 % pco_xVar = 'HF_FeshValue_Spectroscopy';
 % pco_xVar='ExecutionDate';
-% pco_xVar = 'HF_K_FM_offset'
+% pco_xVar = 'HF_K_FM_offset' 
 % pco_xVar='k_op_am';
 % pco_xVar='rb_op_am';
 % pco_xVar = 'RF1B_finalfreq';
@@ -94,7 +94,7 @@ end
 % pco_xVar='HF_kdet_shift';
 %  pco_xVar = 'Evap_End_Power';
 % pco_xVar = 'rf_pulse_length';
-% pco_xVar = 'rf_rabi_time_HF';
+pco_xVar = 'rf_rabi_time_HF';
 % pco_xVar = 'rf_rabi_freq_HF';
 
  

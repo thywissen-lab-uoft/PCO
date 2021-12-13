@@ -3,9 +3,10 @@ fout={};
 FitFlags = opts.FitFlags;
 
 %% Process Data
+X =round(X,4)
 [ux,~,~]=unique(X);    
 ux=unique(X);    
-
+disp(ux)
 Yu=zeros(length(ux),2,size(Y,2));    
 
 
@@ -821,7 +822,7 @@ end
 
 if length(X)>4 && FitFlags.Rabi_oscillation       
 
-    guess_freq = 1/.13;
+    guess_freq = 1/.05;
     guess_tau = 0.5;
 %     
 %         myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t))/2;           
@@ -867,6 +868,59 @@ legend(pF,paramStr,'location','northeast','interpreter','latex');
 outdata.Fit=fout;
 
 end
+
+%% Rabi2
+
+if length(X)>4 && FitFlags.Rabi_oscillation2       
+
+    guess_freq = 1/.05;
+    guess_tau = 0.5;
+%     
+%         myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t))/2;           
+%         fitFuncStr = '$0.5N_0\left(1-\exp(-\pi t / \tau)\cos(2 \pi f t)\right)$';
+
+myfunc=@(N0,f,tau,bg, t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t))/2+bg;   
+fitFuncStr = '$N_0\left(1-\exp(-\pi t / \tau)\cos(2 \pi f t)\right)+bg$';
+
+
+% Define the fit
+myfit=fittype(@(N0,f,tau,bg,t) myfunc(N0,f,tau,bg,t),'independent','t',...
+    'coefficients',{'N0','f','tau','bg'});
+opt=fitoptions(myfit);   
+
+
+opt.StartPoint=[max(Y) guess_freq guess_tau -0.3];
+% opt.Lower=[max(Y)/5 .1 0,-1];
+% opt.Upper=[max(Y) 100 1000,1];
+
+opt.Robust='bisquare';
+
+% Perform the fit
+fout=fit(X,Y,myfit,opt);
+% Construct fit strings
+omega_rabi=2*pi*fout.f; 
+paramStr=['$N_0=' num2str(fout.N0,2) ',~f=' num2str(round(fout.f,2)) ...
+    '~\mathrm{kHz},~\tau=' num2str(round(fout.tau,2)) '~\mathrm{ms}' ...
+    ', bg=' num2str(round(fout.bg,2))...
+    '$'];
+
+tt=linspace(0,max(X),1000);
+ pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
+
+text(.45,.90,fitFuncStr,'units','normalized','interpreter','latex',...
+    'horizontalalignment','right','fontsize',14);
+
+xL=get(gca,'XLim');
+yL=get(gca,'YLim');
+
+% xlim([0 xL(2)]);
+% ylim([0 yL(2)+.1]);
+
+legend(pF,paramStr,'location','northeast','interpreter','latex');
+outdata.Fit=fout;
+
+end
+
 
 
 

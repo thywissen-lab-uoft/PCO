@@ -64,12 +64,12 @@ y_Lbl{30}     = 'N7/N9';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % p_inds is a list where each element is a plot idnex to show. The 
 % number corresponds to the plot index as defined above. 
-% p_inds=[01 02]; %total number
+p_inds=[01 02]; %total number
 
-% p_inds=[03 04];
+% p_inds=[05];
 
 % Excitations to 7
-p_inds = [01,02,05,06,08,15,18,19,07,30];
+% p_inds = [01,02,05,06,08,15,18,19,07,30];
 %  p_inds = [01,02,03,04,06];
 
 
@@ -79,7 +79,7 @@ p_inds = [01,02,05,06,08,15,18,19,07,30];
 % p_inds = [03,08,15,16,17];
 
 % % lifetime measurements
- p_inds = [03,04,06,08,17];
+%  p_inds = [03,04,05,06,08,17];
 
 
 
@@ -105,8 +105,9 @@ p_inds = [01,02,05,06,08,15,18,19,07,30];
 FitFlags = struct;
 
 FitFlags.T2exp=0;
-FitFlags.expdecay =1;
+FitFlags.expdecay =0;
 FitFlags.Rabi_oscillation = 0;
+FitFlags.Rabi_oscillation2 = 0;
 FitFlags.NGaussPeak=0;
 
 FitFlags.gauss_single=0;
