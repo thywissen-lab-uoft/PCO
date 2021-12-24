@@ -74,7 +74,7 @@ end
 % pco_xVar='Raman_freq';
 
 % pco_xVar='Pulse_Time';
-%    pco_xVar='rf_freq_HF_shift';
+   pco_xVar='rf_freq_HF_shift';
 %    pco_xVar = 'HF_hold_time';
 
 
@@ -94,7 +94,7 @@ end
 % pco_xVar='HF_kdet_shift';
 %  pco_xVar = 'Evap_End_Power';
 % pco_xVar = 'rf_pulse_length';
-pco_xVar = 'rf_rabi_time_HF';
+% pco_xVar = 'rf_rabi_time_HF';
 % pco_xVar = 'rf_rabi_freq_HF';
 
  

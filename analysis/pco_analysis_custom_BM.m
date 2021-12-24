@@ -66,18 +66,8 @@ y_Lbl{30}     = 'N7/N9';
 % number corresponds to the plot index as defined above. 
 % p_inds=[01 02]; %total number
 
-<<<<<<< Updated upstream
-p_inds=[06];
-
 % Excitations to 7
-p_inds = [01,02,05,06,08,30];
-=======
-p_inds=[01 02 05];
-
-% Excitations to 7
-% p_inds = [01,02,05,06,08,15,18,19,07,30];
->>>>>>> Stashed changes
-%  p_inds = [01,02,03,04,06];
+ p_inds = [01,02,03,04,05,06];
 
 
 
@@ -86,11 +76,7 @@ p_inds=[01 02 05];
 % p_inds = [03,08,15,16,17];
 
 % % lifetime measurements
-<<<<<<< Updated upstream
-% %  p_inds = [03,04,05,06,08,17];
-=======
 %   p_inds = [01,02,03,04,06,08,17];
->>>>>>> Stashed changes
 
 
 
