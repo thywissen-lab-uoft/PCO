@@ -1,9 +1,22 @@
+figs=get(groot,'Children');
+disp(' ');
+disp('Closing all non GUI figures.');
+for kk=1:length(figs)
+   if ~isequal(figs(kk).Tag,'GUI')
+       disp(['Closing figure ' num2str(figs(kk).Number) ' ' figs(kk).Name]);
+      close(figs(kk)) 
+   end
+end
+disp(' ');
+
+
 %% 100Er 12/2021
 
 runs100new=[
     2021 12 06 07;
     2021 12 08 11;
     2021 12 08 12;
+<<<<<<< Updated upstream
 %     2021 12 08 13;
     2021 12 11 06;
     2021 12 11 07;
@@ -14,6 +27,12 @@ runs100new=[
     2021 12 17 01;
     2021 12 17 04;
     2021 12 18 04;
+=======
+    2021 12 08 13;
+    2021 12 11 06;
+    2021 12 11 07;
+
+>>>>>>> Stashed changes
 
     ];
 
@@ -22,6 +41,7 @@ Guess_Xc_100new={
     [-2.5, 29]
     [-2.5, -10, 15]
     [-2.5, 35]
+<<<<<<< Updated upstream
 %     [-2.5, -18,4]
     [-2.5, -25,5]
     [-2.5, -10]
@@ -32,6 +52,11 @@ Guess_Xc_100new={
     [-2.5, -28, 4]
     [-2.5, 56.5]
     [-2.5,35, 58]
+=======
+    [-2.5, -18,4]
+    [-2.5, -25, 4]
+    [-2.5, -10]
+>>>>>>> Stashed changes
     };
 
 fit_type100new = {
@@ -48,6 +73,9 @@ fit_type100new = {
     'lorentz'
     'lorentz'
     'lorentz'
+    'lorentz'
+    'lorentz'
+
     };
 out_name100new = 'data_100Er_new.mat';
 
@@ -65,9 +93,14 @@ runs300new=[
     2021 12 04 03;
     2021 12 08 02;
     2021 12 08 04;
+<<<<<<< Updated upstream
     2021 12 15 03;
     2021 12 15 06;
     2021 12 16 02;
+=======
+    2021 12 12 02;
+    2021 12 12 03;
+>>>>>>> Stashed changes
     ];
 
 % Note when selecting peak freuqencies, LIST THE SINGLON PEAK FIRST
@@ -81,9 +114,14 @@ Guess_Xc_300new={
     [-2.5, 9],
     [-2.5, 9],
     [-2.5, 35]
+<<<<<<< Updated upstream
     [-2.5, 12, 20],
     [-2.5, 14],
     [-2.5, 8, 14]
+=======
+    [-2.5, -30, 25]
+    [-2.5, -35]
+>>>>>>> Stashed changes
     };
 
 fit_type300new = {
@@ -96,8 +134,12 @@ fit_type300new = {
     'lorentz',
     'lorentz',
     'lorentz',
+<<<<<<< Updated upstream
     'lorentz',
     'lorentz',
+=======
+    'lorentz'
+>>>>>>> Stashed changes
     'lorentz'
     };
 out_name300new = 'data_300Er_new.mat';
@@ -112,11 +154,17 @@ runs200new=[
     2021 12 02 10;
     2021 12 02 11;
     2021 12 09 12;
+<<<<<<< Updated upstream
 %     2021 12 09 13;
     2021 12 15 05;
     2021 12 23 03;
 
 
+=======
+    2021 12 09 13; 
+    2021 12 11 02;
+    2021 12 11 03;
+>>>>>>> Stashed changes
     ];
 
 % Note when selecting peak freuqencies, LIST THE SINGLON PEAK FIRST
@@ -128,10 +176,17 @@ Guess_Xc_200new={
     [-2.5, -7, 27],
     [-2.5, -10, 35],
     [-2.5, -30, 10],
+<<<<<<< Updated upstream
 %     [-2.5, -28, 6, 16],
     [-2.5, -25, 15]
     [-2.5, -15, 18,44]
 
+=======
+    [-2.5, -28, 6, 16],
+    [-2.5, -25, 15],
+    [-2.5, -18, 22]
+    [-2.5, -25, 20],
+>>>>>>> Stashed changes
 
     };
 
@@ -143,7 +198,11 @@ fit_type200new = {
     'lorentz',
     'lorentz',
     'lorentz',
+<<<<<<< Updated upstream
 %     'lorentz',
+=======
+    'lorentz',
+>>>>>>> Stashed changes
     'lorentz',
     'lorentz'
     };
@@ -182,6 +241,73 @@ fit_type300 = {
     'lorentz'
     };
 out_name300 = 'data_300Er.mat';
+
+%% 60Er
+% 60Er data
+
+runs60=[2021 12 10 10;
+    2021 12 10 11;
+    2021 12 10 12;
+    2021 12 10 13;
+    2021 12 12 04;
+
+
+    ];
+
+% Note when selecting peak freuqencies, LIST THE SINGLON PEAK FIRST
+Guess_Xc_60={
+    [-2.5, -5, 15],
+    [-2.5, 20]
+    [-2.5,-10, 10]
+    [-2.5,28]
+    [-2.5,-14]
+
+    };
+
+fit_type60 = {
+    'lorentz',
+    'lorentz'
+    'lorentz'
+    'lorentz'
+    'lorentz'
+
+    };
+out_name60 = 'data_60Er.mat';
+
+%% 40Er
+% 40Er data
+
+runs40=[2021 12 12 05;
+    ];
+
+% Note when selecting peak freuqencies, LIST THE SINGLON PEAK FIRST
+Guess_Xc_40={
+    [-2.5, 15]
+
+    };
+
+fit_type40 = {
+    'lorentz'
+
+    };
+out_name40 = 'data_40Er.mat';
+
+%% 20Er
+% 20Er data
+
+runs20=[2021 12 12 06;
+    ];
+
+% Note when selecting peak freuqencies, LIST THE SINGLON PEAK FIRST
+Guess_Xc_20={
+    [-2.5, 7 ]
+
+    };
+
+fit_type20 = {
+    'lorentz'
+    };
+out_name20 = 'data_20Er.mat';
 
 %% 200 Er
 runs200 =[
@@ -307,25 +433,55 @@ out_name100 = 'data_100Er.mat';
  fit_type = fit_type100new;
  data_label = '100Er_new';
 % % 
+<<<<<<< Updated upstream
 %  runs = runs300new;
 %  Guess_Xc = Guess_Xc_300new;
 %  out_name = out_name300new;
 %  fit_type = fit_type300new;
 %  data_label = '300Er_new';
 % % 
+=======
+ runs = runs300new;
+ Guess_Xc = Guess_Xc_300new;
+ out_name = out_name300new;
+ fit_type = fit_type300new;
+ data_label = '300Er_new';
+
+>>>>>>> Stashed changes
 %   runs = runs200new;
 %   Guess_Xc = Guess_Xc_200new;
 %   out_name = out_name200new;
 %   fit_type = fit_type200new;
 %   data_label = '200Er_new';
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 
 %  runs = runs300;
 %  Guess_Xc = Guess_Xc_300;
 %  out_name = out_name300;
 %  fit_type = fit_type300;
 %  data_label = '300Er';
-
+% % 
+  runs = runs60;
+  Guess_Xc = Guess_Xc_60;
+  out_name = out_name60;
+  fit_type = fit_type60;
+  data_label = '60Er';
 % 
+  runs = runs40;
+  Guess_Xc = Guess_Xc_40;
+  out_name = out_name40;
+  fit_type = fit_type40;
+  data_label = '40Er';
+  
+%   runs = runs20;
+%   Guess_Xc = Guess_Xc_20;
+%   out_name = out_name20;
+%   fit_type = fit_type20;
+%   data_label = '20Er';
+
 %  runs = runs200;
 %  Guess_Xc = Guess_Xc_200;
 %  out_name = out_name200;

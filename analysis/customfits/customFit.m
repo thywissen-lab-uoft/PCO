@@ -54,6 +54,7 @@ set(gca,'fontsize',12,'linewidth',1,'box','on','xgrid','on','ygrid','on');
 % Y Limits
 yL = get(gca,'YLim');
 ylim(yL);
+% ylim([0.05 0.4]);
 
 % X Limits
 xL = get(gca,'XLim');
@@ -720,7 +721,7 @@ A2 = 0.005;
     x1 = -150;
     x2 = -80;
     
-    % Asymmetry
+    % (etry
     a1 = .05;
     a2 = .05;
 
