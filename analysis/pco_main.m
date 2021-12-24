@@ -94,7 +94,7 @@ end
 % pco_xVar='HF_kdet_shift';
 %  pco_xVar = 'Evap_End_Power';
 % pco_xVar = 'rf_pulse_length';
-pco_xVar = 'rf_rabi_time_HF';
+% pco_xVar = 'rf_rabi_time_HF';
 % pco_xVar = 'rf_rabi_freq_HF';
 
  
@@ -142,7 +142,7 @@ doBEC         = 0;      % Enable BEC analysis
 doErfFit      = 0;    
 
 % Band Map Fit
-doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'V';
+doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'H';
 doBMFit       = 1;
 doCustom_BM   = 1;    
 

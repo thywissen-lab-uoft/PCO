@@ -3,10 +3,10 @@ fout={};
 FitFlags = opts.FitFlags;
 
 %% Process Data
-X =round(X,4)
+X =round(X,4);
 [ux,~,~]=unique(X);    
 ux=unique(X);    
-disp(ux)
+% disp(ux)
 Yu=zeros(length(ux),2,size(Y,2));    
 
 
@@ -768,7 +768,7 @@ if length(X)>4 && FitFlags.lorentz_single
     A1=(max(Y)-min(Y));
     inds=[Y>.8*max(Y)];
     x0=mean(X(inds));
-    x0 = -4
+    x0 = 57.5
     opt.StartPoint=[A1/100 G0 x0 bg];   
 %         opt.Upper=[1 3*G0 x0+range(X) 0];   
 
@@ -873,25 +873,26 @@ end
 
 if length(X)>4 && FitFlags.Rabi_oscillation2       
 
-    guess_freq = 1/.05;
-    guess_tau = 0.5;
+    guess_freq = 1/.4;
+    guess_tau = 100;
+%     tau2=0.1;
 %     
 %         myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t))/2;           
 %         fitFuncStr = '$0.5N_0\left(1-\exp(-\pi t / \tau)\cos(2 \pi f t)\right)$';
 
-myfunc=@(N0,f,tau,bg, t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t))/2+bg;   
-fitFuncStr = '$N_0\left(1-\exp(-\pi t / \tau)\cos(2 \pi f t)\right)+bg$';
+myfunc=@(N0,f,tau,tau2,bg, t) (N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t))/2)+bg.*exp(-t/tau2);   
+fitFuncStr = '$N_0\left(1-\exp(-\pi t / \tau)\cos(2 \pi f t)\right)\exp(-t/\tau_2)+bg$';
 
 
 % Define the fit
-myfit=fittype(@(N0,f,tau,bg,t) myfunc(N0,f,tau,bg,t),'independent','t',...
-    'coefficients',{'N0','f','tau','bg'});
+myfit=fittype(@(N0,f,tau,tau2,bg,t) myfunc(N0,f,tau,tau2,bg,t),'independent','t',...
+    'coefficients',{'N0','f','tau','tau2','bg'});
 opt=fitoptions(myfit);   
 
 
-opt.StartPoint=[max(Y) guess_freq guess_tau -0.3];
-% opt.Lower=[max(Y)/5 .1 0,-1];
-% opt.Upper=[max(Y) 100 1000,1];
+opt.StartPoint=[max(Y) guess_freq guess_tau 1000 -0.3];
+% opt.Lower=[max(Y)/5 .1 0,0.01,-1];
+% opt.Upper=[max(Y) 100 1000,1000,1];
 
 opt.Robust='bisquare';
 
@@ -902,6 +903,7 @@ omega_rabi=2*pi*fout.f;
 paramStr=['$N_0=' num2str(fout.N0,2) ',~f=' num2str(round(fout.f,2)) ...
     '~\mathrm{kHz},~\tau=' num2str(round(fout.tau,2)) '~\mathrm{ms}' ...
     ', bg=' num2str(round(fout.bg,2))...
+    ', \tau_2=' num2str(round(fout.tau2,2))...
     '$'];
 
 tt=linspace(0,max(X),1000);
