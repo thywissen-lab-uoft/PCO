@@ -8,9 +8,9 @@
 % Select the data source
 
 % data_source = 'box';
-% data_source = 'gauss';
+data_source = 'gauss';
 % data_source = 'erf';
-data_source = 'erf';
+% data_source = 'erf';
 
 switch data_source
     case 'box'        
@@ -123,7 +123,7 @@ if beep
     process_data.Ratio_79=Ratio_79;    
     process_data.Natoms = N;        
 
-    dataMode= 1;         
+    dataMode= 2;         
     switch dataMode
         case 0     
              process_data.Function = @(N) (N(:,1)-N(:,2))./N(:,1);
@@ -259,7 +259,7 @@ if doCustom
     gauss_neg_single=0;
     gauss_double = 0;
     
-    lorentz_neg_single=0;    
+    lorentz_neg_single=1;    
     lorentz_neg_double=0;  
     
     lorentz_single=0;
@@ -343,7 +343,7 @@ end
     Ntot = sum(N,2);     
      N(:,2) = N(:,2)*8.6/7.2; %fudge factor
 
-     dataMode= 1;         
+     dataMode= 2;         
      switch dataMode
          case 0     
              Y=(N(:,1)-N(:,2))./N(:,1);
@@ -572,9 +572,10 @@ end
         xC=X(ind);
         
         % Assign guess
-        xC1 = 20;
-        xC2 = 90;
-        G=[A 20 xC1 A/10 20 xC2 bg];        
+        xC1 = 198.3;
+        xC2 = 198.8;
+%         G=[A 20 xC1 A/10 20 xC2 bg];        
+        G=[A 0.2 xC1 A/100 0.2 xC2 bg];
         
         opt.StartPoint=G;
         opt.Robust='bisquare';
@@ -587,8 +588,8 @@ end
         % Plot the fit
         tt=linspace(min(X),max(X),1000);
         pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
-        lStr=['xC=(' num2str(round(fout.x1,1)) ',' num2str(round(fout.x2,1)) ')' ...
-            ' FWHM=(' num2str(round(fout.G1,1)) ',' num2str(round(fout.G2,1)) ')' ];
+        lStr=['xC=(' num2str(round(fout.x1,2)) ',' num2str(round(fout.x2,2)) ')' ...
+            ' FWHM=(' num2str(round(fout.G1,2)) ',' num2str(round(fout.G2,2)) ')' ];
         legend(pF,lStr,'location','best');
         
         custom_data.Fit=fout;
@@ -719,7 +720,7 @@ end
         xC=X(ind);
         
         % Assign guess
-        G=[A 35 -50 bg];
+        G=[A 0.5 199.2 bg];
         opt.StartPoint=G;
 
         % Perform the fit
@@ -729,7 +730,7 @@ end
         % Plot the fit
         tt=linspace(min(X),max(X),1000);
         pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
-          lStr=['xC=(' num2str(round(fout.x0,1)) ')' ...
+          lStr=['xC=(' num2str(round(fout.x0,2)) ')' ...
             ' FWHM=(' num2str(round(fout.G,1)) ')' ];
         legend(pF,lStr,'location','best');
     end

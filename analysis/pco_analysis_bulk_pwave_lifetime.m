@@ -1,5 +1,14 @@
 %% Runs
 
+data_60=[
+    2021 12 25 02
+%     2021 12 25 03
+    2021 12 25 04
+    2021 12 25 07
+    2021 12 25 08
+%     2021 12 25 09
+    ];
+
 data_100=[
     2021 12 09 02;
     2021 12 09 03;
@@ -50,6 +59,11 @@ out_name = 'lifetime_100Er.mat';
 %  data_label = '300Er';
 %  Bfield_manual = B_300+0.09;
 % out_name = 'lifetime_300Er.mat';
+
+ runs = data_60;
+ data_label = '60Er';
+out_name = 'lifetime_60Er.mat';
+
 
 %% Load the data
 

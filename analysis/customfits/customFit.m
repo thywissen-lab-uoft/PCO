@@ -769,7 +769,7 @@ if length(X)>4 && FitFlags.lorentz_single
     A1=(max(Y)-min(Y));
     inds=[Y>.8*max(Y)];
     x0=mean(X(inds));
-    x0 = 57.5
+    x0 = 40;
     opt.StartPoint=[A1/100 G0 x0 bg];   
 %         opt.Upper=[1 3*G0 x0+range(X) 0];   
 

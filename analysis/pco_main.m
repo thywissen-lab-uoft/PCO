@@ -75,10 +75,10 @@ end
 
 % pco_xVar='Pulse_Time';
    pco_xVar='rf_freq_HF_shift';
-%    pco_xVar = 'HF_hold_time';
+   pco_xVar = 'HF_hold_time';
 
 
-% pco_xVar = 'HF_FeshValue_Spectroscopy';
+pco_xVar = 'HF_FeshValue_Spectroscopy';
 % pco_xVar='ExecutionDate';
 % pco_xVar = 'HF_K_FM_offset' 
 % pco_xVar='k_op_am';
@@ -103,7 +103,7 @@ end
 % pco_xVar = 'Lattice_loading_field';
 % pco_xVar = 'rf_rabi_freq_HF';
 %   pco_xVar = 'rf_delta_freq_HF';
-% pco_xVar = 'HF_FeshValue_Final_ODT';
+% pco_xVar = 'HF_FeshValue_Initial_ODT';
 %   pco_xVar='HF_Raman_sweep_time';
 %   pco_xVar='latt_rampdown_time';
 
@@ -134,7 +134,7 @@ doLandauZener = 0;      % Landau Zener Analysis on BOX
 doRamanSpec   = 0;      % Raman box count count analyis
 
 % Gaussian
-doGaussFit    = 0;      % Enable gauss fitting
+doGaussFit    = 1;      % Enable gauss fitting
 doGaussRabi   = 0;      % Enable gauss rabi
 doBEC         = 0;      % Enable BEC analysis
 
@@ -143,14 +143,14 @@ doErfFit      = 0;
 
 % Band Map Fit
 doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'H';
-doBMFit       = 1;
-doCustom_BM   = 1;    
+doBMFit       = 0;
+doCustom_BM   = 0;    
 
 % Fermi
 doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
 
 % Custom Box counts
-doCustom       =  0;          % Custom Box Count
+doCustom       =  1;          % Custom Box Count
 doRabiAbsolute = 0;
 doRabiContrast = 0;
 
@@ -364,8 +364,8 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % ROI=[800 950 182 1011;
 %     800 950 1228 2040];   % XDT full TOF
 
-%  ROI=[800 950 660 760;
-%     800 950 1700 1800];   % XDT 20 ms TOF
+ ROI=[757 1002 586 831;
+    757 1002 586+1064 831+1064];   % XDT 20 ms TOF
 % % 
 % ROI=[800 950 1700 1800];   % XDT 20 ms TOF
 % % % 
@@ -373,9 +373,9 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %       800 950 490 600];   %  band map 15 ms TOF  7box, 9 box
 
 
-ROI=[800 950 490 620;
-       800 950 1540 1680];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
-%    
+% ROI=[800 950 490 620;
+%        800 950 1540 1680];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
+% %    
    
    % ROI = ROI(1,:); % 9 only 
     %ROI = ROI(2,:); % 7 only

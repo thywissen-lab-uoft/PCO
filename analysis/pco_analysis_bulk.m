@@ -26,6 +26,7 @@ runs100new=[
     2021 12 17 01;
     2021 12 17 04;
     2021 12 18 04;
+%     2021 12 25 13; %bad?
     ];
 
 % Note when selecting peak freuqencies, LIST THE SINGLON PEAK FIRST
@@ -43,6 +44,7 @@ Guess_Xc_100new={
     [-2.5, -28, 4]
     [-2.5, 56.5]
     [-2.5,35, 58]
+%     [-2.5,-12, 10]
     };
 
 fit_type100new = {
@@ -59,6 +61,7 @@ fit_type100new = {
     'lorentz'
     'lorentz'
     'lorentz'
+%     'lorentz'
 
     };
 out_name100new = 'data_100Er_new.mat';
@@ -129,9 +132,19 @@ runs200new=[
     2021 12 02 10;
     2021 12 02 11;
     2021 12 09 12;
+    2021 12 11 03;
+    
 %     2021 12 09 13;
     2021 12 15 05;
     2021 12 23 03;
+    2021 12 26 02;
+    2021 12 26 03;
+    2021 12 26 04;
+    2021 12 26 05;
+    2021 12 26 07;
+    2021 12 26 08;
+    2021 12 26 06;
+    2021 12 26 10;
     ];
 
 % Note when selecting peak freuqencies, LIST THE SINGLON PEAK FIRST
@@ -143,9 +156,19 @@ Guess_Xc_200new={
     [-2.5, -7, 27],
     [-2.5, -10, 35],
     [-2.5, -30, 10],
+    [-2.5, -19, 22.5]
 %     [-2.5, -28, 6, 16],
     [-2.5, -25, 15]
     [-2.5, -15, 18,44]
+    [-2.5, 6]
+    [-2.5, 6]
+    [-2.5, 6]
+    [-2.5, 13]
+    [-2.5, 5]
+    [-2.5, 8]
+    [-2.5, 10]
+    [-2.5, 15]
+    [-2.5, 6]
     };
 
 fit_type200new = {
@@ -156,8 +179,17 @@ fit_type200new = {
     'lorentz',
     'lorentz',
     'lorentz',
+    'lorentz'
 %     'lorentz',
     'lorentz',
+    'lorentz'
+    'lorentz'
+    'lorentz'
+    'lorentz'
+    'lorentz'
+    'lorentz'
+    'lorentz'
+    'lorentz'
     'lorentz'
     };
 out_name200new = 'data_200Er_new.mat';
@@ -201,10 +233,20 @@ out_name300 = 'data_300Er.mat';
 
 runs60=[2021 12 10 10;
     2021 12 10 11;
-    2021 12 10 12;
+%     2021 12 10 12;
     2021 12 10 13;
     2021 12 12 04;
     2021 12 23 08;
+    2021 12 23 10;
+    2021 12 23 11;
+    2021 12 24 01;
+    2021 12 24 06;
+    2021 12 24 08;
+    2021 12 24 09;
+    2021 12 24 10;
+    2021 12 25 10;
+    2021 12 25 11;
+    2021 12 25 12;
 
 
 
@@ -213,16 +255,36 @@ runs60=[2021 12 10 10;
 % Note when selecting peak freuqencies, LIST THE SINGLON PEAK FIRST
 Guess_Xc_60={
     [-2.5, -5, 15],
-    [-2.5, 20]
+%     [-2.5, 20]
     [-2.5,-10, 10]
     [-2.5,28]
     [-2.5,-14]
-    [-2.5, 23]
+    [-2.5, 25]
+    [-2.5, 30]
+    [-2.5,9, 36]
+    [-2.5,13, 40]
+    [-2.5, 46]
+    [-2.5, -10, 7]
+    [-2.5, -15, 5]
+    [-2.5,  3]
+    [-2.5,-18]
+    [-2.5,-25]
+    [-2.5,-27]
 
     };
 
 fit_type60 = {
     'lorentz',
+%     'lorentz'
+    'lorentz'
+    'lorentz'
+    'lorentz'
+    'lorentz'
+    'lorentz'
+    'lorentz'
+    'lorentz'
+    'lorentz'
+    'lorentz'
     'lorentz'
     'lorentz'
     'lorentz'
@@ -397,12 +459,12 @@ out_name100 = 'data_100Er.mat';
 %  fit_type = fit_type300new;
 %  data_label = '300Er_new';
 % % 
-% 
-%   runs = runs200new;
-%   Guess_Xc = Guess_Xc_200new;
-%   out_name = out_name200new;
-%   fit_type = fit_type200new;
-%   data_label = '200Er_new';
+% % 
+  runs = runs200new;
+  Guess_Xc = Guess_Xc_200new;
+  out_name = out_name200new;
+  fit_type = fit_type200new;
+  data_label = '200Er_new';
 
 %  runs = runs300;
 %  Guess_Xc = Guess_Xc_300;
@@ -410,11 +472,11 @@ out_name100 = 'data_100Er.mat';
 %  fit_type = fit_type300;
 %  data_label = '300Er';
 % % 
-  runs = runs60;
-  Guess_Xc = Guess_Xc_60;
-  out_name = out_name60;
-  fit_type = fit_type60;
-  data_label = '60Er';
+%   runs = runs60;
+%   Guess_Xc = Guess_Xc_60;
+%   out_name = out_name60;
+%   fit_type = fit_type60;
+%   data_label = '60Er';
 % 
 %   runs = runs40;
 %   Guess_Xc = Guess_Xc_40;
