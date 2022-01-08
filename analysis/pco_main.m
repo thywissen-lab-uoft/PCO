@@ -75,11 +75,11 @@ end
 
 % pco_xVar='Pulse_Time';
    pco_xVar='rf_freq_HF_shift';
-   pco_xVar = 'HF_hold_time';
+%    pco_xVar = 'HF_hold_time';
 
 
-pco_xVar = 'HF_FeshValue_Spectroscopy';
-% pco_xVar='ExecutionDate';
+% pco_xVar = 'HF_FeshValue_Spectroscopy';
+pco_xVar='ExecutionDate';
 % pco_xVar = 'HF_K_FM_offset' 
 % pco_xVar='k_op_am';
 % pco_xVar='rb_op_am';
@@ -104,6 +104,8 @@ pco_xVar = 'HF_FeshValue_Spectroscopy';
 % pco_xVar = 'rf_rabi_freq_HF';
 %   pco_xVar = 'rf_delta_freq_HF';
 % pco_xVar = 'HF_FeshValue_Initial_ODT';
+%    pco_xVar = 'HF_hold_time_ODT';
+
 %   pco_xVar='HF_Raman_sweep_time';
 %   pco_xVar='latt_rampdown_time';
 
@@ -134,7 +136,7 @@ doLandauZener = 0;      % Landau Zener Analysis on BOX
 doRamanSpec   = 0;      % Raman box count count analyis
 
 % Gaussian
-doGaussFit    = 1;      % Enable gauss fitting
+doGaussFit    = 0;      % Enable gauss fitting
 doGaussRabi   = 0;      % Enable gauss rabi
 doBEC         = 0;      % Enable BEC analysis
 
@@ -147,15 +149,15 @@ doBMFit       = 0;
 doCustom_BM   = 0;    
 
 % Fermi
-doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
+doFermiFitLong = 1;     % Enable Fermi Fit for XDT TOF
 
 % Custom Box counts
-doCustom       =  1;          % Custom Box Count
+doCustom       =  0;          % Custom Box Count
 doRabiAbsolute = 0;
 doRabiContrast = 0;
 
 % Raman Common Mode Detuning
-doWavemeter    = 1;
+doWavemeter    = 0;
 doCavity       = 0;
 
 %% GDrive Settings
