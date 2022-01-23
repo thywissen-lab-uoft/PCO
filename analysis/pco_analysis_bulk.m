@@ -138,7 +138,7 @@ runs200new=[
     2021 12 15 05;
     2021 12 23 03;
     2021 12 26 02;
-    2021 12 26 03;
+%     2021 12 26 03;
     2021 12 26 04;
     2021 12 26 05;
     2021 12 26 07;
@@ -161,7 +161,7 @@ Guess_Xc_200new={
     [-2.5, -25, 15]
     [-2.5, -15, 18,44]
     [-2.5, 6]
-    [-2.5, 6]
+%     [-2.5, 6]
     [-2.5, 6]
     [-2.5, 13]
     [-2.5, 5]
@@ -184,7 +184,7 @@ fit_type200new = {
     'lorentz',
     'lorentz'
     'lorentz'
-    'lorentz'
+%     'lorentz'
     'lorentz'
     'lorentz'
     'lorentz'
@@ -233,7 +233,7 @@ out_name300 = 'data_300Er.mat';
 
 runs60=[2021 12 10 10;
     2021 12 10 11;
-%     2021 12 10 12;
+%     2021 12 10 12;  %bad
     2021 12 10 13;
     2021 12 12 04;
     2021 12 23 08;
@@ -477,7 +477,7 @@ out_name100 = 'data_100Er.mat';
 %   out_name = out_name60;
 %   fit_type = fit_type60;
 %   data_label = '60Er';
-% 
+% % 
 %   runs = runs40;
 %   Guess_Xc = Guess_Xc_40;
 %   out_name = out_name40;
@@ -682,6 +682,37 @@ for nn=1:length(data)
             freq_delta = freq_delta - freq_delta(1);
             freq_delta_err(1)  = NaN;
         end
+        
+        if isequal(fit_type{nn},'lorentzassym')
+            freq_hwhm=zeros(nF,1);
+            freq_center=zeros(nF,1);
+            freq_delta=zeros(nF,1);
+            amp=zeros(nF,1);
+            A=zeros(nF,1);
+            freq_delta_err=zeros(nF,1);
+            lorentz_opts = struct;
+            lorentz_opts.Guess_Sigma = 13;
+            lorentz_opts.Sign ='pos';
+            lorentz_opts.Guess_Xc = Guess_Xc{nn};            
+            [fout,output,str,A]=customLorentzAssymPeak(X,Y,lorentz_opts);
+            fouts{nn}=fout;     
+            for kk=1:nF
+                freq_hwhm(kk) = fout.(['s' num2str(kk)]);               % hwhm
+                freq_center(kk) = x0 + fout.(['x' num2str(kk)])*1e-3;   % frequency
+                amp(kk)  = fout.(['A' num2str(kk)]);                    % amplitude
+                A(kk)    = amp(kk)*pi*fout.(['s' num2str(kk)]);         % area
+                freq_delta(kk)= fout.(['x' num2str(kk)]);               % Offset frequency  
+                freq_delta_err(kk) = sqrt(freq_hwhm(1)^2 + freq_hwhm(kk).^2);
+
+            end
+            % Specify frequencies relative to the first one
+            freq_delta = freq_delta - freq_delta(1);
+            freq_delta_err(1)  = NaN;
+        end
+        
+        
+        
+        
 
         % Plot the fit
         tt=linspace(min(X),max(X),1000);
