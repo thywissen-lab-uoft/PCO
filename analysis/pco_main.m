@@ -64,48 +64,47 @@ end
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-% pco_xVar='Raman_AOM3_freq';
-% pco_xVar='lat_mod_freq';
-% pco_xVar='AM_spec_freq';
+% pco_xVar=  'kdet_shift';
+% pco_xVar=  'lat_mod_freq';
+% pco_xVar=  'AM_spec_freq';
+% pco_xVar=  'AM_spec_depth';
 
-% pco_xVar='AM_spec_depth';
-
-
-% pco_xVar='Raman_freq';
-
-% pco_xVar='Pulse_Time';
-   pco_xVar='rf_freq_HF_shift';
-%    pco_xVar = 'HF_hold_time';
+pco_xVar='Raman_AOM3_freq';
+% pco_xVar=  'Raman_freq';
+pco_xVar= 'Pulse_Time';
+% pco_xVar=  'rf_freq_HF_shift';
+% pco_xVar=  'rf_freq_HF';
+% pco_xVar = 'HF_hold_time';
 
 
 % pco_xVar = 'HF_FeshValue_Spectroscopy';
-% pco_xVar='ExecutionDate';
+pco_xVar=    'ExecutionDate';
+% pco_xVar=  'Evap_End_Power';
 % pco_xVar = 'HF_K_FM_offset' 
-% pco_xVar='k_op_am';
-% pco_xVar='rb_op_am';
+% pco_xVar=  'k_op_am';
+% pco_xVar=  'rb_op_am';
 % pco_xVar = 'RF1B_finalfreq';
 % pco_xVar = 'kdet_shift';
 % pco_xVar = 'k_op_det';
-
 % pco_xVar = 'rf_tof_srs_power';
 % pco_xVar = 'rf_tof_freq';
 % pco_xVar = 'rf_tof_delta_freq';
-
-% pco_xVar='HF_kdet_shift';
-%  pco_xVar = 'Evap_End_Power';
+% pco_xVar=  'HF_kdet_shift';
+% pco_xVar=  'HF_prob_pwr1';
+% pco_xVar = 'XDT_initial_power';
+% pco_xVar = 'Evap_End_Power';
+% pco_xVar = 'Evap_Tau_frac';
 % pco_xVar = 'rf_pulse_length';
-pco_xVar = 'rf_rabi_time_HF';
+% pco_xVar = 'rf_rabi_time_HF';
 % pco_xVar = 'rf_rabi_freq_HF';
-
- 
 % pco_xVar = 'latt_ramp_time';
 % pco_xVar = 'power_val';
 % pco_xVar = 'Lattice_loading_field';
 % pco_xVar = 'rf_rabi_freq_HF';
-%   pco_xVar = 'rf_delta_freq_HF';
-% pco_xVar = 'HF_FeshValue_Final_ODT';
-%   pco_xVar='HF_Raman_sweep_time';
-%   pco_xVar='latt_rampdown_time';
+% pco_xVar = 'rf_delta_freq_HF';
+% pco_xVar = 'HF_FeshValue_Initial_ODT';
+% pco_xVar=  'HF_Raman_sweep_time';
+% pco_xVar=  'latt_rampdown_time';
 
 
 % Should the analysis attempt to automatically find the unit?
@@ -143,11 +142,11 @@ doErfFit      = 0;
 
 % Band Map Fit
 doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'V';
-doBMFit       = 1;
-doCustom_BM   = 1;    
+doBMFit       = 0;
+doCustom_BM   = 0;    
 
 % Fermi
-doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
+doFermiFitLong = 1;     % Enable Fermi Fit for XDT TOF
 
 % Custom Box counts
 doCustom       =  0;          % Custom Box Count
@@ -155,7 +154,7 @@ doRabiAbsolute = 0;
 doRabiContrast = 0;
 
 % Raman Common Mode Detuning
-doWavemeter    = 1;
+doWavemeter    = 0;
 doCavity       = 0;
 
 %% GDrive Settings
@@ -300,7 +299,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 %%%%% XDT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% ROI = [700 1050 240 640]; %K XDT 5ms tof
+% ROI = [510 1330 180 480]; %K XDT 5ms tof
 % ROI = [700 1050 327 645]; %K XDT 15ms tof rb
 
 % ROI=[649 1160 580 1024];   % XDT TOF 15 ms
@@ -363,20 +362,23 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 % ROI=[800 950 182 1011;
 %     800 950 1228 2040];   % XDT full TOF
-
-%  ROI=[800 950 660 760;
-%     800 950 1700 1800];   % XDT 20 ms TOF
-% % 
-% ROI=[800 950 1700 1800];   % XDT 20 ms TOF
+% 
+%  ROI=[760 1000 590 830;
+%     760 1000 590+1064 830+1064];   % XDT 20 ms TOF
+% % % 
+% ROI=[760 1000 590+1064 830+1064];   % XDT 20 ms TOF
 % % % 
 %  ROI = [800 950 1520 1630;
 %       800 950 490 600];   %  band map 15 ms TOF  7box, 9 box
 
 
-ROI=[800 950 490 620;
-       800 950 1540 1680];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
+% ROI=[800 950 490 620;
+%        800 950 1540 1680];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
+% %    
+
+ROI=[720 1030 420 770;
+       720 1030 420+1064 770+1064];   % bm 15ms in 2D lattice
 %    
-   
    % ROI = ROI(1,:); % 9 only 
     %ROI = ROI(2,:); % 7 only
 
@@ -397,7 +399,7 @@ ROI=[800 950 490 620;
 
 %  ROI=[760 1000 660 940;
 %      760 1000 1684 1964];   %  k_rb 25 ms opevap
-% 
+
 %  ROI=[700 1050 280 680;
 %      700 1050 1504 1904];   %  k 5ms rb 15 ms double shutter
 
@@ -421,6 +423,7 @@ ROI=[800 950 490 620;
 if doFermiFitLong
     ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 end
+%     ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 
 % % if doFermiFitLong && atomdata(1).Flags.do_stern_gerlach
 %     ROI=[800 960 700 870;

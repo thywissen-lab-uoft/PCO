@@ -55,7 +55,7 @@ if doGaussFit
     gaussPopts.FigLabel = FigLabel;
     gaussPopts.xUnit=pco_unit;
     gaussPopts.NumberExpFit = 0;        % Fit exponential decay to atom number
-    gaussPopts.NumberLorentzianFit=1;   % Fit atom number to lorentzian
+    gaussPopts.NumberLorentzianFit=0;   % Fit atom number to lorentzian
     gaussPopts.CenterSineFit = 0;       % Fit sine fit to cloud center
     gaussPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
     gaussPopts.CenterParabolaFit = 0;

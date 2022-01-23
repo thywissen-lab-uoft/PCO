@@ -3,10 +3,10 @@ fout={};
 FitFlags = opts.FitFlags;
 
 %% Process Data
-X =round(X,4)
+X =round(X,4);
 [ux,~,~]=unique(X);    
 ux=unique(X);    
-disp(ux)
+% disp(ux);
 Yu=zeros(length(ux),2,size(Y,2));    
 
 
@@ -61,7 +61,7 @@ xlim([min(X) max(X)]);
 
 hold on    
 
-ylabel(opts.Name)
+ylabel(opts.Name);
 
 
 resizeFig(hF,t,[ax]);
@@ -717,7 +717,7 @@ A2 = 0.005;
 %     x2 = x1;
 %     x2=0;
     
-    x1 = -150;
+    x1 = -125;
     x2 = -80;
     
     % Asymmetry
@@ -768,7 +768,7 @@ if length(X)>4 && FitFlags.lorentz_single
     A1=(max(Y)-min(Y));
     inds=[Y>.8*max(Y)];
     x0=mean(X(inds));
-    x0 = -4
+    x0 = 0;
     opt.StartPoint=[A1/100 G0 x0 bg];   
 %         opt.Upper=[1 3*G0 x0+range(X) 0];   
 

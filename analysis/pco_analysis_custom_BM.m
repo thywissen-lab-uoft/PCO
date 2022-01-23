@@ -66,10 +66,10 @@ y_Lbl{30}     = 'N7/N9';
 % number corresponds to the plot index as defined above. 
 p_inds=[01 02]; %total number
 
-% p_inds=[05];
+p_inds=[05];
 
 % Excitations to 7
-% p_inds = [01,02,05,06,08,15,18,19,07,30];
+p_inds = [01,02,03,04];
 %  p_inds = [01,02,03,04,06];
 
 
@@ -79,11 +79,9 @@ p_inds=[01 02]; %total number
 % p_inds = [03,08,15,16,17];
 
 % % lifetime measurements
-<<<<<<< HEAD
 %  p_inds = [03,04,05,06,08,17];
-=======
+
 %   p_inds = [03,04,06,08,17];
->>>>>>> 6c921055f65bacec5cc2283c0cf988639c2c94aa
 
 
 
@@ -159,8 +157,8 @@ if doCustomX
 %     mF2 = -5/2;
 % 
 % 
-%    Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
-    Bfb   = src_data.Params(1).HF_FeshValue_Spectroscopy;
+   Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
+%     Bfb   = src_data.Params(1).HF_FeshValue_Spectroscopy;
 %     Bfb   = src_data.Params(1).HF_FeshValue_Final_Lattice;
     Bshim = src_data.Params(1).HF_zshim_Initial_Lattice*2.35;
     Boff  = 0.11;

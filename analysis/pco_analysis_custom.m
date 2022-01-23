@@ -8,9 +8,9 @@
 % Select the data source
 
 % data_source = 'box';
-% data_source = 'gauss';
+data_source = 'gauss';
 % data_source = 'erf';
-data_source = 'erf';
+% data_source = 'erf';
 
 switch data_source
     case 'box'        
@@ -65,7 +65,7 @@ if doCustomX
 
         % Choose the mf States
         mF1 = -7/2;
-        mF2 = -5/2;
+        mF2 = -9/2;
         x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
         disp(x0)
 
@@ -275,11 +275,12 @@ if doCustom
 
 % Center frequency for expected RF field (if relevant)
 % Calibrated 2021/09/25-26
-Bfb   = data.Params(1).HF_FeshValue_Initial_Lattice;
-% Bfb   = data.Params(1).HF_FeshValue_Spectroscopy;
-
-Bshim = data.Params(1).HF_zshim_Initial_Lattice*2.35;
+% Bfb   = data.Params(1).HF_FeshValue_Initial_Lattice;
+Bfb   = data.Params(1).HF_FeshValue_Initial_ODT;
 Bshim =0;
+% Bfb   = data.Params(1).HF_FeshValue_Spectroscopy;
+% Bshim = data.Params(1).HF_zshim_Initial_Lattice*2.35;
+
 
 Boff  = 0.11;
 
@@ -290,7 +291,7 @@ B = Bfb + Bshim + Boff;
 
 % Choose the mf States
 mF1 = -7/2;
-mF2 = -5/2;
+mF2 = -9/2;
 
 x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
 
@@ -343,7 +344,7 @@ end
     Ntot = sum(N,2);     
      N(:,2) = N(:,2)*8.6/7.2; %fudge factor
 
-     dataMode= 1;         
+     dataMode= 4;         
      switch dataMode
          case 0     
              Y=(N(:,1)-N(:,2))./N(:,1);
