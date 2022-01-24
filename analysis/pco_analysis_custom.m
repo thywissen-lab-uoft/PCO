@@ -8,8 +8,8 @@
 % Select the data source
 
 % data_source = 'box';
-data_source = 'gauss';
-% data_source = 'erf';
+% data_source = 'gauss';
+data_source = 'erf';
 % data_source = 'erf';
 
 switch data_source
@@ -279,7 +279,7 @@ if doCustom
 Bfb   = data.Params(1).HF_FeshValue_Initial_Lattice;
 % Bfb   = data.Params(1).HF_FeshValue_Spectroscopy;
 
-Bshim = data.Params(1).HF_zshim_Initial_Lattice*2.35;
+% Bshim = data.Params(1).HF_zshim_Initial_Lattice*2.35;
 Bshim =0;
 
 Boff  = 0.11;

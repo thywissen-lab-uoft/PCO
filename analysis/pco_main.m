@@ -103,6 +103,7 @@ pco_xVar='ExecutionDate';
 % pco_xVar = 'Lattice_loading_field';
 % pco_xVar = 'rf_rabi_freq_HF';
 %   pco_xVar = 'rf_delta_freq_HF';
+  pco_xVar = 'rf_freq_HF';
 % pco_xVar = 'HF_FeshValue_Initial_ODT';
 %    pco_xVar = 'HF_hold_time_ODT';
 
@@ -136,12 +137,12 @@ doLandauZener = 0;      % Landau Zener Analysis on BOX
 doRamanSpec   = 0;      % Raman box count count analyis
 
 % Gaussian
-doGaussFit    = 0;      % Enable gauss fitting
+doGaussFit    = 1;      % Enable gauss fitting
 doGaussRabi   = 0;      % Enable gauss rabi
 doBEC         = 0;      % Enable BEC analysis
 
 % Erf Fit
-doErfFit      = 0;    
+doErfFit      = 1;    
 
 % Band Map Fit
 doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'H';
@@ -149,10 +150,10 @@ doBMFit       = 0;
 doCustom_BM   = 0;    
 
 % Fermi
-doFermiFitLong = 1;     % Enable Fermi Fit for XDT TOF
+doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
 
 % Custom Box counts
-doCustom       =  0;          % Custom Box Count
+doCustom       =  1;          % Custom Box Count
 doRabiAbsolute = 0;
 doRabiContrast = 0;
 
@@ -162,7 +163,7 @@ doCavity       = 0;
 
 %% GDrive Settings
 GDrive_root = 'G:\My Drive\Lattice Shared\LabData';
-doUpload = 1;       % Upload to google drive?
+doUpload = 0;       % Upload to google drive?
 
 %% Select image directory
 % Choose the directory where the images to analyze are stored
@@ -366,18 +367,18 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % ROI=[800 950 182 1011;
 %     800 950 1228 2040];   % XDT full TOF
 
- ROI=[757 1002 586 831;
-    757 1002 586+1064 831+1064];   % XDT 20 ms TOF
-% % 
+%  ROI=[757 1002 586 831;
+%     757 1002 586+1064 831+1064];   % XDT 20 ms TOF
+% % % 
 % ROI=[800 950 1700 1800];   % XDT 20 ms TOF
 % % % 
 %  ROI = [800 950 1520 1630;
 %       800 950 490 600];   %  band map 15 ms TOF  7box, 9 box
 
 
-% ROI=[800 950 490 620;
-%        800 950 1540 1680];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
-% %    
+ROI=[800 950 490 620;
+       800 950 1540 1680];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
+%    
    
    % ROI = ROI(1,:); % 9 only 
     %ROI = ROI(2,:); % 7 only
