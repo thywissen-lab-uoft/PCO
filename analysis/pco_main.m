@@ -64,54 +64,11 @@ end
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
-% NOTE TO CF, ADD AUTOMATIC FINDING OF VARIABLE THAT IS CHANGING :
-% basically find if there is a variable besides ExecutionDate that is
-% changing
+% Defautl variable to plot against
+pco_xVar =    'ExecutionDate';
 
-% pco_xVar=  'kdet_shift';
-% pco_xVar=  'lat_mod_freq';
-% pco_xVar=  'AM_spec_freq';
-% pco_xVar=  'AM_spec_depth';
-
-pco_xVar='Raman_AOM3_freq';
-% pco_xVar=  'Raman_freq';
-pco_xVar= 'Pulse_Time';
-% pco_xVar=  'rf_freq_HF_shift';
-% pco_xVar=  'rf_freq_HF';
-% pco_xVar = 'HF_hold_time';
-
-
-% pco_xVar = 'HF_FeshValue_Spectroscopy';
-pco_xVar=    'ExecutionDate';
-% pco_xVar = 'HF_K_FM_offset' 
-% pco_xVar=  'k_op_am';
-% pco_xVar=  'rb_op_am';
-% pco_xVar = 'RF1B_finalfreq';
-% pco_xVar = 'kdet_shift';
-% pco_xVar = 'k_op_det';
-% pco_xVar = 'rf_tof_srs_power';
-% pco_xVar = 'rf_tof_freq';
-% pco_xVar = 'rf_tof_delta_freq';
-% pco_xVar=  'HF_kdet_shift';
-% pco_xVar=  'HF_prob_pwr1';
-% pco_xVar = 'XDT_initial_power';
-% pco_xVar = 'Evap_End_Power';
-% pco_xVar = 'Evap_Tau_frac';
-% pco_xVar = 'rf_pulse_length';
-% pco_xVar = 'rf_rabi_time_HF';
-% pco_xVar = 'rf_rabi_freq_HF';
-% pco_xVar = 'latt_ramp_time';
-% pco_xVar = 'power_val';
-% pco_xVar = 'Lattice_loading_field';
-% pco_xVar = 'rf_rabi_freq_HF';
-
-%   pco_xVar = 'rf_delta_freq_HF';
-% pco_xVar = 'HF_FeshValue_Initial_ODT';
-%    pco_xVar = 'HF_hold_time_ODT';
-
-%   pco_xVar='HF_Raman_sweep_time';
-%   pco_xVar='latt_rampdown_time';
-
+% Should the analysis attempt to automatically find the xvariable?
+pco_autoXVar = 1;
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit=1;
@@ -214,22 +171,18 @@ for kk=1:length(files)
     try
         disp(['     Image Name     : ' data.Name]);
         disp(['     Execution Time : ' datestr(data.Date)]);
-        disp(['     ' pco_xVar ' : ' num2str(data.Params.(pco_xVar))]);
+        if ~pco_autoXVar
+            disp(['     ' pco_xVar ' : ' num2str(data.Params.(pco_xVar))]);
+        end
         disp(' ');
     end    
     
     % Make sure executiondate is a number
     data.Params.ExecutionDate = datenum(data.Params.ExecutionDate);
-    data.Params.ExecutionDateStr = datestr(data.Params.ExecutionDate);
-    
+    data.Params.ExecutionDateStr = datestr(data.Params.ExecutionDate);    
     data.Units.ExecutionDate =  'days';
     data.Units.ExecutionDateStr = 'str';
 
-    
-    
-%     if isequal(pco_xVar,'ExecutionDate')
-%         data.Params.(pco_xVar)=datenum(data.Params.(pco_xVar))*24*60*60;
-%     end  
     
     % Append pixel size and resonant cross section
     data.PixelSize = PixelSize;
@@ -241,14 +194,26 @@ disp(' ');
 
 atomdata = matchParamsFlags(atomdata);
 
-% if isequal(pco_xVar,'ExecutionDate')
-%    p=[atomdata.Params] ;
-%    tmin=min([p.ExecutionDate]);
-%    for kk=1:length(atomdata)
-%       atomdata(kk).Params.ExecutionDate= ...
-%           atomdata(kk).Params.ExecutionDate-tmin;
-%    end     
-% end
+%% X Variable and Units
+
+if pco_autoXVar
+    xVars = findXVars(atomdata);
+    disp([' Found ' num2str(length(xVars)) ...
+        ' valid variables that are changing to plot against.']);
+    disp(xVars);
+    
+    % Select the first one
+    ind = 1;    
+    pco_xVar = xVars{ind};
+    
+    disp([' Setting ' pco_xVar ' to be the x-variable']);
+    
+    for kk=1:length(atomdata)
+        disp([' (' num2str(kk) ') (' num2str(atomdata(kk).Params.(pco_xVar)) ') ' ...
+            atomdata(kk).Name]); 
+    end
+    disp(' ');
+end
 
 % Grab the unit information
 if pco_autoUnit && isfield(atomdata(1),'Units') 
@@ -445,7 +410,10 @@ end
 % % end
 
 % Assign the ROI
+disp(' ')
 disp('Assigning ROI to data');
+disp(ROI);
+
 [atomdata.ROI]=deal(ROI);
 
 %% Calculate the optical density

@@ -78,7 +78,7 @@ for kk=1:length(data)
             s=s2/s1;            
             
             PWOA=s*PWOA;
-            disp(['Scaling the PWOA image by ' num2str(round(s,4))]);
+            disp([' Scaling the PWOA image by ' num2str(round(s,4))]);
         else
             Y=R(3):R(4);
             X=R(1):R(2);
@@ -92,7 +92,7 @@ for kk=1:length(data)
                
             PWOA(1:1024,:)=sa*PWOA(1:1024,:);               
             PWOA(1025:2048,:)=sb*PWOA(1025:2048,:);
-           disp(['Scaling the PWOA image by ' ...
+           disp([' Scaling the PWOA image by ' ...
                num2str(round(sa,4)) ' and ' num2str(round(sb,4))]);               
         end           
     end       
@@ -109,7 +109,7 @@ for kk=1:length(data)
 end
     
 
-
+disp(' ')
 
 
 end
