@@ -123,7 +123,7 @@ if beep
     process_data.Ratio_79=Ratio_79;    
     process_data.Natoms = N;        
 
-    dataMode= 1;         
+    dataMode= 2;         
     switch dataMode
         case 0     
              process_data.Function = @(N) (N(:,1)-N(:,2))./N(:,1);
@@ -258,6 +258,7 @@ if doCustom
     gauss_neg_double=0;
     gauss_neg_single=0;
     gauss_double = 0;
+    expdecay =0;
     
     lorentz_neg_single=0;    
     lorentz_neg_double=0;  
@@ -345,6 +346,7 @@ end
      N(:,2) = N(:,2)*8.6/7.2; %fudge factor
 
      dataMode= 4;         
+
      switch dataMode
          case 0     
              Y=(N(:,1)-N(:,2))./N(:,1);
@@ -365,7 +367,7 @@ end
          case 4
             Y=N(:,2)./(N(:,1)+N(:,2));
 %             ystr=['Transfer Fraction'];
-            ystr=['N_7/(N_7+N_9)'];
+            ystr=['N_9/(N_7+N_9)'];
             figName='Transfer Fraction';
          case 5 % random customized stuffs 
 %              N(:,2)=N(:,2)*0.6;
@@ -573,9 +575,10 @@ end
         xC=X(ind);
         
         % Assign guess
-        xC1 = 20;
-        xC2 = 90;
-        G=[A 20 xC1 A/10 20 xC2 bg];        
+        xC1 = 198.3;
+        xC2 = 198.8;
+%         G=[A 20 xC1 A/10 20 xC2 bg];        
+        G=[A 0.2 xC1 A/100 0.2 xC2 bg];
         
         opt.StartPoint=G;
         opt.Robust='bisquare';
@@ -588,8 +591,8 @@ end
         % Plot the fit
         tt=linspace(min(X),max(X),1000);
         pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
-        lStr=['xC=(' num2str(round(fout.x1,1)) ',' num2str(round(fout.x2,1)) ')' ...
-            ' FWHM=(' num2str(round(fout.G1,1)) ',' num2str(round(fout.G2,1)) ')' ];
+        lStr=['xC=(' num2str(round(fout.x1,2)) ',' num2str(round(fout.x2,2)) ')' ...
+            ' FWHM=(' num2str(round(fout.G1,2)) ',' num2str(round(fout.G2,2)) ')' ];
         legend(pF,lStr,'location','best');
         
         custom_data.Fit=fout;
@@ -702,7 +705,33 @@ end
         legend(pF,str,'location','best','interpreter','latex');
         
     end
-    
+    %% Exponential decay
+if length(X)>4 && expdecay
+    myfit=fittype('A0 + A1*exp(-1*t/tau)',...
+        'coefficients',{'A0','A1','tau'},...
+        'independent','t');
+
+    % Fit options and guess
+    opt=fitoptions(myfit);        
+    Ag = max(Y);
+    A0 = min(Y);
+    taug = median(X);
+    G=[A0 Ag taug];        
+    opt.StartPoint=G;
+
+    % Perform the fit
+    fout=fit(X,Y,myfit,opt)
+
+    % Plot the fit
+    tt=linspace(0,max(X),1000);
+    xlim([0 max(X)]);
+    pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
+    lStr=['$ \tau = ' num2str(round(fout.tau,3)) '~\mathrm{ms}$'];
+    legend(pF,lStr,'location','best','interpreter','latex');        
+    str = '$A_0+ A_1\exp(-t/\tau)$';
+    t=text(.02,.03,str,'units','normalized',...
+        'fontsize',10,'interpreter','latex');
+end
     %% Negative Lorentzian
     if length(X)>4 && lorentz_neg_single
         myfit=fittype('bg-A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)',...
@@ -720,7 +749,7 @@ end
         xC=X(ind);
         
         % Assign guess
-        G=[A 35 -50 bg];
+        G=[A 0.5 199.2 bg];
         opt.StartPoint=G;
 
         % Perform the fit
@@ -730,7 +759,7 @@ end
         % Plot the fit
         tt=linspace(min(X),max(X),1000);
         pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
-          lStr=['xC=(' num2str(round(fout.x0,1)) ')' ...
+          lStr=['xC=(' num2str(round(fout.x0,2)) ')' ...
             ' FWHM=(' num2str(round(fout.G,1)) ')' ];
         legend(pF,lStr,'location','best');
     end

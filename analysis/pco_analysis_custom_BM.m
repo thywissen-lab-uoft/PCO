@@ -72,6 +72,7 @@ p_inds=[05];
 p_inds = [01,02,03,04];
 %  p_inds = [01,02,03,04,06];
 
+% p_inds=[01 02]; %total number
 
 
 % % Excitations to 9
@@ -82,8 +83,7 @@ p_inds = [01,02,03,04];
 %  p_inds = [03,04,05,06,08,17];
 
 %   p_inds = [03,04,06,08,17];
-
-
+  p_inds = [01,02,03,04,06,08,17];
 
 % Loss from 7
 % p_inds = [06,23,08,15,16];
@@ -107,7 +107,7 @@ p_inds = [01,02,03,04];
 FitFlags = struct;
 
 FitFlags.T2exp=0;
-FitFlags.expdecay =0;
+FitFlags.expdecay =1;
 FitFlags.Rabi_oscillation = 0;
 FitFlags.Rabi_oscillation2 = 0;
 FitFlags.NGaussPeak=0;

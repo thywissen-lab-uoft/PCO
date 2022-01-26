@@ -64,6 +64,10 @@ end
 % field of the .mat file. The unit has no tangibile affect and only affects
 % display properties.
 
+% NOTE TO CF, ADD AUTOMATIC FINDING OF VARIABLE THAT IS CHANGING :
+% basically find if there is a variable besides ExecutionDate that is
+% changing
+
 % pco_xVar=  'kdet_shift';
 % pco_xVar=  'lat_mod_freq';
 % pco_xVar=  'AM_spec_freq';
@@ -79,7 +83,6 @@ pco_xVar= 'Pulse_Time';
 
 % pco_xVar = 'HF_FeshValue_Spectroscopy';
 pco_xVar=    'ExecutionDate';
-% pco_xVar=  'Evap_End_Power';
 % pco_xVar = 'HF_K_FM_offset' 
 % pco_xVar=  'k_op_am';
 % pco_xVar=  'rb_op_am';
@@ -101,10 +104,13 @@ pco_xVar=    'ExecutionDate';
 % pco_xVar = 'power_val';
 % pco_xVar = 'Lattice_loading_field';
 % pco_xVar = 'rf_rabi_freq_HF';
-% pco_xVar = 'rf_delta_freq_HF';
+
+%   pco_xVar = 'rf_delta_freq_HF';
 % pco_xVar = 'HF_FeshValue_Initial_ODT';
-% pco_xVar=  'HF_Raman_sweep_time';
-% pco_xVar=  'latt_rampdown_time';
+%    pco_xVar = 'HF_hold_time_ODT';
+
+%   pco_xVar='HF_Raman_sweep_time';
+%   pco_xVar='latt_rampdown_time';
 
 
 % Should the analysis attempt to automatically find the unit?
@@ -142,6 +148,7 @@ doErfFit      = 0;
 
 % Band Map Fit
 doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'V';
+
 doBMFit       = 0;
 doCustom_BM   = 0;    
 
@@ -367,6 +374,12 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %     760 1000 590+1064 830+1064];   % XDT 20 ms TOF
 % % % 
 % ROI=[760 1000 590+1064 830+1064];   % XDT 20 ms TOF
+
+
+ ROI=[757 1002 586 831;
+    757 1002 586+1064 831+1064];   % XDT 20 ms TOF
+% % 
+% ROI=[800 950 1700 1800];   % XDT 20 ms TOF
 % % % 
 %  ROI = [800 950 1520 1630;
 %       800 950 490 600];   %  band map 15 ms TOF  7box, 9 box
@@ -379,6 +392,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 ROI=[720 1030 420 770;
        720 1030 420+1064 770+1064];   % bm 15ms in 2D lattice
 %    
+
    % ROI = ROI(1,:); % 9 only 
     %ROI = ROI(2,:); % 7 only
 
