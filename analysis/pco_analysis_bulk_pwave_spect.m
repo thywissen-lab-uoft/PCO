@@ -710,10 +710,6 @@ for nn=1:length(data)
             freq_delta_err(1)  = NaN;
         end
         
-        
-        
-        
-
         % Plot the fit
         tt=linspace(min(X),max(X),1000);
         pF=plot(tt,feval(fout,tt),'k-','linewidth',1);
