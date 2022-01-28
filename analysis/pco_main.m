@@ -312,7 +312,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% LATTICE LOW FIELD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%    ROI=[750 1000 375 620]; % 15 ms BM TOF x cam
+   ROI=[750 1000 375 620]; % 15 ms BM TOF x cam
   
 %   ROI=[412 755 552 778]; % 10 ms BM TOF y cam
 
@@ -340,9 +340,9 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % % % 
 % ROI=[760 1000 590+1064 830+1064];   % XDT 20 ms TOF
 
-
- ROI=[757 1002 586 831;
-    757 1002 586+1064 831+1064];   % XDT 20 ms TOF
+% 
+%  ROI=[757 1002 586 831;
+%     757 1002 586+1064 831+1064];   % XDT 20 ms TOF
 % % 
 % ROI=[800 950 1700 1800];   % XDT 20 ms TOF
 % % % 
@@ -353,9 +353,9 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % ROI=[800 950 490 620;
 %        800 950 1540 1680];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
 % %    
-
-ROI=[720 1030 420 770;
-       720 1030 420+1064 770+1064];   % bm 15ms in 2D lattice
+% 
+% ROI=[720 1030 420 770;
+%        720 1030 420+1064 770+1064];   % bm 15ms in 2D lattice
 %    
 
    % ROI = ROI(1,:); % 9 only 
