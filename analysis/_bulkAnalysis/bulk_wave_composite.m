@@ -19,6 +19,8 @@ if isequal(f1,f2)
     
 end
 
+data3= load([GDrive_root filesep 'data_swave_raman.mat']);
+data_process_raman = data3.data_process;
 %%
 hf1=figure(10);
 clf
@@ -42,6 +44,28 @@ xlim([round(min(data_process.B)-1,1) round(max(data_process.B)+1,1)]);
 set(gca,'xgrid','on','ygrid','on','box','on','linewidth',1,...
     'fontsize',10);
 
+%%
+hf2=figure(11);
+clf
+hf2.Color='w';
+hf2.Position = [100 100 500 400];
+
+errorbar(data_process_raman.B,data_process_raman.f1,...
+    data_process_raman.s1,data_process_raman.s1,...
+    data_process_raman.B_err,data_process_raman.B_err,...
+    'o','markerfacecolor',[.5 .5 .5],...
+    'markeredgecolor','k','color','k',...
+    'linewidth',2,'markersize',8); 
+
+hold on
+xlabel('magnetic field (G)');
+ylabel('frequency shift (kHz)');
+
+ylim([-110 100]);
+xlim([round(min(data_process.B)-1,1) round(max(data_process.B)+1,1)]);
+
+set(gca,'xgrid','on','ygrid','on','box','on','linewidth',1,...
+    'fontsize',10);
 
 %% UPload data
 doUpload = 1;
@@ -52,6 +76,7 @@ if  doUpload && exist(GDrive_root,'dir')
     gFile = [GDrive_root filesep out_name]; 
     save(gFile,'data_process','data_out');
     saveas(hf1,[GDrive_root filesep out_name '_shifts.png'])
+    saveas(hf2,[GDrive_root filesep 'raman' '_shifts.png'])
 
 
 end
