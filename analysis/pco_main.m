@@ -74,12 +74,12 @@ end
 % pco_xVar='Raman_freq';
 
 % pco_xVar='Pulse_Time';
-   pco_xVar='rf_freq_HF_shift';
+%    pco_xVar='rf_freq_HF_shift';
 %    pco_xVar = 'HF_hold_time';
 
 
 % pco_xVar = 'HF_FeshValue_Spectroscopy';
-pco_xVar='ExecutionDate';
+% pco_xVar='ExecutionDate';
 % pco_xVar = 'HF_K_FM_offset' 
 % pco_xVar='k_op_am';
 % pco_xVar='rb_op_am';
@@ -132,7 +132,7 @@ doSave = 1;
 doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
 
 % Box Count
-doBoxCount    = 0;      % Box count analysis
+doBoxCount    = 1;      % Box count analysis
 doLandauZener = 0;      % Landau Zener Analysis on BOX
 doRamanSpec   = 0;      % Raman box count count analyis
 
@@ -146,14 +146,14 @@ doErfFit      = 1;
 
 % Band Map Fit
 doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'H';
-doBMFit       = 0;
+doBMFit       = 1;
 doCustom_BM   = 0;    
 
 % Fermi
 doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
 
 % Custom Box counts
-doCustom       =  1;          % Custom Box Count
+doCustom       =  0;          % Custom Box Count
 doRabiAbsolute = 0;
 doRabiContrast = 0;
 
@@ -167,6 +167,9 @@ doUpload = 0;       % Upload to google drive?
 
 %% Select image directory
 % Choose the directory where the images to analyze are stored
+choose_folder = 1
+if choose_folder
+
 disp([datestr(now,13) ' Choose an image analysis folder...']);
 dialog_title='Choose the root dire ctory of the images';
 
@@ -193,6 +196,21 @@ else
     disp('Canceling.');
     return;
 end
+
+else
+        saveDir = [imgdir filesep 'figures'];
+
+        if ~exist(saveDir,'dir'); mkdir(saveDir);end    
+
+        saveOpts.saveDir=saveDir;
+        saveOpts.Quality = 'auto';
+
+        strs=strsplit(imgdir,filesep);
+        FigLabel=[strs{end-1} filesep strs{end}];
+end
+    
+    
+    
 
 %% Load the data
 clear atomdata
@@ -376,8 +394,8 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %       800 950 490 600];   %  band map 15 ms TOF  7box, 9 box
 
 
-ROI=[800 950 490 620;
-       800 950 1540 1680];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
+ROI=[750 1000 450 650;
+       750 1000 1500 1700];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
 %    
    
    % ROI = ROI(1,:); % 9 only 
