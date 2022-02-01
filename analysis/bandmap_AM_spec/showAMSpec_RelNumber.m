@@ -33,6 +33,10 @@ Natoms = bm_am_spec_data.Natoms;
 
 Ne = bm_am_spec_data.NatomsBands(:,6) + bm_am_spec_data.NatomsBands(:,7);
 
+% Ne = bm_am_spec_data.NatomsBands(:,6) + bm_am_spec_data.NatomsBands(:,7)+ ...
+%     bm_am_spec_data.NatomsBands(:,2)+bm_am_spec_data.NatomsBands(:,3);
+
+
 Y = Ne./Natoms;
 
 
@@ -88,7 +92,7 @@ A1 = abs(range(Y));
 inds=[Y>.8*max(Y)];     
 
 xC=median(X(inds)); 
-% xC=240
+xC=245
 % Full Width Half Max
 inds = logical([(Y-bg)./range(Y) < 0.6]) & ...
     logical([(Y-bg)./range(Y) > 0.4]);
@@ -100,12 +104,11 @@ X50 = X(inds);
 x50L = X50(X50 < xC); % Left points around 50%
 x50R = X50(X50 > xC); % Right points around 50%
 
-GR = abs(mean(x50R - xC));  % HWHM left
-GL = abs(mean(x50L - xC));  % HWHM right
+GR = 30;abs(mean(x50R - xC));  % HWHM left
+GL = 5;abs(mean(x50L - xC));  % HWHM right
 
 
 G1 = GR + GL;
-
 if isnan(G1)
    G1 = 15; 
 end

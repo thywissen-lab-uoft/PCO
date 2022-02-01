@@ -65,7 +65,8 @@ end
 % display properties.
 
 % Defautl variable to plot against
-pco_xVar =    'ExecutionDate';
+pco_xVar = 'ExecutionDate';
+
 
 % Should the analysis attempt to automatically find the xvariable?
 pco_autoXVar = 1;
@@ -98,19 +99,19 @@ doRamanSpec   = 0;      % Raman box count count analyis
 % Gaussian
 doGaussFit    = 0;      % Enable gauss fitting
 doGaussRabi   = 0;      % Enable gauss rabi
-doBEC         = 0;      % Enable BEC analysis
+doBEC         = 0;      % Enable BEC analys
 
 % Erf Fit
 doErfFit      = 0;    
 
 % Band Map Fit
-doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'V';
+doBMFit_AM_Spec  = 1; AM_Spec_Dir = 'H';
 
 doBMFit       = 0;
-doCustom_BM   = 0;    
+doCustom_BM   = 1;    
 
 % Fermi
-doFermiFitLong = 1;     % Enable Fermi Fit for XDT TOF
+doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
 
 % Custom Box counts
 doCustom       =  0;          % Custom Box Count
@@ -427,8 +428,8 @@ ODopts.SubtractDark=0;
 ODopts.DarkROI=[700 800 20 100];
 
 % Apply gaussian filter to images?
-ODopts.GaussFilter=1;
-ODopts.GaussFilterSigma=1;
+ODopts.GaussFilter=0;
+ODopts.GaussFilterSigma=0;
 
 if doFermiFitLong
    ODopts.GaussFilter=0;
@@ -992,7 +993,7 @@ if doAnimate && doSave
      animateOpts.Order='ascend';
     
 %     % Color limits
-    animateOpts.CLim=[0 .1;
+    animateOpts.CLim=[0 1;
         0 1];   
 %     animateOpts.CLim=[0 1;
 %         0 .2];   
