@@ -104,13 +104,13 @@ doBEC         = 0;      % Enable BEC analysis
 doErfFit      = 0;    
 
 % Band Map Fit
-doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'V';
+doBMFit_AM_Spec  = 1; AM_Spec_Dir = 'H';
 
 doBMFit       = 0;
 doCustom_BM   = 0;    
 
 % Fermi
-doFermiFitLong = 1;     % Enable Fermi Fit for XDT TOF
+doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
 
 % Custom Box counts
 doCustom       =  0;          % Custom Box Count
