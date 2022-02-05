@@ -1,4 +1,4 @@
-function [hF] = showAMSpec_RelNumber(bm_am_spec_data,opts)
+function [hF] = showAMSpec_Number(bm_am_spec_data,opts)
 
 if nargin == 2 && isfield(opts,'FigLabel') 
     FigLabel = opts.FigLabel;
@@ -37,7 +37,7 @@ Ne = bm_am_spec_data.NatomsBands(:,6) + bm_am_spec_data.NatomsBands(:,7);
 %     bm_am_spec_data.NatomsBands(:,2)+bm_am_spec_data.NatomsBands(:,3);
 
 
-Y = Ne./Natoms;
+Y = Natoms;
 
 
 switch opts.xUnit
@@ -96,7 +96,7 @@ xHigh_unique = unique(xHigh);
 
 xC = median(xHigh_unique);
 
-% xC=100;
+% xC=260;
 % Full Width Half Max
 inds = logical([(Y-bg)./range(Y) < 0.6]) & ...
     logical([(Y-bg)./range(Y) > 0.4]);

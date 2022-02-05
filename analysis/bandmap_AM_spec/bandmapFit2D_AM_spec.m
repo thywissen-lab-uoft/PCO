@@ -52,10 +52,14 @@ Zg = Z;
 Zg = Z - min(min(Z));
 % X Center
 Zx = sum(Zg,1)/sum(sum(Zg));
+Zx = Zx - min(Zx);
+Zx = Zx/sum(Zx);
 XcG = sum(Zx.*X);
 
 % Y center
 Zy = sum(Zg,2)'/sum(sum(Zg));
+Zy = Zy - min(Zy);
+Zy = Zy/sum(Zy);
 YcG = sum(Zy.*Y);
 
 % Background Amplitude
@@ -187,6 +191,8 @@ Ne1 = fout.Ae1*(1*fout.s)*(2*fout.s);
 Ne2 = fout.Ae2*(1*fout.s)*(2*fout.s);
 
 N = [Nc Nx1 Nx2 Ny1 Ny2 Ne1 Ne2];
+
+% keyboard
 
 
 end

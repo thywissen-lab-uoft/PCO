@@ -45,6 +45,7 @@ lambdaRb=780E-9;lambdaK=770E-9;   % Rb and K wavelengths
 lambda=mean([lambdaRb lambdaK]);  % mean wavelength      
 CrossSection = 3/(2*pi)*lambda^2; 
 
+
 % Choose your camera
 camaxis='X';
 % camaxis='Y';
@@ -65,14 +66,15 @@ end
 % display properties.
 
 % Defautl variable to plot against
-pco_xVar = 'ExecutionDate';
+pco_xVar = 'AM_spec_freq';
 
+% pco_xVar = 'ExecutionDate';
 
 % Should the analysis attempt to automatically find the xvariable?
-pco_autoXVar = 1;
+pco_autoXVar = 0;
 
 % Should the analysis attempt to automatically find the unit?
-pco_autoUnit=1;
+pco_autoUnit = 1;
 
 % If ixon_autoUnit=0, this will be used.
 pco_overrideUnit='MHz';
@@ -105,10 +107,10 @@ doBEC         = 0;      % Enable BEC analys
 doErfFit      = 0;    
 
 % Band Map Fit
-doBMFit_AM_Spec  = 1; AM_Spec_Dir = 'H';
+doBMFit_AM_Spec  = 1; AM_Spec_Dir = 'V';
 
 doBMFit       = 0;
-doCustom_BM   = 1;    
+doCustom_BM   = 0;    
 
 % Fermi
 doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF

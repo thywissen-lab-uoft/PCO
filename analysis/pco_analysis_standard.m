@@ -260,8 +260,14 @@ if doBMFit_AM_Spec
     bmPopts = struct;
     bmPopts.FigLabel = FigLabel;
     bmPopts.xUnit=pco_unit; 
-    hF_am_spec = showAMSpec_RelNumber(bm_am_spec_data,bmPopts);
-            if doSave;saveFigure(hF_am_spec,'bm_am_spec',saveOpts);end
+    
+    if length(unique(bm_am_spec_data.X))>6    
+        hF_am_spec = showAMSpec_RelNumber(bm_am_spec_data,bmPopts);
+                if doSave;saveFigure(hF_am_spec,'bm_am_spec',saveOpts);end            
+    end
+%             
+%     hF_am_spec_num = showAMSpec_Number(bm_am_spec_data,bmPopts);
+%             if doSave;saveFigure(hF_am_spec_num,'bm_am_spec',saveOpts);end
 end
 %% Fermi Fit Analysis
    
