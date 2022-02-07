@@ -508,6 +508,7 @@ file_name = 'custom_data_bm.mat';
 [all_data,dirNames,dirDates] = loadBulk(runs,file_name);
 data = [all_data.custom_data_bm];
 
+
 %% Plot and Analyze
 
 % Observable to analyzes

@@ -1,4 +1,4 @@
-function [hF] = showAMSpec_RelNumber(bm_am_spec_data,opts)
+function [hF,fout2] = showAMSpec_RelNumber(bm_am_spec_data,opts)
 
 if nargin == 2 && isfield(opts,'FigLabel') 
     FigLabel = opts.FigLabel;
