@@ -18,7 +18,8 @@ Name = 'AM1_Summary';
 % data3=AM2_z_output;
 % Name = 'AM2_Summary';
 
-
+GDrive_root = 'G:\My Drive\Lattice Shared\SharedData\Lattice AM';
+doSave = 1;
 %%
 hF_summary = figure(201);
 clf
@@ -121,13 +122,139 @@ errorbar(data3.Umeas,data3.Asymm./data3.Freq,...
     'markerfacecolor',data3.Color,'markersize',8,...
     'markeredgecolor',data3.Color*.5,'linewidth',2,...
     'color',data3.Color*.5)
+if  exist(GDrive_root,'dir') && doSave     
+    saveas(hF_summary,[GDrive_root filesep hF_summary.Name '.png']); 
+end
 %%
-GDrive_root = 'G:\My Drive\Lattice Shared\SharedData\Lattice AM';
+hF_summary2 = figure(202);
+clf
+hF_summary2.Position=[1 50 1170 500];
+hF_summary2.Name = 'AM Summary Table';
+set(gcf,'color','w');
 
-if  exist(GDrive_root,'dir')   
-    
-    saveas(hF_summary,[GDrive_root filesep hF_summary.Name '.png']);
-    
-  
+ax1= subplot(231);
+pp = get(ax1,'position');
+delete(ax1);
+tbl_data =zeros(length(AM1_x_output.Umeas),3);
+tbl_data(:,1) = AM1_x_output.Depths;
+tbl_data(:,2) = AM1_x_output.Umeas;
+tbl_data(:,3) = AM1_x_output.GammaEr;
+tbl_data(:,4) = AM1_x_output.Depths'-AM1_x_output.Umeas;
 
+tt= uitable('columnwidth',{50 50 50},'units','normalized',...
+    'ColumnName',{'req (Er)','meas (Er)','Gamma (Er)','Residue (Er)'},...
+    'columnwidth',{70 70 70 70},'fontsize',10);
+tt.Position = pp;
+tt.Position(3:4)=tt.Position(3:4).*[1.25 1];
+tt.Data = tbl_data;
+ts = uicontrol('style','text','string','AM1 X Lattice','fontsize',14,...
+    'backgroundcolor','w','fontweight','bold');
+ts.Position(3:4) = ts.Extent(3:4);
+ts.Position(1:2) = hF_summary2.Position(3:4).*[pp(1) pp(2)+pp(4)];
+
+ax1= subplot(232);
+pp = get(ax1,'position');
+delete(ax1);
+tbl_data =zeros(length(AM1_y_output.Umeas),3);
+tbl_data(:,1) = AM1_y_output.Depths;
+tbl_data(:,2) = AM1_y_output.Umeas;
+tbl_data(:,3) = AM1_y_output.GammaEr;
+tbl_data(:,4) = AM1_y_output.Depths'-AM1_y_output.Umeas;
+
+tt= uitable('columnwidth',{50 50 50},'units','normalized',...
+    'ColumnName',{'req (Er)','meas (Er)','Gamma (Er)','Residue (Er)'},...
+    'columnwidth',{70 70 70 70},'fontsize',10);
+tt.Position = pp;
+tt.Position(3:4)=tt.Position(3:4).*[1.25 1];
+tt.Data = tbl_data;
+ts = uicontrol('style','text','string','AM1 Y Lattice','fontsize',14,...
+    'backgroundcolor','w','fontweight','bold');
+ts.Position(3:4) = ts.Extent(3:4);
+ts.Position(1:2) = hF_summary2.Position(3:4).*[pp(1) pp(2)+pp(4)];
+
+ax1= subplot(233);
+pp = get(ax1,'position');
+delete(ax1);
+tbl_data =zeros(length(AM1_z_output.Umeas),3);
+tbl_data(:,1) = AM1_z_output.Depths;
+tbl_data(:,2) = AM1_z_output.Umeas;
+tbl_data(:,3) = AM1_z_output.GammaEr;
+tbl_data(:,4) = AM1_z_output.Depths'-AM1_z_output.Umeas;
+
+tt= uitable('columnwidth',{50 50 50},'units','normalized',...
+    'ColumnName',{'req (Er)','meas (Er)','Gamma (Er)','Residue (Er)'},...
+    'columnwidth',{70 70 70 70},'fontsize',10);
+tt.Position = pp;
+tt.Position(3:4)=tt.Position(3:4).*[1.25 1];
+tt.Data = tbl_data;
+ts = uicontrol('style','text','string','AM1 Z Lattice','fontsize',14,...
+    'backgroundcolor','w','fontweight','bold');
+ts.Position(3:4) = ts.Extent(3:4);
+ts.Position(1:2) = hF_summary2.Position(3:4).*[pp(1) pp(2)+pp(4)];
+
+
+ax1= subplot(234);
+pp = get(ax1,'position');
+delete(ax1);
+tbl_data =zeros(length(AM2_x_output.Umeas),3);
+tbl_data(:,1) = AM2_x_output.Depths;
+tbl_data(:,2) = AM2_x_output.Umeas;
+tbl_data(:,3) = AM2_x_output.GammaEr;
+tbl_data(:,4) = AM2_x_output.Depths'-AM2_x_output.Umeas;
+
+tt= uitable('columnwidth',{50 50 50},'units','normalized',...
+    'ColumnName',{'req (Er)','meas (Er)','Gamma (Er)','Residue (Er)'},...
+    'columnwidth',{70 70 70 70},'fontsize',10);
+tt.Position = pp;
+tt.Position(3:4)=tt.Position(3:4).*[1.25 1];
+tt.Data = tbl_data;
+ts = uicontrol('style','text','string','AM2 X Lattice','fontsize',14,...
+    'backgroundcolor','w','fontweight','bold');
+ts.Position(3:4) = ts.Extent(3:4);
+ts.Position(1:2) = hF_summary2.Position(3:4).*[pp(1) pp(2)+pp(4)];
+
+ax1= subplot(235);
+pp = get(ax1,'position');
+delete(ax1);
+tbl_data =zeros(length(AM2_y_output.Umeas),3);
+tbl_data(:,1) = AM2_y_output.Depths;
+tbl_data(:,2) = AM2_y_output.Umeas;
+tbl_data(:,3) = AM2_y_output.GammaEr;
+tbl_data(:,4) = AM2_y_output.Depths'-AM2_y_output.Umeas;
+
+tt= uitable('columnwidth',{50 50 50},'units','normalized',...
+    'ColumnName',{'req (Er)','meas (Er)','Gamma (Er)','Residue (Er)'},...
+    'columnwidth',{70 70 70 70},'fontsize',10);
+tt.Position = pp;
+tt.Position(3:4)=tt.Position(3:4).*[1.25 1];
+tt.Data = tbl_data;
+ts = uicontrol('style','text','string','AM2 Y Lattice','fontsize',14,...
+    'backgroundcolor','w','fontweight','bold');
+ts.Position(3:4) = ts.Extent(3:4);
+ts.Position(1:2) = hF_summary2.Position(3:4).*[pp(1) pp(2)+pp(4)];
+
+ax1= subplot(236);
+pp = get(ax1,'position');
+delete(ax1);
+tbl_data =zeros(length(AM2_z_output.Umeas),3);
+tbl_data(:,1) = AM2_z_output.Depths;
+tbl_data(:,2) = AM2_z_output.Umeas;
+tbl_data(:,3) = AM2_z_output.GammaEr;
+tbl_data(:,4) = AM2_z_output.Depths'-AM2_z_output.Umeas;
+
+tt= uitable('columnwidth',{50 50 50},'units','normalized',...
+    'ColumnName',{'req (Er)','meas (Er)','Gamma (Er)','Residue (Er)'},...
+    'columnwidth',{70 70 70 70},'fontsize',10);
+tt.Position = pp;
+tt.Position(3:4)=tt.Position(3:4).*[1.25 1];
+tt.Data = tbl_data;
+ts = uicontrol('style','text','string','AM2 Z Lattice','fontsize',14,...
+    'backgroundcolor','w','fontweight','bold');
+ts.Position(3:4) = ts.Extent(3:4);
+ts.Position(1:2) = hF_summary2.Position(3:4).*[pp(1) pp(2)+pp(4)];
+
+
+
+if  exist(GDrive_root,'dir') && doSave     
+    saveas(hF_summary2,[GDrive_root filesep hF_summary2.Name '.png']); 
 end

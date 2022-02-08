@@ -27,6 +27,9 @@ myfit=fittype(@(bg,a1,x1,G1,A1,x) A1*yN(G1,x1,a1,x)+bg,...
 fitopt=fitoptions(myfit);
 fitopt.Robust='bisquare';
 
+fitopt.MaxFunEvals = 1e3;
+fitopt.MaxIter = 1e3;
+
 %%
 runs = opts.Runs;
 [all_data,dirNames,~] = loadBulk(opts.Runs,opts.FileName);
@@ -53,6 +56,8 @@ fc = zeros(length(data),1);
 fc_err = zeros(length(data),1);
 gamma = zeros(length(data),1);
 gamma_err = zeros(length(data),1);
+gammaEr= zeros(length(data),1);
+Ypeak= zeros(length(data),1);
 
 asymm = zeros(length(data),1);
 asymm_err = zeros(length(data),1);
@@ -144,6 +149,11 @@ for nn=1:length(data)
     a_err = abs(ci(1,2)-ci(2,2))/2;
     G_err = abs(ci(1,4)-ci(2,4))/2;
 
+    fC_theory = findTransitionDepth(depths(nn),1,3,0)*fr;
+    
+    gammaEr(nn) = (freq2depth(fout.x1+1)-freq2depth(fout.x1))*fout.G1;
+
+    
     % Plot Fit and Adjust Limits
     xx = linspace(min(X),max(X),1e3);
     pT = plot(xx,feval(fout,xx),'k-','linewidth',1);
@@ -153,7 +163,9 @@ for nn=1:length(data)
         num2str(round(x1_err,2)) '$ kHz' newline ...
         '$' num2str(round(Umeas(nn),1)) '~E_R$' newline ...
         '$\Gamma = ' ...
-        num2str(round(abs(fout.G1),2)) ' $ kHz' newline ...
+        num2str(round(abs(fout.G1),2)) ' \pm ' num2str(round(G_err,2)) '$ kHz' newline ...
+        '$\Gamma = ' ...
+        num2str(round(abs(gammaEr(nn)),2)) '$ Er' newline ...
         '$a = ' num2str(round(fout.a1,2)) '$ kHz'];
     
     plot([1 1]*fout.x1,[fout.bg feval(fout,fout.x1)],'k--','linewidth',1);
@@ -163,8 +175,9 @@ for nn=1:length(data)
 
     plot([1 1]*(fout.x1-fout.a1),[fout.bg feval(fout,fout.x1-fout.a1)],'k:','linewidth',1);
 
-    
-    legend(pT,str,'interpreter','latex','fontsize',10,'location','northwest');
+    text(.01,.98,str,'interpreter','latex','units','normalized',...
+        'verticalalignment','top','horizontalalignment','left');
+%     legend(pT,str,'interpreter','latex','fontsize',10,'location','northwest');
 
     
     ylim([-.05*fout.A1 max(Y)*1.1]);
@@ -177,6 +190,8 @@ for nn=1:length(data)
     asymm(nn) = fout.a1;
     asymm_err(nn) = a_err;
     
+    Ypeak(nn) = max(Y);
+    
     
 end
 %%
@@ -187,6 +202,8 @@ hF_composite.Position=[920 50 800 800];
 
 hF_composite.Name = [opts.Label ' Summary'];
 set(gcf,'color','w');
+
+co=get(gca,'colororder');
 
 t=uicontrol('style','text','string',opts.Label,'units','pixels',...
     'backgroundcolor','w','horizontalalignment','left','fontsize',12);
@@ -225,7 +242,12 @@ hold on
 set(gca,'Xgrid','on','ygrid','on','fontsize',12)
 ylim([0 15]);
 xlim([0 500]);
+yyaxis right
 
+plot(Umeas,Ypeak,'markerfacecolor','k','markersize',8,...
+    'markeredgecolor','k','linewidth',2,'color',co(2,:));
+ylabel('max excited');
+ylim([0 .07]);
 subplot(223)
 
 errorbar(Umeas,asymm,asymm_err,opts.Shape,'markerfacecolor',opts.Color,'markersize',8,...
@@ -257,10 +279,16 @@ output.Fits = fouts;
 output.Depths = depths;
 output.Umeas = Umeas;
 output.Umeas_err= Umeas_err;
+
 output.Freq = fc;
 output.Freq_err = fc_err;
 output.Gamma = gamma;
 output.Gamma_err = gamma_err;
+output.GammaEr = gammaEr;
+
+
+output.Ypeak = Ypeak;
+
 output.Asymm = asymm;
 output.Asymm_err= asymm_err;
 output.CalibFit = fout2;
