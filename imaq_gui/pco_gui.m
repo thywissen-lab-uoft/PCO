@@ -1838,7 +1838,8 @@ end
             % Rotate images to get into "correct" orientation
             for i=1:camera.NumImages
                camera.Images{i}=imrotate(camera.Images{i},-90); 
-            end        
+            end   
+            
 
             data=processImages(t);           % Process images   
             disp(' ');
@@ -2233,11 +2234,21 @@ function camera=configCam(camera)
         auto_exp,...
         camera.ExposureTime,...
         0,0,0,0,bit_pix,0);      
+
+    if (error_code)
+        pco_errdisp('pfSETMODE',error_code)
+        warning('Oh no something went wrong on configuring BAD.'); 
+    end
     
+
     % Read in the camera image size
     [error_code,ccd_width,ccd_height,act_width,act_height,bit_pix]=...
         pfGETSIZES(camera.BoardHandle);
-    
+    if (error_code)
+        pco_errdisp('pfGETSIZES',error_code)
+        warning('oh no something went wrong on reading the sensor.'); 
+    end
+
     camera.H=double(act_height);
     camera.W=double(act_width);
     camera.BitDepth=bit_pix;    

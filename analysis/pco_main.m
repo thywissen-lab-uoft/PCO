@@ -71,7 +71,7 @@ pco_xVar = 'AM_spec_freq';
 % pco_xVar = 'ExecutionDate';
 
 % Should the analysis attempt to automatically find the xvariable?
-pco_autoXVar = 0;
+pco_autoXVar = 1;
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit = 1;
@@ -273,6 +273,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % ROI = [500 1392 300 500]; % XDT 1/2 TOF 10 ms long X9
 
 %%%%% XDT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  ROI = [800 950 280 350]; %K XDT insitu
 
 % ROI = [510 1330 180 480]; %K XDT 5ms tof
 % ROI = [700 1050 327 645]; %K XDT 15ms tof rb

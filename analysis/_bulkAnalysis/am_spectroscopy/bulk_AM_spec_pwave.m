@@ -10,7 +10,7 @@ end
 disp(' ');
 
 GDrive_root = 'G:\My Drive\Lattice Shared\SharedData\Lattice AM';
-doSave = 1;
+doSave = 0;
 
 %% Run Specification
 

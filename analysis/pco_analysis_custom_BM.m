@@ -64,15 +64,15 @@ y_Lbl{30}     = 'N7/N9';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % p_inds is a list where each element is a plot idnex to show. The 
 % number corresponds to the plot index as defined above. 
-p_inds=[01 02]; %total number
+% p_inds=[01 02]; %total number
 
-p_inds=[05];
+% p_inds=[05];
 
 % Excitations to 7
-p_inds = [01,02,03,04];
+% p_inds = [01,02,03,04];
 %  p_inds = [01,02,03,04,06];
 
-% p_inds=[01 02]; %total number
+p_inds=[28];
 
 
 % % Excitations to 9
