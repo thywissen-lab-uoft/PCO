@@ -58,7 +58,7 @@ gamma = zeros(length(data),1);
 gamma_err = zeros(length(data),1);
 gammaEr= zeros(length(data),1);
 Ypeak= zeros(length(data),1);
-
+freq_err_Er= zeros(length(data),1);
 asymm = zeros(length(data),1);
 asymm_err = zeros(length(data),1);
 
@@ -152,6 +152,7 @@ for nn=1:length(data)
     fC_theory = findTransitionDepth(depths(nn),1,3,0)*fr;
     
     gammaEr(nn) = (freq2depth(fout.x1+1)-freq2depth(fout.x1))*fout.G1;
+    freq_err_Er(nn) = (freq2depth(fout.x1+1)-freq2depth(fout.x1))*x1_err;
 
     
     % Plot Fit and Adjust Limits
@@ -282,6 +283,7 @@ output.Umeas_err= Umeas_err;
 
 output.Freq = fc;
 output.Freq_err = fc_err;
+output.Freq_err_Er=freq_err_Er;
 output.Gamma = gamma;
 output.Gamma_err = gamma_err;
 output.GammaEr = gammaEr;

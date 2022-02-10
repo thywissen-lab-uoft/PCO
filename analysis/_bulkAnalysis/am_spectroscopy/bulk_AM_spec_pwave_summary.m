@@ -128,7 +128,7 @@ end
 %%
 hF_summary2 = figure(202);
 clf
-hF_summary2.Position=[1 50 1170 500];
+hF_summary2.Position=[1 50 1500 500];
 hF_summary2.Name = 'AM Summary Table';
 set(gcf,'color','w');
 
@@ -139,11 +139,12 @@ tbl_data =zeros(length(AM1_x_output.Umeas),3);
 tbl_data(:,1) = AM1_x_output.Depths;
 tbl_data(:,2) = AM1_x_output.Umeas;
 tbl_data(:,3) = AM1_x_output.GammaEr;
-tbl_data(:,4) = AM1_x_output.Depths'-AM1_x_output.Umeas;
+tbl_data(:,4) = AM1_x_output.Freq_err_Er;
+tbl_data(:,5) = AM1_x_output.Depths'-AM1_x_output.Umeas;
 
 tt= uitable('columnwidth',{50 50 50},'units','normalized',...
-    'ColumnName',{'req (Er)','meas (Er)','Gamma (Er)','Residue (Er)'},...
-    'columnwidth',{70 70 70 70},'fontsize',10);
+    'ColumnName',{'req (Er)','meas (Er)','Gamma (Er)','fc err (Er)','Residue (Er)'},...
+    'columnwidth',{70 70 70 70 70},'fontsize',10);
 tt.Position = pp;
 tt.Position(3:4)=tt.Position(3:4).*[1.25 1];
 tt.Data = tbl_data;
@@ -159,11 +160,12 @@ tbl_data =zeros(length(AM1_y_output.Umeas),3);
 tbl_data(:,1) = AM1_y_output.Depths;
 tbl_data(:,2) = AM1_y_output.Umeas;
 tbl_data(:,3) = AM1_y_output.GammaEr;
-tbl_data(:,4) = AM1_y_output.Depths'-AM1_y_output.Umeas;
+tbl_data(:,4) = AM1_y_output.Freq_err_Er;
+tbl_data(:,5) = AM1_y_output.Depths'-AM1_y_output.Umeas;
 
 tt= uitable('columnwidth',{50 50 50},'units','normalized',...
-    'ColumnName',{'req (Er)','meas (Er)','Gamma (Er)','Residue (Er)'},...
-    'columnwidth',{70 70 70 70},'fontsize',10);
+    'ColumnName',{'req (Er)','meas (Er)','Gamma (Er)','fc err (Er)','Residue (Er)'},...
+    'columnwidth',{70 70 70 70 70},'fontsize',10);
 tt.Position = pp;
 tt.Position(3:4)=tt.Position(3:4).*[1.25 1];
 tt.Data = tbl_data;
@@ -179,11 +181,12 @@ tbl_data =zeros(length(AM1_z_output.Umeas),3);
 tbl_data(:,1) = AM1_z_output.Depths;
 tbl_data(:,2) = AM1_z_output.Umeas;
 tbl_data(:,3) = AM1_z_output.GammaEr;
-tbl_data(:,4) = AM1_z_output.Depths'-AM1_z_output.Umeas;
+tbl_data(:,4) = AM1_z_output.Freq_err_Er;
+tbl_data(:,5) = AM1_z_output.Depths'-AM1_z_output.Umeas;
 
 tt= uitable('columnwidth',{50 50 50},'units','normalized',...
-    'ColumnName',{'req (Er)','meas (Er)','Gamma (Er)','Residue (Er)'},...
-    'columnwidth',{70 70 70 70},'fontsize',10);
+    'ColumnName',{'req (Er)','meas (Er)','Gamma (Er)','fc err (Er)','Residue (Er)'},...
+    'columnwidth',{70 70 70 70 70},'fontsize',10);
 tt.Position = pp;
 tt.Position(3:4)=tt.Position(3:4).*[1.25 1];
 tt.Data = tbl_data;
@@ -200,11 +203,12 @@ tbl_data =zeros(length(AM2_x_output.Umeas),3);
 tbl_data(:,1) = AM2_x_output.Depths;
 tbl_data(:,2) = AM2_x_output.Umeas;
 tbl_data(:,3) = AM2_x_output.GammaEr;
-tbl_data(:,4) = AM2_x_output.Depths'-AM2_x_output.Umeas;
+tbl_data(:,4) = AM2_x_output.Freq_err_Er;
+tbl_data(:,5) = AM2_x_output.Depths'-AM2_x_output.Umeas;
 
 tt= uitable('columnwidth',{50 50 50},'units','normalized',...
-    'ColumnName',{'req (Er)','meas (Er)','Gamma (Er)','Residue (Er)'},...
-    'columnwidth',{70 70 70 70},'fontsize',10);
+    'ColumnName',{'req (Er)','meas (Er)','Gamma (Er)','fc err (Er)','Residue (Er)'},...
+    'columnwidth',{70 70 70 70 70},'fontsize',10);
 tt.Position = pp;
 tt.Position(3:4)=tt.Position(3:4).*[1.25 1];
 tt.Data = tbl_data;
@@ -220,11 +224,12 @@ tbl_data =zeros(length(AM2_y_output.Umeas),3);
 tbl_data(:,1) = AM2_y_output.Depths;
 tbl_data(:,2) = AM2_y_output.Umeas;
 tbl_data(:,3) = AM2_y_output.GammaEr;
-tbl_data(:,4) = AM2_y_output.Depths'-AM2_y_output.Umeas;
+tbl_data(:,4) = AM2_y_output.Freq_err_Er;
+tbl_data(:,5) = AM2_y_output.Depths'-AM2_y_output.Umeas;
 
 tt= uitable('columnwidth',{50 50 50},'units','normalized',...
-    'ColumnName',{'req (Er)','meas (Er)','Gamma (Er)','Residue (Er)'},...
-    'columnwidth',{70 70 70 70},'fontsize',10);
+    'ColumnName',{'req (Er)','meas (Er)','Gamma (Er)','fc err (Er)','Residue (Er)'},...
+    'columnwidth',{70 70 70 70 70},'fontsize',10);
 tt.Position = pp;
 tt.Position(3:4)=tt.Position(3:4).*[1.25 1];
 tt.Data = tbl_data;
@@ -240,11 +245,12 @@ tbl_data =zeros(length(AM2_z_output.Umeas),3);
 tbl_data(:,1) = AM2_z_output.Depths;
 tbl_data(:,2) = AM2_z_output.Umeas;
 tbl_data(:,3) = AM2_z_output.GammaEr;
-tbl_data(:,4) = AM2_z_output.Depths'-AM2_z_output.Umeas;
+tbl_data(:,4) = AM2_z_output.Freq_err_Er;
+tbl_data(:,5) = AM2_z_output.Depths'-AM2_z_output.Umeas;
 
 tt= uitable('columnwidth',{50 50 50},'units','normalized',...
-    'ColumnName',{'req (Er)','meas (Er)','Gamma (Er)','Residue (Er)'},...
-    'columnwidth',{70 70 70 70},'fontsize',10);
+    'ColumnName',{'req (Er)','meas (Er)','Gamma (Er)','fc err (Er)','Residue (Er)'},...
+    'columnwidth',{70 70 70 70 70},'fontsize',10);
 tt.Position = pp;
 tt.Position(3:4)=tt.Position(3:4).*[1.25 1];
 tt.Data = tbl_data;
