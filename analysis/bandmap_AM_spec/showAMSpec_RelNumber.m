@@ -215,11 +215,52 @@ Ufit2_err = abs(dudf(freq))*sqrt(gamma.^2+freq_err^2);
 yFreqPeak1 = feval(fout1,fout1.x1);
 yFreqPeak2 = feval(fout2,fout2.x1);
 
+Params = [bm_am_spec_data.Params];
+
+if isfield(Params,'AM_spec_depth')
+    Ureq = Params(1).AM_spec_depth; 
+else
+    Ureq = NaN;
+end
+
+
+if isfield(Params,'adwin_am_spec_X')
+   adwin_X = Params(1).adwin_am_spec_X; 
+else
+    adwin_X = NaN;
+end
+
+if isfield(Params,'adwin_am_spec_Y')
+   adwin_Y = Params(1).adwin_am_spec_Y; 
+else
+    adwin_Y = NaN;
+end
+
+if isfield(Params,'adwin_am_spec_Z')
+   adwin_Z = Params(1).adwin_am_spec_Z; 
+else
+    adwin_Z = NaN;
+end
+
+str = [' (X,Y,Z) : ' ...
+    '(' num2str(round(adwin_X,3)) ',' num2str(round(adwin_Y,3)) ',' num2str(round(adwin_Z,3)) ') V' newline ...
+    'Ureq : ' num2str(Ureq)];
+
+
 % Create Output
 output = struct;
 output.Umeas                = Ufit2;
 output.Umeas_err            = Ufit2_err;
+
+output.adwin_X = adwin_X;
+output.adwin_Y = adwin_Y;
+output.adwin_Z = adwin_Z;
+
+output.Ureq = Ureq;
+
+
 output.Fit                  = fout2;
+output.Params               = Params;
 output.Freq                 = freq;
 output.Freq_err             = freq_err;
 output.Gamma                = gamma;
@@ -231,7 +272,9 @@ output.Background_err       = bg_err;
 output.Amplitude            = A;
 output.Amplitude_err        = A_err;
 output.MaxExcite            = max(yF2);
-
+output.X = X;
+output.Y = Y;
+output.FileNames = bm_am_spec_data.FileNames;
 
 %% Plot the output
 
@@ -282,6 +325,7 @@ legend({'center','edge',pStr1,pStr2},'location','southeast','interpreter','latex
 
 resizeFig(hF,t,[hax]);
 
+text(.01,.98,str,'units','normalized','verticalalignment','top');
 
 end
 

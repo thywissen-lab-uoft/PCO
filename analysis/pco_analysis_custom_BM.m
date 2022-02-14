@@ -70,9 +70,9 @@ y_Lbl{30}     = 'N7/N9';
 
 % Excitations to 7
 % p_inds = [01,02,03,04];
-%  p_inds = [01,02,03,04,06];
+ p_inds = [01,02,03,04,05,06];
 
-p_inds=[28];
+% p_inds=[28];
 
 
 % % Excitations to 9
@@ -108,7 +108,7 @@ FitFlags = struct;
 
 FitFlags.T2exp=0;
 FitFlags.expdecay =0;
-FitFlags.Rabi_oscillation = 1;
+FitFlags.Rabi_oscillation = 0;
 FitFlags.Rabi_oscillation2 = 0;
 FitFlags.NGaussPeak=0;
 

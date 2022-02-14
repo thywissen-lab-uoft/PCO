@@ -107,10 +107,10 @@ doBEC         = 0;      % Enable BEC analys
 doErfFit      = 0;    
 
 % Band Map Fit
-doBMFit_AM_Spec  = 1; AM_Spec_Dir = 'V';
+doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'V';
 
-doBMFit       = 0;
-doCustom_BM   = 0;    
+doBMFit       = 1;
+doCustom_BM   = 1;    
 
 % Fermi
 doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
@@ -121,7 +121,7 @@ doRabiAbsolute = 0;
 doRabiContrast = 0;
 
 % Raman Common Mode Detuning
-doWavemeter    = 0;
+doWavemeter    = 1;
 doCavity       = 0;
 
 %% GDrive Settings
@@ -354,9 +354,9 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %       800 950 490 600];   %  band map 15 ms TOF  7box, 9 box
 
 
-% ROI=[800 950 490 620;
-%        800 950 1540 1680];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
-% %    
+ROI=[800 950 490 620;
+       800 950 1540 1680];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
+   
 % 
 % ROI=[720 1030 420 770;
 %        720 1030 420+1064 770+1064];   % bm 15ms in 2D lattice
@@ -996,8 +996,8 @@ if doAnimate && doSave
      animateOpts.Order='ascend';
     
 %     % Color limits
-    animateOpts.CLim=[0 1;
-        0 1];   
+    animateOpts.CLim=[0 0.5;
+        0 0.5];   
 %     animateOpts.CLim=[0 1;
 %         0 .2];   
 %     animateOpts.CLim=[0 .2;

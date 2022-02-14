@@ -718,7 +718,7 @@ A2 = 0.005;
 %     x2=0;
     
     x1 = -125;
-    x2 = -0;
+    x2 = -80;
     
     % (etry
     a1 = .05;
@@ -822,7 +822,7 @@ end
 
 if length(X)>4 && FitFlags.Rabi_oscillation       
 
-    guess_freq = 1/.05;
+    guess_freq = 1/.08;
     guess_tau = 0.5;
 %     
 %         myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t))/2;           
