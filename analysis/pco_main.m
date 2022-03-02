@@ -85,8 +85,8 @@ doStandard     = 1;
 doODProfile    = 1;
 
 % Saving1% Animate the Cloud
-doAnimate = 1;
-doSave = 1;
+doAnimate = 0;
+doSave = 0;
 
 % Probe Beam
 doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
@@ -510,11 +510,20 @@ if doWavemeter && ~doCavity
     P = [atomdata.Params];
     t = [P.ExecutionDate];t1 = min(t);t2 = max(t);    
     [hF_wave,wave_data] = wavemeter_plot(t1,t2,wave_opts);
-    if doSave;
+    
+    if doSave
         saveFigure(hF_wave,'wavemeter',saveOpts);
-%         wave_data = struct(wave_data);
-%         save([saveDir filesep 'wavemeter_data'],'wave_data');
     end
+    
+    if doSave && doUpload && exist(GDrive_root,'dir')
+        gDir = [fileparts(getImageDir2(datevec(now),GDrive_root)) filesep FigLabel];
+        gFile = [gDir filesep 'wave_data'];        
+        if ~exist(gDir,'dir')
+           mkdir(gDir) 
+        end
+        save(gFile,'wave_data');
+    end
+    
 end
 
 if ~doWavemeter && doCavity
