@@ -763,14 +763,16 @@ if length(X)>4 && FitFlags.lorentz_single
     myfit=fittype('A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)+bg','coefficients',{'A','G','x0','bg'},...
         'independent','x');
     opt=fitoptions(myfit);
-    G0=20;
+    
     bg=min(Y);
     A1=(max(Y)-min(Y));
     inds=[Y>.8*max(Y)];
     x0=mean(X(inds));
-
-    opt.StartPoint=[A1/100 G0 x0 bg];   
-%         opt.Upper=[1 3*G0 x0+range(X) 0];   
+    G0 = 2.5;
+    x0 = -2.5;
+    
+    opt.StartPoint=[A1/10 G0 x0 bg];   
+        opt.Upper=[A1*1.1 3*G0 x0+range(X) 0];   
 
     opt.Robust='bisquare';
 
@@ -822,7 +824,7 @@ end
 
 if length(X)>4 && FitFlags.Rabi_oscillation       
 
-    guess_freq = 1/.05;
+    guess_freq = 1/.5;
     guess_tau = 0.5;
 %     
 %         myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t))/2;           
@@ -873,8 +875,8 @@ end
 
 if length(X)>4 && FitFlags.Rabi_oscillation2       
 
-    guess_freq = 1/.4;
-    guess_tau = 100;
+    guess_freq = 1/.5;
+    guess_tau = 20;
 %     tau2=0.1;
 %     
 %         myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t))/2;           
@@ -890,7 +892,7 @@ myfit=fittype(@(N0,f,tau,tau2,bg,t) myfunc(N0,f,tau,tau2,bg,t),'independent','t'
 opt=fitoptions(myfit);   
 
 
-opt.StartPoint=[max(Y) guess_freq guess_tau 1000 -0.3];
+opt.StartPoint=[max(Y) guess_freq guess_tau 50 -0.3];
 % opt.Lower=[max(Y)/5 .1 0,0.01,-1];
 % opt.Upper=[max(Y) 100 1000,1000,1];
 
@@ -907,7 +909,7 @@ paramStr=['$N_0=' num2str(fout.N0,2) ',~f=' num2str(round(fout.f,2)) ...
     '$'];
 
 tt=linspace(0,max(X),1000);
- pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
+ pF=plot(tt,feval(fout,tt),'r-','linewidth',3);
 
 text(.45,.90,fitFuncStr,'units','normalized','interpreter','latex',...
     'horizontalalignment','right','fontsize',14);
@@ -915,7 +917,7 @@ text(.45,.90,fitFuncStr,'units','normalized','interpreter','latex',...
 xL=get(gca,'XLim');
 yL=get(gca,'YLim');
 
-% xlim([0 xL(2)]);
+% xlim([0 0.2]);
 % ylim([0 yL(2)+.1]);
 
 legend(pF,paramStr,'location','northeast','interpreter','latex');

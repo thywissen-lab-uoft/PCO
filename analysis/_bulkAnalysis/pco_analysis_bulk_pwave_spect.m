@@ -145,6 +145,10 @@ runs200new=[
     2021 12 26 08;
     2021 12 26 06;
     2021 12 26 10;
+    2022 02 14 02;
+    2022 02 14 03
+    2022 02 23 02
+
     ];
 
 % Note when selecting peak freuqencies, LIST THE SINGLON PEAK FIRST
@@ -168,7 +172,9 @@ Guess_Xc_200new={
     [-2.5, 8]
     [-2.5, 10]
     [-2.5, 15]
-    [-2.5, 6]
+    [-2.5, 50]
+    [-2.5, 55]
+    [-2.5, 67]
     };
 
 fit_type200new = {
@@ -185,6 +191,9 @@ fit_type200new = {
     'lorentz'
     'lorentz'
 %     'lorentz'
+    'lorentz'
+    'lorentz'
+    'lorentz'
     'lorentz'
     'lorentz'
     'lorentz'
@@ -447,12 +456,12 @@ fit_type100 = {
 out_name100 = 'data_100Er.mat';
 
 %% Select
- runs = runs100new;
- Guess_Xc = Guess_Xc_100new;
- out_name = out_name100new;
- fit_type = fit_type100new;
- data_label = '100Er_new';
-% % 
+%  runs = runs100new;
+%  Guess_Xc = Guess_Xc_100new;
+%  out_name = out_name100new;
+%  fit_type = fit_type100new;
+%  data_label = '100Er_new';
+% % % 
 %  runs = runs300new;
 %  Guess_Xc = Guess_Xc_300new;
 %  out_name = out_name300new;
@@ -545,6 +554,9 @@ nPlotMax = 6;
 clear hFs
 j=1;
 for nn=1:length(data)   
+    
+
+
     myco = cmaps(nn,:);
 
     % X Data
@@ -716,7 +728,8 @@ for nn=1:length(data)
         pF=plot(tt,feval(fout,tt),'k-','linewidth',1);
         text(.98,.98,str,'units','normalized','verticalalignment','cap',...
             'horizontalalignment','right','interpreter','latex','fontsize',8);  
-        
+        if nn==2
+end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %%%% Magnetic field and Magnetic Field Error %%%%
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
