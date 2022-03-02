@@ -262,12 +262,12 @@ if doBMFit_AM_Spec
     bmPopts.xUnit=pco_unit; 
     
     if length(unique(bm_am_spec_data.X))>6    
-        hF_am_spec = showAMSpec_RelNumber(bm_am_spec_data,bmPopts);
-                if doSave;saveFigure(hF_am_spec,'bm_am_spec',saveOpts);end            
-    end
-%             
-%     hF_am_spec_num = showAMSpec_Number(bm_am_spec_data,bmPopts);
-%             if doSave;saveFigure(hF_am_spec_num,'bm_am_spec',saveOpts);end
+        [hF_am_spec am_spec_output] = showAMSpec_RelNumber(bm_am_spec_data,bmPopts);
+        if doSave
+            saveFigure(hF_am_spec,'bm_am_spec',saveOpts);
+            save([saveDir filesep 'am_spec_output'],'am_spec_output');
+        end                 
+    end     
 end
 %% Fermi Fit Analysis
    

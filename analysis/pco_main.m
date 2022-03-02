@@ -66,9 +66,7 @@ end
 % display properties.
 
 % Defautl variable to plot against
-pco_xVar = 'AM_spec_freq';
-
-% pco_xVar = 'ExecutionDate';
+pco_xVar = 'ExecutionDate';
 
 % Should the analysis attempt to automatically find the xvariable?
 pco_autoXVar = 1;
@@ -107,10 +105,10 @@ doBEC         = 0;      % Enable BEC analys
 doErfFit      = 0;    
 
 % Band Map Fit
-doBMFit_AM_Spec  = 1; AM_Spec_Dir = 'V';
+doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'H';
 
-doBMFit       = 0;
-doCustom_BM   = 0;    
+doBMFit       = 1;
+doCustom_BM   = 1;    
 
 % Fermi
 doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
@@ -121,7 +119,7 @@ doRabiAbsolute = 0;
 doRabiContrast = 0;
 
 % Raman Common Mode Detuning
-doWavemeter    = 0;
+doWavemeter    = 1;
 doCavity       = 0;
 
 %% GDrive Settings
@@ -132,6 +130,7 @@ doUpload = 1;       % Upload to google drive?
 % Choose the directory where the images to analyze are stored
 disp([datestr(now,13) ' Choose an image analysis folder...']);
 dialog_title='Choose the root dire ctory of the images';
+
 
 if getImageDir(datevec(now))
     newdir=uigetdir(getImageDir(datevec(now)),dialog_title);
@@ -316,7 +315,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% LATTICE LOW FIELD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-   ROI=[750 1000 375 620]; % 15 ms BM TOF x cam
+%    ROI=[750 1000 375 620]; % 15 ms BM TOF x cam
   
 %   ROI=[412 755 552 778]; % 10 ms BM TOF y cam
 
@@ -353,11 +352,11 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %  ROI = [800 950 1520 1630;
 %       800 950 490 600];   %  band map 15 ms TOF  7box, 9 box
 
-
-% ROI=[800 950 490 620;
-%        800 950 1540 1680];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
-% %    
 % 
+ROI=[790 975 450 650;
+       790 975 1510 1710];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
+% %    
+% % 
 % ROI=[720 1030 420 770;
 %        720 1030 420+1064 770+1064];   % bm 15ms in 2D lattice
 %    
@@ -511,7 +510,11 @@ if doWavemeter && ~doCavity
     P = [atomdata.Params];
     t = [P.ExecutionDate];t1 = min(t);t2 = max(t);    
     [hF_wave,wave_data] = wavemeter_plot(t1,t2,wave_opts);
-    if doSave;saveFigure(hF_wave,'wavemeter',saveOpts);end
+    if doSave;
+        saveFigure(hF_wave,'wavemeter',saveOpts);
+%         wave_data = struct(wave_data);
+%         save([saveDir filesep 'wavemeter_data'],'wave_data');
+    end
 end
 
 if ~doWavemeter && doCavity
@@ -996,8 +999,8 @@ if doAnimate && doSave
      animateOpts.Order='ascend';
     
 %     % Color limits
-    animateOpts.CLim=[0 1;
-        0 1];   
+    animateOpts.CLim=[0 0.5;
+        0 0.5];   
 %     animateOpts.CLim=[0 1;
 %         0 .2];   
 %     animateOpts.CLim=[0 .2;
