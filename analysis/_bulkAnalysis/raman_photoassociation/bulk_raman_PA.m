@@ -11,57 +11,220 @@ disp(' ');
 
 %% 200Er Data
 
-runs100new=[
-    2021 12 06 07;
-    2021 12 08 11;
-    2021 12 08 12;
-%     2021 12 08 13;
-    2021 12 11 06;
-    2021 12 11 07;
-    2021 12 16 06;
-    2021 12 16 07;
-    2021 12 16 08;
-    2021 12 17 02;
-    2021 12 17 01;
-    2021 12 17 04;
-    2021 12 18 04;
-%     2021 12 25 13; %bad?
+runs=[
+    2022 02 25 16;
+    2022 02 25 15;
+    2022 02 25 14;
+    2022 02 25 13;
+    2022 02 25 12;
+    2022 02 25 11;
+    2022 02 25 10;
+    2022 02 25 09;
+    2022 02 25 08;
+    2022 02 25 07;
+    2022 02 25 06;
+    2022 02 25 05;
+    2022 02 25 04;
+    2022 02 25 03;
+    2022 02 28 06;
+    2022 02 28 09;
+    2022 02 28 10;
+    2022 03 01 04;
+    2022 03 01 05;
+    2022 03 01 06;
+    2022 03 01 07;
+    2022 03 01 08;
+        2022 03 02 02;
+    2022 03 02 03;
+    2022 03 02 04;
+    2022 03 02 05;
+
     ];
 
-% Note when selecting peak freuqencies, LIST THE SINGLON PEAK FIRST
-Guess_Xc_100new={
-    [-2.5, 29]
-    [-2.5, -10, 15]
-    [-2.5, 35]
-%     [-2.5, -18,4]
-    [-2.5, -25,5]
-    [-2.5, -10]
-    [-2.5, 18, 45]
-    [-2.5, 14, 41]
-    [-2.5, 22, 52]
-    [-2.5, -20, 7]
-    [-2.5, -28, 4]
-    [-2.5, 56.5]
-    [-2.5,35, 58]
-%     [-2.5,-12, 10]
-    };
+out_name = 'boop.mat';
 
-fit_type100new = {
-    'lorentz',
-    'lorentz'
-    'lorentz'
-%     'lorentz'
-    'lorentz'
-    'lorentz'
-    'lorentz'
-    'lorentz'
-    'lorentz'
-    'lorentz'
-    'lorentz'
-    'lorentz'
-    'lorentz'
-%     'lorentz'
+%% Select the Data
 
-    };
-out_name100new = 'data_100Er_new.mat';
+  
+%% Load the data
+
+file_name = 'custom_data_bm.mat';
+[all_data,dirNames,dirDates] = loadBulk(runs,file_name);
+data = [all_data.custom_data_bm];
+
+
+file_name = 'wave_data.mat';
+[all_data,dirNames,dirDates] = loadBulk(runs,file_name);
+data_wave = {all_data.wave_data};
+
+%% Wavemter analysis
+
+cmaps = hsv(length(data));
+nPlotMax = 6;
+
+clear hFs
+j=1;
+
+wave_df = zeros(length(data),1);
+wave_f = zeros(length(data),1);
+wave_ferr = zeros(length(data),1);
+    f0 = 391.0163*1e3;
+
+for nn=1:length(data)     
+    
+    tbl = data_wave{nn};
+    f = tbl.('frequency (GHz)');
+    tt = tbl.('t');
+    df = f-f0;
+    
+    lbl = [num2str(runs(nn,2)) '/' num2str(runs(nn,3)) ' ' dirNames{nn}(1:2)];
+    p = data(nn).Source.Params(1); 
+    lbl = [lbl ' ' num2str(p.HF_FeshValue_Initial_Lattice) ' G'];   
+
+    myco = cmaps(nn,:);
+    
+    % Make a new figure if necessary
+    if ~mod(nn-1,nPlotMax)
+        % Plot Data    
+        hFs(j)=figure(200+floor(nn/nPlotMax));
+        clf
+        hFs(j).Color='w';
+        hFs(j).Position=[100 50 800 400];
+        co=get(gca,'colororder');
+        j=j+1;
+    end    
+    
+    f = median(f);
+    df_med = median(df);
+    df_sigma = std(df);
+    df_err = sqrt(df_sigma^2+0.05^2); % total error adds with the measurement precision
+    
+    t_lbl = [num2str(round(df_med,1)) 'GHz \pm' num2str(round(df_err,2))];
+    
+    % Make Axis and Plot Data
+    subplot(3,2,mod(nn-1,nPlotMax)+1);
+    plot(tt,df,'o','markerfacecolor',myco,...
+        'markeredgecolor',myco*.5,'color',myco,...
+        'linewidth',1,'markersize',6);    
+    hold on
+    set(gca,'xgrid','on','ygrid','on','fontname','times',...
+        'fontsize',8);
+    xlabel('time');
+    ylabel('f - 391.0163');        
+    title([lbl ' (' t_lbl ')']);
+    gauss_opts.Upper=[];
+    
+    wave_df(nn) = df_med;
+    wave_f(nn) = f;
+    wave_f_err = df_err;
+    
+    
+end
+
 %%
+% Observable to analyzes
+Yname = '(N9-N7)/(N7+N9)';
+
+% Amplitude
+A1 = zeros(length(data),1);
+A2 = zeros(length(data),1);
+
+area1 = zeros(length(data),1);
+area2 = zeros(length(data),1);
+
+% Fit objects output
+fouts={};
+
+cmaps = hsv(length(data));
+nPlotMax = 6;
+
+clear hFs
+j=1;
+for nn=1:length(data)              
+    lbl = [num2str(runs(nn,2)) '/' num2str(runs(nn,3)) ' ' dirNames{nn}(1:2)];
+    p = data(nn).Source.Params(1); 
+    lbl = [lbl ' ' num2str(p.HF_FeshValue_Initial_Lattice) ' G'];   
+    
+    lbl = [lbl ' (' num2str(wave_df(nn)) ' GHz)'];
+
+    myco = cmaps(nn,:);
+
+    % X Data
+    X = data(nn).X;
+    xstr = data(nn).XStr;
+
+    % Ydata
+    ilist = strfind(data(nn).YLabel,Yname);
+    Index = find(not(cellfun('isempty',ilist)));
+    Y = data(nn).Y;
+    Y = Y(Index).Y;    
+    ystr = Yname;    
+    
+    % Find Unique Value    
+    [ux,ia,ib]=unique(X);    
+    Yu=zeros(length(ux),2);    
+    for kk=1:length(ux)
+        inds=find(X==ux(kk));
+        Yu(kk,1)=mean(Y(inds));
+        Yu(kk,2)=std(Y(inds));       
+    end 
+    
+    % Make a new figure if necessary
+    if ~mod(nn-1,nPlotMax)
+        % Plot Data    
+        hFs(j)=figure(100+floor(nn/nPlotMax));
+        clf
+        hFs(j).Color='w';
+        hFs(j).Position=[100 50 800 400];
+        co=get(gca,'colororder');
+        t=uicontrol('style','text','string',Yname,'units','pixels',...
+            'backgroundcolor','w','horizontalalignment','left','fontsize',10);
+        t.Position(3:4)=[hFs(j).Position(3) t.Extent(4)];
+        t.Position(1:2)=[5 hFs(j).Position(4)-t.Position(4)];
+        resizeFig(hFs(j),t);
+        j=j+1;
+    end    
+    
+    % Make Axis and Plot Data
+    subplot(3,2,mod(nn-1,nPlotMax)+1);
+    errorbar(ux,Yu(:,1),Yu(:,2),'o','markerfacecolor',myco,...
+        'markeredgecolor',myco*.5,'color',myco,...
+        'linewidth',1,'markersize',6);    
+    hold on
+    set(gca,'xgrid','on','ygrid','on','fontname','times',...
+        'fontsize',8);
+    xlabel(xstr);
+    ylabel(ystr);        
+    title(lbl);
+    gauss_opts.Upper=[];
+    
+    fitopts = struct;  
+    fitopts.Guess_Sigma = 3;   
+    fitopts.Sign = 'pos';   % Automatically detect
+    fitopts.Guess_Xc = [-116 -75];
+    
+    [fout,out] = customRamanDoublon(X,Y,fitopts);
+    
+    xx=linspace(min(X),max(X),100);
+    plot(xx,feval(fout,xx),'k-','linewidth',1);
+    fouts{nn} = fout;
+    
+    A1(nn) = fout.A1;
+    A2(nn) = fout.A2;
+    area1(nn) = out.Area1;
+    area2(nn) = out.Area2;
+end
+
+%% Next
+
+hf_summ = figure(300);
+clf
+hf_summ.Color='w';
+hf_summ.Position=[100 500 800 400];
+plot(wave_f-f0,A2./A1,'o','markerfacecolor',[.5 .5 .5],'markeredgecolor','k',...
+    'linewidth',2,'markersize',10)
+% plot(wave_f-f0,area2./area1,'o','markerfacecolor',[.1 .5 .5],'markeredgecolor','k',...
+%     'linewidth',2,'markersize',10)
+xlabel(['frequency - ' num2str(f0) ' GHz']);
+ylabel('amplitude ratio');
+set(gca,'box','on','linewidth',1,'fontsize',12,'xgrid','on','ygrid','on');

@@ -81,12 +81,9 @@ pco_overrideUnit='MHz';
 %% Analysis Flags
 
 % Standard Analysis
-doStandard     = 1;
-doODProfile    = 1;
 
 % Saving1% Animate the Cloud
 doAnimate = 0;
-doSave = 0;
 
 % Probe Beam
 doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
@@ -107,8 +104,6 @@ doErfFit      = 0;
 % Band Map Fit
 doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'H';
 
-doBMFit       = 1;
-doCustom_BM   = 1;    
 
 % Fermi
 doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
@@ -513,6 +508,8 @@ if doWavemeter && ~doCavity
     
     if doSave
         saveFigure(hF_wave,'wavemeter',saveOpts);
+        save([saveDir filesep 'wave_data'],'wave_data');
+
     end
     
     if doSave && doUpload && exist(GDrive_root,'dir')
