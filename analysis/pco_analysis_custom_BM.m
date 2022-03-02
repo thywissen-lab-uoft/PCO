@@ -76,7 +76,7 @@ y_Lbl{30}     = 'N7/N9';
 
 
 % % Excitations to 9
-% p_inds = [03,06,08,15,16,17,25];
+p_inds = [03,06,08,15,16,17,25];
 % p_inds = [03,08,15,16,17];
 
 % % lifetime measurements
@@ -109,7 +109,7 @@ FitFlags = struct;
 FitFlags.T2exp=0;
 FitFlags.expdecay =0;
 FitFlags.Rabi_oscillation = 0;
-FitFlags.Rabi_oscillation2 = 0;
+FitFlags.Rabi_oscillation2 =0;
 FitFlags.NGaussPeak=0;
 
 FitFlags.gauss_single=0;

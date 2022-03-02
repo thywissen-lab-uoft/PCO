@@ -717,8 +717,8 @@ A2 = 0.005;
 %     x2 = x1;
 %     x2=0;
     
-    x1 = -125;
-    x2 = -80;
+    x1 = -120;
+    x2 = -70;
     
     % (etry
     a1 = .05;
@@ -763,14 +763,15 @@ if length(X)>4 && FitFlags.lorentz_single
     myfit=fittype('A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)+bg','coefficients',{'A','G','x0','bg'},...
         'independent','x');
     opt=fitoptions(myfit);
-    G0=20;
+    
     bg=min(Y);
     A1=(max(Y)-min(Y));
     inds=[Y>.8*max(Y)];
     x0=mean(X(inds));
-
-    opt.StartPoint=[A1/100 G0 x0 bg];   
-%         opt.Upper=[1 3*G0 x0+range(X) 0];   
+    G0=2.5;
+    x0 = -1.5
+    opt.StartPoint=[A1/2 G0 x0 bg];   
+    opt.Upper=[A1*1.1 3*G0 x0+range(X) 0];   
 
     opt.Robust='bisquare';
 
@@ -798,8 +799,10 @@ if length(X)>4 && FitFlags.gauss_single
     [Ymin,ind]=min(Y);
     A=bg-Ymin;
     xC=X(ind);
+    A = 10E4;
+    xC = -1.5
 
-    G=[A 10 -7.5 bg];
+    G=[A 10 xC bg];
     opt.StartPoint=G;
     opt.Robust='bisquare';
 %         opt.Lower=[0 0 -inf 0 0 -inf 0];
@@ -822,7 +825,7 @@ end
 
 if length(X)>4 && FitFlags.Rabi_oscillation       
 
-    guess_freq = 1/.08;
+    guess_freq = 1/.1;
     guess_tau = 0.5;
 %     
 %         myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t))/2;           
@@ -873,7 +876,7 @@ end
 
 if length(X)>4 && FitFlags.Rabi_oscillation2       
 
-    guess_freq = 1/.4;
+    guess_freq = 1/.05;
     guess_tau = 100;
 %     tau2=0.1;
 %     
@@ -907,7 +910,7 @@ paramStr=['$N_0=' num2str(fout.N0,2) ',~f=' num2str(round(fout.f,2)) ...
     '$'];
 
 tt=linspace(0,max(X),1000);
- pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
+ pF=plot(tt,feval(fout,tt),'r-','linewidth',3);
 
 text(.45,.90,fitFuncStr,'units','normalized','interpreter','latex',...
     'horizontalalignment','right','fontsize',14);

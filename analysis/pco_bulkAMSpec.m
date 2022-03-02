@@ -160,6 +160,9 @@ delete(ax3);
 fit_lin = fittype('m*(x-xi)','coefficients',{'m','xi'},'independent',{'x'});
 fit_lin_opt = fitoptions(fit_lin);
 
+% Create linear fit constrainted
+fit_lin_constrained = fittype('m*(x+9.8)','coefficients',{'m'},'independent',{'x'});
+fit_lin_constrained_opt = fitoptions(fit_lin_constrained);
 
 %% High Adwin Voltage Fit
 
@@ -181,11 +184,13 @@ Voff_L  = -9.804064;
 % Sort adwin voltages into high and low ones
 adwin_H = [adwin>V_threshold];adwin_L = [adwin<V_threshold];
 
-
-
+% High Lattice Depth
 if sum(adwin_H)>2
     fit_lin_opt.Weights = (1./S(adwin_H)).^2;
+  
+    
     foutH = fit(adwin(adwin_H),Y(adwin_H),fit_lin,fit_lin_opt);
+    
     ci_H=confint(foutH);
     ErPerV_H = foutH.m;
     Vint_H = foutH.xi;
@@ -263,9 +268,12 @@ if sum(adwin_H)>2
         'position',pp,'columnwidth',{140,70});    
 end
 
+% Low Lattice Depth
 if sum(adwin_L)>2
     fit_lin_opt.Weights = (1./S(adwin_L)).^2;
     fit_lin_opt.StartPoint =[8 -10];
+%     fit_lin_opt.Lower = [0 -9.81];
+%     fit_lin_opt.Upper = [inf -9.8];
     foutL = fit(adwin(adwin_L),Y(adwin_L),fit_lin,fit_lin_opt);
     ci_L=confint(foutL);
     ErPerV_L = foutL.m;
@@ -345,9 +353,94 @@ if sum(adwin_L)>2
 end
 
 
+% Low Lattice Depth CONSTRAINED
+if sum(adwin_L)>2
+    fit_lin_constrained_opt.Weights = (1./S(adwin_L)).^2;
+    foutL2 = fit(adwin(adwin_L),Y(adwin_L),fit_lin_constrained,fit_lin_constrained_opt);
+    
+    ci_L=confint(foutL2);
+    ErPerV_L = foutL2.m;
+    ErPerV_L_err = abs(ci_L(2,1)-ci_L(1,1))/2;
+    
+    strL = ['$m = (' num2str(round(ErPerV_L,3)) ' \pm ' ...
+        num2str(round(ErPerV_L_err,3)) ...
+        ')~E_\mathrm{R}/\mathrm{V}$ ' newline ...
+        '$x_i=9.8$'];
+    
+    tblL = {};
+    tblL{1,2} = ErPerV_L;
+    tblL{2,2} = ErPerV_L_err;
+
+    
+    tblL{6,2} = VperP_L;
+    tblL{7,2} = Voff_L;
+    tblL{8,2} = P_threshold;
+    tblL{9,2} = V_threshold;
+
+    tblL{11,2} = ErPerV_L*VperP_L;
+    tblL{12,2} = ErPerV_L_err*VperP_L;
+    
+    tblL{1,1} = 'fit slope (Er/V)';
+    tblL{2,1} = 'fit slope err (Er/V)';
+
+    tblL{6,1} = 'given power slope (V/W)';
+    tblL{7,1} = 'given power intercept (V)';
+    tblL{8,1} = 'given power cutoff (W)';
+    tblL{9,1} = 'given voltage cutoff (W)';
+
+    tblL{11,1} = 'fit slope (Er/W)';
+    tblL{12,1} = 'fit slope err (Er/W)';
+
+    
+    h_am_bulk_adwinL = figure;
+    h_am_bulk_adwinL.Color='w';
+    h_am_bulk_adwinL.Position=[560 500 1200 400];
+    
+    clear legP;
+    clear legStr;
+
+    subplot(131);
+    hold on
+    legP(1) = errorbar(adwin(adwin_L),Y(adwin_L),S(adwin_L),'o','markerfacecolor',[.5 .5 .5],...
+        'markeredgecolor','k','markersize',6,...
+        'color','k','linewidth',2);
+    legStr{1} = 'data';
+    xlabel('adwin (V)');
+    ylabel('U measure (Er)');
+    set(gca,'Xgrid','on','ygrid','on','box','on','linewidth',1,'fontsize',10);
+    xlim([min(adwin(adwin_L))-1 max(adwin(adwin_L))+1]);
+    hold on
+    tt=linspace(-10,2,1e3);
+    legP(end+1) = plot(tt,feval(foutL2,tt),'b-');
+    legStr{end+1} = strL;
+    legend(legP,legStr,'interpreter','latex','location','best');
+
+    subplot(132);
+    pX = errorbar(adwin(adwin_L),Y(adwin_L)-feval(foutL2,adwin(adwin_L)),S(adwin_L),'o','markerfacecolor',[.5 .5 .5],...
+        'markeredgecolor','k','markersize',6,...
+        'color','k','linewidth',2);
+    set(gca,'Xgrid','on','ygrid','on','box','on','linewidth',1,'fontsize',10);
+    xlabel('adwin (V)');
+    ylabel('Umeas - fit (Er)');
+    xlim([min(adwin(adwin_L))-1 max(adwin(adwin_L))+1]);
+    
+    ax3=subplot(133);
+    pp=ax3.Position;
+    delete(ax3);
+    tt=uitable('Data',tblL,'fontsize',8,'units','normalized',...
+        'position',pp,'columnwidth',{140,70});    
+end
+
+
 if sum(adwin_L)>2 & sum(adwin_H)>2
+    tt=linspace(-10,10,1e4);
+
+    yLb = feval(foutL2,tt);
+    yHb = feval(foutH,tt);
     
-    
+    vTurn = interp1(yLb-yHb,tt,0);
+    Uturn = feval(foutL2,vTurn);
+
     h_am_bulk_adwin = figure;
     h_am_bulk_adwin.Color='w';
     h_am_bulk_adwin.Position=[560 500 600 400];
@@ -367,15 +460,22 @@ if sum(adwin_L)>2 & sum(adwin_H)>2
     xlim([min(adwin)-1 max(adwin)+1]);
     ylim([-10 max(Y)+100]);
     hold on
-    tt=linspace(-10,10,1e3);
-    legP(end+1) = plot(tt,feval(foutL,tt),'b-');
+    legP(end+1) = plot(tt,feval(foutL2,tt),'b-');
         
     legP(end+1) = plot(tt,feval(foutH,tt),'r-');
 
     
-    legStr{end+1} = strH;
     legStr{end+1} = strL;
+    legStr{end+1} = strH;
+    
+    funcstr = ['(U/' num2str(foutL2.m) '-9.8) (U<' num2str(round(Uturn,2)) ')' ...
+        newline ...
+        '(U/' num2str(foutH.m) '+' num2str(foutH.xi) ') (U>=' num2str(round(Uturn,2)) ')'];
 
     legend(legP,legStr,'interpreter','latex','location','best');
+    
+    text(.1,.4,funcstr,'units','normalized')
+
+
 
 end
