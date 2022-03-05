@@ -81,9 +81,12 @@ pco_overrideUnit='MHz';
 %% Analysis Flags
 
 % Standard Analysis
+doODProfile = 1;
+doStandard = 1;
 
 % Saving1% Animate the Cloud
 doAnimate = 0;
+doSave =1;
 
 % Probe Beam
 doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
@@ -99,11 +102,13 @@ doGaussRabi   = 0;      % Enable gauss rabi
 doBEC         = 0;      % Enable BEC analys
 
 % Erf Fit
-doErfFit      = 0;    
+doErfFit      = 1;    
 
 % Band Map Fit
 doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'H';
 
+doBMFit = 1;
+doCustom_BM = 1;
 
 % Fermi
 doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF

@@ -89,7 +89,7 @@ y_Lbl{30}     = 'N7/N9';
 % p_inds = [06,23,08,15,16];
 
 % Absolute number
-% p_inds = [01,02,25];
+p_inds = [01,02,25];
 
 % Rabi oscillations 7 to 9
 % p_inds = [01,02,07,08,15,16,17];
