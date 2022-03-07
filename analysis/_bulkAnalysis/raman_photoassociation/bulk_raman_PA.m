@@ -34,11 +34,17 @@ runs=[
     2022 03 01 06;
     2022 03 01 07;
     2022 03 01 08;
-        2022 03 02 02;
+    2022 03 02 02;
     2022 03 02 03;
     2022 03 02 04;
     2022 03 02 05;
-
+    2022 03 02 06;
+    2022 03 02 07;
+%     2022 03 02 08; 
+    2022 03 02 09;
+    2022 03 02 10;
+    2022 03 02 11;
+    2022 03 02 12;
     ];
 
 out_name = 'boop.mat';
@@ -89,7 +95,7 @@ for nn=1:length(data)
         hFs(j)=figure(200+floor(nn/nPlotMax));
         clf
         hFs(j).Color='w';
-        hFs(j).Position=[100 50 800 400];
+        hFs(j).Position=[100 50 800 600];
         co=get(gca,'colororder');
         j=j+1;
     end    
@@ -175,7 +181,7 @@ for nn=1:length(data)
         hFs(j)=figure(100+floor(nn/nPlotMax));
         clf
         hFs(j).Color='w';
-        hFs(j).Position=[100 50 800 400];
+        hFs(j).Position=[900 50 800 600];
         co=get(gca,'colororder');
         t=uicontrol('style','text','string',Yname,'units','pixels',...
             'backgroundcolor','w','horizontalalignment','left','fontsize',10);
@@ -221,10 +227,61 @@ hf_summ = figure(300);
 clf
 hf_summ.Color='w';
 hf_summ.Position=[100 500 800 400];
+
+
 plot(wave_f-f0,A2./A1,'o','markerfacecolor',[.5 .5 .5],'markeredgecolor','k',...
     'linewidth',2,'markersize',10)
-% plot(wave_f-f0,area2./area1,'o','markerfacecolor',[.1 .5 .5],'markeredgecolor','k',...
-%     'linewidth',2,'markersize',10)
-xlabel(['frequency - ' num2str(f0) ' GHz']);
 ylabel('amplitude ratio');
+
+plot(wave_f-f0,A2./A1,'o','markerfacecolor',[.5 .5 .5],'markeredgecolor','k',...
+    'linewidth',2,'markersize',10)
+ylabel('amplitude ratio');
+xlabel(['frequency - ' num2str(f0) ' GHz']);
 set(gca,'box','on','linewidth',1,'fontsize',12,'xgrid','on','ygrid','on');
+
+
+hf_summ1 = figure(400);
+clf
+hf_summ1.Color='w';
+hf_summ1.Position=[100 500 800 400];
+
+
+plot(wave_f-f0,A1,'o','markerfacecolor',[.5 .5 .5],'markeredgecolor','k',...
+    'linewidth',2,'markersize',10)
+ylabel('amplitude A_1');
+xlabel(['frequency - ' num2str(f0) ' GHz']);
+set(gca,'box','on','linewidth',1,'fontsize',12,'xgrid','on','ygrid','on');
+
+
+hf_summ2 = figure(500);
+clf
+hf_summ2.Color='w';
+hf_summ2.Position=[100 500 800 400];
+
+
+plot(wave_f-f0,A2,'o','markerfacecolor',[.5 .5 .5],'markeredgecolor','k',...
+    'linewidth',2,'markersize',10)
+ylabel('amplitude A_2');
+xlabel(['frequency - ' num2str(f0) ' GHz']);
+set(gca,'box','on','linewidth',1,'fontsize',12,'xgrid','on','ygrid','on');
+
+
+%% UPload data
+doUpload = 1;
+
+GDrive_root = 'G:\My Drive\Lattice Shared\SharedData\Composite Raman-PA';
+
+if  doUpload && exist(GDrive_root,'dir')   
+%     gFile = [GDrive_root filesep]; 
+    saveas(hf_summ,[GDrive_root filesep 'PA_summary.png'])
+    saveas(hf_summ1,[GDrive_root filesep 'Singlon_A.png'])
+    saveas(hf_summ1,[GDrive_root filesep 'Doublon_A2.png'])
+
+
+    
+    for jj=1:length(hFs)
+        saveas(hFs(jj),[GDrive_root filesep 'Fits' num2str(jj) '.png'])
+    end
+
+end
+

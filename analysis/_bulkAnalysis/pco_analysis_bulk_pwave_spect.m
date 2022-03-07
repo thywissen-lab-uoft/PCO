@@ -528,7 +528,7 @@ Yname = '(N7-N9)/(N7+N9)';
 
 % Output data objects
 data_out = struct;
-
+Breq =[];
 % Magnetic field and error
 all_B=[];
 all_B_err = [];
@@ -789,10 +789,19 @@ end
     p = data(nn).Source.Params(1);
     if isfield(p,'HF_FeshValue_Spectroscopy')
         lbl = [lbl ' ' num2str(p.HF_FeshValue_Spectroscopy) ' G'];
+            Breq(nn)=p.HF_FeshValue_Spectroscopy;
+            Bmeas(nn)=B;
+
     else
         lbl = [lbl ' ' num2str(p.HF_FeshValue_Initial_Lattice) ' G'];
+            Breq(nn)=p.HF_FeshValue_Initial_Lattice;
+                        Bmeas(nn)=B;
+
+
     end  
-    lbl = [lbl ' (' num2str(round(B,2)) ' G)'];
+    lbl = [lbl ' (' num2str(round(B,3)) ' G)'];
+    
+    
     
     title(lbl);
     
@@ -887,9 +896,34 @@ set(gca,'xgrid','on','ygrid','on','box','on','linewidth',1,...
     'fontsize',10);
 yL = get(gca,'YLim');
 ylim([0 yL(2)]);
+%% Magnetic Field
+
+hF3 = figure(21);
+hF3.Color='w';
+co=get(gca,'colororder');
+
+subplot(131);
+plot(Breq,Bmeas,'o','markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5,...
+    'linewidth',2,'markersize',10)
+xlabel('request field (G)');
+ylabel('measured field (G)');
+
+subplot(132);
+plot(Breq,Bmeas-Breq,'o','markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5,...
+    'linewidth',2,'markersize',10)
+xlabel('request field (G)');
+ylabel('meas - request (G)');
+
+
+subplot(133);
+histogram(Bmeas-Breq,10)
+mean(Bmeas-Breq)
+std(Bmeas-Breq)
+xlabel('request field (G)');
+ylabel('residue (G)');
 
 %% UPload data
-doUpload = 1;
+doUpload = 0;
 
 GDrive_root = 'G:\My Drive\Lattice Shared\SharedData\Composite P-wave';
 
