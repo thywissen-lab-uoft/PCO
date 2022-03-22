@@ -279,7 +279,7 @@ if doCustom
 Bfb   = data.Params(1).HF_FeshValue_Initial_Lattice;
 % Bfb   = data.Params(1).HF_FeshValue_Initial_ODT;
 Bshim =0;
-Bfb   = data.Params(1).HF_FeshValue_Spectroscopy;
+% Bfb   = data.Params(1).HF_FeshValue_Spectroscopy;
 % Bshim = data.Params(1).HF_zshim_Initial_Lattice*2.35;
 
 

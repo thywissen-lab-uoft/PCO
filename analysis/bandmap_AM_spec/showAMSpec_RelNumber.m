@@ -94,7 +94,7 @@ xHigh_unique = unique(xHigh);
 
 xC = median(xHigh_unique);
 
-xC=125;
+xC=240;
 % Full Width Half Max
 inds = logical([(Y-bg)./range(Y) < 0.6]) & ...
     logical([(Y-bg)./range(Y) > 0.4]);

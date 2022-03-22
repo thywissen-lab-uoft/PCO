@@ -75,7 +75,7 @@ pco_autoXVar = 1;
 pco_autoUnit = 1;
 
 % If ixon_autoUnit=0, this will be used.
-pco_overrideUnit='MHz';
+pco_overrideUnit='ms';
 
 
 %% Analysis Flags
@@ -85,11 +85,12 @@ doODProfile = 1;
 doStandard = 1;
 
 % Saving1% Animate the Cloud
-doAnimate = 0;
+doAnimate = 1;
 doSave =1;
 
 % Probe Beam
 doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
+
 
 % Box Count
 doBoxCount    = 0;      % Box count analysis
@@ -105,13 +106,13 @@ doBEC         = 0;      % Enable BEC analys
 doErfFit      = 0;    
 
 % Band Map Fit
-doBMFit_AM_Spec  = 1; AM_Spec_Dir = 'H';
+doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'H';
 
 doBMFit = 0;
 doCustom_BM = 0;
 
 % Fermi
-doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
+doFermiFitLong = 1;     % Enable Fermi Fit for XDT TOF
 
 % Custom Box counts
 doCustom       =  0;          % Custom Box Count
@@ -119,7 +120,7 @@ doRabiAbsolute = 0;
 doRabiContrast = 0;
 
 % Raman Common Mode Detuning
-doWavemeter    = 1;
+doWavemeter    = 0;
 doCavity       = 0;
 
 %% GDrive Settings
@@ -274,7 +275,8 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %%%%% XDT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  ROI = [800 950 280 350]; %K XDT insitu
 
-% ROI = [510 1330 180 480]; %K XDT 5ms tof
+ROI = [510 1330 180 480]; %K XDT 5ms tof
+% ROI = [730 1060 250 550]; %K XDT 10ms tof
 % ROI = [700 1050 327 645]; %K XDT 15ms tof rb
 
 % ROI=[649 1160 580 1024];   % XDT TOF 15 ms
@@ -315,7 +317,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% LATTICE LOW FIELD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-   ROI=[750 1000 375 620]; % 15 ms BM TOF x cam
+%    ROI=[750 1000 375 620]; % 15 ms BM TOF x cam
   
 %   ROI=[412 755 552 778]; % 10 ms BM TOF y cam
 
@@ -355,8 +357,8 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % 
 % ROI=[790 975 450 650;
 %        790 975 1510 1710];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
-% % %    
-% % 
+% %    
+% 
 % ROI=[720 1030 420 770;
 %        720 1030 420+1064 770+1064];   % bm 15ms in 2D lattice
 %    

@@ -382,7 +382,7 @@ gC=maxValues(1);
 gC=pi;
 gD=0.5*(max(Y)+min(Y));
 
-gC=pi/2;
+gC=pi;
 gE = range(X);
 
 cosFit=fittype('A*cos(2*pi*t/B+C)*exp(-t/E)+D','independent',{'t'},...
