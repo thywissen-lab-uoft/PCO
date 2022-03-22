@@ -148,6 +148,8 @@ runs200new=[
     2022 02 14 02;
     2022 02 14 03
     2022 02 23 02
+    2022 03 14 05
+
 
     ];
 
@@ -175,6 +177,7 @@ Guess_Xc_200new={
     [-2.5, 50]
     [-2.5, 55]
     [-2.5, 67]
+    [-2.5, 33]
     };
 
 fit_type200new = {
@@ -191,6 +194,7 @@ fit_type200new = {
     'lorentz'
     'lorentz'
 %     'lorentz'
+    'lorentz'
     'lorentz'
     'lorentz'
     'lorentz'
@@ -923,7 +927,7 @@ xlabel('request field (G)');
 ylabel('residue (G)');
 
 %% UPload data
-doUpload = 0;
+doUpload = 1;
 
 GDrive_root = 'G:\My Drive\Lattice Shared\SharedData\Composite P-wave';
 

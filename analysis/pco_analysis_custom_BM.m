@@ -70,13 +70,13 @@ y_Lbl{30}     = 'N7/N9';
 
 % Excitations to 7
 % p_inds = [01,02,03,04];
- p_inds = [01,02,03,04,05,06];
+%  p_inds = [01,02,03,04,05,06];
 
 % p_inds=[28];
 
 
 % % Excitations to 9
-% p_inds = [03,06,08,15,16,17,25];
+p_inds = [03,06,08,15,16,17,25];
 % p_inds = [03,08,15,16,17];
 
 % % lifetime measurements

@@ -44,25 +44,25 @@ data_300=[
 B_300 = [200.8 200.4 200.3];
 
 %% Select
- runs = data_100;
- data_label = '100Er';
-out_name = 'lifetime_100Er.mat';
+%  runs = data_100;
+%  data_label = '100Er';
+% out_name = 'lifetime_100Er.mat';
 
 % 
-% runs = data_200;
-% data_label = '200Er';
-% Bfield_manual = B_200+0.09;
-% out_name = 'lifetime_200Er.mat';
+runs = data_200;
+data_label = '200Er';
+Bfield_manual = B_200+0.096;
+out_name = 'lifetime_200Er.mat';
 
- 
+%  
 %    runs = data_300;
 %  data_label = '300Er';
-%  Bfield_manual = B_300+0.09;
+%  Bfield_manual = B_300+0.096;
 % out_name = 'lifetime_300Er.mat';
-
- runs = data_60;
- data_label = '60Er';
-out_name = 'lifetime_60Er.mat';
+% 
+%  runs = data_60;
+%  data_label = '60Er';
+% out_name = 'lifetime_60Er.mat';
 
 
 %% Load the data
@@ -120,7 +120,7 @@ for nn=1:length(data)
     if isequal(data_label, '200Er') || isequal(data_label, '300Er')
         Bfield(nn) = Bfield_manual(nn);
     else
-        Bfield(nn) = p.HF_FeshValue_Spectroscopy + 0.09;
+        Bfield(nn) = p.HF_FeshValue_Spectroscopy + 0.096;
     end
 
     tau(nn) = fout.tau;
