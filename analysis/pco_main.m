@@ -48,7 +48,7 @@ CrossSection = 3/(2*pi)*lambda^2;
 
 % Choose your camera
 camaxis='X';
-% camaxis='Y';
+ %camaxis='Y';
 % Choose the pixel size base on the camera
 switch camaxis
     case 'X'
@@ -98,7 +98,7 @@ doLandauZener = 0;      % Landau Zener Analysis on BOX
 doRamanSpec   = 0;      % Raman box count count analyis
 
 % Gaussian
-doGaussFit    = 0;      % Enable gauss fitting
+doGaussFit    = 1;      % Enable gauss fitting
 doGaussRabi   = 0;      % Enable gauss rabi
 doBEC         = 0;      % Enable BEC analys
 
@@ -112,7 +112,7 @@ doBMFit = 0;
 doCustom_BM = 0;
 
 % Fermi
-doFermiFitLong = 1;     % Enable Fermi Fit for XDT TOF
+doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
 
 % Custom Box counts
 doCustom       =  0;          % Custom Box Count
@@ -275,7 +275,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %%%%% XDT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  ROI = [800 950 280 350]; %K XDT insitu
 
-ROI = [510 1330 180 480]; %K XDT 5ms tof
+%ROI = [510 1330 180 480]; %K XDT 5ms tof
 % ROI = [730 1060 250 550]; %K XDT 10ms tof
 % ROI = [700 1050 327 645]; %K XDT 15ms tof rb
 
@@ -287,7 +287,9 @@ ROI = [510 1330 180 480]; %K XDT 5ms tof
 % ROI=[741 1014 780 1024];  % XDT  TOF 15 ms HF+SG imaging
 % ROI=[708 1089 377 608];   % XDT  TOF 20 ms evaporation
 % ROI=[713 1015 310 601];
-% ROI=[810 970 740 860];   % XDT  Full TOF analysis
+
+ ROI=[810 970 200 860];   % XDT  Full TOF analysis
+ 
 % ROI = [810 970 420 580]; %XDT Rb after evap 15ms 
 
 %   ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
@@ -403,6 +405,8 @@ ROI = [510 1330 180 480]; %K XDT 5ms tof
 % ROI = [830 940 590 700;
 %     830 940 450 560]; 
 %     ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
+
+ %ROI=[500 700 200 1000];   % XDT  Full TOF analysis
 
 if doFermiFitLong
     ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM

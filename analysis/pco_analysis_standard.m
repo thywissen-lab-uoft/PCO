@@ -58,10 +58,10 @@ if doGaussFit
     gaussPopts.NumberLorentzianFit=0;   % Fit atom number to lorentzian
     gaussPopts.CenterSineFit = 0;       % Fit sine fit to cloud center
     gaussPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
-    gaussPopts.CenterParabolaFit = 0;
+    gaussPopts.CenterParabolaFit = 1;
     gaussPopts.CenterLinearFit = 0;     % Linear fit to cloud center
     gaussPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
-    
+    gaussPopts.angleTrack = 1;
     % Plot the statistics of gaussian fit
     hF_stats=showGaussStats(gauss_data,gaussPopts);     
     if doSave;saveFigure(hF_stats,'gauss_stats',saveOpts);end       
@@ -89,9 +89,12 @@ if doGaussFit
     if doSave;saveFigure(hF_Error,'gauss_error',saveOpts);end  
    
     % Cloud centre
-    hF_Centre=showAtomCentre(gauss_data,pco_xVar,gaussPopts);    
-    if doSave;saveFigure(hF_Centre,'gauss_position',saveOpts);end 
-        
+    [hF_Centre,hF_Centre2]=showAtomCentre(gauss_data,pco_xVar,gaussPopts);    
+    if doSave
+        saveFigure(hF_Centre,'gauss_position',saveOpts);
+        saveFigure(hF_Centre2,'gauss_position2',saveOpts);
+    end 
+    
     % Gauss Size
     hF_size=showSize(gauss_data,pco_xVar,gaussPopts);    
     if doSave;saveFigure(hF_size,'gauss_size',saveOpts);end
@@ -109,7 +112,7 @@ if doGaussFit
     if doSave;saveFigure(hF_density,'gauss_density',saveOpts);end    
 
     % Gaussian Temperature Analysis
-    if isequal(pco_xVar,'tof') && size(gauss_data.Natoms,2)>2
+    if isequal(pco_xVar,'tof') && size(gauss_data.Natoms,1)>3
         [hF_temp,fitX,fitY]=computeGaussianTemperature(gauss_data,gaussPopts);
         if doSave;saveFigure(hF_temp,'gauss_temp',saveOpts);end    
     end      
