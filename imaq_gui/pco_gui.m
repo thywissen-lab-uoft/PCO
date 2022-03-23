@@ -35,7 +35,7 @@ end
 % least the pixel size).
 
 % Whether to enter debug mode
-doDebug=1;
+doDebug=0;
 
 % Camera properties
 raw_pixel_size=6.45E-6; % Pixelsize on the pixefly cameras
