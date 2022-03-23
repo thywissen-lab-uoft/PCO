@@ -58,6 +58,9 @@ historyDir=['C:' filesep 'ImageHistory'];
 frVar='ExecutionDate';
 camera=initCamStruct;
 
+scaleProbeDefaultROI=[30 100 900 980];
+
+boxBkgdDefaultROI = [400 500 400 500];
 
 %% Initialize Dummy Data
 
@@ -1128,7 +1131,7 @@ cBoxBg.Position=[70 cBox.Position(2) 75 15];
        end
     end
 
-d=[400 500 400 500];
+d=boxBkgdDefaultROI;
 pp=[d(1) d(3) d(2)-d(1) d(4)-d(3)];
 tblROIbsub=uitable(hpAnl,'units','pixels','ColumnWidth',{30 30 30 30},...
     'ColumnEditable',true(ones(1,4)),'ColumnName',{},...
@@ -1352,7 +1355,7 @@ cScaleProbe=uicontrol('style','checkbox','string','scale',...
     end
 
 
-d=[1 100 900 1000];
+d=scaleProbeDefaultROI;
 pp=[d(1) d(3) d(2)-d(1) d(4)-d(3)];
 tblROIPScale=uitable(hpImgProcess,'units','pixels','ColumnWidth',{30 30 30 30},...
     'ColumnEditable',true(ones(1,4)),'ColumnName',{},...
