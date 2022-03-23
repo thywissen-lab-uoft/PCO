@@ -35,10 +35,21 @@ end
 % least the pixel size).
 
 % Whether to enter debug mode
-doDebug=0;
+doDebug=1;
 
+% Camera properties
 raw_pixel_size=6.45E-6; % Pixelsize on the pixefly cameras
+
+% Optics
 mag=[1 2]; % ideal manification of X and Y cams respectively
+
+% Rotation
+rotation_angle = [0 1.8]; % Rotation angles of X and Y cams respectively
+% Note that rotations are tricky because the total image size changes.
+% However, because our rotation angles are assumed to be small, we can
+% mostly fix this issue by recropping the image to be the same size. This
+% technique WILL FAIL for large rotation angles
+rotMode = 'crop'; %(alternative is 'loose');
 
 % X Cam has 200 mm objective, 200 mm refocuing
 % Y Cam has 200 mm objective, 400 mm refocusing
@@ -1244,26 +1255,38 @@ uicontrol(bgCam,'Style','radiobutton','String','Y Cam',...
     function chCam(~,evt)
         switch evt.NewValue.String
             case 'X Cam'
-                tbl_cam.Data{1,2}=mag(1);
-                tbl_cam.Data{3,2}=raw_pixel_size*1E6/mag(1);
+                tbl_optics.Data{2,2}=mag(1);
+                tbl_cam.Data{1,2} = raw_pixel_size*1E6/mag(1);
+                tblRotate.Data = rotation_angle(1);
+                
             case 'Y Cam'
-                tbl_cam.Data{1,2}=mag(2);
-                tbl_cam.Data{3,2}=raw_pixel_size*1E6/mag(2);
+                tbl_optics.Data{2,2}=mag(2);
+                tbl_cam.Data{1,2} = raw_pixel_size*1E6/mag(2);
+                tblRotate.Data = rotation_angle(2);
+
         end
        updateScalebar;
     end
+
+tbl_optics=uitable('parent',hpSet,'units','pixels','RowName',{},'ColumnName',{},...
+    'fontsize',8,'ColumnWidth',{100,40},'columneditable',[false true]);
+tbl_optics.Data={...
+    ['raw pixelsize (' char(956) 'm)'], raw_pixel_size*1E6;
+    'magnification',mag(1)};
+
+tbl_optics.Position(3:4)=tbl_optics.Extent(3:4);
+tbl_optics.Position(1:2)=[1 bgCam.Position(2)-tbl_optics.Position(4)];
+
 
 tbl_cam=uitable('parent',hpSet,'units','pixels','RowName',{},'ColumnName',{},...
     'fontsize',8,'ColumnWidth',{100,40},'columneditable',[false false]);
 
 tbl_cam.Data={...
-    'magnification',mag(1);
-    ['raw pixelsize (' char(956) 'm)'], raw_pixel_size*1E6;
     ['img pixelsize (' char(956) 'm)'], raw_pixel_size*1E6/mag(1)};
-
 tbl_cam.Position(3:4)=tbl_cam.Extent(3:4);
-tbl_cam.Position(1:2)=[0 0];
-    
+tbl_cam.Position(1:2)=[1 0];    
+
+
 %% Image Pre Processing Panel
 
 % This is alpha stage, perhaps enable filtering? or fringe removal?
@@ -1318,7 +1341,7 @@ uicontrol('parent',hpImgProcess,'units','pixels',...
     'fontsize',8,'backgroundcolor','w');
 
 % Checkbox for enabling scaling of the probe
-cScaleProbe=uicontrol('style','checkbox','string','scale probe',...
+cScaleProbe=uicontrol('style','checkbox','string','scale',...
     'value',1,'parent',hpImgProcess,'backgroundcolor','w',...
     'position',[5 cGaussFilter.Position(2)-20 100 15],...
     'callback',@cScaleProbeCB);
@@ -1329,7 +1352,6 @@ cScaleProbe=uicontrol('style','checkbox','string','scale probe',...
     end
 
 
-
 d=[1 100 900 1000];
 pp=[d(1) d(3) d(2)-d(1) d(4)-d(3)];
 tblROIPScale=uitable(hpImgProcess,'units','pixels','ColumnWidth',{30 30 30 30},...
@@ -1338,13 +1360,10 @@ tblROIPScale=uitable(hpImgProcess,'units','pixels','ColumnWidth',{30 30 30 30},.
     'CellEditCallback',@chROIPScale);
 tblROIPScale.Position(3)=tblROIPScale.Extent(3);
 tblROIPScale.Position(4)=20;
-tblROIPScale.Position(1:2)=[22 15];
+tblROIPScale.Position(1:2)=[55 cScaleProbe.Position(2)-3];
 
 pROIPScale=rectangle('position',pp,'edgecolor','k','linewidth',2,...
     'visible','on','parent',axImg,'linestyle',':');
-
-
-
 
 
     function chROIPScale(src,evt)
@@ -1380,6 +1399,17 @@ pROIPScale=rectangle('position',pp,'edgecolor','k','linewidth',2,...
         end
     end
 
+
+% Checkbox for rotating image
+cRotate=uicontrol('style','checkbox','string','rotate',...
+    'units','pixels','parent',hpImgProcess,'backgroundcolor','w',...
+    'value',1);
+cRotate.Position=[5 cScaleProbe.Position(2)-20 75 15];
+
+tblRotate=uitable('parent',hpImgProcess,'units','pixels',...
+    'rowname',{},'columnname',{},'Data',0,'columneditable',[true],...
+    'columnwidth',{45},'fontsize',8,'ColumnFormat',{'numeric'});
+tblRotate.Position=[80 cRotate.Position(2)-5 50 20];
 
 
 
@@ -1492,6 +1522,8 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
         PWA=data.PWA;
         PWOA=data.PWOA;
         
+       
+        
         % Apply a gaussianfilter
        if cGaussFilter.Value
           s=tblGaussFilter.Data;
@@ -1547,6 +1579,19 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
               warning('Issue with OD type. Assuming low field.');
               OD=log(PWOA./PWA);
       end 
+      
+      % Rotate Images
+         if cRotate.Value
+             theta = tblRotate.Data;
+             if size(data.PWOA,1)==1024   
+                OD = imrotate(OD,theta,'nearest',rotMode);             
+
+             else
+                OD_1 = imrotate(PWA(1:1024,:),theta,'nearest',rotMode);
+                OD_2 = imrotate(PWA(1025:end,:),theta,'nearest',rotMode);  
+                OD = [OD_1; OD_2];
+             end            
+         end 
         
         data.OD=single(OD);
     end
@@ -1584,8 +1629,8 @@ end
         ROI=tbl_dispROI.Data;
         set(pScaleX,'XData',axImg.XTick(1:2),'YData',[1 1]*ROI(3)+(ROI(4)-ROI(3))*(1-35/axImg.Position(3)));           
         set(pScaleY,'YData',axImg.YTick(1:2),'XData',[1 1]*ROI(1)+(ROI(2)-ROI(1))*20/axImg.Position(4));
-        tScaleX.String=[num2str(range(axImg.XTick(1:2))*tbl_cam.Data{3,2}) '\mum'];
-        tScaleY.String=[num2str(range(axImg.YTick(1:2))*tbl_cam.Data{3,2}) '\mum'];
+        tScaleX.String=[num2str(range(axImg.XTick(1:2))*tbl_optics.Data{2,2}) '\mum'];
+        tScaleY.String=[num2str(range(axImg.YTick(1:2))*tbl_optics.Data{2,2}) '\mum'];
         tScaleX.Position(1:2)=[axImg.XTick(1) pScaleX.YData(1)];
         tScaleY.Position(1:2)=[pScaleY.XData(1) axImg.YTick(1)]; 
         drawnow;
@@ -1709,7 +1754,8 @@ function data=performFits(data)
     for m=1:size(ROI,1)
         ind=2;fr(m,ind)=m;ind=ind+1; %
         tbl_analysis(m).Data=[];        % Clear old analysis table
-        pxsize=tbl_cam.Data{3,2};       % Pixel size in um
+        pxsize=tbl_cam.Data{1,2};       % Pixel size in um
+
         for rr=1:size(data.PWOA,3)
             % Gaussian analysis
             if cGaussFit.Value            
@@ -1773,10 +1819,10 @@ function data=performFits(data)
 
                 % Box counts analysis table string
                 str={'Nb (OD,N)',bcount.Ncounts,Natoms;
-                    ['Xc (px,' char(956) 'm)'],bcount.Xc,bcount.Xc*tbl_cam.Data{3,2};
-                    ['Yc (px,' char(956) 'm)'],bcount.Yc,bcount.Yc*tbl_cam.Data{3,2};
-                    [char(963) ' x (px,' char(956) 'm)'],bcount.Xs,bcount.Xs*tbl_cam.Data{3,2};
-                    [char(963) ' y (px,' char(956) 'm)'],bcount.Ys,bcount.Ys*tbl_cam.Data{3,2};
+                    ['Xc (px,' char(956) 'm)'],bcount.Xc,bcount.Xc*tbl_cam.Data{1,2};
+                    ['Yc (px,' char(956) 'm)'],bcount.Yc,bcount.Yc*tbl_cam.Data{1,2};
+                    [char(963) ' x (px,' char(956) 'm)'],bcount.Xs,bcount.Xs*tbl_cam.Data{1,2};
+                    [char(963) ' y (px,' char(956) 'm)'],bcount.Ys,bcount.Ys*tbl_cam.Data{1,2};
                     ['Nb bg'],bcount.Nbkgd,NatomsBKGD;
                     'Nb tot',bcount.Nraw,(Natoms+NatomsBKGD);
                     'nb bg', bcount.nbkgd,[];
