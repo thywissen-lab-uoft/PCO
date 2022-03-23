@@ -49,8 +49,8 @@ rotation_angle = [0 1.8]; % Rotation angles of X and Y cams respectively
 % However, because our rotation angles are assumed to be small, we can
 % mostly fix this issue by recropping the image to be the same size. This
 % technique WILL FAIL for large rotation angles
-rotMode = 'crop'; %(alternative is 'loose');
-
+rotMode = 'bicubic'; % 'nearest','bilinear','bicubic'
+rotCrop = 'crop'; % 'crop' or 'loose'
 % X Cam has 200 mm objective, 200 mm refocuing
 % Y Cam has 200 mm objective, 400 mm refocusing
 
@@ -1584,14 +1584,14 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
       end 
       
       % Rotate Images
-         if cRotate.Value
+         if cRotate.Value && tblRotate.Data~=0
              theta = tblRotate.Data;
              if size(data.PWOA,1)==1024   
-                OD = imrotate(OD,theta,'nearest',rotMode);             
+                OD = imrotate(OD,theta,rotMode,rotCrop);             
 
              else
-                OD_1 = imrotate(PWA(1:1024,:),theta,'nearest',rotMode);
-                OD_2 = imrotate(PWA(1025:end,:),theta,'nearest',rotMode);  
+                OD_1 = imrotate(PWA(1:1024,:),theta,rotMode,rotCrop);
+                OD_2 = imrotate(PWA(1025:end,:),theta,rotMode,rotCrop);  
                 OD = [OD_1; OD_2];
              end            
          end 
