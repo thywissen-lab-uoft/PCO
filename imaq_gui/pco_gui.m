@@ -44,7 +44,7 @@ raw_pixel_size=6.45E-6; % Pixelsize on the pixefly cameras
 mag=[1 2]; % ideal manification of X and Y cams respectively
 
 % Rotation
-rotation_angle = [0 1.8]; % Rotation angles of X and Y cams respectively
+rotation_angle = [0 -1.7]; % Rotation angles of X and Y cams respectively
 % Note that rotations are tricky because the total image size changes.
 % However, because our rotation angles are assumed to be small, we can
 % mostly fix this issue by recropping the image to be the same size. This
