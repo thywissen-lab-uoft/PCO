@@ -58,10 +58,10 @@ if doGaussFit
     gaussPopts.NumberLorentzianFit=0;   % Fit atom number to lorentzian
     gaussPopts.CenterSineFit = 0;       % Fit sine fit to cloud center
     gaussPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
-    gaussPopts.CenterParabolaFit = 1;
+    gaussPopts.CenterParabolaFit = 0;
     gaussPopts.CenterLinearFit = 0;     % Linear fit to cloud center
     gaussPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
-    gaussPopts.angleTrack = 1;
+    gaussPopts.angleTrack = 0;
     % Plot the statistics of gaussian fit
     hF_stats=showGaussStats(gauss_data,gaussPopts);     
     if doSave;saveFigure(hF_stats,'gauss_stats',saveOpts);end       
