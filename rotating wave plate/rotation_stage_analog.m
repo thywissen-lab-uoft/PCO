@@ -1,6 +1,6 @@
 function rotation_stage_analog()
-%This function sends the waveplate to its defined home position, and then
-%switches to analog control so that it is ready for use by the sequencer
+% This function sends the waveplate to its defined home position, and then
+% switches to analog control so that it is ready for use by the sequencer
 
 %BE SURE TO SET THE WAVEPLATE INPUT TO 0 VOLTS BEFORE SWITCHING TO ANALOG
 %CONTROL!!!

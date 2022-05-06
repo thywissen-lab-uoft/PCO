@@ -48,7 +48,7 @@ CrossSection = 3/(2*pi)*lambda^2;
 
 % Choose your camera
 camaxis='X';
- %camaxis='Y';
+%  camaxis='Y';
 % Choose the pixel size base on the camera
 switch camaxis
     case 'X'
@@ -66,7 +66,7 @@ end
 % display properties.
 
 % Defautl variable to plot against
-pco_xVar = 'ExecutionDate';
+pco_xVar = 'uwave_freq_offset';
 
 % Should the analysis attempt to automatically find the xvariable?
 pco_autoXVar = 1;
@@ -93,12 +93,12 @@ doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
 
 
 % Box Count
-doBoxCount    = 0;      % Box count analysis
+doBoxCount    = 1;      % Box count analysis
 doLandauZener = 0;      % Landau Zener Analysis on BOX
 doRamanSpec   = 0;      % Raman box count count analyis
 
 % Gaussian
-doGaussFit    = 0;      % Enable gauss fitting
+doGaussFit    = 1;      % Enable gauss fitting
 doGaussRabi   = 0;      % Enable gauss rabi
 doBEC         = 0;      % Enable BEC analys
 
@@ -112,7 +112,7 @@ doBMFit = 0;
 doCustom_BM = 0;
 
 % Fermi
-doFermiFitLong = 1;     % Enable Fermi Fit for XDT TOF
+doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
 
 % Custom Box counts
 doCustom       =  0;          % Custom Box Count
@@ -264,7 +264,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % ROI = [720 1040 330 640];   % RF1B 5 ms TOF
 
 % ROI =  [700 1100 300 600];
-% ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
+ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
 
 
 %%%%% XDT 1/2 ONLY
@@ -275,7 +275,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %%%%% XDT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  ROI = [800 950 280 350]; %K XDT insitu
 
-%ROI = [510 1330 180 480]; %K XDT 5ms tof
+% ROI = [780 990 310 510]; %K XDT 5ms tof
 % ROI = [730 1060 250 550]; %K XDT 10ms tof
 % ROI = [700 1050 327 645]; %K XDT 15ms tof rb
 
@@ -288,11 +288,11 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % ROI=[708 1089 377 608];   % XDT  TOF 20 ms evaporation
 % ROI=[713 1015 310 601];
 
- ROI=[810 970 200 860];   % XDT  Full TOF analysis
+%  ROI=[810 970 200 860];   % XDT  Full TOF analysis
  
 % ROI = [810 970 420 580]; %XDT Rb after evap 15ms 
 
-%   ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
+%    ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 
 % % 12ms tof SG from XDT #850 900 300 560;
 % ROI = [825 900 300 565;
@@ -317,11 +317,17 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %       820 940 680 770];    % K SG 15ms TOF -9,-7,-5 boxes
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%% LATTICE LOW FIELD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%% LATTICE LOW FIELD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%    ROI=[800 960 570 730;
+%        800 960 300 460]; % 15 ms BM TOF x cam, SG F
+%    
+%    ROI=[820 960 200 310;
+%        820 960 650 760]; % 10 ms BM TOF x cam, SG F
 
-%    ROI=[750 1000 375 620]; % 15 ms BM TOF x cam
+%    ROI=[800 960 400 580]; % 15 ms BM TOF x cam
   
 %   ROI=[412 755 552 778]; % 10 ms BM TOF y cam
+%   ROI=[412 755 700 1000]; % 15 ms BM TOF y cam
 
 
 %  ROI = [830 940 230 300;
@@ -339,8 +345,16 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 %%%%%%%%%%%%%%%%%%%%% X CAM DOUBLE SHUTTER %%%%%%%%%%%%%%%%%%%%%
 
-% ROI=[800 950 182 1011;
-%     800 950 1228 2040];   % XDT full TOF
+%ROI=[800 950 182 1011;
+%    800 950 1228 2040];   % XDT full TOF\
+
+% 
+% ROI=[800 950 475 630;
+%     800 950 1540 1662];   % XDT 15ms tof high field
+
+% ROI=[800 950 690 840;
+%     800 950 1770 1920];   % XDT 21ms tof high field
+
 % 
 %  ROI=[760 1000 590 830;
 %     760 1000 590+1064 830+1064];   % XDT 20 ms TOF
@@ -389,6 +403,9 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %  ROI=[700 1050 280 680;
 %      700 1050 1504 1904];   %  k 5ms rb 15 ms double shutter
 
+%    ROI=[800 960 700 870; 
+%        800 960 1800 1930];   % XDT  TOF 25 ms evaporation ZOOM
+
 %%%%%%%%%%%%%%%%%%% Y CAM %%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % ROI = [1 1392 400 600]; % XDT Insitu long
@@ -418,6 +435,9 @@ end
 %         800 960 870 1000];   % XDT  TOF 25 ms evaporation ZOOM
 % % end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% FLUORESCENE %%%%%%%%%%%%
+ROI = [1 1000 1 1000];
+
 % Assign the ROI
 disp(' ')
 disp('Assigning ROI to data');
@@ -435,9 +455,17 @@ ODopts.ScaleProbeROI=[200 400 800 1000];  % ROI to do the scaling
 ODopts.SubtractDark=0;
 ODopts.DarkROI=[700 800 20 100];
 
+if isequal(camaxis,'Y')
+    ODopts.doRotate = 1;
+    ODopts.Theta = -1.7;
+else
+    ODopts.doRotate = 0;
+    ODopts.Theta = 0;
+end
+
 % Apply gaussian filter to images?
 ODopts.GaussFilter=0;
-ODopts.GaussFilterSigma=0;
+ODopts.GaussFilterSigma=.5;
 
 if doFermiFitLong
    ODopts.GaussFilter=0;
@@ -447,12 +475,21 @@ end
 % Get the high field flag (this may throw error for old data)
 if isfield(data(1).Flags,'High_Field_Imaging')
     ODopts.HighField = data(1).Flags.High_Field_Imaging; 
+    ODopts.HighField = data(1).Flags.CDT_evap_2_high_field; 
+
+    
 else
     ODopts.HighField=0;
 end
 
 % Calculate the optical density
-atomdata=computeOD(atomdata,ODopts);
+% atomdata=computeOD(atomdata,ODopts);
+
+fluorOpts = struct;
+fluorOpts.GaussFilter = 1;
+fluorOpts.GaussFilterSigma = 5;
+atomdata=computeFluorOD(atomdata,fluorOpts);
+
 [atomdata.ODopts]=deal(ODopts);
 
 %% Probe Beam
@@ -1009,19 +1046,25 @@ if doAnimate && doSave
     
     % Stacking images (applicable only for double exposure)
      animateOpts.doubleStack='vertical';
-     animateOpts.doubleStack='horizontal';
+%      animateOpts.doubleStack='horizontal';
 
      % Asceneding or descending
-    %animateOpts.Order='descend';   
+%     animateOpts.Order='descend';   
      animateOpts.Order='ascend';
     
-%     % Color limits
-    animateOpts.CLim=[0 0.5;
-        0 0.5];   
-%     animateOpts.CLim=[0 1;
-%         0 .2];   
+% %     % Color limits
+%     animateOpts.CLim=[0 0.5;
+%         0 0.5];   
+    animateOpts.CLim=[0 1;
+        0 .2];   
 %     animateOpts.CLim=[0 .2;
 %         0 .5]; 
+% 
+%     animateOpts.CLim=[0 2;
+%         0 .2]; 
+
+    animateOpts.CLim=[0 5];   
+
     
     animateCloud(atomdata,pco_xVar,animateOpts);    
 end

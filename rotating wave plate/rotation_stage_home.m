@@ -1,6 +1,7 @@
 function rotation_stage_home()
-%This function defines the current waveplate position as the new home 
-% position for the rotating waveplate
+% This function defines the current waveplate position as the new home 
+% position for the rotating waveplate. This also means it won't respond to
+% analog voltages.
 
 %% Establish Connection
 %Define serial port object

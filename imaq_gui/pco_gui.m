@@ -731,6 +731,7 @@ hbDisconnect=uicontrol(hpAcq,'style','pushbutton','string','disconnect','units',
         tbl_cama.Enable='off';  
         rbSingleAcq.Enable='off';
         rbDoubleAcq.Enable='off';
+        rbSingleVideo.Enable='off';
     end
 
 % Disconnect from camera callback
@@ -750,6 +751,8 @@ hbDisconnect=uicontrol(hpAcq,'style','pushbutton','string','disconnect','units',
         tbl_cama.Enable='on';
         rbSingleAcq.Enable='on';
         rbDoubleAcq.Enable='on';
+        rbSingleVideo.Enable='on';
+
     end
 
 % Start acquisition button
@@ -1227,12 +1230,16 @@ bgCamMode.Position(3:4)=[150 40];
 bgCamMode.Position(1:2)=[5 5];
     
 % Radio buttons for cuts vs sum
-rbSingleAcq=uicontrol(bgCamMode,'Style','radiobutton','String','single exp (0x16)',...
-    'Position',[0 20 150 20],'units','pixels','backgroundcolor','w',...
+rbSingleAcq=uicontrol(bgCamMode,'Style','radiobutton','String','single exp (0x10)',...
+    'Position',[0 30 150 20],'units','pixels','backgroundcolor','w',...
     'Value',1,'UserData',16);
-rbDoubleAcq=uicontrol(bgCamMode,'Style','radiobutton','String','double exp (0x32)',...
-    'Position',[0 0 150 20],'units','pixels','backgroundcolor','w',...
+rbDoubleAcq=uicontrol(bgCamMode,'Style','radiobutton','String','double exp (0x20)',...
+    'Position',[0 15 150 20],'units','pixels','backgroundcolor','w',...
     'UserData',32);
+rbSingleVideo=uicontrol(bgCamMode,'Style','radiobutton','String','single video (0x30)',...
+    'Position',[0 0 150 20],'units','pixels','backgroundcolor','w',...
+    'UserData',48);
+
 
     function chCamModeCB(~,~)
        disp('Changing camera acquistion mode');
@@ -1590,8 +1597,8 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
                 OD = imrotate(OD,theta,rotMode,rotCrop);             
 
              else
-                OD_1 = imrotate(PWA(1:1024,:),theta,rotMode,rotCrop);
-                OD_2 = imrotate(PWA(1025:end,:),theta,rotMode,rotCrop);  
+                OD_1 = imrotate(OD(1:1024,:),theta,rotMode,rotCrop);
+                OD_2 = imrotate(OD(1025:end,:),theta,rotMode,rotCrop);  
                 OD = [OD_1; OD_2];
              end            
          end 
@@ -1862,17 +1869,15 @@ end
         doProcess=0;           
         
         % Check if next buffer is filled
-        if GetBuffStatus(camera,camera.NumAcquired+1)==3   
+        if GetBuffStatus(camera,camera.NumAcquired+1)==3               
             % Increment number of images acquired
             camera.NumAcquired=camera.NumAcquired+1;            
-            disp(['Trigger (' num2str(camera.NumAcquired) ')']);        
-            
+            disp(['Trigger (' num2str(camera.NumAcquired) ')']);                
             % Check if acquisition is complete
             if camera.NumImages==camera.NumAcquired
                 doProcess=1;
             end       
-        end   
-                    
+        end        
 
         % Process the images
         if doProcess            
@@ -1883,7 +1888,7 @@ end
             for i = 1:camera.NumImages
                 camera.Images{i}=double(get(camera.buf_ptrs(i),'Value'));                
             end   
-            
+
             % Rotate images to get into "correct" orientation
             for i=1:camera.NumImages
                camera.Images{i}=imrotate(camera.Images{i},-90); 
@@ -1929,10 +1934,6 @@ end
                         end  
                     end
                     
-%                     
-%                 tbl_params.Data=[fieldnames(params), ...     
-%                         struct2cell(params)];    
-                
                 % Update flags table
                 fnames=fieldnames(dstruct.Flags);
                 for nn=1:length(fnames)
@@ -1971,8 +1972,7 @@ end
             start(trigTimer);            
             hbstop.Enable='on';
             hbstart.Enable='off';            
-            hbclear.Enable='on';           
-
+            hbclear.Enable='on'; 
             
             if camera.CameraMode==17 || camera.CameraMode==33; hbSWtrig.Enable='on';end
        end

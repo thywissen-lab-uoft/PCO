@@ -394,19 +394,19 @@ for nn=1:size(Xc,2)
    
 end
 
-if opts.angleTrack
-    fit_xy=polyfit(Xc(:,1),Yc(:,1),1);
-    xx=linspace(min(Xc(:,1)),max(Xc(:,1)),100);
-
-    theta = atan(1/fit_xy(1))*180/pi;
-
-    pf=plot(xx,polyval(fit_xy,xx),'r-','linewidth',1);  
-    str = ['$\theta = ' num2str(round(theta,2)) '^\circ$'];
-    legend(pf,{str},'location','best','interpreter','latex');
-    
-%     text(5,5,str,'units','pixels','interpreter','latex','verticalalignment','bottom',...
-%         'backgroundcolor',);
-end
+% if opts.angleTrack
+%     fit_xy=polyfit(Xc(:,1),Yc(:,1),1);
+%     xx=linspace(min(Xc(:,1)),max(Xc(:,1)),100);
+% 
+%     theta = atan(1/fit_xy(1))*180/pi;
+% 
+%     pf=plot(xx,polyval(fit_xy,xx),'r-','linewidth',1);  
+%     str = ['$\theta = ' num2str(round(theta,2)) '^\circ$'];
+%     legend(pf,{str},'location','best','interpreter','latex');
+%     
+% %     text(5,5,str,'units','pixels','interpreter','latex','verticalalignment','bottom',...
+% %         'backgroundcolor',);
+% end
 
 resizeFig(hF2,t)
 end

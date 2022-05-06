@@ -103,7 +103,21 @@ for kk=1:length(data)
     % Calculate optical density if high field imaging
     if opts.HighField
         OD=log(abs(PWOA./(2*PWA-PWOA))); %deets on labbook entry 2021.06.26 
-    end       
+    end     
+    
+    rotMode = 'bicubic'; % 'nearest','bilinear','bicubic'
+    rotCrop = 'crop'; % 'crop' or 'loose'
+    
+     if opts.doRotate
+         theta = opts.Theta;
+         if size(OD)==1024   
+            OD = imrotate(OD,theta,rotMode,rotCrop); 
+         else
+            OD_1 = imrotate(OD(1:1024,:),theta,rotMode,rotCrop);
+            OD_2 = imrotate(OD(1025:end,:),theta,rotMode,rotCrop);  
+            OD = [OD_1; OD_2];
+         end            
+     end 
     
     data(kk).OD=OD;    
 end

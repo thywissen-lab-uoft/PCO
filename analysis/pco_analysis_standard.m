@@ -145,7 +145,8 @@ if doErfFit
     ErfPopts.CenterParabolaFit = 0;
     ErfPopts.CenterLinearFit = 0;     % Linear fit to cloud center
     ErfPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
-    
+    ErfPopts.angleTrack = 0;
+
     % Plot the statistics of erfian fit
     hF_stats_erf=showErfStats(erf_data,ErfPopts);     
     if doSave;saveFigure(hF_stats_erf,'erf_stats',saveOpts);end       
@@ -205,7 +206,8 @@ if doBMFit
     bmPopts.CenterParabolaFit = 0;
     bmPopts.CenterLinearFit = 0;     % Linear fit to cloud center
     bmPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
-    
+    bmPopts.angleTrack = 0;
+
     % Plot the statistics of bmian fit
     hF_stats_bm=showBMStats(bm_data,bmPopts);     
     if doSave;saveFigure(hF_stats_bm,'bm_stats',saveOpts);end       

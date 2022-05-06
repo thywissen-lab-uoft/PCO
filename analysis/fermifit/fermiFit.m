@@ -122,7 +122,7 @@ disp(['     Atom Number     : ' num2str(fitGauss.AtomNumber,'%e')]);
 disp(['     sum square err  : ' num2str(gofG.sse)]);
      
 %% Use Gauss Fit to Make Fermi Fit
-
+% Guess
 % Atom Number
 N=2*pi*foutG.Wx*foutG.Wy*foutG.A; 
 Natoms=N*(opts.PixelSize^2/crosssec);  
@@ -131,7 +131,7 @@ Natoms=N*(opts.PixelSize^2/crosssec);
 Tf_g=hbar*(2*pi*opts.Freq).*(.5*6*Natoms).^(1/3)/kB;   
 T_g =fitGauss.Temperature;
 TTf_g = T_g/Tf_g;   
-TTf_g = .5*TTf_g; % Fudge Factor
+TTf_g = .5*TTf_g; % Fudge Factor for guessing
 
 % Find fugacity (z) and the Q
 qVec=linspace(-10,20,100);zVec=exp(qVec);
@@ -266,6 +266,10 @@ fitFermi.GOF=gof;
 fitFermi.ConfInt=c;
 fitFermi.Temperature=m*(fout.W*opts.PixelSize/opts.TOF)^2/kB;
 fitFermi.FermiTemperature_shape=(fitFermi.QtoT(fout.Q)^(-1))*fitFermi.Temperature;
+
+
+fitFermi.Temperature_Error = fitFermi.Temperature*(2*0.5*range(fitFermi.ConfInt(:,2)));
+
 
 % Find atom number
 warning off
