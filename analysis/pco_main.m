@@ -489,6 +489,8 @@ end
 fluorOpts = struct;
 fluorOpts.GaussFilter = 1;
 fluorOpts.GaussFilterSigma = 5;
+fluorOpts.doRotate = 1;
+fluorOpts.Theta = 15.5;
 atomdata=computeFluorOD(atomdata,fluorOpts);
 
 [atomdata.ODopts]=deal(ODopts);
