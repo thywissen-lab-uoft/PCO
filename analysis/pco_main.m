@@ -93,7 +93,7 @@ doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
 
 
 % Box Count
-doBoxCount    = 1;      % Box count analysis
+doBoxCount    = 0;      % Box count analysis
 doLandauZener = 0;      % Landau Zener Analysis on BOX
 doRamanSpec   = 0;      % Raman box count count analyis
 
@@ -436,7 +436,8 @@ end
 % % end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% FLUORESCENE %%%%%%%%%%%%
-ROI = [1 1000 1 1000];
+%ROI = [200 1200 1 800];
+ROI = [1 1392 1 1024];
 
 % Assign the ROI
 disp(' ')
@@ -902,7 +903,7 @@ end
 % However, if the trap frequency is known via an independent measure, it
 % can be used as a check.
 
-% Determine which ROI to do Fermi Fit
+%Determine which ROI to do Fermi Fit
 if isfield(atomdata(1),'Flags') 
     switch atomdata(1).Flags.image_atomtype
         case 0; DFGinds = zeros(size(ROI,1),1);

@@ -1867,9 +1867,28 @@ end
 %% GUI callbacks of camera functions
     function trigCheckerCB(src,evt)        
         doProcess=0;           
-        
+%                     bgCamMode.UserData
+% get(bgCamMode)
         % Check if next buffer is filled
-        if GetBuffStatus(camera,camera.NumAcquired+1)==3               
+        if GetBuffStatus(camera,camera.NumAcquired+1)==3      
+            camera.NumAcquired
+            if bgCamMode.SelectedObject.UserData == 48
+                stopCamera(camera.BoardHandle);
+                camera.Images{camera.NumAcquired+1}=double(get(camera.buf_ptrs(camera.NumAcquired+1),'Value'));  
+
+                clearCameraBuffer(camera.BoardHandle);
+
+                pause(1);
+%                 startCamera(camera.BoardHandle);
+
+                figure(3123123);
+                clf
+                imagesc(camera.Images{1});
+                caxis([0 30]);
+            end
+            
+            
+            
             % Increment number of images acquired
             camera.NumAcquired=camera.NumAcquired+1;            
             disp(['Trigger (' num2str(camera.NumAcquired) ')']);                
@@ -1877,8 +1896,8 @@ end
             if camera.NumImages==camera.NumAcquired
                 doProcess=1;
             end       
-        end        
 
+        end        
         % Process the images
         if doProcess            
             t=evt.Data.time;    % Grab the time
@@ -1982,7 +2001,9 @@ end
        disp('Stopping camera acquisition...'); 
        stop(trigTimer);
 
-       error_code=stopCamera(camera.BoardHandle);       
+       error_code=stopCamera(camera.BoardHandle);     
+       clearCameraBuffer(camera.BoardHandle);
+
        if ~error_code
             camera.RunStatus=0;
             hbstart.Enable='on';
@@ -2244,7 +2265,7 @@ else
     disp(' camera stopped.');
 end 
 
-clearCameraBuffer(board_handle);
+% clearCameraBuffer(board_handle);
 
 end
 

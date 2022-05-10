@@ -30,7 +30,7 @@ for kk=1:length(data)
         disp(['Applying gaussian filter. s=' num2str(s) ' px']);
     end
     
-    OD = PWOA-PWA;
+    OD = (PWOA-PWA);
     
     data(kk).OD=OD;    
 end
