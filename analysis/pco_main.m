@@ -122,7 +122,7 @@ pco_overrideUnit='MHz';
 
 % Standard Analysis
 doStandard     = 1;
-doODProfile    = 1;
+doODProfile    = 0;
 
 % Saving1% Animate the Cloud
 doAnimate = 1;
@@ -167,7 +167,7 @@ doUpload = 0;       % Upload to google drive?
 
 %% Select image directory
 % Choose the directory where the images to analyze are stored
-choose_folder = 1
+choose_folder = 1;
 if choose_folder
 
 disp([datestr(now,13) ' Choose an image analysis folder...']);
@@ -394,9 +394,9 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %       800 950 490 600];   %  band map 15 ms TOF  7box, 9 box
 
 
-ROI=[750 1000 450 650;
-       750 1000 1500 1700];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
-%    
+ROI=[790 975 450 650;
+       790 975 1510 1710];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
+% %    
    
    % ROI = ROI(1,:); % 9 only 
     %ROI = ROI(2,:); % 7 only
