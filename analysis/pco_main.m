@@ -167,7 +167,11 @@ doUpload = 0;       % Upload to google drive?
 
 %% Select image directory
 % Choose the directory where the images to analyze are stored
+<<<<<<< Updated upstream
 choose_folder = 1;
+=======
+choose_folder = 0
+>>>>>>> Stashed changes
 if choose_folder
 
 disp([datestr(now,13) ' Choose an image analysis folder...']);
