@@ -130,6 +130,9 @@ tic;
 t2=toc;
 disp([' done (' num2str(round(t2,2)) ' sec.).']);
 
+Zf = feval(fout,XX,YY);
+
+
 %% Post Processing
 
 % Number of counts
@@ -140,7 +143,6 @@ Ny1 = fout.Ay1*(1*fout.s)*(2*fout.s);
 Ny2 = fout.Ay2*(1*fout.s)*(2*fout.s);
 
 N = [Nc Nx1 Nx2 Ny1 Ny2];
-
 
 end
 

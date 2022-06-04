@@ -1,7 +1,7 @@
 function [dirDay] = getImageDir(mydatevec)
 
 % dirSource = 'Y:\';
-dirSource = 'D:\Y Drive\Data\'
+dirSource = 'E:\Y Drive\Data\'
 
 dirYear  = [dirSource filesep num2str(mydatevec(1))];
 dirMonth = [dirYear filesep num2str(mydatevec(1)) '.' sprintf('%2.2d',mydatevec(2))];
