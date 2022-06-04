@@ -124,9 +124,31 @@ if doDebug
     plot(Y,sum(Z,2))
     hold on
     plot(Y,sum(Zf,2));
+    
+    
+    savefile = 1;
+    if savefile
+            erffitdata = struct;
+            erffitdata.X = X;
+            erffitdata.Y = Y;
+            erffitdata.Z = Z;
+            erffitdata.Zfit = Zf;
+            erffitdata.residue = Z-Zf;
+            erffitdata.Ycut = Z(round(fout.Yc)-Y(1),:);  %plots againsst X
+            erffitdata.Yfcut = Zf(round(fout.Yc)-Y(1),:);
+            erffitdata.Xcut = Z(:,round(fout.Xc)-X(1));
+            erffitdata.Xfcut = Zf(:,round(fout.Xc)-X(1));
+            erffitdata.Ysum = sum(Z,1);
+            erffitdata.Yfsum = sum(Zf,1);
+            erffitdata.Xsum = sum(Z,2);
+            erffitdata.Xfsum = sum(Zf,2);
+
+            savedir = 'C:\Users\vijin\OneDrive - University of Toronto\PhD\Writing\Thesis\PythonCodes\MATLAB helpers\';
+            save([savedir filesep 'erffitdata'],'erffitdata');
+    end
 
 %     waitforbuttonpress
-pause(0.1)
+% pause(0.1)
 end
 end
 

@@ -92,7 +92,7 @@ end
 % pco_xVar = 'rf_tof_delta_freq';
 
 % pco_xVar='HF_kdet_shift';
-%  pco_xVar = 'Evap_End_Power';
+ pco_xVar = 'Evap_End_Power';
 % pco_xVar = 'rf_pulse_length';
 % pco_xVar = 'rf_rabi_time_HF';
 % pco_xVar = 'rf_rabi_freq_HF';
@@ -103,7 +103,7 @@ end
 % pco_xVar = 'Lattice_loading_field';
 % pco_xVar = 'rf_rabi_freq_HF';
 %   pco_xVar = 'rf_delta_freq_HF';
-  pco_xVar = 'rf_freq_HF';
+%   pco_xVar = 'rf_freq_HF';
 % pco_xVar = 'HF_FeshValue_Initial_ODT';
 %    pco_xVar = 'HF_hold_time_ODT';
 
@@ -132,21 +132,21 @@ doSave = 1;
 doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
 
 % Box Count
-doBoxCount    = 1;      % Box count analysis
+doBoxCount    = 0;      % Box count analysis
 doLandauZener = 0;      % Landau Zener Analysis on BOX
 doRamanSpec   = 0;      % Raman box count count analyis
 
 % Gaussian
-doGaussFit    = 1;      % Enable gauss fitting
+doGaussFit    = 0;      % Enable gauss fitting
 doGaussRabi   = 0;      % Enable gauss rabi
 doBEC         = 0;      % Enable BEC analysis
 
 % Erf Fit
-doErfFit      = 1;    
+doErfFit      = 0;    
 
 % Band Map Fit
 doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'H';
-doBMFit       = 1;
+doBMFit       = 0;
 doCustom_BM   = 0;    
 
 % Fermi
@@ -394,9 +394,9 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %  ROI = [800 950 1520 1630;
 %       800 950 490 600];   %  band map 15 ms TOF  7box, 9 box
 
-
-ROI=[790 975 450 650;
-       790 975 1510 1710];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
+% 
+% ROI=[790 975 450 650;
+%        790 975 1510 1710];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
 % %    
    
    % ROI = ROI(1,:); % 9 only 
@@ -417,8 +417,8 @@ ROI=[790 975 450 650;
 %  ROI=[750 1020 150 1020;
 %      750 1020 1174 2044];   %  k_rb double shutter various tof 
 
-%  ROI=[760 1000 660 940;
-%      760 1000 1684 1964];   %  k_rb 25 ms opevap
+ ROI=[760 1000 660 940;
+     760 1000 1684 1964];   %  k_rb 25 ms opevap
 % 
 %  ROI=[700 1050 280 680;
 %      700 1050 1504 1904];   %  k 5ms rb 15 ms double shutter

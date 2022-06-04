@@ -332,8 +332,8 @@ if opts.ShowDetails
 
     % Plot xcut
     subplot(323)
-    p1=plot(X,feval(foutG,X,foutG.Yc),'-','linewidth',2,'color','cyan');
-    hold
+%     p1=plot(X,feval(foutG,X,foutG.Yc),'-','linewidth',2,'color','cyan');
+%     hold
     p2=plot(X,feval(fout,X,fout.Yc),'r-','linewidth',2);
     hold on
     iY=find(Y==round(fout.Yc),1);
@@ -353,8 +353,8 @@ if opts.ShowDetails
     % iX=[iX-1 iX iX+1];
     % iX=
     ZxCut=sum(Z(:,iX),2)/length(iX);
-    plot(Y,feval(foutG,foutG.Xc,Y),'-','linewidth',2,'color','cyan');
-    hold on
+%     plot(Y,feval(foutG,foutG.Xc,Y),'-','linewidth',2,'color','cyan');
+%     hold on
     plot(Y,feval(fout,fout.Xc,Y),'r-','linewidth',2);
     hold on
     plot(Y,ZxCut,'k.-','linewidth',1);
@@ -420,6 +420,26 @@ if opts.ShowDetails
 
     tbl.Position(1:2)=ax6.Position(1:2);
     delete(ax6);
+
+doDebug=0;
+if doDebug
+%some extra save options VV
+
+    fermifitdata = struct;
+    fermifitdata.X = X;
+    fermifitdata.Y = Y;
+    fermifitdata.Z = Z;
+    fermifitdata.xCut = feval(fout,fout.Xc,Y);
+    fermifitdata.yCut = feval(fout,X,fout.Yc);
+    fermifitdata.ZxCut = ZxCut;
+    fermifitdata.ZyCut = ZyCut;
+    fermifitdata.Zfit = Zfit;
+    fermifitdata.residue = Z-Zfit;
+
+
+    savedir = 'C:\Users\vijin\OneDrive - University of Toronto\PhD\Writing\Thesis\PythonCodes\MATLAB helpers\';
+    save([savedir filesep 'fermifitdata'],'fermifitdata');
+end
 end
 
 end
@@ -466,3 +486,8 @@ function Z=ODfunc(X,Y,A,W,Q,xc,yc)
     Z=real(Z);
     warning on    
 end
+
+
+
+
+
