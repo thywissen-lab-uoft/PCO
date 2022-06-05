@@ -219,7 +219,26 @@ legend({'center','edge',pStr1,pStr2},'location','southeast');
 
 resizeFig(hF,t,[hax hax2]);
 
-    
+%% VV edit
+do_debug = 0;
+if do_debug
+bandmapfitresults = struct;
+bandmapfitresults.X = XF;
+bandmapfitresults.assymlorfit = feval(fout1,XF);
+bandmapfitresults.assymlorfreq = round(fout1.x1,1);
+bandmapfitresults.assymlorfreq_err = round((ci1(2,2)-ci1(1,2))/2,1);
+bandmapfitresults.assymlor_a = round(fout1.a1,1);
+bandmapfitresults.assymlor_G = round(abs(fout1.G1),1);
+
+bandmapfitresults.bmconvfit = feval(fout2,XF);
+bandmapfitresults.bmconvfreq = round(fout2.x1,1);
+bandmapfitresults.bmconvfreq_err = round((ci2(2,2)-ci2(1,2))/2,1);
+bandmapfitresults.bmconv_a = round(fout2.a1,1);
+bandmapfitresults.bmconv_G = round(abs(fout2.G1),1);
+
+savedir = 'C:\Users\Batlake\OneDrive - University of Toronto\PhD\Writing\Thesis\PythonCodes\MATLAB helpers\';
+save([savedir filesep 'bandmapfitresults'],'bandmapfitresults');
+end
 end
 
 

@@ -46,7 +46,7 @@ lambda=mean([lambdaRb lambdaK]);  % mean wavelength
 CrossSection = 3/(2*pi)*lambda^2; 
 
 % Choose your camera
-camaxis='X';
+camaxis='Y';
 % camaxis='Y';
 % Choose the pixel size base on the camera
 switch camaxis
@@ -66,7 +66,7 @@ end
 
 % pco_xVar='Raman_AOM3_freq';
 % pco_xVar='lat_mod_freq';
-% pco_xVar='AM_spec_freq';
+pco_xVar='AM_spec_freq';
 
 % pco_xVar='AM_spec_depth';
 
@@ -92,7 +92,7 @@ end
 % pco_xVar = 'rf_tof_delta_freq';
 
 % pco_xVar='HF_kdet_shift';
- pco_xVar = 'Evap_End_Power';
+%  pco_xVar = 'Evap_End_Power';
 % pco_xVar = 'rf_pulse_length';
 % pco_xVar = 'rf_rabi_time_HF';
 % pco_xVar = 'rf_rabi_freq_HF';
@@ -145,7 +145,7 @@ doBEC         = 0;      % Enable BEC analysis
 doErfFit      = 0;    
 
 % Band Map Fit
-doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'H';
+doBMFit_AM_Spec  = 1; AM_Spec_Dir = 'H';
 doBMFit       = 0;
 doCustom_BM   = 0;    
 
@@ -365,7 +365,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 %    ROI=[750 1000 375 620]; % 15 ms BM TOF x cam
   
-%   ROI=[412 755 552 778]; % 10 ms BM TOF y cam
+  ROI=[412 755 552 778]; % 10 ms BM TOF y cam
 
 
 %  ROI = [830 940 230 300;
@@ -416,9 +416,9 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %  
 %  ROI=[750 1020 150 1020;
 %      750 1020 1174 2044];   %  k_rb double shutter various tof 
-
- ROI=[760 1000 660 940;
-     760 1000 1684 1964];   %  k_rb 25 ms opevap
+% 
+%  ROI=[760 1000 660 940;
+%      760 1000 1684 1964];   %  k_rb 25 ms opevap
 % 
 %  ROI=[700 1050 280 680;
 %      700 1050 1504 1904];   %  k 5ms rb 15 ms double shutter

@@ -187,7 +187,5 @@ Ne1 = fout.Ae1*(1*fout.s)*(2*fout.s);
 Ne2 = fout.Ae2*(1*fout.s)*(2*fout.s);
 
 N = [Nc Nx1 Nx2 Ny1 Ny2 Ne1 Ne2];
-
-
 end
 
