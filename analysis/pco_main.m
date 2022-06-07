@@ -46,7 +46,7 @@ lambda=mean([lambdaRb lambdaK]);  % mean wavelength
 CrossSection = 3/(2*pi)*lambda^2; 
 
 % Choose your camera
-camaxis='Y';
+camaxis='X';
 % camaxis='Y';
 % Choose the pixel size base on the camera
 switch camaxis
@@ -66,7 +66,7 @@ end
 
 % pco_xVar='Raman_AOM3_freq';
 % pco_xVar='lat_mod_freq';
-pco_xVar='AM_spec_freq';
+% pco_xVar='AM_spec_freq';
 
 % pco_xVar='AM_spec_depth';
 
@@ -75,7 +75,7 @@ pco_xVar='AM_spec_freq';
 
 % pco_xVar='Pulse_Time';
 %    pco_xVar='rf_freq_HF_shift';
-%    pco_xVar = 'HF_hold_time';
+   pco_xVar = 'HF_prob_pwr';
 
 
 % pco_xVar = 'HF_FeshValue_Spectroscopy';
@@ -132,12 +132,12 @@ doSave = 1;
 doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
 
 % Box Count
-doBoxCount    = 0;      % Box count analysis
+doBoxCount    = 1;      % Box count analysis
 doLandauZener = 0;      % Landau Zener Analysis on BOX
 doRamanSpec   = 0;      % Raman box count count analyis
 
 % Gaussian
-doGaussFit    = 0;      % Enable gauss fitting
+doGaussFit    = 1;      % Enable gauss fitting
 doGaussRabi   = 0;      % Enable gauss rabi
 doBEC         = 0;      % Enable BEC analysis
 
@@ -145,7 +145,7 @@ doBEC         = 0;      % Enable BEC analysis
 doErfFit      = 0;    
 
 % Band Map Fit
-doBMFit_AM_Spec  = 1; AM_Spec_Dir = 'H';
+doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'H';
 doBMFit       = 0;
 doCustom_BM   = 0;    
 
@@ -365,7 +365,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 %    ROI=[750 1000 375 620]; % 15 ms BM TOF x cam
   
-  ROI=[412 755 552 778]; % 10 ms BM TOF y cam
+%   ROI=[412 755 552 778]; % 10 ms BM TOF y cam
 
 
 %  ROI = [830 940 230 300;
@@ -444,6 +444,8 @@ if doFermiFitLong
     ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 end
 
+ROI=[800 1000 600 800];
+
 % % if doFermiFitLong && atomdata(1).Flags.do_stern_gerlach
 %     ROI=[800 960 700 870;
 %         800 960 870 1000];   % XDT  TOF 25 ms evaporation ZOOM
@@ -470,7 +472,6 @@ ODopts.GaussFilterSigma=1;
 if doFermiFitLong
    ODopts.GaussFilter=0;
 end
-
 
 % Get the high field flag (this may throw error for old data)
 if isfield(data(1).Flags,'High_Field_Imaging')
