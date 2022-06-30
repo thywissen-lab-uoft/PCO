@@ -19,7 +19,7 @@ Freqs = data.Freq;
 
 %% Make Figure
 
-hF=figure('Name',[pad('Fermi Compare',20) FigLabel],...
+hF=figure('Name',[pad('Fermi Summary',20) FigLabel],...
     'units','pixels','color','w');
 hF.Position = [510 50 1200 400];clf
 drawnow;

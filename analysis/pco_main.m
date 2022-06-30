@@ -66,7 +66,7 @@ end
 % display properties.
 
 % Defautl variable to plot against
-pco_xVar = 'uwave_freq_offset';
+pco_xVar = 'ExecutionDate';
 
 % Should the analysis attempt to automatically find the xvariable?
 pco_autoXVar = 1;
@@ -98,7 +98,7 @@ doLandauZener = 0;      % Landau Zener Analysis on BOX
 doRamanSpec   = 0;      % Raman box count count analyis
 
 % Gaussian
-doGaussFit    = 1;      % Enable gauss fitting
+doGaussFit    = 0;      % Enable gauss fitting
 doGaussRabi   = 0;      % Enable gauss rabi
 doBEC         = 0;      % Enable BEC analys
 
@@ -112,7 +112,7 @@ doBMFit = 0;
 doCustom_BM = 0;
 
 % Fermi
-doFermiFitLong = 0;     % Enable Fermi Fit for XDT TOF
+doFermiFitLong = 1;     % Enable Fermi Fit for XDT TOF
 
 % Custom Box counts
 doCustom       =  0;          % Custom Box Count
@@ -258,13 +258,16 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %
 % While in principle different images can have different analysis ROIs,
 % this is currently disabled because it creates code issues at the moment.
+%%%%%%% RF1a
+% ROI = [395 1330 190 1010]; % RF1A 10ms TOF
 
+% ROI = [460 1370 200 800]; % RF1A 5ms TOF
 
 %%%%% RF 1B
 % ROI = [720 1040 330 640];   % RF1B 5 ms TOF
 
 % ROI =  [700 1100 300 600];
-ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
+% ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
 
 
 %%%%% XDT 1/2 ONLY
@@ -302,7 +305,7 @@ ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
 % % 
 % ROI=[820 940 860 950;
 %     820 940 770 860];    % K SG 15ms TOF -9,-7 boxes
-
+% 
 % ROI=[820 940 870 970;
 %     820 940 770 870];    % K SG 15ms TOF -9,-7 boxes
 
@@ -311,6 +314,8 @@ ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
 %       820 960 420 520];    % Rb Stern Gerlach 15 ms TOF
 %  ROI=[750 1050 195 425;
 %       750 1050 550 780];    % Rb Stern Gerlach 17 ms TOF
+%  ROI=[750 1050 195 425;     % Rb Stern Gerlach 15 ms TOF no evap
+%       750 1050 450 780]; 
 
 %  ROI=[820 940 860 950;
 %       820 940 770 860;
@@ -318,8 +323,10 @@ ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
 
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%% LATTICE LOW FIELD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    ROI=[800 960 570 730;
+% ROI=[800 960 570 730;
 %        800 960 300 460]; % 15 ms BM TOF x cam, SG F
+ROI=[780 980 400 500;
+       780 980 500 600]; % 15 ms BM TOF x cam, SG F
 %    
 %    ROI=[820 960 200 310;
 %        820 960 650 760]; % 10 ms BM TOF x cam, SG F
@@ -437,7 +444,7 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% FLUORESCENE %%%%%%%%%%%%
 %ROI = [200 1200 1 800];
-ROI = [1 1392 1 1024];
+% ROI = [1 1200 5  1024]; % 15.5 deg rot
 
 % Assign the ROI
 disp(' ')
@@ -484,16 +491,21 @@ else
 end
 
 % Calculate the optical density
-% atomdata=computeOD(atomdata,ODopts);
+atomdata=computeOD(atomdata,ODopts);
 
-fluorOpts = struct;
-fluorOpts.GaussFilter = 1;
-fluorOpts.GaussFilterSigma = 5;
-fluorOpts.doRotate = 1;
-fluorOpts.Theta = 15.5;
-atomdata=computeFluorOD(atomdata,fluorOpts);
+% fluorOpts = struct;
+% fluorOpts.GaussFilter = 1;
+% fluorOpts.GaussFilterSigma = 3;
+% fluorOpts.doRotate = 0;
+% fluorOpts.Theta = 15.5;
+% atomdata=computeFluorOD(atomdata,fluorOpts);
 
 [atomdata.ODopts]=deal(ODopts);
+
+%% Average Data
+% This is a test piece of code which averages over data sets.
+
+
 
 %% Probe Beam
 probe_opts=struct;
@@ -1001,6 +1013,8 @@ end
 %% OD Profiles w or w/o Fits 
 profile_opts = struct;
 profile_opts.Style = 'cut'; 'sum';  % Cut or sum?
+% profile_opts.Style = 'sum';  % Cut or sum?
+
 profile_opts.FigLabel = FigLabel;
 
 clear hF_X;clear hF_Y;
@@ -1052,21 +1066,23 @@ if doAnimate && doSave
 %      animateOpts.doubleStack='horizontal';
 
      % Asceneding or descending
-%     animateOpts.Order='descend';   
-     animateOpts.Order='ascend';
+    animateOpts.Order='descend';   
+%      animateOpts.Order='ascend';
     
 % %     % Color limits
 %     animateOpts.CLim=[0 0.5;
 %         0 0.5];   
-    animateOpts.CLim=[0 1;
-        0 .2];   
+    animateOpts.CLim=[0 0.2;
+        0 .2]; 
+%      animateOpts.CLim=[0 .2;
+%         0 .2]; 
 %     animateOpts.CLim=[0 .2;
 %         0 .5]; 
 % 
 %     animateOpts.CLim=[0 2;
 %         0 .2]; 
 
-    animateOpts.CLim=[0 5];   
+%     animateOpts.CLim=[-.1 5];   
 
     
     animateCloud(atomdata,pco_xVar,animateOpts);    

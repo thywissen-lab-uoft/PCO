@@ -59,7 +59,7 @@ if doGaussFit
     gaussPopts.CenterSineFit = 0;       % Fit sine fit to cloud center
     gaussPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
     gaussPopts.CenterParabolaFit = 0;
-    gaussPopts.CenterLinearFit = 0;     % Linear fit to cloud center
+    gaussPopts.CenterLinearFit = 1;     % Linear fit to cloud center
     gaussPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
     gaussPopts.angleTrack = 0;
     % Plot the statistics of gaussian fit
@@ -301,7 +301,7 @@ if doFermiFitLong
     if doSave;saveFigure(hF_fermi_summary,'fermi_summary',saveOpts);end
     
     if ~isequal(pco_xVar,'ExecutionDate')
-        hF_fermi_summary_time=showFermiTempCompare(fermi_data,pco_xVar,fermiPopts);    
+        hF_fermi_summary_time=showFermiTempCompare(fermi_data,'ExecutionDate',fermiPopts);    
         if doSave;saveFigure(hF_fermi_summary_time,'fermi_summary_time',saveOpts);end
     end
 end 

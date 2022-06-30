@@ -1,11 +1,18 @@
 
 function [fout,gof,output]=gaussFit2D(Dx,Dy,data)
+
+% mask = isnan(data);
+
+% data(mask)=0;
+
  % Ensure data type is double
 data=double(data);Dx=double(Dx);Dy=double(Dy);
 
 % Rescale images for fitting speed (Do this adaptively? or on option?)
 sc=0.4; % Scale factor
 data=imresize(data,sc);Dx=imresize(Dx,sc);Dy=imresize(Dy,sc);
+
+% mask = imresize(mask,sc);
 
 dSmooth=imgaussfilt(data,2);    % Smooth data
 N0=max(max(dSmooth));           % Extract peak, amplitude guess
@@ -35,8 +42,18 @@ th=0.1;
 % th=-.1;
 xx2(Zguess<th*N0)=[];yy2(Zguess<th*N0)=[];data2(Zguess<th*N0)=[];
 
+ %CHEATING
+inds = [data2 == 0];
+xx2(inds)=[];
+yy2(inds)=[];
+data2(inds)=[];
+
+% xx2(mask)=[];yy2(mask)=[];data2(mask)=[];
+
 % Calculate the appropriate background
 bg=sum(sum(data-Zguess))/(length(X)*length(Y));
+
+bg = min(min(data));
 
 % Create fit object
 myfit=fittype('A*exp(-(xx-Xc).^2./(2*Xs^2)).*exp(-(yy-Yc).^2./(2*Ys^2))+nbg',...
@@ -44,7 +61,9 @@ myfit=fittype('A*exp(-(xx-Xc).^2./(2*Xs^2)).*exp(-(yy-Yc).^2./(2*Ys^2))+nbg',...
 opt=fitoptions(myfit);
 opt.StartPoint=[N0 Xc Xs Yc Ys bg];
 opt.Lower=[N0/10 10 1 10 1 -.1];
-opt.Upper=[1.5*N0 1.5*max(Dx) range(Dx) 1.5*max(Dy) range(Dy) 0.1];
+% opt.Upper=[1.5*N0 1.5*max(Dx) range(Dx) 1.5*max(Dy) range(Dy) 0.1];
+opt.Upper=[1.5*N0 1.5*max(Dx) range(Dx) 1.5*max(Dy) range(Dy) inf];
+
 opt.Weights=[];
 
 % Check that the upper and lower bounds make sense

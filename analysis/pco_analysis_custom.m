@@ -8,8 +8,8 @@
 % Select the data source
 
 % data_source = 'box';
-% data_source = 'gauss';
-data_source = 'erf';
+data_source = 'gauss';
+% data_source = 'erf';
 % data_source = 'erf';
 
 switch data_source

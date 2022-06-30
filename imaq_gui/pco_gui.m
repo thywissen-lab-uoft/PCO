@@ -29,8 +29,6 @@ for kk=1:length(a.Children)
        end
     end
 end
-
-%% Caculate pixel sizes
 % This could probably move or mabye even be sampled from the camera (at
 % least the pixel size).
 
@@ -1505,6 +1503,15 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
         data.PWA=camera.Images{1};
         data.PWOA=camera.Images{2};
         
+        zz = zeros(camera.H,camera.W);
+        for ff=2:length(camera.Images)
+            zz = zz + camera.Images{ff};
+        end
+        zz = zz/(length(camera.Images)-1);
+        data.PWOA=zz;
+            
+        
+%         keyboard
         % Grab the sequence parameters        
         [data.Params,data.Units,data.Flags]=grabSequenceParams2;
 
@@ -1765,8 +1772,8 @@ function data=performFits(data)
         ind=2;fr(m,ind)=m;ind=ind+1; %
         tbl_analysis(m).Data=[];        % Clear old analysis table
         pxsize=tbl_cam.Data{1,2};       % Pixel size in um
-
-        for rr=1:size(data.PWOA,3)
+        rr=1;
+%         for rr=1:size(data.PWOA,3)
             % Gaussian analysis
             if cGaussFit.Value            
                 fout = data.GaussFit{rr,m};                % Grab the fit
@@ -1844,8 +1851,22 @@ function data=performFits(data)
                 % Update fitresults
                 fr(m,ind)=Natoms*1.0;ind=ind+1;                 
             end
-        end
+%         end
     end  
+    
+    % Ratio if its two boxes
+    if size(ROI,1)==2
+        m=m+1;
+        ind=1; 
+        if cGaussFit.Value
+            fr(m,ind)=fr(1,ind);ind=ind+1;
+            fr(m,ind)=NaN;ind=ind+1;
+            fr(m,ind)=fr(1,3)/(fr(2,3)+fr(1,3));ind=ind+1; % N1/(N1+N2);
+            fr(m,ind)=fr(2,3)/(fr(2,3)+fr(1,3));ind=ind+1; % N2/(N1+N2);
+            fr(m,ind)=fr(1,3)/fr(2,3);ind=ind+1; % N1/N2
+            fr(m,ind)=fr(2,3)/fr(1,3);ind=ind+1; % N2/N1
+        end        
+    end
     disp('done');
 
     % Update plots        
