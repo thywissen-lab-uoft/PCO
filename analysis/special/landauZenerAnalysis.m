@@ -1,11 +1,9 @@
 function [hF,frabi,frabi2] = landauZenerAnalysis(data,dtdf,opts)
-
 %%
 if nargin == 3 && isfield(opts,'FigLabel') 
     FigLabel = opts.FigLabel;
 else
     FigLabel = '';
-    opts = struct;
 end
 
 if nargin==2
@@ -26,7 +24,7 @@ ind=opts.BoxIndex;
 % Calculate the normalized atom number
 scale = opts.num_scale;
 Natoms(:,2) = Natoms(:,ind)./scale;
-Nrel=Natoms(:,ind)'./NatomsTot;
+Nrel=Natoms(:,ind)./NatomsTot;
 
 %% Ignore Bad Data Points
 badInds=[NatomsTot<1E4];
@@ -47,10 +45,10 @@ dtdf(badInds)=[];
 %% Analyze the data
 
 % Peform the fit
-fout1=doLZFit(dtdf',Nrel',opts.LZ_GUESS);
+fout1=doLZFit(dtdf',Nrel,opts.LZ_GUESS);
 
 % Create theory curve
-dtdfVec=linspace(0,max(dtdf),100);
+dtdfVec=linspace(0,max(dtdf),1000);
 yy1=feval(fout1,dtdfVec);
 
 % Output the frabi frequency
@@ -59,7 +57,7 @@ f1str=['$\Omega_R=2\pi \times' num2str(round(fout1.f_rabi,3))  '~\mathrm{kHz}$']
 
 
 % Fit to the other function that has T2
-fout2=doLZFit2(dtdf',Nrel');
+fout2=doLZFit2(dtdf',Nrel);
 yy2=feval(fout2,dtdfVec);
 frabi2=fout2.f_rabi;
 f2str=['$\Omega_R=2\pi \times' num2str(round(fout2.f_rabi,3))  '~\mathrm{kHz},~T_2=' num2str(round(fout2.T2,2)) '~\mathrm{ms}$'];
@@ -71,7 +69,7 @@ f2str=['$\Omega_R=2\pi \times' num2str(round(fout2.f_rabi,3))  '~\mathrm{kHz},~T
 hF=figure('Name',[pad('Landau Zener',20) FigLabel],...
     'units','pixels','color','w',...
     'numbertitle','off');
-hF.Position =[0 50 500 400];
+hF.Position =[0 50 800 400];
 clf
 drawnow;
 
@@ -88,7 +86,7 @@ hold on
 
 % X and Y labels
 xlabel('inverse sweep rate (ms/kHz)','interpreter','none');
-ylabel('relative box atom number');
+ylabel('relative atom number');
 
 % Resize axis to make room for directory strin
 hax.Position(4)=hax.Position(4)-20;
@@ -108,7 +106,7 @@ ylim([0 1.2]);
 
 % Make sure x limit starts at zero
 xL=get(gca,'XLim');
-xlim([0 xL(2)]);
+xlim([0 max(dtdfVec)]);
 
 % Image directory folder string
 t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
@@ -143,7 +141,7 @@ myfit=fittype('A*(1-exp(-0.25*(2*pi*f_rabi).^2*dtdf))','independent','dtdf','coe
 opts=fitoptions(myfit);
 opts.StartPoint=lz_guess; % Initial rabi guess is 3 kHz
 opts.Lower=[0 .5];      % Lower limits
-opts.Upper=[100 1.2];     % Upper limits
+opts.Upper=[1000 1.2];     % Upper limits
 
 % Output 
 fout=fit(dtdf,Nrel,myfit,opts);
@@ -163,7 +161,7 @@ myfit=fittype(fitstr,...
 opts=fitoptions(myfit);
 opts.StartPoint=[1 15]; % Initial rabi guess is 3 kHz
 opts.Lower=[0 0];      % Lower limits
-opts.Upper=[20 inf];     % Upper limits
+opts.Upper=[2000 inf];     % Upper limits
 
 % Output 
 fout=fit(dtdf,Nrel,myfit,opts);

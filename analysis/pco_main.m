@@ -66,7 +66,7 @@ end
 % display properties.
 
 % Defautl variable to plot against
-pco_xVar = 'ExecutionDate';
+pco_xVar = 'Raman_Power1';
 
 % Should the analysis attempt to automatically find the xvariable?
 pco_autoXVar = 1;
@@ -84,40 +84,70 @@ pco_overrideUnit='ms';
 doODProfile = 1;
 doStandard = 1;
 
-% Saving1% Animate the Cloud
 doAnimate = 1;
 doSave =1;
 
 % Probe Beam
 doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
 
+%%%%%%%%%%%%%%%%%%%%%%%%
+% Standard Analyses
+%%%%%%%%%%%%%%%%%%%%%%%%
+% These analyses are "standard" in that they primarily fit the cloud to a
+% typical distribution (gaussian, lattice, fermi). Additionally analyses
+% on these processed data may be applied through the special flags. The
+% processed data outputs of the below fits are typically <fit_type>_name
 
 % Box Count
 doBoxCount    = 0;      % Box count analysis
-doLandauZener = 0;      % Landau Zener Analysis on BOX
-doRamanSpec   = 0;      % Raman box count count analyis
 
-% Gaussian
+% Gaussian Fit
+% Fit to a gaussian distribution (thermal cloud)
 doGaussFit    = 0;      % Enable gauss fitting
-doGaussRabi   = 0;      % Enable gauss rabi
-doBEC         = 0;      % Enable BEC analys
 
 % Erf Fit
 doErfFit      = 0;    
 
-% Band Map Fit
+% Band map fit
+% Fit to a square band map, this includes the vertical and horizontal
+% excited bands
+doBMFit = 1;
+
+% Fermi-Fit
+% Fit a DFG in long time of flight
+doFermiFitLong = 0;     
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+% Special Analyses
+%%%%%%%%%%%%%%%%%%%%%%%%
+% These are special analyses which operate on the processed data.  Their
+% applicability depends on the specific experiment which you are running.
+% More details are typically found in the specific scripts/functions that
+% are used when the particular flag is enabled.
+
+doGaussRabi   = 0;      % Enable gauss rabi
+doBEC         = 0;      % Enable BEC analys
+
+% Raman box count count analyis
+doRamanSpec   = 0;      
+
+% LandauZener Analysis
+doLandauZener = 0;      
+
+% Band Map Fit and Analysis
 doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'H';
 
-doBMFit = 0;
 doCustom_BM = 0;
-
-% Fermi
-doFermiFitLong = 1;     % Enable Fermi Fit for XDT TOF
 
 % Custom Box counts
 doCustom       =  0;          % Custom Box Count
 doRabiAbsolute = 0;
 doRabiContrast = 0;
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+% Misc Analyses
+%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Raman Common Mode Detuning
 doWavemeter    = 0;
@@ -325,8 +355,8 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % %%%%%%%%%%%%%%%%%%%%%%%%%%% LATTICE LOW FIELD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ROI=[800 960 570 730;
 %        800 960 300 460]; % 15 ms BM TOF x cam, SG F
-ROI=[780 980 400 500;
-       780 980 500 600]; % 15 ms BM TOF x cam, SG F
+ROI=[800 960 380 500;
+       800 960 500 620]; % 15 ms BM TOF x cam, SG F
 %    
 %    ROI=[820 960 200 310;
 %        820 960 650 760]; % 10 ms BM TOF x cam, SG F
@@ -472,8 +502,8 @@ else
 end
 
 % Apply gaussian filter to images?
-ODopts.GaussFilter=0;
-ODopts.GaussFilterSigma=.5;
+ODopts.GaussFilter=1;
+ODopts.GaussFilterSigma=1;
 
 if doFermiFitLong
    ODopts.GaussFilter=0;
@@ -1066,8 +1096,8 @@ if doAnimate && doSave
 %      animateOpts.doubleStack='horizontal';
 
      % Asceneding or descending
-    animateOpts.Order='descend';   
-%      animateOpts.Order='ascend';
+%     animateOpts.Order='descend';   
+      animateOpts.Order='ascend';
     
 % %     % Color limits
 %     animateOpts.CLim=[0 0.5;

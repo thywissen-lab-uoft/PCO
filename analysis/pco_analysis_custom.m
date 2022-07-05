@@ -8,9 +8,9 @@
 % Select the data source
 
 % data_source = 'box';
-data_source = 'gauss';
+% data_source = 'gauss';
 % data_source = 'erf';
-% data_source = 'erf';
+data_source = 'bm';
 
 switch data_source
     case 'box'        
@@ -172,7 +172,8 @@ if doLandauZener && size(data.Natoms,2)>1 && size(data.Natoms,1)>3
     lz_opts.Mode='auto';
     lz_opts.BoxIndex=1;  % 1/2 ratio or 2/1 ratio
     lz_opts.LZ_GUESS=[1 .8]; % Fit guess kHz,ampltidue can omit guess as well
-    lz_opts.num_scale = 0.6;        
+%     lz_opts.num_scale = 0.6;        
+    lz_opts.num_scale = 1;        
 
     % Define the dt/df in ms/kHz
     % This can be different variables depending on the sweep
@@ -182,23 +183,26 @@ if doLandauZener && size(data.Natoms,2)>1 && size(data.Natoms,1)>3
 
     % Get df and dt
 %     SweepTimeVar='sweep_time';      % Variable that defines sweep time
-%     SweepRangeVar='sweep_range';    %    Variable that defines sweep range
+    SweepRangeVar='Sweep_Range';    %    Variable that defines sweep range
 
 %     SweepTimeVar='uwave_sweep_time';      % Variable that defines sweep time
 %     SweepRangeVar='uwave_delta_freq';    %    Variable that defines sweep range
 
-%     SweepTimeVar='Raman_Time';      % Variable that defines sweep time
-    SweepRangeVar='HF_Raman_sweep_range';    %    Variable that defines sweep range
+    SweepTimeVar='Raman_Time';      % Variable that defines sweep time
+%     SweepRangeVar='HF_Raman_sweep_range';    %    Variable that defines sweep range
 %     
     % Convert the parameter into df and dt (add whatever custom processing
     % you want).
     dT=[params.(SweepTimeVar)];
+    dF=[params.(SweepRangeVar)];
+
 %     dF=[params.(SweepRangeVar)]*1000; % Factor of two for the SRS
-    dF=[params.(SweepRangeVar)]*1000*2; % Factor of two for the AOM DP
+%     dF=[params.(SweepRangeVar)]*1000*2; % Factor of two for the AOM DP
 
     % Convert to dtdf
     dtdf=dT./dF; 
     % Perform the analysis and save the output
+    
     [hF_LandauZener,frabi]=landauZenerAnalysis(data,dtdf,lz_opts); 
 
     if doSave
