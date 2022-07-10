@@ -75,7 +75,7 @@ end
 
 % pco_xVar='Pulse_Time';
 %    pco_xVar='rf_freq_HF_shift';
-   pco_xVar = 'HF_prob_pwr';
+   pco_xVar = 'HF_FeshValue_Final_ODT';
 
 
 % pco_xVar = 'HF_FeshValue_Spectroscopy';
@@ -103,7 +103,7 @@ end
 % pco_xVar = 'Lattice_loading_field';
 % pco_xVar = 'rf_rabi_freq_HF';
 %   pco_xVar = 'rf_delta_freq_HF';
-%   pco_xVar = 'rf_freq_HF';
+  pco_xVar = 'rf_freq_HF';
 % pco_xVar = 'HF_FeshValue_Initial_ODT';
 %    pco_xVar = 'HF_hold_time_ODT';
 
@@ -142,7 +142,7 @@ doGaussRabi   = 0;      % Enable gauss rabi
 doBEC         = 0;      % Enable BEC analysis
 
 % Erf Fit
-doErfFit      = 0;    
+doErfFit      = 1;    
 
 % Band Map Fit
 doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'H';
@@ -168,7 +168,7 @@ doUpload = 0;       % Upload to google drive?
 %% Select image directory
 % Choose the directory where the images to analyze are stored
 % choose_folder = 1;
-choose_folder = 1
+choose_folder = 1;
 if choose_folder
 
 disp([datestr(now,13) ' Choose an image analysis folder...']);
@@ -395,9 +395,9 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %       800 950 490 600];   %  band map 15 ms TOF  7box, 9 box
 
 % 
-% ROI=[790 975 450 650;
-%        790 975 1510 1710];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
-% %    
+ROI=[790 975 450 650;
+       790 975 1510 1710];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
+%    
    
    % ROI = ROI(1,:); % 9 only 
     %ROI = ROI(2,:); % 7 only
@@ -443,8 +443,6 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 if doFermiFitLong
     ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 end
-
-ROI=[800 1000 600 800];
 
 % % if doFermiFitLong && atomdata(1).Flags.do_stern_gerlach
 %     ROI=[800 960 700 870;
