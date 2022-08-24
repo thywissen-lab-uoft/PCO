@@ -72,11 +72,11 @@ y_Lbl{30}     = 'N7/N9';
 % p_inds = [01,02,03,04];
 %  p_inds = [01,02,03,04,05,06];
 
-% p_inds=[28];
+p_inds=[02,04,05,01,25];
 
 
 % % Excitations to 9
-p_inds = [03,06,08,15,16,17,25];
+% p_inds = [03,06,08,15,16,17,25];
 % p_inds = [03,08,15,16,17];
 
 % % lifetime measurements
@@ -109,7 +109,7 @@ FitFlags = struct;
 FitFlags.T2exp=0;
 FitFlags.expdecay =0;
 FitFlags.Rabi_oscillation = 0;
-FitFlags.Rabi_oscillation2 = 1;
+FitFlags.Rabi_oscillation2 = 0;
 FitFlags.NGaussPeak=0;
 
 FitFlags.gauss_single=0;
@@ -120,7 +120,7 @@ FitFlags.gauss_double = 0;
 FitFlags.gauss_triple = 0;
  
 FitFlags.lorentz_neg_single=0;    
-FitFlags.lorentz_neg_double=0;  
+FitFlags.lorentz_neg_double=1;  
 
 FitFlags.lorentz_single=0;
 FitFlags.lorentz_double=0;    
@@ -150,16 +150,17 @@ custom_data_bm.XUnit = src_data.Units(1).(src_data.xVar);
 
 if doCustomX
     % Select mF states
-    mF1 = -7/2;
-    mF2 = -9/2;
-     
 %     mF1 = -7/2;
-%     mF2 = -5/2;
+%     mF2 = -9/2;
+     
+    mF1 = -7/2;
+    mF2 = -5/2;
 
-%    Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
-    Bfb   = src_data.Params(1).HF_FeshValue_Spectroscopy;
+   Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
+%     Bfb   = src_data.Params(1).HF_FeshValue_Spectroscopy;
 %     Bfb   = src_data.Params(1).HF_FeshValue_Final_Lattice;
     Bshim = src_data.Params(1).HF_zshim_Initial_Lattice*2.35;
+%     Boff  = 0.11;
     Boff  = 0.11;
     B = Bfb + Bshim + Boff;
 %     B = 199.5 + 0 + 0.11; 

@@ -66,7 +66,7 @@ end
 % display properties.
 
 % Defautl variable to plot against
-pco_xVar = 'Raman_Power1';
+pco_xVar = 'freq_val';
 
 % Should the analysis attempt to automatically find the xvariable?
 pco_autoXVar = 1;
@@ -81,7 +81,7 @@ pco_overrideUnit='ms';
 %% Analysis Flags
 
 % Standard Analysis
-doODProfile = 1;
+doODProfile = 0;
 doStandard = 1;
 
 doAnimate = 1;
@@ -111,11 +111,11 @@ doErfFit      = 0;
 % Band map fit
 % Fit to a square band map, this includes the vertical and horizontal
 % excited bands
-doBMFit = 1;
+doBMFit = 0;
 
 % Fermi-Fit
 % Fit a DFG in long time of flight
-doFermiFitLong = 0;     
+doFermiFitLong = 1;     
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Special Analyses
@@ -339,6 +339,8 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % ROI=[820 940 870 970;
 %     820 940 770 870];    % K SG 15ms TOF -9,-7 boxes
 
+ROI=[820 940 510 610;
+    820 940 400 500];    % K SG 15ms TOF K uwave transfer
 
 %  ROI=[820 960 520 620;
 %       820 960 420 520];    % Rb Stern Gerlach 15 ms TOF
@@ -355,8 +357,8 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % %%%%%%%%%%%%%%%%%%%%%%%%%%% LATTICE LOW FIELD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ROI=[800 960 570 730;
 %        800 960 300 460]; % 15 ms BM TOF x cam, SG F
-ROI=[800 960 380 500;
-       800 960 500 620]; % 15 ms BM TOF x cam, SG F
+% ROI=[800 960 380 500;
+%        800 960 500 620]; % 15 ms BM TOF x cam, SG F
 %    
 %    ROI=[820 960 200 310;
 %        820 960 650 760]; % 10 ms BM TOF x cam, SG F
@@ -410,7 +412,7 @@ ROI=[800 960 380 500;
 % 
 % ROI=[790 975 450 650;
 %        790 975 1510 1710];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
-% %    
+% % %    
 % 
 % ROI=[720 1030 420 770;
 %        720 1030 420+1064 770+1064];   % bm 15ms in 2D lattice
@@ -1114,6 +1116,10 @@ if doAnimate && doSave
 
 %     animateOpts.CLim=[-.1 5];   
 
+    if doFermiFitLong
+        animateOpts.CLim=[0 .8;0 .8];
+    end
+        
     
     animateCloud(atomdata,pco_xVar,animateOpts);    
 end
