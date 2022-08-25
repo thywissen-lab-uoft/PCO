@@ -79,6 +79,7 @@ uicontrol('style','text','string',['PCO,' data.FitType],'units','pixels','backgr
     'position',[2 2 100 20]);
 
 % Make axis
+% hax=subplot(2,3,[1 2 4 5]);
 hax=axes;
 co=get(gca,'colororder');
 set(hax,'box','on','linewidth',1,'fontsize',14,'units','pixels');
@@ -89,7 +90,8 @@ xlabel('inverse sweep rate (ms/kHz)','interpreter','none');
 ylabel('relative atom number');
 
 % Resize axis to make room for directory strin
-hax.Position(4)=hax.Position(4)-20;
+hax.Position(4)=hax.Position(4)-30;
+hax.Position(2)=hax.Position(2)+20;
 
 % Plot the data
 pD=plot(dtdf,Nrel,'o','color',co(ind,:),'linewidth',1,'markersize',8,...
@@ -129,6 +131,10 @@ text(.02,0.98,fitStr,'interpreter','latex','verticalalignment','top',...
 % Make the legend
 legStr={f1str,f2str};
 legend([pF1 pF2],legStr,'location','southeast','fontsize',10,'interpreter','latex');
+
+% subplot(2,3,3)
+% 
+% plot(
 
 end
 

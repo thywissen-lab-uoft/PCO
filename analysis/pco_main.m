@@ -106,16 +106,16 @@ doBoxCount    = 0;      % Box count analysis
 doGaussFit    = 0;      % Enable gauss fitting
 
 % Erf Fit
-doErfFit      = 0;    
+doErfFit      = 1;    
 
 % Band map fit
 % Fit to a square band map, this includes the vertical and horizontal
 % excited bands
-doBMFit = 0;
+doBMFit = 1;
 
 % Fermi-Fit
 % Fit a DFG in long time of flight
-doFermiFitLong = 1;     
+doFermiFitLong = 0;     
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Special Analyses
