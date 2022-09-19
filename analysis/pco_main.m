@@ -75,7 +75,7 @@ end
 
 % pco_xVar='Pulse_Time';
 %    pco_xVar='rf_freq_HF_shift';
-   pco_xVar = 'HF_FeshValue_Final_ODT';
+   pco_xVar = 'Pulse_Time';
 
 
 % pco_xVar = 'HF_FeshValue_Spectroscopy';
@@ -103,7 +103,7 @@ end
 % pco_xVar = 'Lattice_loading_field';
 % pco_xVar = 'rf_rabi_freq_HF';
 %   pco_xVar = 'rf_delta_freq_HF';
-  pco_xVar = 'rf_freq_HF';
+%   pco_xVar = 'rf_freq_HF';
 % pco_xVar = 'HF_FeshValue_Initial_ODT';
 %    pco_xVar = 'HF_hold_time_ODT';
 
@@ -137,7 +137,7 @@ doLandauZener = 0;      % Landau Zener Analysis on BOX
 doRamanSpec   = 0;      % Raman box count count analyis
 
 % Gaussian
-doGaussFit    = 1;      % Enable gauss fitting
+doGaussFit    = 0;      % Enable gauss fitting
 doGaussRabi   = 0;      % Enable gauss rabi
 doBEC         = 0;      % Enable BEC analysis
 
@@ -146,7 +146,7 @@ doErfFit      = 1;
 
 % Band Map Fit
 doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'H';
-doBMFit       = 0;
+doBMFit       = 1;
 doCustom_BM   = 0;    
 
 % Fermi
