@@ -64,6 +64,7 @@ file_name = 'wave_data.mat';
 data_wave = {all_data.wave_data};
 
 %% Wavemter analysis
+outdata = struct;
 
 cmaps = hsv(length(data));
 nPlotMax = 6;
@@ -126,7 +127,10 @@ for nn=1:length(data)
     
     
 end
-
+outdata.wave_df = wave_df;
+outdata.wave_f = wave_f;
+outdata.wave_f_err = wave_f_err;
+outdata.f0 = f0;
 %%
 % Observable to analyzes
 Yname = '(N9-N7)/(N7+N9)';
@@ -221,6 +225,11 @@ for nn=1:length(data)
     area2(nn) = out.Area2;
 end
 
+outdata.A1 = A1;
+outdata.A2 =  A2;
+outdata.area1 = area1;
+outdata.area2 = area2;
+
 %% Next
 
 hf_summ = figure(300);
@@ -282,6 +291,7 @@ if  doUpload && exist(GDrive_root,'dir')
     for jj=1:length(hFs)
         saveas(hFs(jj),[GDrive_root filesep 'Fits' num2str(jj) '.png'])
     end
+   save([GDrive_root filesep 'PA_data'], 'outdata')
 
 end
 
