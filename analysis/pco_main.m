@@ -66,7 +66,7 @@ end
 % display properties.
 
 % Defautl variable to plot against
-pco_xVar = 'freq_val';
+pco_xVar = 'rf_freq_HF_shift';
 
 % Should the analysis attempt to automatically find the xvariable?
 pco_autoXVar = 1;
@@ -75,7 +75,7 @@ pco_autoXVar = 1;
 pco_autoUnit = 1;
 
 % If ixon_autoUnit=0, this will be used.
-pco_overrideUnit='ms';
+pco_overrideUnit='MHz';
 
 
 %% Analysis Flags
@@ -88,7 +88,7 @@ doAnimate = 1;
 doSave =1;
 
 % Probe Beam
-doProbeFit    = 0;      % Fit probe beam to 2D Gaussian
+doProbeFit    = 0;      % Fit probe beam  to 2D Gaussian
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Standard Analyses
@@ -106,19 +106,19 @@ doBoxCount    = 0;      % Box count analysis
 doGaussFit    = 0;      % Enable gauss fitting
 
 % Erf Fit
-doErfFit      = 1;    
+doErfFit      = 0;    
 
 % Band map fit
 % Fit to a square band map, this includes the vertical and horizontal
 % excited bands
-doBMFit = 1;
+doBMFit =1;
 
 % Fermi-Fit
 % Fit a DFG in long time of flight
 doFermiFitLong = 0;     
 
 %%%%%%%%%%%%%%%%%%%%%%%%
-% Special Analyses
+% Custom Analyses
 %%%%%%%%%%%%%%%%%%%%%%%%
 % These are special analyses which operate on the processed data.  Their
 % applicability depends on the specific experiment which you are running.
@@ -128,19 +128,21 @@ doFermiFitLong = 0;
 doGaussRabi   = 0;      % Enable gauss rabi
 doBEC         = 0;      % Enable BEC analys
 
-% Raman box count count analyis
-doRamanSpec   = 0;      
+% Landau Zener Analysis
+doLandauZener       =  0;         
 
-% LandauZener Analysis
-doLandauZener = 0;      
+% Raman box count count analyis
+doRamanSpec   = 0;   
 
 % Band Map Fit and Analysis
-doBMFit_AM_Spec  = 0; AM_Spec_Dir = 'H';
+doBMFit_AM   = 0; doBMFit_AM_Dir = 'V';
+doBMFit_AM_Spec  = 0; 
 
 doCustom_BM = 0;
 
 % Custom Box counts
 doCustom       =  0;          % Custom Box Count
+
 doRabiAbsolute = 0;
 doRabiContrast = 0;
 
@@ -152,6 +154,7 @@ doRabiContrast = 0;
 % Raman Common Mode Detuning
 doWavemeter    = 0;
 doCavity       = 0;
+doVortexLock = 1;
 
 %% GDrive Settings
 GDrive_root = 'G:\My Drive\Lattice Shared\LabData';
@@ -299,6 +302,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % ROI =  [700 1100 300 600];
 % ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
 
+% ROI = [740 1015 230 430]; %XDT Loading K 5 ms TOF
 
 %%%%% XDT 1/2 ONLY
 %
@@ -311,6 +315,8 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % ROI = [780 990 310 510]; %K XDT 5ms tof
 % ROI = [730 1060 250 550]; %K XDT 10ms tof
 % ROI = [700 1050 327 645]; %K XDT 15ms tof rb
+
+% ROI = [750 1050 300 530]; %K XDT 10ms tof
 
 % ROI=[649 1160 580 1024];   % XDT TOF 15 ms
 % ROI=[617 1091 258 385];   % XDT1 only TOF 5 ms
@@ -327,46 +333,31 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 %    ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 
-% % 12ms tof SG from XDT #850 900 300 560;
-% ROI = [825 900 300 565;
-%        825 900 565 610];
+% ROI = [830 930 860 940;    
+%     830 930 780 860;
+%     830 930 700 780;
+%     ];
 
-% ROI=[661 1036 1556 1916];   % XDT HFF TOF 20 ms
-% % 
-% ROI=[820 940 860 950;
-%     820 940 770 860];    % K SG 15ms TOF -9,-7 boxes
-% 
-% ROI=[820 940 870 970;
-%     820 940 770 870];    % K SG 15ms TOF -9,-7 boxes
-
-ROI=[820 940 510 610;
-    820 940 400 500];    % K SG 15ms TOF K uwave transfer
-
-%  ROI=[820 960 520 620;
-%       820 960 420 520];    % Rb Stern Gerlach 15 ms TOF
-%  ROI=[750 1050 195 425;
-%       750 1050 550 780];    % Rb Stern Gerlach 17 ms TOF
-%  ROI=[750 1050 195 425;     % Rb Stern Gerlach 15 ms TOF no evap
-%       750 1050 450 780]; 
-
-%  ROI=[820 940 860 950;
-%       820 940 770 860;
-%       820 940 680 770];    % K SG 15ms TOF -9,-7,-5 boxes
-
+% ROI=[800 960 390 500;
+%        800 960 500 610]; % 15 ms  xcam,XDT F SG
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%% LATTICE LOW FIELD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ROI=[800 960 570 730;
 %        800 960 300 460]; % 15 ms BM TOF x cam, SG F
-% ROI=[800 960 380 500;
-%        800 960 500 620]; % 15 ms BM TOF x cam, SG F
-%    
+%  ROI=[800 960 380 500;
+%         800 960 500 620]; % 15 ms BM TOF x cam, SG F
+% ROI=[800 960 300 650]; % 15 ms BM TOF x cam, SG F
+
+% ROI=[800 960 380 500];
 %    ROI=[820 960 200 310;
 %        820 960 650 760]; % 10 ms BM TOF x cam, SG F
 
 %    ROI=[800 960 400 580]; % 15 ms BM TOF x cam
-  
+%      ROI=[750 1010 350 630]; % 15 ms BM TOF x cam
+%      ROI=[390 800 680 1000]; % 15 ms BM TOF y cam
+
 %   ROI=[412 755 552 778]; % 10 ms BM TOF y cam
-%   ROI=[412 755 700 1000]; % 15 ms BM TOF y cam
+% %   ROI=[412 755 700 1000]; % 15 ms BM TOF y cam
 
 
 %  ROI = [830 940 230 300;
@@ -387,7 +378,7 @@ ROI=[820 940 510 610;
 %ROI=[800 950 182 1011;
 %    800 950 1228 2040];   % XDT full TOF\
 
-% 
+
 % ROI=[800 950 475 630;
 %     800 950 1540 1662];   % XDT 15ms tof high field
 
@@ -409,41 +400,12 @@ ROI=[820 940 510 610;
 %  ROI = [800 950 1520 1630;
 %       800 950 490 600];   %  band map 15 ms TOF  7box, 9 box
 
-% 
-% ROI=[790 975 450 650;
-%        790 975 1510 1710];   %  band map 15 ms TOF 9box, 7 box, most commonly used 
-% % %    
-% 
-% ROI=[720 1030 420 770;
-%        720 1030 420+1064 770+1064];   % bm 15ms in 2D lattice
-%    
+% most commonly used
+ROI=[770 970 450 650;
+       770 970 1510 1710];   %  band map 15 ms  
+% ROI = ROI(1,:); % 9 only 
+%ROI = ROI(2,:); % 7 only
 
-   % ROI = ROI(1,:); % 9 only 
-    %ROI = ROI(2,:); % 7 only
-
-%      ROI=[750 1000 620 860;
-%        750 1000 1670 1910];   %  band map 20 ms TOF 9box, 7 box  
-
-%  ROI=[800 950 1520 1650];   %  band map 15 ms TOF   -7 box   
-%  ROI=[800 950 1640 1900];   %  band map 20 ms TOF   -7 box   
-%  ROI=[800 950 490 620];   %  band map 15 ms TOF   -9 box   
-%  ROI=[800 950 610 830];   %  band map 20 ms TOF   -9 box   
-
-
-%  ROI=[820 950 150 1020;
-%      820 950 1174 2044];   %  k_rb double shutter various tof NARRO
-%  
-%  ROI=[750 1020 150 1020;
-%      750 1020 1174 2044];   %  k_rb double shutter various tof 
-
-%  ROI=[760 1000 660 940;
-%      760 1000 1684 1964];   %  k_rb 25 ms opevap
-
-%  ROI=[700 1050 280 680;
-%      700 1050 1504 1904];   %  k 5ms rb 15 ms double shutter
-
-%    ROI=[800 960 700 870; 
-%        800 960 1800 1930];   % XDT  TOF 25 ms evaporation ZOOM
 
 %%%%%%%%%%%%%%%%%%% Y CAM %%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -489,8 +451,8 @@ disp(ROI);
 ODopts=struct;
 ODopts.ScaleProbe=1;
 % ODopts.ScaleProbeROI=[1 100 900 1000];  % ROI to do the scaling
-ODopts.ScaleProbeROI=[200 400 800 1000];  % ROI to do the scaling
-% ODopts.ScaleProbeROI=[700 790 500 600];  % ROI to do the scaling
+% ODopts.ScaleProbeROI=[200 400 800 1000];  % ROI to do the scaling
+ODopts.ScaleProbeROI=[700 790 500 600];  % ROI to do the scaling
 
 ODopts.SubtractDark=0;
 ODopts.DarkROI=[700 800 20 100];
@@ -650,6 +612,20 @@ if doWavemeter && doCavity
     
     hF_wave_cavity = wave_cavity_plot(wave_data,cavity_data,wave_cavity_opts);
     if doSave;saveFigure(hF_wave_cavity,'wavemeter_cavity',saveOpts);end
+
+end
+
+%% Vortex
+if doVortexLock
+    addpath('Y:\wavemeter_amar');
+    P = [atomdata.Params];
+    t = [P.ExecutionDate];t1 = datevec(min(t));t2 = datevec(max(t)+10/24/60/60);
+    
+    vortex_opts = struct;
+    vortex_opts.FigLabel = FigLabel;    
+    
+    hF_vortex = plotVortexLockData(t1,t2,vortex_opts);   
+    if doSave;saveFigure(hF_vortex,'vortex_lock',saveOpts);end
 
 end
     
@@ -889,10 +865,10 @@ bm_opts.doScale = 1;            % Enable rescale of data (smaller img --> faster
 bm_opts.Scale = 0.4;            % Length Scale factor
 bm_opts.doSmooth = 0;           % Enable smoothing?
 bm_opts.Smooth = 1;             % Smoothing radius
-bm_opts.ExciteDir = AM_Spec_Dir;
+bm_opts.ExciteDir = doBMFit_AM_Dir;
    
 % Perform the Erf Fit
-if doBMFit_AM_Spec
+if doBMFit_AM
     disp(repmat('-',1,60));    
     disp('Performing 2D Band Map fit');
     disp(repmat('-',1,60)); 
@@ -1104,7 +1080,7 @@ if doAnimate && doSave
 % %     % Color limits
 %     animateOpts.CLim=[0 0.5;
 %         0 0.5];   
-    animateOpts.CLim=[0 0.2;
+    animateOpts.CLim=[0 .2;
         0 .2]; 
 %      animateOpts.CLim=[0 .2;
 %         0 .2]; 
@@ -1124,13 +1100,19 @@ if doAnimate && doSave
     animateCloud(atomdata,pco_xVar,animateOpts);    
 end
 
-%% Analysis
+%% Standard Analysis
 if doStandard
     pco_analysis_standard;
 end
 
+%% Special Analyses
+
 if doCustom
     pco_analysis_custom;
+end
+
+if doLandauZener
+    pco_analysis_LandauZener;
 end
 
 if doCustom_BM

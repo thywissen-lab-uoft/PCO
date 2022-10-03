@@ -1,6 +1,9 @@
-function [hF,frabi,frabi2] = landauZenerAnalysis(data,dtdf,opts)
+function [hF,frabi,frabi2] = landauZenerAnalysis(data,dt,df,opts)
 %%
-if nargin == 3 && isfield(opts,'FigLabel') 
+
+frabi = 0 ;
+frabi2 = 0;
+if nargin == 4 && isfield(opts,'FigLabel') 
     FigLabel = opts.FigLabel;
 else
     FigLabel = '';
@@ -13,7 +16,10 @@ if nargin==2
     opts.BoxIndex=1;
 end
 
+
 %% Grab the data
+
+dtdf = dt./df;
 
 Natoms = data.Natoms;
 NatomsTot = sum(Natoms,2);
@@ -44,23 +50,27 @@ dtdf(badInds)=[];
 
 %% Analyze the data
 
-% Peform the fit
-fout1=doLZFit(dtdf',Nrel,opts.LZ_GUESS);
+    % Create theory curve
+    dtdfVec=linspace(0,max(dtdf),1000);
+if length(Nrel)>4
 
-% Create theory curve
-dtdfVec=linspace(0,max(dtdf),1000);
-yy1=feval(fout1,dtdfVec);
+    % Peform the fit
+    fout1=doLZFitIdeal(dtdf',Nrel,opts.LZ_GUESS);
 
-% Output the frabi frequency
-frabi=fout1.f_rabi;
-f1str=['$\Omega_R=2\pi \times' num2str(round(fout1.f_rabi,3))  '~\mathrm{kHz}$'];
+    yy1=feval(fout1,dtdfVec);
+
+    % Output the frabi frequency
+    frabi=fout1.f_rabi;
+    f1str=['$\Omega_R=2\pi \times' num2str(round(fout1.f_rabi,3))  '~\mathrm{kHz}$'];
 
 
-% Fit to the other function that has T2
-fout2=doLZFit2(dtdf',Nrel);
-yy2=feval(fout2,dtdfVec);
-frabi2=fout2.f_rabi;
-f2str=['$\Omega_R=2\pi \times' num2str(round(fout2.f_rabi,3))  '~\mathrm{kHz},~T_2=' num2str(round(fout2.T2,2)) '~\mathrm{ms}$'];
+
+    % Fit to the other function that has T2
+    fout2=doLZFitT2(dtdf',Nrel,[opts.LZ_GUESS(1) 2]);
+    yy2=feval(fout2,dtdfVec);
+    frabi2=fout2.f_rabi;
+    f2str=['$\Omega_R=2\pi \times' num2str(round(fout2.f_rabi,3))  '~\mathrm{kHz},~T_2=' num2str(round(fout2.T2,2)) '~\mathrm{ms}$'];
+end
 
 %% Make Figure
 
@@ -69,7 +79,7 @@ f2str=['$\Omega_R=2\pi \times' num2str(round(fout2.f_rabi,3))  '~\mathrm{kHz},~T
 hF=figure('Name',[pad('Landau Zener',20) FigLabel],...
     'units','pixels','color','w',...
     'numbertitle','off');
-hF.Position =[0 50 800 400];
+hF.Position =[0 50 1000 400];
 clf
 drawnow;
 
@@ -79,10 +89,10 @@ uicontrol('style','text','string',['PCO,' data.FitType],'units','pixels','backgr
     'position',[2 2 100 20]);
 
 % Make axis
-% hax=subplot(2,3,[1 2 4 5]);
-hax=axes;
+hax=subplot(1,4,[1 2 3]);
+% hax=axes;
 co=get(gca,'colororder');
-set(hax,'box','on','linewidth',1,'fontsize',14,'units','pixels');
+set(hax,'box','on','linewidth',1,'fontsize',10,'units','normalized');
 hold on
 
 % X and Y labels
@@ -90,19 +100,22 @@ xlabel('inverse sweep rate (ms/kHz)','interpreter','none');
 ylabel('relative atom number');
 
 % Resize axis to make room for directory strin
-hax.Position(4)=hax.Position(4)-30;
-hax.Position(2)=hax.Position(2)+20;
+% hax.Position(4)=hax.Position(4)-30;
+% hax.Position(2)=hax.Position(2)+20;
+
 
 % Plot the data
 pD=plot(dtdf,Nrel,'o','color',co(ind,:),'linewidth',1,'markersize',8,...
    'markerfacecolor',co(ind,:),'markeredgecolor',co(ind,:)*.5);
 
-% Plot the fit1
-pF1=plot(dtdfVec,yy1,'-','color','k','linewidth',2);
+if length(Nrel)>4
+    % Plot the fit1
 
-% Plot the fit2
-pF2=plot(dtdfVec,yy2,'--','color','k','linewidth',2);
+    pF1=plot(dtdfVec,yy1,'-','color','k','linewidth',2);
 
+    % Plot the fit2
+    pF2=plot(dtdfVec,yy2,'--','color','k','linewidth',2);
+end
 % Ylim is [0 1]
 ylim([0 1.2]);
 
@@ -116,9 +129,7 @@ t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',
 drawnow;
 t.Position(4)=t.Extent(4);
 t.Position(3)=hF.Position(3);
-% t.Position(3)=t.Extent(3);
 t.Position(1:2)=[5 hF.Position(4)-t.Position(4)];
-
 
 % Add theoretical curve function (fit function)
 fitStr=['$P_{\mathrm{LZ}}:=(1-\exp(-\frac{1}{4}\Omega_\mathrm{R}^2 \frac{dt}{df}))$ ' newline ...
@@ -129,18 +140,30 @@ text(.02,0.98,fitStr,'interpreter','latex','verticalalignment','top',...
     'horizontalalignment','left','units','normalized','fontsize',12);
 
 % Make the legend
+if length(Nrel)>4
 legStr={f1str,f2str};
 legend([pF1 pF2],legStr,'location','southeast','fontsize',10,'interpreter','latex');
+end
 
-% subplot(2,3,3)
-% 
-% plot(
+hax2=subplot(1,4,[4]);
+plot(dtdf,dt,'ko')
+hold on
+set(hax2,'box','on','linewidth',1,'fontsize',10,'units','normalized');
+
+ylabel('sweep time (ms)');
+xlabel('inverse sweep rate (ms/kHz)');
+yyaxis right
+plot(dtdf,df,'ro')
+ylabel('sweep range (kHz)');
+
+
+
 
 end
 
 
 
-function fout=doLZFit(dtdf,Nrel,lz_guess)
+function fout=doLZFitIdeal(dtdf,Nrel,lz_guess)
 
 % Define fit function (constrained so that goes to 0 at dtdf=0)
 myfit=fittype('A*(1-exp(-0.25*(2*pi*f_rabi).^2*dtdf))','independent','dtdf','coefficients',{'f_rabi','A'});
@@ -155,7 +178,7 @@ disp(fout)
 end
 
 
-function fout=doLZFit2(dtdf,Nrel)
+function fout=doLZFitT2(dtdf,Nrel,lz_guess)
 
 % Define fit function (constrained so that goes to 0 at dtdf=0)
 
@@ -165,9 +188,10 @@ fitstr='(1-exp(-0.25*(2*pi*f_rabi).^2*dtdf)).*0.5.*(1+exp(-pi*dtdf*(2*pi*f_rabi)
 myfit=fittype(fitstr,...
     'independent','dtdf','coefficients',{'f_rabi','T2'});
 opts=fitoptions(myfit);
-opts.StartPoint=[1 15]; % Initial rabi guess is 3 kHz
+opts.StartPoint=lz_guess; % Initial rabi guess is 3 kHz
 opts.Lower=[0 0];      % Lower limits
-opts.Upper=[2000 inf];     % Upper limits
+opts.Upper=[40 inf];     % Upper limits
+opts.Robust='bisquare';
 
 % Output 
 fout=fit(dtdf,Nrel,myfit,opts);

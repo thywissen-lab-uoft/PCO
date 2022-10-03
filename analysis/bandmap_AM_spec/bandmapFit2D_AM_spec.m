@@ -44,8 +44,8 @@ end
 
 % Convert recoil velocity to pixels
 sG = vR/((opts.PixelSize*1e6)/((opts.TOF+dt)*1e3));
-
-
+% disp(sG)
+% sG = 50;
 
 %% Initial Guess
 Zg = Z;

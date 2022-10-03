@@ -59,7 +59,7 @@ if doGaussFit
     gaussPopts.CenterSineFit = 0;       % Fit sine fit to cloud center
     gaussPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
     gaussPopts.CenterParabolaFit = 0;
-    gaussPopts.CenterLinearFit = 1;     % Linear fit to cloud center
+    gaussPopts.CenterLinearFit = 0;     % Linear fit to cloud center
     gaussPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
     gaussPopts.angleTrack = 0;
     % Plot the statistics of gaussian fit
@@ -261,18 +261,31 @@ if doBMFit
 end
 %% 2D Band Map Analysis AM SPec
 
-if doBMFit_AM_Spec        
+if doBMFit_AM       
     bmPopts = struct;
     bmPopts.FigLabel = FigLabel;
-    bmPopts.xUnit=pco_unit; 
+    bmPopts.xUnit=pco_unit;
+    bmPopts.NumberExpFit = 0;        % Fit exponential decay to atom number
+    bmPopts.NumberLorentzianFit=0;   % Fit atom number to lorentzian
+    bmPopts.CenterSineFit = 0;       % Fit sine fit to cloud center
+    bmPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
+    bmPopts.CenterParabolaFit = 0;
+    bmPopts.CenterLinearFit = 0;     % Linear fit to cloud center
+    bmPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
+    bmPopts.angleTrack = 0;
     
-    if length(unique(bm_am_spec_data.X))>6    
-        [hF_am_spec am_spec_output] = showAMSpec_RelNumber(bm_am_spec_data,bmPopts);
+    if length(unique(bm_am_spec_data.X))>6 && doBMFit_AM_Spec
+        [hF_am_spec, am_spec_output] = showAMSpec_RelNumber(bm_am_spec_data,bmPopts);
         if doSave
             saveFigure(hF_am_spec,'bm_am_spec',saveOpts);
             save([saveDir filesep 'am_spec_output'],'am_spec_output');
         end                 
     end     
+    
+    % Atom number
+    hF_number_bm_am = showAtomNumber(bm_am_spec_data,pco_xVar,bmPopts);  
+    ylim([0 max(get(gca,'YLim'))]);    
+    if doSave;saveFigure(hF_number_bm_am,'bm_am_number',saveOpts);end
 end
 %% Fermi Fit Analysis
    
