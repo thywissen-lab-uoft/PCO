@@ -9,7 +9,7 @@ end
 
 %% Sort the data by the parameter given
 params=[data.Params];
-X=[params.(xVar)];
+X=[params.(xVar)]';
 Natoms = data.Natoms;
 
 %% Exponential Decay Fit
@@ -20,7 +20,8 @@ if isfield(opts,'NumberExpFit') && opts.NumberExpFit && size(Natoms,1)>2
     opt=fitoptions(myfit);
     
     % Get some initial guesses
-    tau0=max(X)/2;  
+    tau0=max(X)/2;
+%     tau0=0.1;
     
     fout_exp={};
     for nn=1:size(Natoms,2)  
@@ -67,7 +68,7 @@ if doLorentzianFit
         inds=[Natoms(:,rr)>.8*max(Natoms(:,rr))];
         x0=mean(X(inds));       
         opt.StartPoint=[A0 G0 x0];    
-        fout_lorentz=fit(X',Natoms(:,rr),myfit,opt);
+        fout_lorentz=fit(X,Natoms(:,rr),myfit,opt);
         fouts_lorentz{rr}=fout_lorentz;
     end
 end
@@ -107,7 +108,7 @@ for nn=1:size(Natoms,2)
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
 
-if opts.NumberExpFit || opts.NumberExpOffsetFit
+if (opts.NumberExpFit || opts.NumberExpOffsetFit) && size(Natoms,1)>3
     strs={};
     xx=linspace(0,max(X),1000);
     

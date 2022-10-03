@@ -74,6 +74,7 @@ y_Lbl{30}     = 'N7/N9';
 
 p_inds=[02,04,05,01,25];
 
+p_inds=[25];
 
 % % Excitations to 9
 % p_inds = [03,06,08,15,16,17,25];
@@ -120,7 +121,7 @@ FitFlags.gauss_double = 0;
 FitFlags.gauss_triple = 0;
  
 FitFlags.lorentz_neg_single=0;    
-FitFlags.lorentz_neg_double=1;  
+FitFlags.lorentz_neg_double=0;  
 
 FitFlags.lorentz_single=0;
 FitFlags.lorentz_double=0;    
@@ -403,7 +404,9 @@ for nn=1:length(p_inds)
     bm_custom_opts.xstr = xstr;
     bm_custom_opts.Ind = nn;
     
-    [hFs(nn),fouts{nn}] = customFit(X,Y(p_inds(nn)).Y,bm_custom_opts);   
+    [hFs(nn),fouts{nn}] = customFit(X,Y(p_inds(nn)).Y,bm_custom_opts); 
+    ylim([0 10e4]);
+    
     if doSave;saveFigure(hFs(nn),FigName,saveOpts);end
 
 end

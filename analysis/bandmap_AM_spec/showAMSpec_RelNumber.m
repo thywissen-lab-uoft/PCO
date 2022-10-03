@@ -46,7 +46,7 @@ end
 hF=figure('Name',[pad([bm_am_spec_data.FitType ' am spec'],20) FigLabel],...
     'units','pixels','color','w','Menubar','figure','Resize','on',...
     'numbertitle','off');
-hF.Position=[5 380 1000 300];clf;
+hF.Position=[5 380 1000 400];clf;
 
 % Image directory folder string
 t=uicontrol('style','text','string',FigLabel,'units','pixels','backgroundcolor',...
@@ -76,7 +76,7 @@ ylabel(['relative excited d band']);
 plot(X,Y,'o','color',co(1,:),'linewidth',1,'markersize',8,...
    'markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5);
 xlim([min(X)-0.1 max(X)+0.1]);
-ylim([min(Y)-.01 max(Y)+.01])
+ylim([min(Y)-.005 max(Y)+.015])
 
 %% Make Guesses
 
@@ -94,7 +94,7 @@ xHigh_unique = unique(xHigh);
 
 xC = median(xHigh_unique);
 
-xC=240;
+% xC=240;
 % Full Width Half Max
 inds = logical([(Y-bg)./range(Y) < 0.6]) & ...
     logical([(Y-bg)./range(Y) > 0.4]);
@@ -166,11 +166,11 @@ myfit=fittype(@(bg,a1,x1,G1,A1,x) A1*yN(G1,x1,a1,x)+bg,...
 
 % Form the guesses
 G = 2;
-a = max([GR GL]);
+a = max([GR GL])
 
 % Modify fit options
 fitopt=fitoptions(myfit);
-fitopt.StartPoint=[bg a fout1.x1 G A1];
+fitopt.StartPoint=[bg a fout1.x1 G A1]
 fitopt.Robust='bisquare';
 
 % Perform the fit
