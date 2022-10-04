@@ -66,10 +66,10 @@ end
 % display properties.
 
 % Defautl variable to plot against
-pco_xVar = 'rf_freq_HF_shift';
+pco_xVar = 'rf_shift';
 
 % Should the analysis attempt to automatically find the xvariable?
-pco_autoXVar = 1;
+pco_autoXVar = 0;
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit = 1;
@@ -138,7 +138,7 @@ doRamanSpec   = 0;
 doBMFit_AM   = 0; doBMFit_AM_Dir = 'V';
 doBMFit_AM_Spec  = 0; 
 
-doCustom_BM = 0;
+doCustom_BM = 1;
 
 % Custom Box counts
 doCustom       =  0;          % Custom Box Count
@@ -154,7 +154,7 @@ doRabiContrast = 0;
 % Raman Common Mode Detuning
 doWavemeter    = 0;
 doCavity       = 0;
-doVortexLock = 1;
+doVortexLock   = 1;
 
 %% GDrive Settings
 GDrive_root = 'G:\My Drive\Lattice Shared\LabData';
@@ -452,7 +452,8 @@ ODopts=struct;
 ODopts.ScaleProbe=1;
 % ODopts.ScaleProbeROI=[1 100 900 1000];  % ROI to do the scaling
 % ODopts.ScaleProbeROI=[200 400 800 1000];  % ROI to do the scaling
-ODopts.ScaleProbeROI=[700 790 500 600];  % ROI to do the scaling
+% ODopts.ScaleProbeROI=[700 790 500 600];  % ROI to do the scaling
+ODopts.ScaleProbeROI=[1200 1350 300 900];  % ROI to do the scaling
 
 ODopts.SubtractDark=0;
 ODopts.DarkROI=[700 800 20 100];
@@ -619,7 +620,7 @@ end
 if doVortexLock
     addpath('Y:\wavemeter_amar');
     P = [atomdata.Params];
-    t = [P.ExecutionDate];t1 = datevec(min(t));t2 = datevec(max(t)+10/24/60/60);
+    t = [P.ExecutionDate];t1 = datevec(min(t)+10/24/60/60);t2 = datevec(max(t)+10/24/60/60);
     
     vortex_opts = struct;
     vortex_opts.FigLabel = FigLabel;    
@@ -627,6 +628,12 @@ if doVortexLock
     hF_vortex = plotVortexLockData(t1,t2,vortex_opts);   
     if doSave;saveFigure(hF_vortex,'vortex_lock',saveOpts);end
 
+    
+    if isfield(P,'PA_freq') && length(unique([P.PA_freq]))==1
+        hF_vortex_hist = plotVortexLockDataHist(t1,t2,vortex_opts);   
+        if doSave;saveFigure(hF_vortex_hist,'vortex_lock_histogram',saveOpts);end
+
+    end
 end
     
 
