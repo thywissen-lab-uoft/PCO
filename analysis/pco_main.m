@@ -104,7 +104,7 @@ doBoxCount    = 0;      % Box count analysis
 
 % Gaussian Fit
 % Fit to a gaussian distribution (thermal cloud)
-doGaussFit    = 0;      % Enable gauss fitting
+doGaussFit    = 1;      % Enable gauss fitting
 
 % Erf Fit
 doErfFit      = 0;    
@@ -432,7 +432,7 @@ if doFermiFitLong
     if isfield(data(1).Flags,'High_Field_Imaging')
         ROI=[800 950 680 830;
             800 950 1750 1900];  % XDT High field 21 ms TOF
-                ROI=[800 950 680 830];
+%         ROI=[800 950 680 830];
     end
 end
 %     ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM

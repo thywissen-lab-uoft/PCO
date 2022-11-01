@@ -1,4 +1,4 @@
-function hF=showFermiStats(fermi_data,opts)
+function hFs=showFermiStats(fermi_data,opts)
 
 if nargin == 2 && isfield(opts,'FigLabel') 
     FigLabel = opts.FigLabel;
@@ -8,6 +8,8 @@ else
 end
 
 %% Make Figure
+
+hFs=[];
 
 for nn=1:size(fermi_data.Natoms,2)
     hF=figure('Name',[pad(['Fermi Stats ' num2str(nn)],20) FigLabel],...
@@ -149,6 +151,8 @@ for nn=1:size(fermi_data.Natoms,2)
         'backgroundcolor',[1 1 1 .5]);
 
     resizeFig(hF,t);
+    
+    hFs(nn)=hF;
 end
 
 end
