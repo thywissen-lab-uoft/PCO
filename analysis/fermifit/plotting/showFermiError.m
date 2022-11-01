@@ -48,10 +48,12 @@ ylabel('rsquared');
 hax1.Position(4)=hax1.Position(4)-20;
 co=get(gca,'colororder');
 
-p1=plot(X,r2,'o','color',co(1,:),'linewidth',1,'markersize',8,...
-   'markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5);
-p2=plot(X,r2g,'v','color',co(4,:),'linewidth',1,'markersize',8,...
-   'markerfacecolor',co(4,:),'markeredgecolor',co(4,:)*.5);
+for kk=1:size(r2,2)
+    p1=plot(X,r2(:,kk),'o','color',co(1,:),'linewidth',1,'markersize',8,...
+       'markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5);
+    p2=plot(X,r2g(:,kk),'v','color',co(4,:),'linewidth',1,'markersize',8,...
+       'markerfacecolor',co(4,:),'markeredgecolor',co(4,:)*.5);
+end
 set(gca,'YScale','Log');
 
 if isequal(xVar,'ExecutionDate')
@@ -77,11 +79,13 @@ ylabel('sse');
 hax2.Position(4)=hax2.Position(4)-20;
 co=get(gca,'colororder');
 
-p1=plot(X,sse,'o','color',co(1,:),'linewidth',1,'markersize',8,...
-   'markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5);
-p2=plot(X,sseg,'v','color',co(4,:),'linewidth',1,'markersize',8,...
-   'markerfacecolor',co(4,:),'markeredgecolor',co(4,:)*.5);
+for kk=1:size(sse,2)
 
+    p1=plot(X,sse(:,kk),'o','color',co(1,:),'linewidth',1,'markersize',8,...
+       'markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5);
+    p2=plot(X,sseg(:,kk),'v','color',co(4,:),'linewidth',1,'markersize',8,...
+       'markerfacecolor',co(4,:),'markeredgecolor',co(4,:)*.5);
+end
 if isequal(xVar,'ExecutionDate')
     datetick('x');
     xlabel('ExecutionDate');

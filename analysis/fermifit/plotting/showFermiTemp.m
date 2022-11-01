@@ -11,7 +11,7 @@ params=[data.Params];
 X=[params.(xVar)];
 
 Natoms = data.Natoms;
-T = data.Temperature;
+T = data.T;
 Tfa = data.Tf_shape;
 Tfb = data.Tf_N_Freq_Pure;
 Tfc = data.Tf_N_Freq_Mix;
@@ -51,14 +51,15 @@ hax.Position(4)=hax.Position(4)-20;
 
 co=get(gca,'colororder');
 
+for kk=1:size(T,2)
 
-p1=plot(X,T*1E9,'o','color',co(1,:),'linewidth',1,'markersize',8,...
-    'markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5);
-p2=plot(X,Tfa*1E9,'s','color',co(2,:),'linewidth',1,'markersize',8,...
-    'markerfacecolor',co(2,:),'markeredgecolor',co(2,:)*.5);
-p3=plot(X,Tg*1E9,'v','color',co(4,:),'linewidth',1,'markersize',8,...
-   'markerfacecolor',co(4,:),'markeredgecolor',co(4,:)*.5);
-
+    p1=plot(X,T(:,kk)*1E9,'o','color',co(1,:),'linewidth',1,'markersize',8,...
+        'markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5);
+    p2=plot(X,Tfa(:,kk)*1E9,'s','color',co(2,:),'linewidth',1,'markersize',8,...
+        'markerfacecolor',co(2,:),'markeredgecolor',co(2,:)*.5);
+    p3=plot(X,Tg(:,kk)*1E9,'v','color',co(4,:),'linewidth',1,'markersize',8,...
+       'markerfacecolor',co(4,:),'markeredgecolor',co(4,:)*.5);
+end
 if isequal(xVar,'ExecutionDate')
     datetick('x');
     xlabel('ExecutionDate');
