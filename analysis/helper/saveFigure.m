@@ -48,9 +48,9 @@ for kk=1:length(hF)
     fprintf([datestr(now,13) ' Saving figure handle to ']);
     fprintf([filename ext ' ... ']);
     
-    figure(hF)
-    set(0,'CurrentFigure', hF);
-    set(hF,'PaperPositionMode','auto');
+    figure(hF(kk))
+    set(0,'CurrentFigure', hF(kk));
+    set(hF(kk),'PaperPositionMode','auto');
     print(imgformat,save_qual,saveLocation);
     disp('Saved!');
 end
