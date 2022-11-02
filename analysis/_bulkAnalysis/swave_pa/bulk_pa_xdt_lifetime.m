@@ -19,7 +19,7 @@
 
         ];
     
-data_label =['xdt_linewidth_1'];
+data_label =['xdt_lifetime'];
 
 powers = [1.07]';
 w0 = 400; % Waist in um
@@ -184,53 +184,14 @@ for nn=1:length(data)
     
     
 %     % Fit with background decay
-%     
-%        myfit = fittype('exp(-t/62.5)*(A0+A1*exp(-t/tau))','coefficients',{'A0','A1','tau'},...
-%         'independent','t');
-%     fitopt = fitoptions(myfit);  
-%     
-%     tau_guess = max(X)/2;
-%     A1_guess = range(Y);
-%     A0_guess = min(Y);
-%     
-%     fitopt.StartPoint = [A0_guess A1_guess tau_guess];
-%     fitopt.Lower = [0 A0_guess 0];    
-%     fout = fit(X,Y,myfit,fitopt);    
-%          
-%     xx=linspace(min(X),max(X),100);
-%     pF=plot(xx,feval(fout,xx),'k-','linewidth',1);
-%     
-%     lStr=['$ \tau = ' num2str(round(fout.tau,3)) '~\mathrm{ms}$' ...
-%         newline ...
-%         '$A_0 = ' num2str(round(fout.A0,3),'%.3e') '$' ... 
-%         newline ...
-%         '$A_1 = ' num2str(round(fout.A1,3),'%.3e') '$'];
-%     legend(pF,lStr,'location','best','interpreter','latex');  
-%     
-%     c = confint(fout);
-%     tauerror = abs(0.5*(c(1,3)-c(2,3)));
-%     A1error = abs(0.5*(c(1,2)-c(2,2)));
-% 
-%     fouts{nn} = fout;
-%     tauvec(nn) = fout.tau;
-%     A1vec(nn) = fout.A1;
-% 
-%     tau_err_vec(nn) = tauerror;
-%     A1_err_vec(nn) = A1error; 
-%     
-%     gamma(nn) = 1/fout.tau;
-%     gamma_err(nn) = (1/(fout.tau))^2*tauerror;
-
-
-%%% Fit with power law - not working w/ initial guesses
     
-       myfit = fittype('A0*(t+A1)^(-tau)','coefficients',{'A0','A1','tau'},...
+       myfit = fittype('exp(-t/62.5)*(A0+A1*exp(-t/tau))','coefficients',{'A0','A1','tau'},...
         'independent','t');
     fitopt = fitoptions(myfit);  
     
-    tau_guess = 6;
-    A1_guess = 0.250;
-    A0_guess = range(Y)/(A1_guess)^(-tau_guess);
+    tau_guess = max(X)/2;
+    A1_guess = range(Y);
+    A0_guess = min(Y);
     
     fitopt.StartPoint = [A0_guess A1_guess tau_guess];
     fitopt.Lower = [0 A0_guess 0];    
@@ -260,7 +221,56 @@ for nn=1:length(data)
     gamma(nn) = 1/fout.tau;
     gamma_err(nn) = (1/(fout.tau))^2*tauerror;
 
+
+%%% Fit with power law - not working w/ initial guesses
+    
+%        myfit = fittype('A0*(t+A1)^(-tau)','coefficients',{'A0','A1','tau'},...
+%         'independent','t');
+%     fitopt = fitoptions(myfit);  
+%     
+%     tau_guess = 6;
+%     A1_guess = 0.250;
+%     A0_guess = range(Y)/(A1_guess)^(-tau_guess);
+%     
+%     fitopt.StartPoint = [A0_guess A1_guess tau_guess];
+%     fitopt.Lower = [0 A0_guess 0];    
+%     fout = fit(X,Y,myfit,fitopt);    
+%          
+%     xx=linspace(min(X),max(X),100);
+%     pF=plot(xx,feval(fout,xx),'k-','linewidth',1);
+%     
+%     lStr=['$ \tau = ' num2str(round(fout.tau,3)) '~\mathrm{ms}$' ...
+%         newline ...
+%         '$A_0 = ' num2str(round(fout.A0,3),'%.3e') '$' ... 
+%         newline ...
+%         '$A_1 = ' num2str(round(fout.A1,3),'%.3e') '$'];
+%     legend(pF,lStr,'location','best','interpreter','latex');  
+%     
+%     c = confint(fout);
+%     tauerror = abs(0.5*(c(1,3)-c(2,3)));
+%     A1error = abs(0.5*(c(1,2)-c(2,2)));
+% 
+%     fouts{nn} = fout;
+%     tauvec(nn) = fout.tau;
+%     A1vec(nn) = fout.A1;
+% 
+%     tau_err_vec(nn) = tauerror;
+%     A1_err_vec(nn) = A1error; 
+%     
+%     gamma(nn) = 1/fout.tau;
+%     gamma_err(nn) = (1/(fout.tau))^2*tauerror;
+
 end
+
+%% Collate data
+lifetime = struct;
+lifetime.B = Bvec;
+lifetime.tau = tauvec;
+lifetime.tau_err = tau_err_vec;
+
+lifetime.gamma = gamma;
+lifetime.gamma_err = gamma_err;
+lifetime.fits = fouts;
 
 %% Scattering length
 
@@ -320,26 +330,19 @@ set(gca,'xgrid','on','ygrid','on','box','on');
 yL = get(gca,'YLim');
 ylim([0 yL(2)]);
 
-%% Versus Scattering Length
-% hF_a= figure(513);
-% clf
-% set(hF_a,'color','w');
-% hF_a.Position=[100 200 1200 300];
-% 
-% avec = B2a(Bvec);
-% 
-% plot(1./avec,1./tauvec,'ko');
 
 
 %% UPload data
-doUpload = 0;
+doUpload = 1;
 
-GDrive_root = 'G:\My Drive\Lattice Shared\SharedData\Composite S-wave RF';
+GDrive_root = 'G:\My Drive\Lattice Shared\SharedData\2022 PA experiment\11_01 dipole trap lifetime\lifetimes';
 
 if  doUpload && exist(GDrive_root,'dir')   
     gFile = [GDrive_root filesep out_name]; 
-    save(gFile,'data_process','data_out');
-    saveas(hf1,[GDrive_root filesep data_label '_shifts.png'])
+
+    save(gFile,'lifetime');
+
+    saveas(hF_a,[GDrive_root filesep 'lifetime_summary.png'])
     
     for jj=1:length(hFs)
         saveas(hFs(jj),[GDrive_root filesep hFs(jj).Name '.png'])

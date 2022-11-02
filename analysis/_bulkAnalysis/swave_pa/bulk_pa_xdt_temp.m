@@ -53,6 +53,7 @@ ylabel('atom number');
 ylim([0 2.5e5]);
 
 
+legend({'pure','mixture'});
 
 subplot(132);
 
@@ -77,6 +78,8 @@ myco=co(4,:);
 errorbar(X,Y,err,'s','markerfacecolor',myco,...
     'markeredgecolor',myco*.5,'color',myco,...
     'linewidth',2,'markersize',8);  
+
+legend({'pure','mix -9/2','mix -7/2'});
 
 subplot(133);
 
@@ -108,6 +111,7 @@ xlabel('magnetic field (G)');
 ylabel('T/T_f');
 ylim([0 .7]);
 
+legend({'pure','mix -9/2','mix -7/2'});
 
 %%
 hF2 = figure(1093);
@@ -147,6 +151,8 @@ hold on
 set(gca,'xgrid','on','ygrid','on','fontsize',10);
 ylim([0 .7]);
 ylabel('T/T_f');
+xlabel('magnetic field (G)');
+
 %%
 temperature = struct;
 temperature.B = B;

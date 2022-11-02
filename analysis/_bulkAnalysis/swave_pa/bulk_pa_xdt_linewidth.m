@@ -205,14 +205,14 @@ ylabel('center (GHz)');
 set(gca,'xgrid','on','ygrid','on','box','on');
 
 %% UPload data
-doUpload = 0;
+doUpload = 1;
 
-GDrive_root = 'G:\My Drive\Lattice Shared\SharedData\Composite S-wave RF';
+GDrive_root = 'G:\My Drive\Lattice Shared\SharedData\2022 PA experiment\11_01 dipole trap lifetime\linewidth';
 
 if  doUpload && exist(GDrive_root,'dir')   
     gFile = [GDrive_root filesep out_name]; 
-    save(gFile,'data_process','data_out');
-    saveas(hf1,[GDrive_root filesep data_label '_shifts.png'])
+%     save(gFile,'data_process','data_out');
+    saveas(hF_a,[GDrive_root filesep 'linewidth.png'])
     
     for jj=1:length(hFs)
         saveas(hFs(jj),[GDrive_root filesep hFs(jj).Name '.png'])

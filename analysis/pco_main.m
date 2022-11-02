@@ -70,7 +70,7 @@ end
 pco_xVar = 'PA_field_close';
 
 % Should the analysis attempt to automatically find the xvariable?
-pco_autoXVar = 0;
+pco_autoXVar = 1;
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit = 1;
@@ -116,7 +116,7 @@ doBMFit = 0;
 
 % Fermi-Fit
 % Fit a DFG in long time of flight
-doFermiFitLong = 1;     
+doFermiFitLong = 0;     
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Custom Analyses
@@ -155,7 +155,7 @@ doRabiContrast = 0;
 % Raman Common Mode Detuning
 doWavemeter    = 0;
 doCavity       = 0;
-doVortexLock   = 0;
+doVortexLock   = 1;
 
 %% GDrive Settings
 GDrive_root = 'G:\My Drive\Lattice Shared\LabData';
@@ -379,12 +379,12 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %ROI=[800 950 182 1011;
 %    800 950 1228 2040];   % XDT full TOF\
 
-% 
-% ROI=[800 950 475 630;
-%     800 950 1540 1695];   % XDT 15ms tof high field
 
-ROI=[800 950 690 840;
-    800 950 1770 1920];   % XDT 21ms tof high field
+ROI=[800 950 475 630;
+    800 950 1540 1695];   % XDT 15ms tof high field
+
+% ROI=[800 950 690 840;
+%     800 950 1770 1920];   % XDT 21ms tof high field
 
 % 
 %  ROI=[760 1000 590 830;
