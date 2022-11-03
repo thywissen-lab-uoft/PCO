@@ -87,6 +87,10 @@ for nn=1:length(data)
     lbl = [num2str(runs(nn,2)) '/' num2str(runs(nn,3)) ' ' dirNames{nn}(1:2)];
     p = data(nn).Source.Params(1); 
     lbl = [lbl ' ' num2str(p.HF_FeshValue_Initial_Lattice) ' G'];   
+    
+    inds = abs(median(df)-df)>2;
+    df(inds)=[];
+    tt(inds)=[];
 
     myco = cmaps(nn,:);
     
@@ -123,13 +127,13 @@ for nn=1:length(data)
     
     wave_df(nn) = df_med;
     wave_f(nn) = f;
-    wave_f_err = df_err;
+    wave_ferr(nn) = df_err;
     
     
 end
 outdata.wave_df = wave_df;
 outdata.wave_f = wave_f;
-outdata.wave_f_err = wave_f_err;
+outdata.wave_f_err = wave_ferr;
 outdata.f0 = f0;
 %%
 % Observable to analyzes
@@ -274,9 +278,44 @@ ylabel('amplitude A_2');
 xlabel(['frequency - ' num2str(f0) ' GHz']);
 set(gca,'box','on','linewidth',1,'fontsize',12,'xgrid','on','ygrid','on');
 
+%% Next
+
+hf_summ = figure(305);
+clf
+hf_summ.Color='w';
+hf_summ.Position=[100 500 1200 300];
+
+f0a= 391016.821;
+
+PA= load('Y:\wavemeter_amar\PA_40K2.mat');
+X=wave_f-f0a;
+pdata=plot(X,A2./A1,'o','markerfacecolor',[.5 .5 .5],'markeredgecolor','k',...
+    'linewidth',2,'markersize',10);
+ylabel('amplitude ratio');
+
+xlim([min(X)-2.5 max(X)+2.5]);
+hold on
+
+for kk=1:length(PA.data_0u)
+    df_PA = -PA.data_0u(kk);
+    pB=plot([1 1]*df_PA, [0 1],'b--');
+end
+
+for kk=1:length(PA.data_1g)
+    df_PA = -PA.data_1g(kk);
+    pR=plot([1 1]*df_PA, [0 1],'r--');
+end
+
+ylim([0 .65]);
+
+legend([pdata,pB,pR],{['\pm 0.1 GHz ?'],['\pm 0.25 GHz 0u^+'],['\pm 0.25 GHz 1g']});
+
+ylabel('amplitude ratio');
+xlabel(['frequency - ' num2str(f0a) ' GHz']);
+set(gca,'box','on','linewidth',1,'fontsize',12,'xgrid','on','ygrid','on');
 
 %% UPload data
-doUpload = 1;
+doUpload = 0;
 
 GDrive_root = 'G:\My Drive\Lattice Shared\SharedData\Composite Raman-PA';
 
