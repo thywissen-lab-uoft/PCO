@@ -100,7 +100,7 @@ doProbeFit    = 0;      % Fit probe beam  to 2D Gaussian
 % processed data outputs of the below fits are typically <fit_type>_name
 
 % Box Count
-doBoxCount    = 0;      % Box count analysis
+doBoxCount    = 1;      % Box count analysis
 
 % Gaussian Fit
 % Fit to a gaussian distribution (thermal cloud)
@@ -142,7 +142,7 @@ doBMFit_AM_Spec  = 0;
 doCustom_BM = 0;
 
 % Custom Box counts
-doCustom       =  0;          % Custom Box Count
+doCustom       =  1;          % Custom Box Count
 
 doRabiAbsolute = 0;
 doRabiContrast = 0;
@@ -430,9 +430,11 @@ ROI=[800 950 475 630;
 if doFermiFitLong
         ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
     if isfield(data(1).Flags,'High_Field_Imaging')
-        ROI=[800 950 680 830;
-            800 950 1750 1900];  % XDT High field 21 ms TOF
-%         ROI=[800 950 680 830];
+        if data(1).Flags.High_Field_Imaging == 1
+            ROI=[800 950 680 830;
+                800 950 1750 1900];  % XDT High field 21 ms TOF
+%           ROI=[800 950 680 830];
+        end
     end
 end
 %     ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
@@ -487,8 +489,6 @@ end
 if isfield(data(1).Flags,'High_Field_Imaging')
     ODopts.HighField = data(1).Flags.High_Field_Imaging; 
 %     ODopts.HighField = data(1).Flags.CDT_evap_2_high_field; 
-
-    
 else
     ODopts.HighField=0;
 end

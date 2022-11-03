@@ -7,21 +7,22 @@
 % was killed, but it did not appear to hav ea detuning dependence. (We were
 % pulsing for too long??) Unclear.
     runs=[
-            2022 10 31 06;
-            2022 10 31 08;
-            2022 10 31 09;
-            2022 10 31 10;
-            2022 10 31 11;
-            2022 10 31 12;
-            2022 10 31 13;
-            2022 10 31 14;
-            2022 10 31 15;
+            2022 11 02 09;
+            2022 11 02 10;
+            2022 11 02 11;
+            2022 11 02 12;
+            2022 11 02 13;
+            2022 11 02 14;
+            2022 11 02 15;
+            2022 11 02 16;
 
         ];
     
 data_label =['xdt_lifetime'];
 
-powers = [1.07]';
+% powers = [1.07]';
+B_same = [0 4 4];
+powers = [1.13 0.57 0.156 0.027 1.13 0.587 0.171 0.028];
 w0 = 400; % Waist in um
 
 %% Magnetic Field
@@ -75,6 +76,8 @@ for nn=1:length(data)
     Bunq=unique(B);
     B=Bunq(1);
     
+    
+
     if length(Bunq)>1
        warning('more than one magnetic field given'); 
     end
@@ -84,7 +87,8 @@ for nn=1:length(data)
     B_real = rf2B(f_rf_B_real,-7/2,-5/2);    
     Bvec(nn) = B_real;
     
-    
+    pwr = powers(nn);
+
     myco = cmaps(nn,:);
 
     % X Data
@@ -141,46 +145,49 @@ for nn=1:length(data)
     
 %     set(gca,'XScale','log');
     
-    set(gca,'YScale','log');    
-%      set(gca,'YScale','linear');    
+%     set(gca,'YScale','log');    
+     set(gca,'YScale','linear');    
 
-    titstr = [titstr ' ' num2str(round(B,2)) ' G (' num2str(round(B_real,2)) ' G)'];
+    titstr = [titstr ' ' num2str(round(pwr,2)) ' mW ' '(' num2str(round(B_real,2)) ' G)'];
     title(titstr,'interpreter','none')
-    ylim([5e3 2e5]);
-    % Fit one
-%     
-%     myfit = fittype('A0+A1*exp(-t/tau)','coefficients',{'A0','A1','tau'},...
-%         'independent','t');
-%     fitopt = fitoptions(myfit);  
-%     
-%     tau_guess = max(X)/2;
-%     A1_guess = range(Y);
-%     A0_guess = min(Y);
-%     
-%     fitopt.StartPoint = [A0_guess A1_guess tau_guess];
-%     fitopt.Lower = [0 A0_guess 0];    
-%     fout = fit(X,Y,myfit,fitopt);    
-%          
-%     xx=linspace(min(X),max(X),100);
-%     pF=plot(xx,feval(fout,xx),'k-','linewidth',1);
-%     
-%     lStr=['$ \tau = ' num2str(round(fout.tau,3)) '~\mathrm{ms}$' ...
-%         newline ...
-%         '$A_0 = ' num2str(round(fout.A0,3),'%.3e') '$' ... 
-%         newline ...
-%         '$A_1 = ' num2str(round(fout.A1,3),'%.3e') '$'];
-%     legend(pF,lStr,'location','best','interpreter','latex');  
-%     
-%     c = confint(fout);
-%     tauerror = abs(0.5*(c(1,3)-c(2,3)));
-%     A1error = abs(0.5*(c(1,2)-c(2,2)));
-% 
-%     fouts{nn} = fout;
-%     tauvec(nn) = fout.tau;
-%     A1vec(nn) = fout.A1;
-% 
-%     tau_err_vec(nn) = tauerror;
-%     A1_err_vec(nn) = A1error;
+    ylim([5e3 2.2e5]);
+%     %% Fit exponential
+    
+    myfit = fittype('A0+A1*exp(-t/tau)','coefficients',{'A0','A1','tau'},...
+        'independent','t');
+    fitopt = fitoptions(myfit);  
+    
+    tau_guess = max(X)/2;
+    A1_guess = range(Y);
+    A0_guess = min(Y);
+    
+    fitopt.StartPoint = [A0_guess A1_guess tau_guess];
+    fitopt.Lower = [0 A0_guess 0];    
+    fout = fit(X,Y,myfit,fitopt);    
+         
+    xx=linspace(min(X),max(X),100);
+    pF=plot(xx,feval(fout,xx),'k-','linewidth',1);
+    
+    lStr=['$ \tau = ' num2str(round(fout.tau,3)) '~\mathrm{ms}$' ...
+        newline ...
+        '$A_0 = ' num2str(round(fout.A0,3),'%.3e') '$' ... 
+        newline ...
+        '$A_1 = ' num2str(round(fout.A1,3),'%.3e') '$'];
+    legend(pF,lStr,'location','best','interpreter','latex');  
+    
+    c = confint(fout);
+    tauerror = abs(0.5*(c(1,3)-c(2,3)));
+    A1error = abs(0.5*(c(1,2)-c(2,2)));
+
+    fouts{nn} = fout;
+    tauvec(nn) = fout.tau;
+    A1vec(nn) = fout.A1;
+
+    tau_err_vec(nn) = tauerror;
+    A1_err_vec(nn) = A1error;
+
+    gamma(nn) = 1/fout.tau;
+    gamma_err(nn) = (1/(fout.tau))^2*tauerror;
     
     
     % Fit with background decay
@@ -220,49 +227,49 @@ for nn=1:length(data)
 %     
 %     gamma(nn) = 1/fout.tau;
 %     gamma_err(nn) = (1/(fout.tau))^2*tauerror;
+
+
+%% Fit with power law - not working w/ initial guesses
+%     
+%        myfit = fittype('P+A0*(t/(6*tau)+1)^(-2)','coefficients',{'A0','P','tau'},...
+%         'independent','t');
+%     fitopt = fitoptions(myfit);  
+%     
+%     tau_guess = median(X);
+%     P_guess = min(Y);
+%     A0_guess = max(Y);
+%     
+%     fitopt.StartPoint = [A0_guess P_guess tau_guess];
+%     fitopt.Lower = [0 0 0];    
+%     fout = fit(X,Y,myfit,fitopt);
+%          
+%     xx=linspace(min(X),max(X),100);
+%     pF=plot(xx,feval(fout,xx),'k-','linewidth',1);
+%     
+%     lStr=['$ \tau = ' num2str(round(fout.tau,3)) '~\mathrm{ms}$' ...
+%         newline ...
+%         '$A_0 = ' num2str(round(fout.A0,3),'%.3e') '$' ... 
+%         newline ...
+%         '$P = ' num2str(round(fout.P,3),'%.3e') '$'];
+%     legend(pF,lStr,'location','best','interpreter','latex');  
+%     
+%     c = confint(fout);
+%     tauerror = abs(0.5*(c(1,3)-c(2,3)));
+%     A1error = abs(0.5*(c(1,2)-c(2,2)));
 % 
-
-% %% Fit with power law - not working w/ initial guesses
-    
-       myfit = fittype('P+A0*(t/(6*tau)+1)^(-2)','coefficients',{'A0','P','tau'},...
-        'independent','t');
-    fitopt = fitoptions(myfit);  
-    
-    tau_guess = median(X);
-    P_guess = min(Y);
-    A0_guess = max(Y);
-    
-    fitopt.StartPoint = [A0_guess P_guess tau_guess];
-    fitopt.Lower = [0 0 0];    
-    fout = fit(X,Y,myfit,fitopt);
-         
-    xx=linspace(min(X),max(X),100);
-    pF=plot(xx,feval(fout,xx),'k-','linewidth',1);
-    
-    lStr=['$ \tau = ' num2str(round(fout.tau,3)) '~\mathrm{ms}$' ...
-        newline ...
-        '$A_0 = ' num2str(round(fout.A0,3),'%.3e') '$' ... 
-        newline ...
-        '$P = ' num2str(round(fout.P,3),'%.3e') '$'];
-    legend(pF,lStr,'location','best','interpreter','latex');  
-    
-    c = confint(fout);
-    tauerror = abs(0.5*(c(1,3)-c(2,3)));
-    A1error = abs(0.5*(c(1,2)-c(2,2)));
-
-    fouts{nn} = fout;
-    tauvec(nn) = fout.tau;
-    A1vec(nn) = fout.P;
-
-    tau_err_vec(nn) = tauerror;
-    A1_err_vec(nn) = A1error; 
-    
-    gamma(nn) = 1/fout.tau;
-    gamma_err(nn) = (1/(fout.tau))^2*tauerror;
+%     fouts{nn} = fout;
+%     tauvec(nn) = fout.tau;
+%     A1vec(nn) = fout.P;
+% 
+%     tau_err_vec(nn) = tauerror;
+%     A1_err_vec(nn) = A1error; 
+%     
+%     gamma(nn) = 1/fout.tau;
+%     gamma_err(nn) = (1/(fout.tau))^2*tauerror;
 
 end
 
-%% Collate data
+ %% Collate data
 lifetime = struct;
 lifetime.B = Bvec;
 lifetime.tau = tauvec;
@@ -281,13 +288,14 @@ dB = 6.910;
 B2a = @(B) abg*(1-dB/(B-B0));
 
 %% Intensity
-powers = 1e-3*1.07;
+% powers = 1e-3*1.07;
 w0 = 400e-6;
 I0 = 2*(powers)/(pi*w0^2); % in W/m^2
 
 df = unique(detuningvec);
 
-pow_str = [num2str(I0*0.1,'%.2f') ' mW/cm^2, ' num2str(df,'%.3f') ' GHz'];
+df_str = [ num2str(df,'%.3f') ' GHz'];
+% pow_str = [num2str(I0*0.1,'%.2f') ' mW/cm^2, ' num2str(df,'%.3f') ' GHz'];
 
 %%
 hF_a= figure(5122);
@@ -297,20 +305,41 @@ hF_a.Position=[100 200 1200 300];
 
 
 subplot(131);
-errorbar(Bvec,tauvec,tau_err_vec,'ko','markerfacecolor','k',...
-    'markersize',8);
-xlabel('magnetic field (G)');
-ylabel(['tau (ms)']);
 
-text(5,5,pow_str,'units','pixels','horizontalalignment','left',...
+for B=1:(length(B_same)-1)
+    
+    myco = cmaps(B,:);
+
+    errorbar(I0(1+sum(B_same(1:B)):sum(B_same(1:B+1)))/10000,tauvec(1+sum(B_same(1:B)):sum(B_same(1:B+1))),tau_err_vec(1+sum(B_same(1:B)):sum(B_same(1:B+1))),'ok',...
+       'markeredgecolor',myco*.5,'markerfacecolor',myco,...
+        'color',myco,...
+     'markersize',8,'DisplayName',[num2str(round(Bvec(1+sum(B_same(1:B))))) ' G']);
+    hold on;
+end
+xlabel('Intensity (mW)/cm^2');
+ylabel(['tau (ms)']);
+ylim([0 200])
+
+text(5,210,df_str,'units','pixels','horizontalalignment','left',...
     'verticalalignment','bottom');
+
+legend show;
 
 
 set(gca,'xgrid','on','ygrid','on','box','on');
+
 subplot(132);
-errorbar(Bvec,gamma,gamma_err,'ko','markerfacecolor','k',...
-    'markersize',8);
-xlabel('magnetic field (G)');
+for B=1:(length(B_same)-1)
+    
+    myco = cmaps(B,:);
+
+    errorbar(I0(1+sum(B_same(1:B)):sum(B_same(1:B+1)))/10000,gamma(1+sum(B_same(1:B)):sum(B_same(1:B+1))),gamma_err(1+sum(B_same(1:B)):sum(B_same(1:B+1))),'ok',...
+       'markeredgecolor',myco*.5,'markerfacecolor',myco,...
+        'color',myco,...
+     'markersize',8);
+    hold on
+end
+xlabel('Intensity (mW)/cm^2');
 ylabel(['1/tau (1/ms)']);
 set(gca,'xgrid','on','ygrid','on','box','on');
 ylim([0 1.2]);
@@ -319,11 +348,19 @@ plot(get(gca,'XLim'),[1 1]./62.5,'k--');
 text(min(get(gca,'XLim')),1/62.5,'single photon 62.5 ms','units',...
     'data','horizontalalignment','left','verticalalignment','bottom');
 
-plot([1 1]*202.15,get(gca,'YLim'),'k--');
-
+% plot([1 1]*202.15,get(gca,'YLim'),'k--');
+% 
 subplot(133);
-errorbar(Bvec,A1vec,A1_err_vec,'ko','markerfacecolor','k',...
-    'markersize',8);
+for B=1:(length(B_same)-1)
+    
+    myco = cmaps(B,:);
+
+    errorbar(Bvec(1+sum(B_same(1:B)):sum(B_same(1:B+1))),A1vec(1+sum(B_same(1:B)):sum(B_same(1:B+1))),A1_err_vec(1+sum(B_same(1:B)):sum(B_same(1:B+1))),'ok',...
+       'markeredgecolor',myco*.5,'markerfacecolor',myco,...
+        'color',myco,...
+     'markersize',8);
+    hold on
+end
 xlabel('magnetic field (G)');
 ylabel(['N_A (10^5)']);
 set(gca,'xgrid','on','ygrid','on','box','on');

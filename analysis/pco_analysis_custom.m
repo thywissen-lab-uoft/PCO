@@ -34,9 +34,9 @@ gauss_4=0;
 gauss_neg_double=0;
 gauss_neg_single=0;
 gauss_double = 0;
-expdecay = 0;
+expdecay = 1;
 
-lorentz_neg_single=1;    
+lorentz_neg_single=0;    
 lorentz_neg_double=0;  
 
 lorentz_single=0;
@@ -47,6 +47,8 @@ lorentz_asym_single= 0;
 lorentz_asym_double= 0;
 
 fit_lorentz_assymetric_4=0;
+
+UniPowerLaw = 0;
 
 %% Generate Custom Data
 
@@ -1053,6 +1055,39 @@ end
 
     end
    
+%% Power law
+    if length(X)>4 && UniPowerLaw
+
+        myfit=fittype('A1*(1+ t/(6*tau))^(-A0)',...
+            'coefficients',{'A0','A1','tau'},...
+            'independent','t');
+
+        % Fit options and guess
+        opt=fitoptions(myfit);        
+        Ag = max(Y);
+        A0 = 6;
+        taug = median(X);
+        G=[A0 Ag taug];        
+        opt.StartPoint=G;
+        opt.Lower = [0 0 0];
+
+        % Perform the fit
+        fout=fit(X,Y,myfit,opt);
+
+        % Plot the fit
+        tt=linspace(0,max(X),1000);
+        xlim([0 max(X)]);
+        pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
+        lStr=['$ \tau = ' num2str(round(fout.tau,3)) '~\mathrm{ms}$' ...
+            newline ...
+            '$A_0 = ' num2str(round(fout.A0,3),'%.3e') '$' ... 
+            newline ...
+            '$A_1 = ' num2str(round(fout.A1,3),'%.3e') '$'];
+        legend(pF,lStr,'location','best','interpreter','latex');        
+        str = '$A_0+ A_1\exp(-t/\tau)$';
+        t=text(.02,.03,str,'units','normalized',...
+            'fontsize',10,'interpreter','latex');
+    end
    
 %% Save the Figure
 
