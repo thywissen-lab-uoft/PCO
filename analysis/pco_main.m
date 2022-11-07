@@ -155,7 +155,7 @@ doRabiContrast = 0;
 % Raman Common Mode Detuning
 doWavemeter    = 0;
 doCavity       = 0;
-doVortexLock   = 1;
+doVortexLock   = 0;
 
 %% GDrive Settings
 GDrive_root = 'G:\My Drive\Lattice Shared\LabData';

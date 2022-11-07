@@ -34,10 +34,10 @@ gauss_4=0;
 gauss_neg_double=0;
 gauss_neg_single=0;
 gauss_double = 0;
-expdecay = 1;
+expdecay = 0;
 
 lorentz_neg_single=0;    
-lorentz_neg_double=0;  
+lorentz_neg_double=1;  
 
 lorentz_single=0;
 lorentz_double=0;    
@@ -475,14 +475,14 @@ end
         xC=X(ind);
         
         % Assign guess
-        xC1 = 198.3;
-        xC2 = 198.8;
-%         G=[A 20 xC1 A/10 20 xC2 bg];        
-        G=[A 0.2 xC1 A/100 0.2 xC2 bg];
+        xC1 = -44.13;
+        xC2 = -44;
+%         G=[A/2 20 xC1 A 20 xC2 bg];        
+        G=[A/2 0.2 xC1 A 0.2 xC2 bg];
         
         opt.StartPoint=G;
         opt.Robust='bisquare';
-        opt.Lower=[0 0 -inf 0 0 -inf 0];
+        opt.Lower=[0 0 -44.18 0 0 -inf 0];
         
         % Perform the fit
         fout=fit(X,Y,myfit,opt);
@@ -659,7 +659,7 @@ end
 %         bg= 5e4;
         xC=X(ind);
 %         xlim([-49.7 -49.45]);
-%         xC=-49.56;
+%         xC=-41.6;
 
         % Assign guess
         G=[A 0.025 xC bg];
