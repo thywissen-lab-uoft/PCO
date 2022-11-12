@@ -1544,11 +1544,11 @@ hpRaw=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
     'title','raw images','fontsize',6);
 hpRaw.Position=[hpImgProcess.Position(1)+hpImgProcess.Position(3) hp.Position(4) 700 Htop];
 
-Wraw = Htop-7;
+Wraw = Htop-18;
 
 % Axes for images of raw data
 axPWA=axes('parent',hpRaw,'units','pixels','UserData','PWA');
-axPWA.Position=[5 1 Wraw Wraw];
+axPWA.Position=[5 3 Wraw Wraw];
 hPWA=imagesc(X,Y,Z);
 set(axPWA,'box','on','XTick',[],'YTick',[]);
 axis equal tight
@@ -1558,7 +1558,7 @@ caxis([0 1000]);
 
 axPWOA=axes('parent',hpRaw,'units','pixels','UserData','PWOA');
 
-axPWOA.Position=[Wraw+15 1 Wraw Wraw];
+axPWOA.Position=[Wraw+15 3 Wraw Wraw];
 hPWOA=imagesc(X,Y,Z);
 set(axPWOA,'box','on','XTick',[],'YTick',[]);
 axis equal tight
@@ -1690,22 +1690,6 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
         data.X=1:camera.W;
         data.Y=1:camera.H;
         data.BitDepth=camera.BitDepth;
-       
-        % Grab the images
-%         if ismember(camera.CameraMode,[16 17])
-%             data.PWA=camera.Images{1};
-%             data.PWOA=camera.Images{2};                     
-%         else
-%             data.PWA=camera.Images{1}(1:1024,:);
-%             data.PWA(:,:,2)=camera.Images{1}(1025:end,:);
-% 
-%             data.PWOA=camera.Images{2}(1:1024,:);        
-%             data.PWOA(:,:,2)=camera.Images{2}(1025:end,:);
-%             
-%             data.X=1:size(data.PWOA,2);
-%             data.Y=1:size(data.PWOA,1);
-%         end
-        
         
         data.PWA=camera.Images{1};
         data.PWOA=camera.Images{2};
@@ -2417,7 +2401,7 @@ data2=data;xx2=xx;yy2=yy;
 
 % Elminate data points below a threshold to reduce # points to fit
 th=0.1;
-th=-1;
+th=.05;
 xx2(Zguess<th*N0)=[];yy2(Zguess<th*N0)=[];data2(Zguess<th*N0)=[];
 
 xx2(isinf(data2))=[];
