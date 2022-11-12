@@ -264,11 +264,38 @@ fitFermi.QtoT = @(Q) real((-6*polylog(3,-exp(Q)))^(-1/3));
 fitFermi.Fit=fout;
 fitFermi.GOF=gof;
 fitFermi.ConfInt=c;
-fitFermi.Temperature=m*(fout.W*opts.PixelSize/opts.TOF)^2/kB;
-fitFermi.FermiTemperature_shape=(fitFermi.QtoT(fout.Q)^(-1))*fitFermi.Temperature;
+
+% Acrew Errors
+W_error = (0.5*range(fitFermi.ConfInt(:,2)));
+Q_high = fitFermi.ConfInt(2,3);
+Q_low = fitFermi.ConfInt(1,3);
+
+% temperature value and error
+T = m*(fout.W*opts.PixelSize/opts.TOF)^2/kB;
+T_error = 2*(T/fout.W)*W_error;
+
+% T/Tf shape value and error
+TTf_shape = fitFermi.QtoT(fout.Q);
+TTf_shape_error = abs(0.5*(fitFermi.QtoT(Q_low)-fitFermi.QtoT(Q_high)));
+
+% Tf shape value and error
+Tf_shape = T/TTf_shape;
+Tf_shape_error = Tf_shape*sqrt((T_error/T)^2+(TTf_shape_error/TTf_shape)^2);
 
 
-fitFermi.Temperature_Error = fitFermi.Temperature*(2*0.5*range(fitFermi.ConfInt(:,2)));
+fitFermi.T = T;
+fitFermi.T_error = T_error;
+
+fitFermi.TTf_shape = TTf_shape;
+fitFermi.TTf_shape_error = TTf_shape_error;
+
+fitFermi.Tf_shape = Tf_shape;
+fitFermi.Tf_shape_error = Tf_shape_error;
+% 
+% fitFermi.Temperature=m*(fout.W*opts.PixelSize/opts.TOF)^2/kB;
+% fitFermi.FermiTemperature_shape=(fitFermi.QtoT(fout.Q)^(-1))*fitFermi.Temperature;
+% fitFermi.Temperature_Error =2*(fitFermi.Temperature/fout.W)*(0.5*range(fitFermi.ConfInt(:,2)));
+
 
 
 % Find atom number
@@ -277,21 +304,37 @@ Natoms = real(1/crosssec*2*pi*(fout.W*opts.PixelSize)^2*fout.A/6^(2/3)*(-polylog
 fitFermi.AtomNumber = Natoms;
 warning on
 
+% % Use Trap Frequency and atom number for Fermi Temperature
+% if isfield(opts,'Freq')
+%     fitFermi.Freq = opts.Freq;
+%     fitFermi.FermiTemperature_N_Freq_Pure = ...
+%         hbar*(2*pi*opts.Freq).*(6*Natoms).^(1/3)/kB;
+%     fitFermi.FermiTemperature_N_Freq_Mix = ...
+%         hbar*(2*pi*opts.Freq).*(6*0.5*Natoms).^(1/3)/kB;
+% else
+%     fitFermi.Freq = NaN;
+%     fitFermi.FermiTemperature_N_Freq_Pure = NaN;
+%     fitFermi.FermiTemperature_N_Freq_Mix = NaN;
+% end
+
 % Use Trap Frequency and atom number for Fermi Temperature
 if isfield(opts,'Freq')
     fitFermi.Freq = opts.Freq;
-    fitFermi.FermiTemperature_N_Freq_Pure = ...
+    fitFermi.Tf_N_Freq_Pure = ...
         hbar*(2*pi*opts.Freq).*(6*Natoms).^(1/3)/kB;
-    fitFermi.FermiTemperature_N_Freq_Mix = ...
+    fitFermi.Tf_N_Freq_Mix = ...
         hbar*(2*pi*opts.Freq).*(6*0.5*Natoms).^(1/3)/kB;
 else
     fitFermi.Freq = NaN;
-    fitFermi.FermiTemperature_N_Freq_Pure = NaN;
-    fitFermi.FermiTemperature_N_Freq_Mix = NaN;
+    fitFermi.Tf_N_Freq_Pure = NaN;
+    fitFermi.Tf_N_Freq_Mix = NaN;
 end
 
 fitFermi.SSE=gof.sse;
 fitFermi.R2=gof.rsquare;
+
+%% Get Fermi Error
+disp(fout);
 %% Display Fermi Fit Result
 
 % disp('%%%%%%%%%%%%%%%%')
@@ -300,9 +343,9 @@ disp(['     Center       (px) : ' '[' num2str(round(fout.Xc,1)) ',' num2str(roun
 disp(['     Fugacity          : ' num2str(exp(fout.Q),'%e')]);
 disp(['     Width        (px) : ' num2str(round(fout.W,3))]);
 disp(['     Atom Number       : ' num2str(fitFermi.AtomNumber,'%e')]);
-disp(['     Temp.        (nK) : ' num2str(fitFermi.Temperature*1E9)]);
-disp(['     Fermi Temp.  (nK) : ' num2str(fitFermi.FermiTemperature_shape*1E9)]);
-disp(['     T/Tf              : ' num2str(fitFermi.Temperature/fitFermi.FermiTemperature_shape)]);
+disp(['     Temp.        (nK) : ' num2str(fitFermi.T*1E9)]);
+disp(['     Fermi Temp.  (nK) : ' num2str(fitFermi.Tf_shape*1E9)]);
+disp(['     T/Tf              : ' num2str(fitFermi.TTf_shape)]);
 disp(['     sum square err  : ' num2str(gof.sse)]);
 
 %% Plot the results
@@ -409,11 +452,11 @@ if opts.ShowDetails
     data{2,3}=fitFermi.AtomNumber;
     data{3,3}=round(fitFermi.Fit.Xc,1);
     data{4,3}=round(fitFermi.Fit.Yc,1);
-    data{5,3}=round(fitFermi.Temperature*1E9,1);
+    data{5,3}=round(fitFermi.T*1E9,1);
     data{6,3}=round(fitFermi.SSE,3);
     data{7,3}=round(exp(fitFermi.Fit.Q),2);
-    data{8,3}=round(fitFermi.FermiTemperature_shape*1E9,1);
-    data{9,3}=round(fitFermi.Temperature/fitFermi.FermiTemperature_shape,4);
+    data{8,3}=round(fitFermi.Tf_shape*1E9,1);
+    data{9,3}=round(fitFermi.TTf_shape,4);
 
     data{10,2}=round(fitGauss.AspectRatio,4);
 

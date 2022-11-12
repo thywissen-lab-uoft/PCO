@@ -58,7 +58,8 @@ y_Lbl{29}     = 'N7s/(N7s+N9s)';
 %%%%%%%%%% N7/N9
 y_Lbl{30}     = 'N7/N9';
 
-
+%%%%%%%%%% relative excited
+y_Lbl{31}     = 'Ne/Ntot';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%% Choose what to plot %%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -74,7 +75,7 @@ y_Lbl{30}     = 'N7/N9';
 
 p_inds=[02,04,05,01,25];
 
-p_inds=[25];
+p_inds=[25,31];
 
 % % Excitations to 9
 % p_inds = [03,06,08,15,16,17,25];
@@ -378,6 +379,9 @@ Y(30).YName      = y_Lbl{30};
 Y(30).FigName    = 'bm_custom_N7N9_ratio';
 Y(30).Y          = N7./N9;
 
+Y(31).YName      = y_Lbl{31};
+Y(31).FigName    = 'bm_custom_Ne_ratio';
+Y(31).Y          = (N7-N7s+N9-N9s)./(N7+N9);
 
 % Assign to output
 custom_data_bm.Y = Y;
@@ -388,6 +392,9 @@ bm_custom_opts=struct;
 fouts={};
 names={};
 clear hFs
+
+% X = X - 391016.821;
+
 for nn=1:length(p_inds)
     % Figure Name
     FigName = Y(p_inds(nn)).FigName;        
@@ -405,7 +412,7 @@ for nn=1:length(p_inds)
     bm_custom_opts.Ind = nn;
     
     [hFs(nn),fouts{nn}] = customFit(X,Y(p_inds(nn)).Y,bm_custom_opts); 
-    ylim([0 10e4]);
+%     ylim([0 10e4]);
     
     if doSave;saveFigure(hFs(nn),FigName,saveOpts);end
 

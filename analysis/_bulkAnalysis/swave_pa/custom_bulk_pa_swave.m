@@ -56,8 +56,8 @@ x2 = -35;
 A2 = A1/4;
 
 fitopt.StartPoint   = [bg A1  x1 s1 A2 x2 s2];
- fitopt.Lower        = [0   0 -14 0 0 -37 0]; 
- fitopt.Upper        = [bg+.15   A1*1.2   0 10 A1*.5 -33 3]; 
+ fitopt.Lower        = [0   0 -14 0 0 -40 0]; 
+ fitopt.Upper        = [bg+.15   A1*1.2   0 10 A1*.5 -10 3]; 
 
 disp(fitopt.StartPoint);
 

@@ -33,18 +33,27 @@ end
 
 figDir = opts.saveDir;
 
-% Make the figure name with the location
-saveLocation=fullfile(figDir,[filename ext]);
-% saveLocation='C:
 
-% Save the figure and the png
-fprintf([datestr(now,13) ' Saving figure handle to ']);
-fprintf([filename ext ' ... ']);
-figure(hF)
-set(0,'CurrentFigure', hF);
-set(hF,'PaperPositionMode','auto');
-print(imgformat,save_qual,saveLocation);
-disp('Saved!');
+
+for kk=1:length(hF)
+    if length(hF)>1
+       filename = [filename num2str(kk)]; 
+    end
+    
+    % Make the figure name with the location
+    saveLocation=fullfile(figDir,[filename ext]);
+    % saveLocation='C:
+
+    % Save the figure and the png
+    fprintf([datestr(now,13) ' Saving figure handle to ']);
+    fprintf([filename ext ' ... ']);
+    
+    figure(hF(kk))
+    set(0,'CurrentFigure', hF(kk));
+    set(hF(kk),'PaperPositionMode','auto');
+    print(imgformat,save_qual,saveLocation);
+    disp('Saved!');
+end
 
 % savefig(the_figure,saveLocation);
 end

@@ -41,10 +41,19 @@ for kk=1:length(atomdata)
             % Grab the atom number and temperature
             Freqs(kk,nn)            = fermi.Freq;
             Natoms(kk,nn)           = fermi.AtomNumber;
-            T(kk,nn)                = fermi.Temperature;
-            Tf_shape(kk,nn)         = fermi.FermiTemperature_shape;
-            Tf_N_Freq_Pure(kk,nn)   = fermi.FermiTemperature_N_Freq_Pure;
-            Tf_N_Freq_Mix(kk,nn)    = fermi.FermiTemperature_N_Freq_Mix;
+            
+            T(kk,nn)                = fermi.T;
+            T_error(kk,nn)          = fermi.T_error;
+            
+            TTf_shape(kk,nn)         = fermi.TTf_shape;
+            TTf_shape_error(kk,nn)   = fermi.TTf_shape_error;
+
+            Tf_shape(kk,nn)         = fermi.Tf_shape;
+            Tf_shape_error(kk,nn)   = fermi.Tf_shape_error;
+
+            
+            Tf_N_Freq_Pure(kk,nn)   = fermi.Tf_N_Freq_Pure;
+            Tf_N_Freq_Mix(kk,nn)    = fermi.Tf_N_Freq_Mix;
             
              % Grab the Fermi Gauss Fit
             gauss = atomdata(kk).FermiGaussFit{nn};
@@ -99,8 +108,17 @@ output.FitSSE       = SSEs;
 % Assign fermi fit outputs
 output.Natoms               = Natoms;
 output.Freq                 = Freqs;
-output.Temperature          = T;
+
+output.T                    = T;
+output.T_error              = T_error;
+
+output.TTf_shape            = TTf_shape;
+output.TTf_shape_error      = TTf_shape_error;
+
 output.Tf_shape             = Tf_shape;
+output.Tf_shape_error       = Tf_shape_error;
+
+
 output.Tf_N_Freq_Pure       = Tf_N_Freq_Pure;
 output.Tf_N_Freq_Mix        = Tf_N_Freq_Mix;
 output.Xc                   = Xc;

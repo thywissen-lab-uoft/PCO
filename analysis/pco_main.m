@@ -66,16 +66,17 @@ end
 % display properties.
 
 % Defautl variable to plot against
-pco_xVar = 'rf_shift';
+% pco_xVar = 'pulse_time';
+pco_xVar = 'K_probe_pwr';
 
 % Should the analysis attempt to automatically find the xvariable?
-pco_autoXVar = 0;
+pco_autoXVar = 1;
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit = 1;
 
 % If ixon_autoUnit=0, this will be used.
-pco_overrideUnit='MHz';
+pco_overrideUnit='kHz'; 
 
 
 %% Analysis Flags
@@ -111,11 +112,11 @@ doErfFit      = 0;
 % Band map fit
 % Fit to a square band map, this includes the vertical and horizontal
 % excited bands
-doBMFit =1;
+doBMFit = 0;
 
 % Fermi-Fit
 % Fit a DFG in long time of flight
-doFermiFitLong = 0;     
+doFermiFitLong = 1;     
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Custom Analyses
@@ -138,7 +139,7 @@ doRamanSpec   = 0;
 doBMFit_AM   = 0; doBMFit_AM_Dir = 'V';
 doBMFit_AM_Spec  = 0; 
 
-doCustom_BM = 1;
+doCustom_BM = 0;
 
 % Custom Box counts
 doCustom       =  0;          % Custom Box Count
@@ -154,7 +155,7 @@ doRabiContrast = 0;
 % Raman Common Mode Detuning
 doWavemeter    = 0;
 doCavity       = 0;
-doVortexLock   = 1;
+doVortexLock   = 0;
 
 %% GDrive Settings
 GDrive_root = 'G:\My Drive\Lattice Shared\LabData';
@@ -380,10 +381,10 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 
 % ROI=[800 950 475 630;
-%     800 950 1540 1662];   % XDT 15ms tof high field
+%     800 950 1540 1695];   % XDT 15ms tof high field
 
-% ROI=[800 950 690 840;
-%     800 950 1770 1920];   % XDT 21ms tof high field
+ROI=[800 950 680 830;
+                800 950 1750 1900];  % XDT 21ms tof high field
 
 % 
 %  ROI=[760 1000 590 830;
@@ -401,8 +402,8 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %       800 950 490 600];   %  band map 15 ms TOF  7box, 9 box
 
 % most commonly used
-ROI=[770 970 450 650;
-       770 970 1510 1710];   %  band map 15 ms  
+% ROI=[770 970 450 650;
+%        770 970 1510 1710];   %  band map 15 ms  
 % ROI = ROI(1,:); % 9 only 
 %ROI = ROI(2,:); % 7 only
 
@@ -427,7 +428,14 @@ ROI=[770 970 450 650;
  %ROI=[500 700 200 1000];   % XDT  Full TOF analysis
 
 if doFermiFitLong
-    ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
+        ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
+    if isfield(data(1).Flags,'High_Field_Imaging')
+        if data(1).Flags.High_Field_Imaging == 1
+%             ROI=[800 950 680 830;
+%                 800 950 1750 1900];  % XDT High field 21 ms TOF
+          ROI=[800 950 680 830];
+        end
+    end
 end
 %     ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 
@@ -455,6 +463,8 @@ ODopts.ScaleProbe=1;
 % ODopts.ScaleProbeROI=[700 790 500 600];  % ROI to do the scaling
 ODopts.ScaleProbeROI=[1200 1350 300 900];  % ROI to do the scaling
 
+% ODopts.ScaleProbeROI=[1000 1100 400 700];
+
 ODopts.SubtractDark=0;
 ODopts.DarkROI=[700 800 20 100];
 
@@ -478,9 +488,7 @@ end
 % Get the high field flag (this may throw error for old data)
 if isfield(data(1).Flags,'High_Field_Imaging')
     ODopts.HighField = data(1).Flags.High_Field_Imaging; 
-    ODopts.HighField = data(1).Flags.CDT_evap_2_high_field; 
-
-    
+%     ODopts.HighField = data(1).Flags.CDT_evap_2_high_field; 
 else
     ODopts.HighField=0;
 end
@@ -651,6 +659,8 @@ boxOpts.doSubBG = 1;
 bgROI=[700 790 500 600];
 % bgROI=[900 1000 450 500]; % even more zoom in for BM
 % bgROI=[800 1000 600 700]; % for k dfg long tof
+
+bgROI=[1000 1100 400 700];
 
 boxOpts.bgROI = bgROI;
 
@@ -1088,7 +1098,7 @@ if doAnimate && doSave
 %     animateOpts.CLim=[0 0.5;
 %         0 0.5];   
     animateOpts.CLim=[0 .2;
-        0 .2]; 
+        0 1]; 
 %      animateOpts.CLim=[0 .2;
 %         0 .2]; 
 %     animateOpts.CLim=[0 .2;

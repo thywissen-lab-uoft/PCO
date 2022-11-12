@@ -2,12 +2,13 @@
 %% Introduction
 % These analyses represent our swave anaysis at the end period of 2021.
 
-
-%% Early Data
-
+%% 10/03043/2022
+% This didn't work but we don't know exactly why not.  The doublon feature
+% was killed, but it did not appear to hav ea detuning dependence. (We were
+% pulsing for too long??) Unclear.
     runs=[
-        2022 10 03 10
-        2022 10 03 11
+                2022 10 03 10
+                2022 10 03 11
                 2022 10 04 01
                 2022 10 04 03
                 2022 10 04 04
@@ -19,11 +20,26 @@
                 2022 10 04 10
                 2022 10 04 11
                 2022 10 04 12
-
-
         ];
-
+% runs = [2022 10 06 02];
 data_label =['swave'];
+
+%% 10/13/2022
+% % This didn't work but we don't know exactly why not.  The doublon feature
+% % was killed, but it did not appear to hav ea detuning dependence. (We were
+% % pulsing for too long??) Unclear.
+%     runs=[
+%                 2022 10 13 05
+%                 2022 10 13 06
+%                 2022 10 13 07
+%                 2022 10 13 08
+%                 2022 10 13 10
+%                 2022 10 13 11
+%                 2022 10 13 12
+%                 2022 10 13 13
+%         ];
+% % runs = [2022 10 06 02];
+% data_label =['swave'];
 
 %% Load the data
 

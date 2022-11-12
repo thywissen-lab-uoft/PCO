@@ -8,9 +8,9 @@
 % Select the data source
 
 % data_source = 'box';
-% data_source = 'gauss';
+data_source = 'gauss';
 % data_source = 'erf';
-data_source = 'bm';
+% data_source = 'bm';
 
 switch data_source
     case 'box'        
@@ -22,6 +22,33 @@ switch data_source
     case 'bm'
         data = bm_data;
 end
+
+%% Fit Flags
+
+%%%%%%%%%%%%%%%% Fit Flags
+T2exp=0;
+Rabi_oscillation = 0;
+
+gauss_single=0;
+gauss_4=0;
+gauss_neg_double=0;
+gauss_neg_single=0;
+gauss_double = 0;
+expdecay = 0;
+
+lorentz_neg_single=0;    
+lorentz_neg_double=0;  
+
+lorentz_single=0;
+lorentz_double=0;    
+lorentz_triple=0;    
+
+lorentz_asym_single= 0;
+lorentz_asym_double= 0;
+
+fit_lorentz_assymetric_4=0;
+
+UniPowerLaw = 0;
 
 %% Generate Custom Data
 
@@ -77,7 +104,7 @@ if doCustomX
             X = X*1e3;
             xstr=['frequency - ' num2str(round(abs(x0),4))  ' MHz (kHz)']; 
             xunit = 'kHz';
-        case 'Pulse_Time'
+        case 'pulse_time' %'Pulse_Time'
             X=process_data.X;
             xstr='pulse time (ms)';    
             xunit = 'ms';
@@ -106,65 +133,6 @@ if doCustomX
     process_data.XLabel = xstr;        
     process_data.XUnit = xunit;
 end    
-
-
-%% Customize Y Data
-beep=0;
-if beep
-    
-    % Scale the atom number in each box if necessary
-    Ratio_79=1;
-    N = data.Natoms;
-    
-    for nn=1:size(data.Natoms,2)
-       if mean(data.Yc(:,nn))>1024
-           N(:,nn) = N(:,nn)/Ratio_79;
-       end        
-    end
-    process_data.Ratio_79=Ratio_79;    
-    process_data.Natoms = N;        
-
-    dataMode= 2;         
-    switch dataMode
-        case 0     
-             process_data.Function = @(N) (N(:,1)-N(:,2))./N(:,1);
-             ystr=['\Delta N97/N9'];
-             figName='bob';
-        case 1
-            process_data.Function = @(N) N(:,2);
-            ystr=['N_7'];
-            figName=ystr;
-        case 2     
-            process_data.Function = @(N) N(:,1);
-            ystr=['N_9'];
-            figName=ystr;
-        case 3
-            process_data.Function = @(N) sum(N,2);
-            ystr=['N_{tot}'];
-            figName=ystr;
-        case 4
-            process_data.Function=@(N) N(:,1)./(N(:,1)+N(:,2));
-            ystr=['Transfer Fraction'];
-            ystr=['N_9/(N_7+N_9)'];
-            figName='Transfer Fraction';
-        case 6
-            process_data.Function=@(N) N(:,2)./N(:,1);
-            ystr=['N_7/N_9'];
-            figName='79 ratio';             
-        case 7
-            process_data.Function=@(N) N(:,1)./N(:,2);
-            ystr=['N_9/N_7'];
-            figName='97 ratio';             
-        case 8
-            process_data.Function = @(N) (N(:,1)+N(:,2))./(N(:,1)+N(:,2)+N(:,3));
-            ystr=['y excited fraction'];
-            figName='y excited ratio';
-     end
-
-     process_data.Y = process_data.Function(process_data.Natoms);
-     process_data.YLabel = ystr;
-end
-
 
 
 %% Rabi Oscillations
@@ -197,7 +165,6 @@ if doRabiContrast && size(data.Natoms,1)>4
     end  
     
     % Add additional lines for different counting schemes
-
     [hF_rabi_contrast,rabi_contrast]=rabiOscillationsContrast(data,pco_xVar,rabi_opts);
     if doSave;saveFigure(hF_rabi_contrast,[data_source '_rabi_oscillate_contrast'],saveOpts);end
 end
@@ -206,32 +173,6 @@ if doRabiAbsolute && size(data.Natoms,1)>4
     [hF_rabi_raw,rabi_absolute]=rabiOscillationsAbsolute(data,pco_xVar,rabi_opts);
     if doSave;saveFigure(hF_rabi_raw,[data_source '_rabi_oscillate_raw'],saveOpts);end    
 end
-
-%% Custom
-if doCustom 
-
-    %%%%%%%%%%%%%%%% Fit Flags
-    T2exp=0;
-    Rabi_oscillation = 0;
-    
-    gauss_single=0;
-    gauss_4=0;
-    gauss_neg_double=0;
-    gauss_neg_single=0;
-    gauss_double = 0;
-    expdecay =0;
-    
-    lorentz_neg_single=0;    
-    lorentz_neg_double=0;  
-    
-    lorentz_single=0;
-    lorentz_double=0;    
-    lorentz_triple=0;    
-    
-    lorentz_asym_single= 0;
-    lorentz_asym_double= 0;
-
-    fit_lorentz_assymetric_4=0;
     
 %% Process X Data
 
@@ -243,9 +184,7 @@ Bshim =0;
 % Bfb   = data.Params(1).HF_FeshValue_Spectroscopy;
 % Bshim = data.Params(1).HF_zshim_Initial_Lattice*2.35;
 
-
 Boff  = 0.11;
-
 
 % B = Bfb + Bshim + Boff;
  
@@ -306,7 +245,9 @@ end
     Ntot = sum(N,2);     
      N(:,2) = N(:,2)*8.6/7.2; %fudge factor
 
-     dataMode= 4;         
+     dataMode= 3;      
+     
+     Ytype = 'relative';
 
      switch dataMode
          case 0     
@@ -317,49 +258,43 @@ end
             Y = N(:,2);
             ystr=['N_7'];
             figName=ystr;
+            Ytype='absolute';
          case 2     
             Y= N(:,1);
             ystr=['N_9'];
             figName=ystr;
+            Ytype='absolute';
          case 3
             Y=N(:,1)+N(:,2);
             ystr=['N_9+N_7'];
             figName=ystr;
+            Ytype='absolute';
          case 4
             Y=N(:,2)./(N(:,1)+N(:,2));
 %             ystr=['Transfer Fraction'];
             ystr=['N_9/(N_7+N_9)'];
             figName='Transfer Fraction';
          case 5 % random customized stuffs 
-%              N(:,2)=N(:,2)*0.6;
-%              N(:,2)=N(:,3);
-%              Y =(N(:,3)+ N(:,2)-2*N(:,1))./(N(:,3)+N(:,2)-N(:,1));
              Y =(N(:,1)- N(:,2))./(N(:,1)+N(:,2));
              ystr=['(N_9-N_7)/(N_7+N_9)'];
-%              ystr=['Higher band fraction'];
-%              xstr=['latt ramp time (ms)'];
              figName='custom';
          case 6
              Y=N(:,2)./N(:,1);
              ystr=['N_7/N_9'];
-             figName='79 ratio';
-             
+             figName='79 ratio';             
           case 7
              Y=N(:,1)./N(:,2);
              ystr=['N_9/N_7'];
-             figName='79 ratio';
-             
+             figName='79 ratio';             
          case 8
              Y =(N(:,1)+N(:,2))./(N(:,1)+N(:,2)+N(:,3));
              ystr=['y excited fraction'];
-             figName='y excited ratio';
-             
+             figName='y excited ratio';             
           case 9 % 
              Y =(N(:,2)- N(:,1))./(N(:,1)+N(:,2));
              ystr=['(N_7-N_9)/(N_7+N_9)'];
-             figName='custom7';
-             
-          case 10 % 
+             figName='custom7';             
+          case 10 
              Y =(N(:,2))./(N(:,1)+N(:,2));
              ystr=['(N_7)/(N_7+N_9)'];
              figName='custom72';
@@ -374,50 +309,54 @@ end
     custom_data.Y = Y;
     custom_data.YStr = ystr;
     
-%% Plot the unique values
+%% Plot the raw Data
 
-    [ux,ia,ib]=unique(X);    
-    Yu=zeros(length(ux),2);    
-    for kk=1:length(ux)
-        inds=find(X==ux(kk));
-        Yu(kk,1)=mean(Y(inds));
-        Yu(kk,2)=std(Y(inds));       
-    end
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%% FIGURE
-    hFB=figure;
-    hFB.Color='w';
-    hFB.Name='box custom';
-    
-    hFB.Name=figName;
-    hFB.Position=[400 400 400 400];
-    co=get(gca,'colororder');    
+% Get the unique values and error bars
+[ux,ia,ib]=unique(X);    
+Yu=zeros(length(ux),2);    
+for kk=1:length(ux)
+    inds=find(X==ux(kk));
+    Yu(kk,1)=mean(Y(inds));
+    Yu(kk,2)=std(Y(inds));       
+end
 
-    % Image directory folder string
-    t=uicontrol('style','text','string',FigLabel,'units','pixels',...
-        'backgroundcolor','w','horizontalalignment','left','fontsize',6);
-    t.Position(3:4)=[hFB.Position(3) t.Extent(4)];
-    t.Position(1:2)=[5 hFB.Position(4)-t.Position(4)];
-    
-%     plot(X,Y,'o','markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5,...
-%         'linewidth',2,'markersize',8);
-    errorbar(ux,Yu(:,1),Yu(:,2),'o','markerfacecolor',co(1,:),'markeredgecolor',co(1,:)*.5,...
-        'linewidth',2,'markersize',8);    
-    
-    xlabel(xstr,'interpreter','latex');    
-    ylabel(ystr);
-    
-    set(gca,'fontsize',12,'linewidth',1,'box','on','xgrid','on','ygrid','on');
-    yL=get(gca,'YLim');
-%     ylim([0 1e5]);
-%     ylim([-0.25 0.2]);
+hFB=figure;
+hFB.Color='w';
+hFB.Name='box custom';
+
+hFB.Name=figName;
+hFB.Position=[400 400 600 350];
+
+co=get(gca,'colororder');    
 
 
-    %     ylim([1.1E5 2.5E5]);
+% Image directory folder string
+t=uicontrol('style','text','string',FigLabel,'units','pixels',...
+    'backgroundcolor','w','horizontalalignment','left','fontsize',6);
+t.Position(3:4)=[hFB.Position(3) 7];
+t.Position(1:2)=[5 hFB.Position(4)-t.Position(4)];
 
-    hold on    
-    xlim([min(X) max(X)]);
-%         xlim([-20 40]);    
+
+
+
+% Plot the data with error bars
+errorbar(ux,Yu(:,1),Yu(:,2),'o','markerfacecolor',co(1,:),...
+    'markeredgecolor',co(1,:)*.5,...
+    'linewidth',2,'markersize',8);    
+
+xlabel(xstr,'interpreter','latex');    
+ylabel(ystr);
+
+set(gca,'fontsize',10,'linewidth',1,'box','on',...
+    'xgrid','on','ygrid','on');
+yL=get(gca,'YLim');
+
+hold on    
+xlim([min(X) max(X)]);
+
+if isequal(Ytype,'absolute')
+    ylim([0 yL(2)]);
+end
 
 %% Exponential Fit
     if T2exp
@@ -536,14 +475,14 @@ end
         xC=X(ind);
         
         % Assign guess
-        xC1 = 198.3;
-        xC2 = 198.8;
-%         G=[A 20 xC1 A/10 20 xC2 bg];        
-        G=[A 0.2 xC1 A/100 0.2 xC2 bg];
+        xC1 = -44.13;
+        xC2 = -44;
+%         G=[A/2 20 xC1 A 20 xC2 bg];        
+        G=[A/2 0.2 xC1 A 0.2 xC2 bg];
         
         opt.StartPoint=G;
         opt.Robust='bisquare';
-        opt.Lower=[0 0 -inf 0 0 -inf 0];
+        opt.Lower=[0 0 -44.18 0 0 -inf 0];
         
         % Perform the fit
         fout=fit(X,Y,myfit,opt);
@@ -666,8 +605,10 @@ end
         legend(pF,str,'location','best','interpreter','latex');
         
     end
-    %% Exponential decay
+%% Exponential decay
+
 if length(X)>4 && expdecay
+    
     myfit=fittype('A0 + A1*exp(-1*t/tau)',...
         'coefficients',{'A0','A1','tau'},...
         'independent','t');
@@ -679,20 +620,26 @@ if length(X)>4 && expdecay
     taug = median(X);
     G=[A0 Ag taug];        
     opt.StartPoint=G;
+    opt.Lower = [0 0 0];
 
     % Perform the fit
-    fout=fit(X,Y,myfit,opt)
+    fout=fit(X,Y,myfit,opt);
 
     % Plot the fit
     tt=linspace(0,max(X),1000);
     xlim([0 max(X)]);
     pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
-    lStr=['$ \tau = ' num2str(round(fout.tau,3)) '~\mathrm{ms}$'];
+    lStr=['$ \tau = ' num2str(round(fout.tau,3)) '~\mathrm{ms}$' ...
+        newline ...
+        '$A_0 = ' num2str(round(fout.A0,3),'%.3e') '$' ... 
+        newline ...
+        '$A_1 = ' num2str(round(fout.A1,3),'%.3e') '$'];
     legend(pF,lStr,'location','best','interpreter','latex');        
     str = '$A_0+ A_1\exp(-t/\tau)$';
     t=text(.02,.03,str,'units','normalized',...
         'fontsize',10,'interpreter','latex');
 end
+
     %% Negative Lorentzian
     if length(X)>4 && lorentz_neg_single
         myfit=fittype('bg-A*(G/2).^2*((x-x0).^2+(G/2).^2).^(-1)',...
@@ -707,10 +654,15 @@ end
         [Ymin,ind]=min(Y);
         A=bg-Ymin;   
         A=range(Y);
-        xC=X(ind);
         
+%         A=4e4;
+%         bg= 5e4;
+        xC=X(ind);
+%         xlim([-49.7 -49.45]);
+%         xC=-41.6;
+
         % Assign guess
-        G=[A 0.5 199.2 bg];
+        G=[A 0.025 xC bg];
         opt.StartPoint=G;
 
         % Perform the fit
@@ -720,9 +672,13 @@ end
         % Plot the fit
         tt=linspace(min(X),max(X),1000);
         pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
-          lStr=['xC=(' num2str(round(fout.x0,2)) ')' ...
-            ' FWHM=(' num2str(round(fout.G,1)) ')' ];
+          lStr=['xC=(' num2str(round(fout.x0,4),'%.4f') ')' ...
+            ' FWHM=(' num2str(round(fout.G,4),'%.4f') ')' ];
         legend(pF,lStr,'location','best');
+        
+        cc= confint(fout);
+        dG = abs((cc(2,2)-cc(1,2))/2);
+        disp(dG)
     end
     
     %% Double Loretnzian
@@ -1098,20 +1054,48 @@ end
     outdata.Fit=fout;
 
     end
-    
-    mystr=['$N_7 \rightarrow N_7/' ...
-        num2str(Ratio_79) '$'];
-   text(.98,.02,mystr,'units','normalized','interpreter','latex',...
-       'verticalalignment','bottom','horizontalalignment','right');    
-    
-    pp=get(gcf,'position');
-    set(gcf,'position',[pp(1) pp(2) 800 400]);    
-    if doSave
-        saveFigure(hFB,figName,saveOpts);
+   
+%% Power law
+    if length(X)>4 && UniPowerLaw
+
+        myfit=fittype('A1*(1+ t/(6*tau))^(-A0)',...
+            'coefficients',{'A0','A1','tau'},...
+            'independent','t');
+
+        % Fit options and guess
+        opt=fitoptions(myfit);        
+        Ag = max(Y);
+        A0 = 6;
+        taug = median(X);
+        G=[A0 Ag taug];        
+        opt.StartPoint=G;
+        opt.Lower = [0 0 0];
+
+        % Perform the fit
+        fout=fit(X,Y,myfit,opt);
+
+        % Plot the fit
+        tt=linspace(0,max(X),1000);
+        xlim([0 max(X)]);
+        pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
+        lStr=['$ \tau = ' num2str(round(fout.tau,3)) '~\mathrm{ms}$' ...
+            newline ...
+            '$A_0 = ' num2str(round(fout.A0,3),'%.3e') '$' ... 
+            newline ...
+            '$A_1 = ' num2str(round(fout.A1,3),'%.3e') '$'];
+        legend(pF,lStr,'location','best','interpreter','latex');        
+        str = '$A_0+ A_1\exp(-t/\tau)$';
+        t=text(.02,.03,str,'units','normalized',...
+            'fontsize',10,'interpreter','latex');
     end
-    
-    if doSave
-        save([saveDir filesep 'custom_data'],'custom_data');
-    end
-    
+   
+%% Save the Figure
+
+if doSave
+    saveFigure(hFB,figName,saveOpts);
 end
+if doSave
+    save([saveDir filesep 'custom_data'],'custom_data');
+end
+    
+
