@@ -227,7 +227,9 @@ l=80;   % Left gap for fitting and data analysis summary
         hpAnl.Position(2)=hp.Position(4);
         hpImgProcess.Position(2)=hp.Position(4);
         
-        hpRaw.Position(1:2)=[hF.Position(3)-250 hp.Position(4)];   
+        
+
+        hpRaw.Position(1:2)=[hpImgProcess.Position(1)+hpImgProcess.Position(3) hp.Position(4)];   
         hpROI.Position(2)=hF.Position(4)-hpROI.Position(4)-Hacqbar;
         
         %%%%%% Resize Left Panel %%%%%
@@ -1523,29 +1525,65 @@ uicontrol('parent',hpImgProcess,'units','pixels',...
 %% Raw Image Panel
 hpRaw=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
     'title','raw images','fontsize',6);
-hpRaw.Position=[hF.Position(3)-250 hp.Position(4) 250 Htop];
+hpRaw.Position=[hpImgProcess.Position(1)+hpImgProcess.Position(3) hp.Position(4) 700 Htop];
 
+Wraw = Htop-5;
+
+% Axes for images of raw data
 axPWA=axes('parent',hpRaw,'units','pixels','UserData','PWA');
-axPWA.Position=[0 2 125 73];
+axPWA.Position=[5 2 Wraw Wraw];
 hPWA=imagesc(X,Y,Z);
 set(axPWA,'box','on','XTick',[],'YTick',[]);
 axis equal tight
-
 pDisp=rectangle('position',[1 1 1392 1024],'edgecolor','r','linewidth',2);
 
 axPWOA=axes('parent',hpRaw,'units','pixels','UserData','PWOA');
-axPWOA.Position=[125 2 125 73];
+axPWOA.Position=[Wraw+15 2 Wraw Wraw];
 hPWOA=imagesc(X,Y,Z);
 set(axPWOA,'box','on','XTick',[],'YTick',[]);
 axis equal tight
 
-cLightAuto=uicontrol('parent',hpRaw,'style','checkbox','string','auto-scale?',...
-    'units','pixels','Position',[0 80 90 20],'backgroundcolor','w');
+
+% Text label for color limit table on OD image
+crawlimtext=uicontrol('parent',hpRaw,'units','pixels','string','count limits :',...
+    'fontsize',8,'backgroundcolor','w','style','text');
+crawlimtext.Position(3:4)=crawlimtext.Extent(3:4);
+crawlimtext.Position(1) = axPWOA.Position(1)+axPWOA.Position(3)+5;
+crawlimtext.Position(2) = 95;
 
 htblLight=uitable('parent',hpRaw,'units','pixels','RowName',{},'ColumnName',{},...
-    'fontsize',8,'ColumnWidth',{50 50},'columneditable',[true true],...
-    'Data',[0 1E6]);
-htblLight.Position=[140 75 htblLight.Extent(3) htblLight.Extent(4)];
+    'fontsize',8,'ColumnWidth',{45 45},'columneditable',[true true],...
+    'Data',[0 2.5]);
+htblLight.Position(1:2) = crawlimtext.Position(1:2)+[0 -20];
+htblLight.Position(3:4)=[htblLight.Extent(3) htblLight.Extent(4)];
+
+% % Control stuff
+cAutoROI=uicontrol('parent',hpRaw,'style','checkbox','string','match ROI to OD?',...
+    'units','pixels','backgroundcolor','w','value',1);
+cAutoROI.Position(1:2) = htblLight.Position(1:2)+[0 -20];
+cAutoROI.Position(3:4) = cAutoROI.Extent(3:4)+[30 0];
+
+% Text label for color limit table on OD image
+light_text_exp=uicontrol('parent',hpRaw,'units','pixels','string',['E8'],...
+    'fontsize',7,'backgroundcolor','w','style','text','fontsize',10,'fontweight','bold');
+light_text_exp.Position(3:4)=light_text_exp.Extent(3:4);
+light_text_exp.Position(1)=htblLight.Position(1) + htblLight.Position(3);
+light_text_exp.Position(2)=htblLight.Position(2);
+% 
+% % Table for changing display limits
+tbl_rawROI=uitable('parent',hpRaw,'units','pixels','RowName',{},'columnname',{},...
+    'ColumnEditable',[true true true true],'CellEditCallback',@tbl_rawROICB,...
+    'ColumnWidth',{30 30 30 30},'FontSize',8,'Data',[1 size(Z,2) 1 size(Z,1)]);
+tbl_rawROI.Position(3:4)=tbl_rawROI.Extent(3:4);
+tbl_rawROI.Position(1:2)=[cAutoROI.Position(1) cAutoROI.Position(2)-30];
+
+% Analaysis outputs
+% total counts PWOA 1
+% total counts PWOA 2
+% total counts PWA 1
+% total counts PWA 2
+
+% PWOA waist
 
 %% Finish graphics initialization
 
