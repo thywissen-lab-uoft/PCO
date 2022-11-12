@@ -168,6 +168,8 @@ l=80;   % Left gap for fitting and data analysis summary
         set(hAxX,'XLim',axImg.XLim,'XTick',axImg.XTick);
         set(hAxY,'YLim',axImg.YLim,'YTick',axImg.YTick);
         
+    
+        
         % Move the colorbar
         cBar.Position=[hAxX.Position(1) hAxY.Position(2)+hAxY.Position(4)+23 ...
             hAxX.Position(3) 15]; 
@@ -338,6 +340,11 @@ hbSlctLim=uicontrol(hp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
         src.Data=ROI;       
         try
             set(axImg,'XLim',ROI(1:2),'YLim',ROI(3:4));
+            if cAutoROI.Value
+                set(axPWA,'XLim',axImg.XLim,'YLim',axImg.YLim);
+                set(axPWOA,'XLim',axImg.XLim,'YLim',axImg.YLim);
+                tbl_rawROI.Data = ROI;
+            end
             resizePlots;
             drawnow;
             pDisp.Position=[ROI(1) ROI(3) ROI(2)-ROI(1) ROI(4)-ROI(3)];           
@@ -353,6 +360,11 @@ hbSlctLim=uicontrol(hp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
        ROI=[1 size(dstruct.PWA,2) 1 size(dstruct.PWOA,1)];
        tbl_dispROI.Data=ROI;
        tbl_dispROICB(tbl_dispROI);
+       if cAutoROI.Value
+            set(axPWA,'XLim',axImg.XLim,'YLim',axImg.YLim);
+            set(axPWOA,'XLim',axImg.XLim,'YLim',axImg.YLim);
+            tbl_rawROI.Data = ROI;
+        end
        resizePlots;
        drawnow;
     end
@@ -362,6 +374,11 @@ hbSlctLim=uicontrol(hp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
            min(tblROI.Data(:,3)) max(tblROI.Data(:,4))];
        tbl_dispROI.Data=ROI;
        tbl_dispROICB(tbl_dispROI);
+        if cAutoROI.Value
+            set(axPWA,'XLim',axImg.XLim,'YLim',axImg.YLim);
+            set(axPWOA,'XLim',axImg.XLim,'YLim',axImg.YLim);
+            tbl_rawROI.Data = ROI;
+        end
        resizePlots;
        drawnow;
     end
@@ -1527,63 +1544,128 @@ hpRaw=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
     'title','raw images','fontsize',6);
 hpRaw.Position=[hpImgProcess.Position(1)+hpImgProcess.Position(3) hp.Position(4) 700 Htop];
 
-Wraw = Htop-5;
+Wraw = Htop-7;
 
 % Axes for images of raw data
 axPWA=axes('parent',hpRaw,'units','pixels','UserData','PWA');
-axPWA.Position=[5 2 Wraw Wraw];
+axPWA.Position=[5 1 Wraw Wraw];
 hPWA=imagesc(X,Y,Z);
 set(axPWA,'box','on','XTick',[],'YTick',[]);
 axis equal tight
 pDisp=rectangle('position',[1 1 1392 1024],'edgecolor','r','linewidth',2);
+hold on
+caxis([0 1000]);
 
 axPWOA=axes('parent',hpRaw,'units','pixels','UserData','PWOA');
-axPWOA.Position=[Wraw+15 2 Wraw Wraw];
+
+axPWOA.Position=[Wraw+15 1 Wraw Wraw];
 hPWOA=imagesc(X,Y,Z);
 set(axPWOA,'box','on','XTick',[],'YTick',[]);
 axis equal tight
-
+hold on
+caxis([0 1000]);
+cBarRaw=colorbar('fontsize',6,'units','pixels','orientation','horizontal');
+      cBarRaw.Position=[axPWOA.Position(1)+axPWOA.Position(3)+10 90 ...
+            120 10]; 
 
 % Text label for color limit table on OD image
-crawlimtext=uicontrol('parent',hpRaw,'units','pixels','string','count limits :',...
+crawlimtext=uicontrol('parent',hpRaw,'units','pixels','string','limits',...
     'fontsize',8,'backgroundcolor','w','style','text');
 crawlimtext.Position(3:4)=crawlimtext.Extent(3:4);
 crawlimtext.Position(1) = axPWOA.Position(1)+axPWOA.Position(3)+5;
-crawlimtext.Position(2) = 95;
+crawlimtext.Position(2) =60;
+
+
 
 htblLight=uitable('parent',hpRaw,'units','pixels','RowName',{},'ColumnName',{},...
     'fontsize',8,'ColumnWidth',{45 45},'columneditable',[true true],...
-    'Data',[0 2.5]);
-htblLight.Position(1:2) = crawlimtext.Position(1:2)+[0 -20];
+    'Data',[0 1000],'celleditcallback',@climrawcb);
+htblLight.Position(1:2) = crawlimtext.Position(1:2)+[30 0];
 htblLight.Position(3:4)=[htblLight.Extent(3) htblLight.Extent(4)];
 
-% % Control stuff
-cAutoROI=uicontrol('parent',hpRaw,'style','checkbox','string','match ROI to OD?',...
-    'units','pixels','backgroundcolor','w','value',1);
-cAutoROI.Position(1:2) = htblLight.Position(1:2)+[0 -20];
-cAutoROI.Position(3:4) = cAutoROI.Extent(3:4)+[30 0];
+% Callback for changing the color limits table
+    function climrawcb(src,evt)
+        try
+            axPWA.CLim=htblLight.Data;
+            axPWOA.CLim=htblLight.Data;
+        catch exception
+            warning('Bad OD color limits given. Using old value.');
+            src.Data(evt.Indices)=evt.PreviousData;
+        end
+    end
 
-% Text label for color limit table on OD image
-light_text_exp=uicontrol('parent',hpRaw,'units','pixels','string',['E8'],...
-    'fontsize',7,'backgroundcolor','w','style','text','fontsize',10,'fontweight','bold');
-light_text_exp.Position(3:4)=light_text_exp.Extent(3:4);
-light_text_exp.Position(1)=htblLight.Position(1) + htblLight.Position(3);
-light_text_exp.Position(2)=htblLight.Position(2);
+
 % 
 % % Table for changing display limits
 tbl_rawROI=uitable('parent',hpRaw,'units','pixels','RowName',{},'columnname',{},...
     'ColumnEditable',[true true true true],'CellEditCallback',@tbl_rawROICB,...
-    'ColumnWidth',{30 30 30 30},'FontSize',8,'Data',[1 size(Z,2) 1 size(Z,1)]);
+    'ColumnWidth',{30 30 30 30},'FontSize',8,'Data',[1 size(Z,2) 1 size(Z,1)],'enable','off');
 tbl_rawROI.Position(3:4)=tbl_rawROI.Extent(3:4);
-tbl_rawROI.Position(1:2)=[cAutoROI.Position(1) cAutoROI.Position(2)-30];
+tbl_rawROI.Position(1:2)=[crawlimtext.Position(1) crawlimtext.Position(2)-30];
 
-% Analaysis outputs
-% total counts PWOA 1
-% total counts PWOA 2
-% total counts PWA 1
-% total counts PWA 2
 
-% PWOA waist
+
+    function tbl_rawROICB(src,evt)
+        ROI=src.Data;        % Grab the new ROI     
+        % Check that the data is numeric
+        if sum(~isnumeric(ROI)) || sum(isinf(ROI)) || sum(isnan(ROI))
+            warning('Incorrect data type provided for ROI.');
+            src.Data(evt.Indices(2))=evt.PreviousData;
+            return;
+        end        
+        ROI=round(ROI);      % Make sure this ROI are integers   
+
+        % Keep the ROI within image bounds (this is hardcoded and could be
+        % changed if we ever implement hardware ROI but want to keep 
+        % absolute pixel positions relative to total sensor.)
+        if ROI(2)<=ROI(1) || ROI(4)<=ROI(3)
+           warning('Bad ROI specification given.');
+           ROI(evt.Indices(2))=evt.PreviousData;
+        end       
+        if ROI(1)<1; ROI(1)=1; end       
+        if ROI(3)<1; ROI(3)=1; end   
+        if ROI(4)>size(dstruct.PWA,1); ROI(4)=size(dstruct.PWA,1);end       
+        if ROI(2)>size(dstruct.PWA,2); ROI(2)=size(dstruct.PWA,2);end       
+        src.Data=ROI;       
+        try
+            set(axPWA,'XLim',ROI(1:2),'YLim',ROI(3:4));
+            set(axPWOA,'XLim',ROI(1:2),'YLim',ROI(3:4));  
+            drawnow;
+        catch ab
+            warning('Unable to change display ROI.');
+            src.Data(evt.Indices)=evt.PreviousData;
+        end
+    end
+
+% % Control stuff
+cAutoROI=uicontrol('parent',hpRaw,'style','checkbox','string','match ROI to OD?',...
+    'units','pixels','backgroundcolor','w','value',1,'callback',@cAutoROIcb);
+cAutoROI.Position(1:2) = tbl_rawROI.Position(1:2)+[0 -20];
+cAutoROI.Position(3:4) = cAutoROI.Extent(3:4)+[30 0];
+
+
+    function cAutoROIcb(src,evt)
+        if src.Value
+           tbl_rawROI.Enable = 'on';
+        else
+            tbl_rawROI.Enable='off';
+        end
+        
+    end
+tbl_raw1counts=uitable('parent',hpRaw,'units','pixels','RowName',{},'columnname',{},...
+    'ColumnEditable',[false false],'CellEditCallback',@tbl_rawROICB,...
+    'ColumnWidth',{60 80},'FontSize',8,'Data',[1 size(Z,2) 1 size(Z,1)]);
+tbl_raw1counts.Data={'PWA 1',0;'PWOA 1',0};
+tbl_raw1counts.Position(3:4)=tbl_raw1counts.Extent(3:4);
+tbl_raw1counts.Position(1:2)=[tbl_rawROI.Position(1)+tbl_rawROI.Position(3)+15 65];
+
+
+tbl_raw2counts=uitable('parent',hpRaw,'units','pixels','RowName',{},'columnname',{},...
+    'ColumnEditable',[false false],'CellEditCallback',@tbl_rawROICB,...
+    'ColumnWidth',{60 80},'FontSize',8,'Data',[1 size(Z,2) 1 size(Z,1)],'Enable','off');
+tbl_raw2counts.Data={'PWA 2',0;'PWOA 2',0};
+tbl_raw2counts.Position(3:4)=tbl_raw2counts.Extent(3:4);
+tbl_raw2counts.Position(1:2)=[tbl_rawROI.Position(1)+tbl_rawROI.Position(3)+15 15];
 
 %% Finish graphics initialization
 
@@ -1747,6 +1829,24 @@ function updateImages(data)
     set(hPWOA,'XData',data.X,'YData',data.Y,'CData',data.PWOA);
     set(hPWA,'XData',data.X,'YData',data.Y,'CData',data.PWA);
     set(hImg,'XData',data.X,'YData',data.Y,'CData',data.OD);
+    
+    NPWOA_1=sum(sum(data.PWOA(1:1024,:)));
+    NPWA_1=sum(sum(data.PWA(1:1024,:)));
+    
+    tbl_raw1counts.Data{1,2} = num2str(NPWA_1,'%.3e');
+    tbl_raw1counts.Data{2,2} = num2str(NPWOA_1,'%.3e');
+    
+    
+    if size(data.PWOA,1)>1024
+        NPWOA_2=sum(sum(data.PWOA(1025:end,:)));
+        NPWA_2=sum(sum(data.PWA(1025:end,:)));        
+            
+        tbl_raw2counts.Data{1,2} = num2str(NPWA_2,'%.3e');
+        tbl_raw2counts.Data{2,2} = num2str(NPWOA_2,'%.3e');
+    else
+        tbl_raw2counts.Data{1,2} = NaN;
+        tbl_raw2counts.Data{2,2} = NaN;
+    end
 
 
     % Update data string
