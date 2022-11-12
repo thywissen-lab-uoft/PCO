@@ -67,7 +67,7 @@ end
 
 % Defautl variable to plot against
 % pco_xVar = 'pulse_time';
-pco_xVar = 'PA_field_close';
+pco_xVar = 'K_probe_pwr';
 
 % Should the analysis attempt to automatically find the xvariable?
 pco_autoXVar = 1;
@@ -100,11 +100,11 @@ doProbeFit    = 0;      % Fit probe beam  to 2D Gaussian
 % processed data outputs of the below fits are typically <fit_type>_name
 
 % Box Count
-doBoxCount    = 1;      % Box count analysis
+doBoxCount    = 0;      % Box count analysis
 
 % Gaussian Fit
 % Fit to a gaussian distribution (thermal cloud)
-doGaussFit    = 1;      % Enable gauss fitting
+doGaussFit    = 0;      % Enable gauss fitting
 
 % Erf Fit
 doErfFit      = 0;    
@@ -116,7 +116,7 @@ doBMFit = 0;
 
 % Fermi-Fit
 % Fit a DFG in long time of flight
-doFermiFitLong = 0;     
+doFermiFitLong = 1;     
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Custom Analyses
@@ -142,7 +142,7 @@ doBMFit_AM_Spec  = 0;
 doCustom_BM = 0;
 
 % Custom Box counts
-doCustom       =  1;          % Custom Box Count
+doCustom       =  0;          % Custom Box Count
 
 doRabiAbsolute = 0;
 doRabiContrast = 0;
@@ -380,11 +380,11 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %    800 950 1228 2040];   % XDT full TOF\
 
 
-ROI=[800 950 475 630;
-    800 950 1540 1695];   % XDT 15ms tof high field
+% ROI=[800 950 475 630;
+%     800 950 1540 1695];   % XDT 15ms tof high field
 
-% ROI=[800 950 690 840;
-%     800 950 1770 1920];   % XDT 21ms tof high field
+ROI=[800 950 680 830;
+                800 950 1750 1900];  % XDT 21ms tof high field
 
 % 
 %  ROI=[760 1000 590 830;
@@ -431,9 +431,9 @@ if doFermiFitLong
         ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
     if isfield(data(1).Flags,'High_Field_Imaging')
         if data(1).Flags.High_Field_Imaging == 1
-            ROI=[800 950 680 830;
-                800 950 1750 1900];  % XDT High field 21 ms TOF
-%           ROI=[800 950 680 830];
+%             ROI=[800 950 680 830;
+%                 800 950 1750 1900];  % XDT High field 21 ms TOF
+          ROI=[800 950 680 830];
         end
     end
 end
@@ -1098,7 +1098,7 @@ if doAnimate && doSave
 %     animateOpts.CLim=[0 0.5;
 %         0 0.5];   
     animateOpts.CLim=[0 .2;
-        0 .2]; 
+        0 1]; 
 %      animateOpts.CLim=[0 .2;
 %         0 .2]; 
 %     animateOpts.CLim=[0 .2;

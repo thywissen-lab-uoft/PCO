@@ -24,24 +24,47 @@ end
 lifetimes = lifetimes(inds);
 
 %% Fit it
-myfit = fittype('G0*(x./(1+x/xs))','independent','x',...
+myfit = fittype('G0*(x./xs)./(1+x./xs)','independent','x',...
     'coefficients',{'G0','xs'});
 fitopt= fitoptions(myfit);
-Gvec = zeros(length(lifetimes),1);
+G0vec = zeros(length(lifetimes),1);
 Isvec = zeros(length(lifetimes),1);
+
+G0error = zeros(length(lifetimes),2);
+Iserror = zeros(length(lifetimes),2);
+
+
 clear fouts
 for kk=1:length(lifetimes)
-    fitopt.StartPoint = [max(lifetimes(kk).gamma)/3 10];
+    fitopt.StartPoint = [max(lifetimes(kk).gamma) 50];
    fout = fit(lifetimes(kk).I0',lifetimes(kk).gamma,myfit,fitopt);
    fouts{kk} = fout;
    
-   Gvec(kk) = fout.G0;
+   G0vec(kk) = fout.G0;
    Isvec(kk) = fout.xs;
    
+   c=confint(fout,.641);
    
+    G0error(kk) = abs(0.5*(c(1,1)-c(2,1)));
+    Iserror(kk) = abs(0.5*(c(1,2)-c(2,2)));
+    
+   
+   Islow =abs(c(1,2)-fout.xs);
+   Ishigh =abs(c(2,2)-fout.xs);
+   
+   G0low = abs(c(1,1)-fout.G0);
+   G0high = abs(c(2,1)-fout.G0);
+   
+   
+   
+   G0error(kk,1:2) = [G0low G0high];
+   Iserror(kk,1:2) = [Islow Ishigh];
+
+   
+  
 end
 
-flabel = ['$\Gamma =\Gamma_0\frac{I}{1+I/I_s}$'];
+flabel = ['$\Gamma(I) =\Gamma_0\frac{I/I_s}{1+I/I_s}$'];
 
 tt=linspace(0,5e3,100);
 
@@ -67,8 +90,8 @@ for kk=1:length(lifetimes)
    legStr{kk}=[num2str(lifetimes(kk).B(1),'%.2f') 'G'];
    
 end
-xlabel('intensity (mW/cm^2)');
-ylabel('rate (kHz)');
+xlabel('intensity $I$ ($\mathrm{mW}/\mathrm{cm}^2$)','interpreter','latex');
+ylabel('loss rate $\Gamma$ (kHz)','interpreter','latex');
 ylim([0 1.5]);
 
 legend(ps,legStr);
@@ -76,40 +99,37 @@ grid on
 text(.01,.98,flabel,'interpreter','latex','units','normalized',...
     'verticalalignment','cap','fontsize',20);
 
+set(gca,'box','on','fontsize',12);
+
 
 subplot(222);
 
-plot(Bv,Isvec*.1,'ko','markerfacecolor',[.8 .8 .8],'linewidth',2,...
-    'markersize',8);
-xlabel('magnetic field (G)');
-ylabel('saturation intensity (mW/cm^2)');
+
+errorbar(Bv,Isvec,Iserror(:,1),Iserror(:,2),...
+   'o','linewidth',2,'markersize',8,'markerfacecolor',[.8 .8 .8],...
+   'markeredgecolor','k','color','k')
+
+xlabel('magnetic field (G)','interpreter','latex');
+ylabel('saturation intesity $I_s$ ($\mathrm{mW}/\mathrm{cm}^2$)','interpreter','latex');
 grid on
-xlim([202 207.5]);
+set(gca,'box','on','fontsize',12);
+ylim([0 3500]);
 
 subplot(224)
 
-plot(Bv,Gvec,'ko','markerfacecolor',[.8 .8 .8],'linewidth',2,...
-    'markersize',8);
-xlabel('magnetic field (G)');
-ylabel('max loss rate (kHz)');
-grid on
-ylim([0 .002]);
 
-% clear legStr
-% for kk=1:length(lifetimes)
-%     co=cos(kk,:);
-%    errorbar(lifetimes(kk).I0*.1,lifetimes(kk).gamma,lifetimes(kk).gamma_err,...
-%        'o','linewidth',2,'markersize',8,'markerfacecolor',co,...
-%        'markeredgecolor',co*.5)
-%    hold on
-%    legStr{kk}=[num2str(lifetimes(kk).B(1)) 'G'];
-%    
-% end
-% xlabel('intensity (mW/cm^2)');
-% ylabel('rate (kHz)');
-% ylim([0 .6]);
-% legend(legStr,'location','northwest');
-% grid on
+errorbar(Bv,G0vec,G0error(:,1),G0error(:,2),...
+   'o','linewidth',2,'markersize',8,'markerfacecolor',[.8 .8 .8],...
+   'markeredgecolor','k','color','k')
+
+
+
+xlabel('magnetic field (G)','interpreter','latex');
+ylabel('max loss rate (kHz)','interpreter','latex');
+grid on
+ylim([0 1]);
+set(gca,'box','on','fontsize',12);
+
 
 %%  Composite
 
