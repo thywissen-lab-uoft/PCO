@@ -1,5 +1,6 @@
 # PCO
-MATLAB code for running the PCO cameras
+MATLAB code for running the Pixefly QE PCO cameras. This code is not designed to run on different cameras,
+but it could be feasibly altered by someone proficient in the drivers.
 
 
 ### Hardware Requirements
