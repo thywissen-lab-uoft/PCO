@@ -1734,6 +1734,10 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
         data.PWA=camera.Images{1};
         data.PWOA=camera.Images{2};
         
+        if length(Images)>2
+           data.Dark = camera.Images{3}; 
+        end
+        
         zz = zeros(camera.H,camera.W);
         for ff=2:length(camera.Images)
             zz = zz + camera.Images{ff};
@@ -2136,11 +2140,9 @@ end
 %% GUI callbacks of camera functions
     function trigCheckerCB(src,evt)        
         doProcess=0;           
-%                     bgCamMode.UserData
-% get(bgCamMode)
-        % Check if next buffer is filled
+
         if GetBuffStatus(camera,camera.NumAcquired+1)==3      
-            camera.NumAcquired
+%             camera.NumAcquired
             if bgCamMode.SelectedObject.UserData == 48
                 stopCamera(camera.BoardHandle);
                 camera.Images{camera.NumAcquired+1}=double(get(camera.buf_ptrs(camera.NumAcquired+1),'Value'));  
