@@ -33,7 +33,7 @@ for kk=1:length(a.Children)
 end
 
 % Whether to enter debug mode
-doDebug=1;
+doDebug=0;
 
 % Camera properties
 raw_pixel_size=6.45E-6; % Pixelsize on the pixefly cameras
@@ -538,16 +538,18 @@ hbhistoryRight.Position(3:4)=[12 20];
         olddata=dstruct;
         try
             data=load(filename);
+            
+            
             dstruct=data.data;
             dstruct=computeOD(dstruct);
-            updateImages(dstruct);
-            dstruct=performFits(dstruct);
             
+            updateImages(dstruct);
+            
+            dstruct=performFits(dstruct);
+
             [~,inds] = sort(lower(fieldnames(dstruct.Params)));
             params = orderfields(dstruct.Params,inds);  
-%             keyboard
-            
-            
+          
             fnames=fieldnames(params);
             for nn=1:length(fnames)
                   tbl_params.Data{nn,1}=fnames{nn};
@@ -560,10 +562,7 @@ hbhistoryRight.Position(3:4)=[12 20];
                        tbl_params.Data{nn,2}='[struct]'; 
                     end  
             end
-%             
-%            tbl_params.Data=[fieldnames(params), ...
-%                     struct2cell(params)];     
-%                 
+              
             fnames=fieldnames(dstruct.Flags);
                 for nn=1:length(fnames)
                     tbl_flags.Data{nn,1}=fnames{nn};
@@ -578,6 +577,7 @@ hbhistoryRight.Position(3:4)=[12 20];
                 end
                 
         catch ME
+            
             warning(ME.message);
             warning('Unable to load image. Reverting to previous');
             
@@ -1661,7 +1661,7 @@ hDark=imagesc(X,Y,Zdark);
 set(axDark,'box','on','XTick',[],'YTick',[]);
 axis equal tight
 hold on
-caxis([0 100]);
+caxis([0 50]);
 
 % Text label for color limit table on OD image
 cdarklimtext=uicontrol('parent',hpRaw,'units','pixels','string','dark',...
@@ -1672,7 +1672,7 @@ cdarklimtext.Position(2) =35;
 
 htblDark=uitable('parent',hpRaw,'units','pixels','RowName',{},'ColumnName',{},...
     'fontsize',8,'ColumnWidth',{45 45},'columneditable',[true true],...
-    'Data',[0 100],'celleditcallback',@climrawdarkcb);
+    'Data',[0 50],'celleditcallback',@climrawdarkcb);
 htblDark.Position(1:2) = cdarklimtext.Position(1:2)+[30 0];
 htblDark.Position(3:4)=[htblDark.Extent(3) htblDark.Extent(4)];
 
@@ -1694,18 +1694,17 @@ cBarRawDark.Position=[cBarRaw.Position(1) 20 ...
 
 tbl_raw1counts=uitable('parent',hpRaw,'units','pixels','RowName',{},'columnname',{},...
     'ColumnEditable',[false false],'CellEditCallback',@tbl_rawROICB,...
-    'ColumnWidth',{60 80},'FontSize',7,'Data',[1 size(Z,2) 1 size(Z,1)]);
-tbl_raw1counts.Data={'PWA 1',0;'PWOA 1',0; 'Dark', 0};
+    'ColumnWidth',{70 60},'FontSize',7,'Data',[1 size(Z,2) 1 size(Z,1)]);
+tbl_raw1counts.Data={'PWA 1',0;'PWOA 1',0; 'Dark', 0; 'Dark Avg / px',0};
 tbl_raw1counts.Position(3:4)=tbl_raw1counts.Extent(3:4);
-tbl_raw1counts.Position(1:2)=[axDark.Position(1)+axDark.Position(3)+15 60];
-% 
-% 
+tbl_raw1counts.Position(1:2)=[axDark.Position(1)+axDark.Position(3)+5 10];
+
 tbl_raw2counts=uitable('parent',hpRaw,'units','pixels','RowName',{},'columnname',{},...
     'ColumnEditable',[false false],'CellEditCallback',@tbl_rawROICB,...
-    'ColumnWidth',{60 80},'FontSize',7,'Data',[1 size(Z,2) 1 size(Z,1)],'Enable','off');
-tbl_raw2counts.Data={'PWA 2',0;'PWOA 2',0; 'Dark', 0};
+    'ColumnWidth',{70 60},'FontSize',7,'Data',[1 size(Z,2) 1 size(Z,1)],'Enable','off');
+tbl_raw2counts.Data={'PWA 2',0;'PWOA 2',0; 'Dark', 0; 'Dark Avg / px',0};
 tbl_raw2counts.Position(3:4)=tbl_raw2counts.Extent(3:4);
-tbl_raw2counts.Position(1:2)=[axDark.Position(1)+axDark.Position(3)+15 1 ];
+tbl_raw2counts.Position(1:2)=[tbl_raw1counts.Position(1)+tbl_raw1counts.Position(3)+5 10 ];
 
 %% Finish graphics initialization
 
@@ -1734,19 +1733,11 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
         data.PWA=camera.Images{1};
         data.PWOA=camera.Images{2};
         
+        % Add a dark image if present
         if length(camera.Images)>2
            data.Dark = camera.Images{3}; 
         end
-        
-        zz = zeros(camera.H,camera.W);
-        for ff=2:length(camera.Images)
-            zz = zz + camera.Images{ff};
-        end
-        zz = zz/(length(camera.Images)-1);
-        data.PWOA=zz;
-            
-        
-%         keyboard
+
         % Grab the sequence parameters        
         [data.Params,data.Units,data.Flags]=grabSequenceParams2;
 
@@ -1774,6 +1765,10 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
         PWA=data.PWA;
         PWOA=data.PWOA;
         
+        if isfield(data,'Dark')
+           PWA = PWA - data.Dark;
+           PWOA = PWOA - data.Dark;
+        end        
         
         % Apply a gaussianfilter
        if cGaussFilter.Value
@@ -1843,25 +1838,40 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
                 OD = [OD_1; OD_2];
              end            
          end 
-        
-        data.OD=real(single(OD));
+        OD(PWOA<50) = 0;
+        OD(PWA<50) = 0;
+
+        OD = real(OD);
+        OD(isnan(OD))=0;
+        data.OD=single(OD);
     end
 
 
-function updateImages(data)
-    
-          
+function updateImages(data)             
     
     % Update images
     set(hPWOA,'XData',data.X,'YData',data.Y,'CData',data.PWOA);
     set(hPWA,'XData',data.X,'YData',data.Y,'CData',data.PWA);
     set(hImg,'XData',data.X,'YData',data.Y,'CData',data.OD);
     
+    if isfield(data,'Dark')
+        set(hDark,'XData',data.X,'YData',data.Y,'CData',data.Dark);
+    end
+
     NPWOA_1=sum(sum(data.PWOA(1:1024,:)));
     NPWA_1=sum(sum(data.PWA(1:1024,:)));
     
     tbl_raw1counts.Data{1,2} = num2str(NPWA_1,'%.3e');
     tbl_raw1counts.Data{2,2} = num2str(NPWOA_1,'%.3e');
+    
+    if isfield(data,'Dark')
+        NDark_1 = sum(sum(data.Dark(1:1024,:)));
+        NDark_1_avg = NDark_1/(1024*1392);
+        
+        tbl_raw1counts.Data{3,2} = num2str(NDark_1,'%.3e');
+        tbl_raw1counts.Data{4,2} = num2str(NDark_1_avg,'%.3e');
+     
+    end
     
     
     if size(data.PWOA,1)>1024
@@ -1869,10 +1879,25 @@ function updateImages(data)
         NPWA_2=sum(sum(data.PWA(1025:end,:)));        
             
         tbl_raw2counts.Data{1,2} = num2str(NPWA_2,'%.3e');
-        tbl_raw2counts.Data{2,2} = num2str(NPWOA_2,'%.3e');
+        tbl_raw2counts.Data{2,2} = num2str(NPWOA_2,'%.3e');        
+        tbl_raw2counts.Enable = 'on';
+        
+        if isfield(data,'Dark')
+            NDark_2 = sum(sum(data.Dark(1025:end,:)));
+            NDark_2_avg = NDark_2/(1024*1392);
+            tbl_raw2counts.Data{3,2} = num2str(NDark_2,'%.3e');
+            tbl_raw2counts.Data{4,2} = num2str(NDark_2_avg,'%.3e');    
+        else
+              tbl_raw2counts.Data{3,2} = NaN;
+              tbl_raw2counts.Data{4,2} = NaN;           
+        end
+        
     else
         tbl_raw2counts.Data{1,2} = NaN;
         tbl_raw2counts.Data{2,2} = NaN;
+        tbl_raw2counts.Data{3,2} = NaN;
+        tbl_raw2counts.Data{4,2} = NaN;   
+        tbl_raw2counts.Enable = 'off';
     end
 
 
@@ -1970,7 +1995,8 @@ end
 disp('done.');
 end
 
-function data=performFits(data)   
+function data=performFits(data)
+   
 % Use mean wavelength for calculating corss section (simpler)
     lambdaRb=780E-9;lambdaK=770E-9;   % Rb and K wavelengths             
     lambda=mean([lambdaRb lambdaK]);  % mean wavelength      
@@ -2410,12 +2436,15 @@ function dstruct=fitGauss(dstruct)
 end
   
 function fout=gaussfit2D(Dx,Dy,data)
+
  % Ensure data type is double
 data=double(data);Dx=double(Dx);Dy=double(Dy);
 
 % Rescale images for fitting speed (Do this adaptively? or on option?)
 sc=0.4; % Scale factor
 data=imresize(data,sc);Dx=imresize(Dx,sc);Dy=imresize(Dy,sc);
+
+data(isnan(data))=0;
 
 dSmooth=imgaussfilt(data,2);    % Smooth data
 N0=max(max(dSmooth));           % Extract peak, amplitude guess
@@ -2922,7 +2951,9 @@ function camera=initCamStruct
     camera=struct;
     camera.ExposureTime=350;
     camera.CameraMode=17;
-    camera.NumImages=2;
+    camera.NumImages=3;
+%     camera.NumImages=2;
+
     camera.isConnected=0;
     camera.RunStatus=0;
     camera.NumAcquired=0;
