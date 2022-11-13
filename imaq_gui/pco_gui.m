@@ -1734,7 +1734,7 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
         data.PWA=camera.Images{1};
         data.PWOA=camera.Images{2};
         
-        if length(Images)>2
+        if length(camera.Images)>2
            data.Dark = camera.Images{3}; 
         end
         
