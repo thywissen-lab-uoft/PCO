@@ -1769,10 +1769,7 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
 
         PWA=data.PWA;
         PWOA=data.PWOA;
-%         
-        PWA = PWA-50;
-        PWOA= PWOA-50;
-       
+        
         
         % Apply a gaussianfilter
        if cGaussFilter.Value
@@ -2426,6 +2423,9 @@ Z=dSmooth;Z(dSmooth<N0*.5)=0;
 
 % Calculate guesses for center and size
 X=sum(Z,1);Y=sum(Z,2)';             % Get X and Y sum profiles
+
+X(X<0)=0;Y(Y<0)=0;
+
 Nx=sum(X);Ny=sum(Y);                % Get the total number of counts
 Xc=mean(Dx(X>.9*max(X)));           % X center (use >90% SNR)
 Yc=mean(Dy(Y>.9*max(Y)));           % Y center (use >90% SNR)
