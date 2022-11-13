@@ -123,8 +123,6 @@ sq1d = @(c,r1,r2,s,xx) 0.5.*(erf((xx+s-c)./r1)+erf((-xx+s+c)./r2));
 sq2d = @(c1,c2,s1,s2,r1a,r1b,r2a,r2b,xx,yy) ...
     sq1d(c1,r1a,r1b,s1,xx).*sq1d(c2,r2a,r2b,s2,yy);
 
-
-
 % Fit Object
 switch opts.ExciteDir
     

@@ -2,16 +2,18 @@ function pco_gui
 % pco_gui.m
 %
 % Author      : CF Fujiwara
-% Last Edited : 2021/06
 % 
 % This code run the PCO cameras which the lattice experiment uses for
-% absorption imaging along the X and Y lattice directions. The design of
-% this GUI is based upon the original GUI 
+% absorption imaging along the X and Y lattice directions.
 
 %% Load dependencies
 % Add all subdirectories for this m file
 curpath = fileparts(mfilename('fullpath'));
 addpath(curpath);addpath(genpath(curpath))
+
+% Add analysis directory
+analysis_path = fullfile(fileparts(curpath),'analysis');
+addpath(analysis_path);
 
 % Add the SDK MATLAB drivers to the path
 sdk_dir=fullfile(fileparts(curpath), 'pixelfly_plugin_rev3_01_beta');
@@ -29,8 +31,6 @@ for kk=1:length(a.Children)
        end
     end
 end
-% This could probably move or mabye even be sampled from the camera (at
-% least the pixel size).
 
 % Whether to enter debug mode
 doDebug=0;
@@ -81,7 +81,8 @@ set(hF,'Color','w','units','pixels','Name',guiname,...
     'toolbar','none','Tag','GUI','CloseRequestFcn',@closeGUI,...
     'NumberTitle','off','Position',[50 50 1600 800]);
 
-co=get(gca,'colororder');
+% co=get(gca,'colororder');
+co = colororder;
 co=circshift(co,3,1);
 co=[co;co;co];
 
@@ -121,15 +122,27 @@ coNew=brighten([coNew;coNew;coNew],.2);
     end
 
 %% Initialize the image panel
+Htop = 130;         % Settings height
+Hacqbar = 30;       % Acquisition bar height
+
 hp=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
-    'Position',[200 0 hF.Position(3)-200 hF.Position(4)-130],...
+    'Position',[200 0 hF.Position(3)-200 hF.Position(4)-(Htop+Hacqbar)],...
     'bordertype','beveledin');
 
 % Define spacing for images, useful for resizing
 l=80;   % Left gap for fitting and data analysis summary
 
+
+% Size of top row
+
     function resizePlots       
         % Resize the image axis     
+        
+        if (hp.Position(3)<250 || hp.Position(4)<250)
+            
+            return;
+        end
+        
         axImg.Position=[40 110 hp.Position(3)-200 hp.Position(4)-200];        
         
         % Get the aspect ratio of plot objects
@@ -155,6 +168,8 @@ l=80;   % Left gap for fitting and data analysis summary
         set(hAxX,'XLim',axImg.XLim,'XTick',axImg.XTick);
         set(hAxY,'YLim',axImg.YLim,'YTick',axImg.YTick);
         
+    
+        
         % Move the colorbar
         cBar.Position=[hAxX.Position(1) hAxY.Position(2)+hAxY.Position(4)+23 ...
             hAxX.Position(3) 15]; 
@@ -164,8 +179,15 @@ l=80;   % Left gap for fitting and data analysis summary
         % This resize fucntion ensures that the X and Y cut/sum plot has
         % commenserate positioning with respect the actual image shown
         
-        W=hF.Position(3);H=hF.Position(4);      % Grab figure dimensions           
-        hp.Position=[220 1 W-220 H-130];        % Resize image panel        
+        
+        
+        W=hF.Position(3);H=hF.Position(4);      % Grab figure dimensions     
+        
+        if W<300 || H <300
+            return;
+        end
+        
+        hp.Position=[220 1 W-220 H-(Htop+Hacqbar)];        % Resize image panel        
         resizePlots;                            % Resize plots
         
         % Reposition the display ROI and axis equal options
@@ -195,7 +217,7 @@ l=80;   % Left gap for fitting and data analysis summary
         tImageFileFig.Position(1:2)=[136 ...
         hp.Position(4)-tImageFileFig.Position(4)];
         %%%%%% Resize Acquisition Panel %%%%
-        hpAcq.Position(2:3)=[hp.Position(4)+100 hF.Position(3)];
+        hpAcq.Position(2:3)=[hF.Position(4)-hpAcq.Position(4) hF.Position(3)];
         tSaveDir.Position(3)=hpAcq.Position(3)-2;
         hbSWtrig.Position(1)=hpAcq.Position(3)-60;
 
@@ -207,16 +229,18 @@ l=80;   % Left gap for fitting and data analysis summary
         hpAnl.Position(2)=hp.Position(4);
         hpImgProcess.Position(2)=hp.Position(4);
         
-        hpRaw.Position(1:2)=[hF.Position(3)-250 hp.Position(4)];   
-        hpROI.Position(2)=hp.Position(4)-100;
+        
+
+        hpRaw.Position(1:2)=[hpImgProcess.Position(1)+hpImgProcess.Position(3) hp.Position(4)];   
+        hpROI.Position(2)=hF.Position(4)-hpROI.Position(4)-Hacqbar;
         
         %%%%%% Resize Left Panel %%%%%
-        hpFit.Position(4)=hp.Position(4)-100;
+        hpFit.Position(4)=hF.Position(4)-200-Hacqbar;
         drawnow;
     end
 
 % Initialize image axis
-axImg=axes('parent',hp);cla
+axImg=axes('parent',hp,'UserData','OD');cla
 hImg=imagesc(X,Y,Z);
 set(axImg,'box','on','linewidth',.1,'fontsize',10,'units','pixels',...
     'XAxisLocation','top','colormap',colormap(whitejet));
@@ -246,7 +270,7 @@ drawnow;
 
 % X Cut/Sum Axis
 hAxX=axes('box','on','linewidth',1,'fontsize',10,...
-    'XAxisLocation','Bottom','units','pixels','parent',hp);
+    'XAxisLocation','Bottom','units','pixels','parent',hp,'UserData','ODx');
 hAxX.Position=[axImg.Position(1) axImg.Position(2)-l axImg.Position(3) l];
 hold on
 % Add X data data and fit plots
@@ -255,7 +279,7 @@ pXF=plot(X,0*ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2)
 
 % Y Cut/Sum Axis
 hAxY=axes('box','on','linewidth',1,'fontsize',10,'units','pixels',...
-    'YAxisLocation','Right','YDir','Reverse','parent',hp);
+    'YAxisLocation','Right','YDir','Reverse','parent',hp,'UserData','ODy');
 hAxY.Position=[axImg.Position(1)+axImg.Position(3) axImg.Position(2) l axImg.Position(4)];
 
 hold on
@@ -316,9 +340,14 @@ hbSlctLim=uicontrol(hp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
         src.Data=ROI;       
         try
             set(axImg,'XLim',ROI(1:2),'YLim',ROI(3:4));
+            set(axPWA,'XLim',axImg.XLim,'YLim',axImg.YLim);
+            set(axPWOA,'XLim',axImg.XLim,'YLim',axImg.YLim);
+            set(axDark,'XLim',axImg.XLim,'YLim',axImg.YLim);
+
+            
             resizePlots;
             drawnow;
-            pDisp.Position=[ROI(1) ROI(3) ROI(2)-ROI(1) ROI(4)-ROI(3)];           
+%             pDisp.Position=[ROI(1) ROI(3) ROI(2)-ROI(1) ROI(4)-ROI(3)];           
             updateScalebar;
             drawnow;
         catch ab
@@ -331,6 +360,10 @@ hbSlctLim=uicontrol(hp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
        ROI=[1 size(dstruct.PWA,2) 1 size(dstruct.PWOA,1)];
        tbl_dispROI.Data=ROI;
        tbl_dispROICB(tbl_dispROI);
+        set(axPWA,'XLim',axImg.XLim,'YLim',axImg.YLim);
+        set(axPWOA,'XLim',axImg.XLim,'YLim',axImg.YLim);
+        set(axDark,'XLim',axImg.XLim,'YLim',axImg.YLim);
+
        resizePlots;
        drawnow;
     end
@@ -340,6 +373,10 @@ hbSlctLim=uicontrol(hp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
            min(tblROI.Data(:,3)) max(tblROI.Data(:,4))];
        tbl_dispROI.Data=ROI;
        tbl_dispROICB(tbl_dispROI);
+        set(axPWA,'XLim',axImg.XLim,'YLim',axImg.YLim);
+        set(axPWOA,'XLim',axImg.XLim,'YLim',axImg.YLim);
+        set(axDark,'XLim',axImg.XLim,'YLim',axImg.YLim);
+
        resizePlots;
        drawnow;
     end
@@ -501,16 +538,18 @@ hbhistoryRight.Position(3:4)=[12 20];
         olddata=dstruct;
         try
             data=load(filename);
+            
+            
             dstruct=data.data;
             dstruct=computeOD(dstruct);
-            updateImages(dstruct);
-            dstruct=performFits(dstruct);
             
+            updateImages(dstruct);
+            
+            dstruct=performFits(dstruct);
+
             [~,inds] = sort(lower(fieldnames(dstruct.Params)));
             params = orderfields(dstruct.Params,inds);  
-%             keyboard
-            
-            
+          
             fnames=fieldnames(params);
             for nn=1:length(fnames)
                   tbl_params.Data{nn,1}=fnames{nn};
@@ -523,10 +562,7 @@ hbhistoryRight.Position(3:4)=[12 20];
                        tbl_params.Data{nn,2}='[struct]'; 
                     end  
             end
-%             
-%            tbl_params.Data=[fieldnames(params), ...
-%                     struct2cell(params)];     
-%                 
+              
             fnames=fieldnames(dstruct.Flags);
                 for nn=1:length(fnames)
                     tbl_flags.Data{nn,1}=fnames{nn};
@@ -541,6 +577,7 @@ hbhistoryRight.Position(3:4)=[12 20];
                 end
                 
         catch ME
+            
             warning(ME.message);
             warning('Unable to load image. Reverting to previous');
             
@@ -696,7 +733,7 @@ axImg.CLim=climtbl.Data;
 set(axImg,'XLim',tbl_dispROI.Data(1:2),'YLim',tbl_dispROI.Data(3:4));
 %% Initialize Acquisition Panel
 hpAcq=uipanel(hF,'units','pixels','backgroundcolor','w',...
-    'Position',[0 hp.Position(4) hF.Position(3)-150 30]);
+    'Position',[0 hp.Position(4) hF.Position(3)-150 Hacqbar]);
 
 % Connect button
 ttstr='Connect to camera and initialize settings.';
@@ -827,7 +864,7 @@ end
 
 %% ROI Panels
 hpROI=uipanel(hF,'units','pixels','backgroundcolor','w');
-hpROI.Position=[0 hp.Position(4)-100 220 200];
+hpROI.Position=[0 hF.Position(4)-200-Hacqbar 220 200];
 
 % Table of ROIs
 tblROI=uitable(hpROI,'units','pixels','ColumnWidth',{30 30 30 30},...
@@ -871,11 +908,8 @@ tblROI.Position(1:2)=[1 hpROI.Position(4)-tblROI.Position(4)-5];
         end
     end
 %% Fit Results Panel
-% hpFit=uipanel(hF,'units','pixels','backgroundcolor','w');
-% hpFit.Position=[0 0 200 hp.Position(4)-100];
-
 hpFit=uitabgroup(hF,'units','pixels');
-hpFit.Position=[0 0 220 hp.Position(4)-100];
+hpFit.Position=[0 0 220 hF.Position(4)-200-Hacqbar];
 
 tabs(1)=uitab(hpFit,'Title','params','units','pixels');
 tabs(2)=uitab(hpFit,'Title','flags','units','pixels');
@@ -896,30 +930,30 @@ tbl_analysis(1)=uitable(tabs(3),'units','normalized','RowName',{},'ColumnName',{
     'Position',[0 0 1 1],'backgroundcolor',[brighten(coNew(1,:),.5); 1 1 1]);
 %% ROI Settings panel
 hpROISettings=uipanel(hF,'units','pixels','backgroundcolor','w',...
-    'title','ROI','fontsize',6);
-hpROISettings.Position=[220 hp.Position(4) 120 105];
+    'title','roi','fontsize',6);
+hpROISettings.Position=[220 hp.Position(4) 120 Htop];
 
 % Table for number of ROIs
 tblNumROIs=uitable(hpROISettings,'Data',1,'RowName','Num ROIs','columnName',{},...
     'units','pixels','ColumnWidth',{20});
-tblNumROIs.Position=[1 70 tblNumROIs.Extent(3:4)];
+tblNumROIs.Position=[1 hpROISettings.Position(4)-35 tblNumROIs.Extent(3:4)];
 
 % Button for decreasing number of ROIs
 ttsr='Increase the number of analysis ROIs by one.';
 uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
-    'backgroundcolor','w','String',char(10094),'Position',[0 45 20 25],...
+    'backgroundcolor','w','String',char(10094),'Position',[0 tblNumROIs.Position(2)-25 20 25],...
     'callback',{@chROINum '-'},'ToolTipString',ttstr);
 
 % Button for increasing the number of ROIs
 ttstr='Decrease the number of analysis ROIs by one.';
 uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
-    'backgroundcolor','w','String',char(10095),'Position',[20 45 20 25],...
+    'backgroundcolor','w','String',char(10095),'Position',[20 tblNumROIs.Position(2)-25 20 25],...
     'callback',{@chROINum '+'},'ToolTipString',ttstr);
 
 % Button for single full image ROI
 ttstr='Change analysis ROI to a single one the size of the entire sensor.';
-uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
-    'backgroundcolor','w','String','Single Full','Position',[40 45 75 25],...
+b=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
+    'backgroundcolor','w','String','Single Full','Position',[40 tblNumROIs.Position(2)-25 75 25],...
     'callback',{@chROINum 0},'FontSize',10,'ToolTipString',ttstr);
 
 % Callback function for changing number of ROIs
@@ -995,20 +1029,20 @@ uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
 % Button for decreasing ROI selector
 ttstr='Decrease the selected ROI by one';
 uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
-    'backgroundcolor','w','String',char(10094),'Position',[0 5 15 20],....
+    'backgroundcolor','w','String',char(10094),'Position',[0 b.Position(2)-20 15 20],....
     'callback',{@chSelectROI, '-'},'ToolTipString',ttstr)
 
 % Button for GUI selection of ROI
 ttstr='Use mouse clicks to choose the selected analysis ROI.';
 bROISelect=uicontrol(hpROISettings,'style','pushbutton',...
-    'enable','on','backgroundcolor','w','position',[15 5 85 20],...
+    'enable','on','backgroundcolor','w','position',[15 b.Position(2)-20 85 20],...
     'String','Select ROI 1','fontsize',8,'UserData',1,...
     'callback',@selectROICB,'ToolTipString',ttstr);
 
 % Button for increasing ROI selector
 ttstr='Increase the selected ROI by one';
 uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
-    'backgroundcolor','w','String',char(10095),'Position',[100 5 15 20],...
+    'backgroundcolor','w','String',char(10095),'Position',[100 b.Position(2)-20 15 20],...
     'callback',{@chSelectROI, '+'},'ToolTipString',ttstr);
 
 % Callback function for GUI selection of ROI
@@ -1060,7 +1094,7 @@ uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
 hpAnl=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
     'title','analysis','fontsize',6);
 hpAnl.Position=[hpROISettings.Position(1)+hpROISettings.Position(3) ...
-    hp.Position(4) 150 105];
+    hp.Position(4) 155 Htop];
 
 % Refit button
 hbfit=uicontrol('style','pushbutton','string','analyze',...
@@ -1073,40 +1107,12 @@ hbfit.Position=[1 1 50 15];
         dstruct=performFits(dstruct);
     end
 
-% Checkbox for enabling 2D gauss fitting
-cGaussFit=uicontrol('style','checkbox','string','2D gauss',...
-    'units','pixels','parent',hpAnl,'backgroundcolor','w',...
-    'value',1,'Callback',@cbgaussfit);
-cGaussFit.Position=[1 hpAnl.Position(4)-28 75 15];
-
-    function cbgaussfit(src,~)
-        if src.Value
-           cTemp.Enable='on'; 
-           rbCut.Enable='on';
-           cGaussRet.Enable='on';
-        else
-            cTemp.Value=0;
-            cTemp.Enable='off';
-            rbCut.Value=0;
-            rbCut.Enable='off';
-            rbSum.Enable='on';
-            rbSum.Value=1;
-            cGaussRet.Enable='off';
-            cGaussRet.Value=0;            
-            cGaussRetCB(cGaussRet);
-        end
-    end
-
-% Checkbox for single shot temperature analysis
-cTemp=uicontrol('style','checkbox','string','single shot temperature',...
-    'units','pixels','parent',hpAnl,'backgroundcolor','w');
-cTemp.Position=[1 cGaussFit.Position(2)-15 150 15];
 
 % Checkbox for box count analysis.
 cBox=uicontrol('style','checkbox','string','box count',...
     'units','pixels','parent',hpAnl,'backgroundcolor','w',...
     'value',1,'callback',@cBoxCB);
-cBox.Position=[1 cTemp.Position(2)-15 75 15];
+cBox.Position=[1 hpAnl.Position(4)-28 75 15];
 
     function cBoxCB(src,~)
         if src.Value
@@ -1118,7 +1124,7 @@ cBox.Position=[1 cTemp.Position(2)-15 75 15];
         
     end
 
-cBoxBg=uicontrol('style','checkbox','string','sub bkgd?',...
+cBoxBg=uicontrol('style','checkbox','string','sub. bkgd',...
     'units','pixels','parent',hpAnl,'backgroundcolor','w',...
     'fontsize',8,'enable','on','callback',@cBoxBGCB);
 cBoxBg.Position=[70 cBox.Position(2) 75 15];
@@ -1140,7 +1146,7 @@ tblROIbsub=uitable(hpAnl,'units','pixels','ColumnWidth',{30 30 30 30},...
     'CellEditCallback',@chROIbsub);
 tblROIbsub.Position(3)=tblROIbsub.Extent(3);
 tblROIbsub.Position(4)=20;
-tblROIbsub.Position(1:2)=[15 25];
+tblROIbsub.Position(1:2)=[15 cBox.Position(2)-20];
 
 pROIboxsub=rectangle('position',pp,'edgecolor','k','linewidth',1,...
     'visible','off','parent',axImg,'linestyle','-.');
@@ -1177,10 +1183,106 @@ pROIboxsub=rectangle('position',pp,'edgecolor','k','linewidth',1,...
            src.Data(m,n)=evt.PreviousData;
         end
     end
+
+
+% Checkbox for enabling 2D gauss fitting
+cGaussFit=uicontrol('style','checkbox','string','2D gauss',...
+    'units','pixels','parent',hpAnl,'backgroundcolor','w',...
+    'value',1,'Callback',@cbgaussfit);
+cGaussFit.Position=[1 tblROIbsub.Position(2)-17 75 15];
+
+    function cbgaussfit(src,~)
+        if src.Value
+           cTemp.Enable='on'; 
+           rbCut.Enable='on';
+           cGaussRet.Enable='on';
+           
+           cDFG.Value = 0;
+           cDFG.Enable = 'off';
+            cBM.Value = 0;
+            cBM.Enable = 'off';
+            
+           cBMpX.Enable='off'; 
+            cBMpY.Enable='off'; 
+            cBMdX.Enable='off'; 
+            cBMdY.Enable='off'; 
+            cBMpX.Value = 0;
+            cBMpY.Value = 0;
+            cBMdX.Value = 0;
+            cBMdY.Value = 0;
+
+        else
+            cDFG.Enable = 'on';
+            cBM.Enable = 'on';
+%             
+            
+            cTemp.Value=0;
+            cTemp.Enable='off';
+            rbCut.Value=0;
+            rbCut.Enable='off';
+            rbSum.Enable='on';
+            rbSum.Value=1;
+            cGaussRet.Enable='off';
+            cGaussRet.Value=0;            
+            cGaussRetCB(cGaussRet);
+        end
+    end
+
+% Checkbox for single shot temperature analysis
+cTemp=uicontrol('style','checkbox','string','gauss temp.',...
+    'units','pixels','parent',hpAnl,'backgroundcolor','w');
+cTemp.Position=[70 cGaussFit.Position(2) 150 15];
+
+
+
+cDFG=uicontrol('style','checkbox','string','DFG long TOF',...
+    'units','pixels','parent',hpAnl,'backgroundcolor','w');
+cDFG.Position=[1 cGaussFit.Position(2)-15 150 15];
+
+cBM=uicontrol('style','checkbox','string','2D Band Map',...
+    'units','pixels','parent',hpAnl,'backgroundcolor','w','callback',@cbbmfit);
+cBM.Position=[1 cDFG.Position(2)-15 150 15];
+
+cBMpX=uicontrol('style','checkbox','string','pX',...
+    'units','pixels','parent',hpAnl,'backgroundcolor','w','fontsize',6,'Enable','off');
+cBMpX.Position=[20 cBM.Position(2)-15 50 15];
+
+cBMpY=uicontrol('style','checkbox','string','pY',...
+    'units','pixels','parent',hpAnl,'backgroundcolor','w','fontsize',6,'Enable','off');
+cBMpY.Position=[50 cBM.Position(2)-15 50 15];
+
+cBMdX=uicontrol('style','checkbox','string','dX',...
+    'units','pixels','parent',hpAnl,'backgroundcolor','w','fontsize',6,'Enable','off');
+cBMdX.Position=[80 cBM.Position(2)-15 50 15];
+
+cBMdY=uicontrol('style','checkbox','string','dY',...
+    'units','pixels','parent',hpAnl,'backgroundcolor','w','fontsize',6,'Enable','off');
+cBMdY.Position=[110 cBM.Position(2)-15 50 15];
+
+    function cbbmfit(src,~)       
+        if src.Value
+            cBMpX.Enable='on'; 
+            cBMpY.Enable='on'; 
+            cBMdX.Enable='on'; 
+            cBMdY.Enable='on'; 
+            cBMpX.Value = 1;
+            cBMpY.Value = 1;
+
+        else
+            cBMpX.Enable='off'; 
+            cBMpY.Enable='off'; 
+            cBMdX.Enable='off'; 
+            cBMdY.Enable='off'; 
+            cBMpX.Value = 0;
+            cBMpY.Value = 0;
+            cBMdX.Value = 0;
+            cBMdY.Value = 0;
+        end
+    end
 %% Camera Settings Panel
 hpAcq2=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
     'title','acquisition','fontsize',6);
-hpAcq2.Position=[hpAnl.Position(1)+hpAnl.Position(3) hp.Position(4) 150 105];
+hpAcq2.Position=[hpAnl.Position(1)+hpAnl.Position(3) hp.Position(4) 150 Htop];
 
 tbl_cama=uitable('parent',hpAcq2,'units','pixels','RowName',{},...
     'ColumnName',{},'fontsize',8,'ColumnWidth',{90,40},...
@@ -1192,7 +1294,7 @@ tbl_cama.Data={...
     'num images', camera.NumImages};
 
 tbl_cama.Position(3:4)=tbl_cama.Extent(3:4);
-tbl_cama.Position(1:2)=[5 50];
+tbl_cama.Position(1:2)=[5 65];
 
     function chCamSettingsCB(src,evt)
        disp('Changing camera settings');
@@ -1224,15 +1326,15 @@ tbl_cama.Position(1:2)=[5 50];
 % Button group for deciding what the X/Y plots show
 bgCamMode = uibuttongroup(hpAcq2,'units','pixels','backgroundcolor','w','BorderType','None',...
     'SelectionChangeFcn',@chCamModeCB);  
-bgCamMode.Position(3:4)=[150 40];
+bgCamMode.Position(3:4)=[150 56];
 bgCamMode.Position(1:2)=[5 5];
     
 % Radio buttons for cuts vs sum
 rbSingleAcq=uicontrol(bgCamMode,'Style','radiobutton','String','single exp (0x10)',...
-    'Position',[0 30 150 20],'units','pixels','backgroundcolor','w',...
+    'Position',[0 36 150 20],'units','pixels','backgroundcolor','w',...
     'Value',1,'UserData',16);
 rbDoubleAcq=uicontrol(bgCamMode,'Style','radiobutton','String','double exp (0x20)',...
-    'Position',[0 15 150 20],'units','pixels','backgroundcolor','w',...
+    'Position',[0 18 150 20],'units','pixels','backgroundcolor','w',...
     'UserData',32);
 rbSingleVideo=uicontrol(bgCamMode,'Style','radiobutton','String','single video (0x30)',...
     'Position',[0 0 150 20],'units','pixels','backgroundcolor','w',...
@@ -1248,7 +1350,7 @@ rbSingleVideo=uicontrol(bgCamMode,'Style','radiobutton','String','single video (
 %% Camera Settings Panel
 hpSet=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
     'title','optics','fontsize',6);
-hpSet.Position=[hpAcq2.Position(1)+hpAcq2.Position(3) hp.Position(4) 150 105];
+hpSet.Position=[hpAcq2.Position(1)+hpAcq2.Position(3) hp.Position(4) 150 Htop];
 
 bgCam = uibuttongroup('units','pixels','backgroundcolor','w',...
     'position',[0 75 150 20],...
@@ -1299,14 +1401,14 @@ tbl_cam.Position(1:2)=[1 0];
 
 % This is alpha stage, perhaps enable filtering? or fringe removal?
 hpImgProcess=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
-    'title','processing');
-hpImgProcess.Position=[hpSet.Position(1)+hpSet.Position(3) hp.Position(4) 200 105]; 
+    'title','processing','fontsize',6);
+hpImgProcess.Position=[hpSet.Position(1)+hpSet.Position(3) hp.Position(4) 200 Htop]; 
 
 % Method of calculating OD
 bgODFieldText=uicontrol('style','text','parent',hpImgProcess,...
-    'String','field : ','backgroundcolor','w','position',[0 70 30 20]);
+    'String','field : ','backgroundcolor','w','position',[0 hpImgProcess.Position(4)-35 30 20]);
 bgODField = uibuttongroup('units','pixels','backgroundcolor','w',...
-    'position',[30 75 180 20],...
+    'position',[30 hpImgProcess.Position(4)-30 180 20],...
     'SelectionChangedFcn',@chOD,'parent',hpImgProcess,'BorderType','None');        
 % Create radio buttons in the button group.
 uicontrol(bgODField,'Style','radiobutton','String','Detect',...
@@ -1436,39 +1538,183 @@ uicontrol('parent',hpImgProcess,'units','pixels',...
     end
 
 %% Raw Image Panel
-hpRaw=uipanel('parent',hF,'units','pixels','backgroundcolor','w');
-hpRaw.Position=[hF.Position(3)-250 hp.Position(4) 250 100];
+hpRaw=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
+    'title','raw images','fontsize',6);
+hpRaw.Position=[hpImgProcess.Position(1)+hpImgProcess.Position(3) hp.Position(4) 800 Htop];
 
-axPWA=axes('parent',hpRaw,'units','pixels');
-axPWA.Position=[0 2 125 73];
+Wraw = Htop-18;
+
+% Axes for images of raw data
+axPWA=axes('parent',hpRaw,'units','pixels','UserData','PWA');
+axPWA.Position=[5 3 Wraw Wraw];
 hPWA=imagesc(X,Y,Z);
 set(axPWA,'box','on','XTick',[],'YTick',[]);
 axis equal tight
+% pDisp=rectangle('position',[1 1 1392 1024],'edgecolor','k','linewidth',2);
+hold on
+caxis([0 1000]);
 
-pDisp=rectangle('position',[1 1 1392 1024],'edgecolor','r','linewidth',2);
+axPWOA=axes('parent',hpRaw,'units','pixels','UserData','PWOA');
 
-axPWOA=axes('parent',hpRaw,'units','pixels');
-axPWOA.Position=[125 2 125 73];
+axPWOA.Position=[Wraw+15 3 Wraw Wraw];
 hPWOA=imagesc(X,Y,Z);
 set(axPWOA,'box','on','XTick',[],'YTick',[]);
 axis equal tight
+hold on
+caxis([0 1000]);
 
-cLightAuto=uicontrol('parent',hpRaw,'style','checkbox','string','auto-scale?',...
-    'units','pixels','Position',[0 80 90 20],'backgroundcolor','w');
+
+cBarRaw=colorbar('fontsize',6,'units','pixels','orientation','horizontal');
+      cBarRaw.Position=[axPWOA.Position(1)+axPWOA.Position(3)+10 90 ...
+            120 10]; 
+
+% Text label for color limit table on OD image
+crawlimtext=uicontrol('parent',hpRaw,'units','pixels','string','light',...
+    'fontsize',8,'backgroundcolor','w','style','text');
+crawlimtext.Position(3:4)=crawlimtext.Extent(3:4);
+crawlimtext.Position(1) = axPWOA.Position(1)+axPWOA.Position(3)+5;
+crawlimtext.Position(2) =60;
+
+
 
 htblLight=uitable('parent',hpRaw,'units','pixels','RowName',{},'ColumnName',{},...
-    'fontsize',8,'ColumnWidth',{50 50},'columneditable',[true true],...
-    'Data',[0 1E6]);
-htblLight.Position=[140 75 htblLight.Extent(3) htblLight.Extent(4)];
+    'fontsize',8,'ColumnWidth',{45 45},'columneditable',[true true],...
+    'Data',[0 1000],'celleditcallback',@climrawcb);
+htblLight.Position(1:2) = crawlimtext.Position(1:2)+[30 0];
+htblLight.Position(3:4)=[htblLight.Extent(3) htblLight.Extent(4)];
+
+% Callback for changing the color limits table
+    function climrawcb(src,evt)
+        try
+            axPWA.CLim=htblLight.Data;
+            axPWOA.CLim=htblLight.Data;
+        catch exception
+            warning('Bad OD color limits given. Using old value.');
+            src.Data(evt.Indices)=evt.PreviousData;
+        end
+    end
+
+
+% 
+% % Table for changing display limits
+% tbl_rawROI=uitable('parent',hpRaw,'units','pixels','RowName',{},'columnname',{},...
+%     'ColumnEditable',[true true true true],'CellEditCallback',@tbl_rawROICB,...
+%     'ColumnWidth',{30 30 30 30},'FontSize',8,'Data',[1 size(Z,2) 1 size(Z,1)],'enable','off');
+% tbl_rawROI.Position(3:4)=tbl_rawROI.Extent(3:4);
+% tbl_rawROI.Position(1:2)=[crawlimtext.Position(1) crawlimtext.Position(2)-30];
+
+% 
+% 
+%     function tbl_rawROICB(src,evt)
+%         ROI=src.Data;        % Grab the new ROI     
+%         % Check that the data is numeric
+%         if sum(~isnumeric(ROI)) || sum(isinf(ROI)) || sum(isnan(ROI))
+%             warning('Incorrect data type provided for ROI.');
+%             src.Data(evt.Indices(2))=evt.PreviousData;
+%             return;
+%         end        
+%         ROI=round(ROI);      % Make sure this ROI are integers   
+% 
+%         % Keep the ROI within image bounds (this is hardcoded and could be
+%         % changed if we ever implement hardware ROI but want to keep 
+%         % absolute pixel positions relative to total sensor.)
+%         if ROI(2)<=ROI(1) || ROI(4)<=ROI(3)
+%            warning('Bad ROI specification given.');
+%            ROI(evt.Indices(2))=evt.PreviousData;
+%         end       
+%         if ROI(1)<1; ROI(1)=1; end       
+%         if ROI(3)<1; ROI(3)=1; end   
+%         if ROI(4)>size(dstruct.PWA,1); ROI(4)=size(dstruct.PWA,1);end       
+%         if ROI(2)>size(dstruct.PWA,2); ROI(2)=size(dstruct.PWA,2);end       
+%         src.Data=ROI;       
+%         try
+%             set(axPWA,'XLim',ROI(1:2),'YLim',ROI(3:4));
+%             set(axPWOA,'XLim',ROI(1:2),'YLim',ROI(3:4));  
+%             drawnow;
+%         catch ab
+%             warning('Unable to change display ROI.');
+%             src.Data(evt.Indices)=evt.PreviousData;
+%         end
+%     end
+
+% % % Control stuff
+% cAutoROI=uicontrol('parent',hpRaw,'style','checkbox','string','match ROI to OD?',...
+%     'units','pixels','backgroundcolor','w','value',1,'callback',@cAutoROIcb);
+% cAutoROI.Position(1:2) = tbl_rawROI.Position(1:2)+[0 -20];
+% cAutoROI.Position(3:4) = cAutoROI.Extent(3:4)+[30 0];
+% 
+% 
+%     function cAutoROIcb(src,evt)
+%         if src.Value
+%            tbl_rawROI.Enable = 'on';
+%         else
+%             tbl_rawROI.Enable='off';
+%         end
+%         
+%     end
+
+% Dark Image Axis
+axDark=axes('parent',hpRaw,'units','pixels','UserData','Dark');
+axDark.Position=[htblLight.Position(1)+htblLight.Position(3)+10 3 Wraw Wraw];
+Zdark = Z + normrnd(50,10,size(Z,1),size(Z,2));
+hDark=imagesc(X,Y,Zdark);
+set(axDark,'box','on','XTick',[],'YTick',[]);
+axis equal tight
+hold on
+caxis([0 50]);
+
+% Text label for color limit table on OD image
+cdarklimtext=uicontrol('parent',hpRaw,'units','pixels','string','dark',...
+    'fontsize',8,'backgroundcolor','w','style','text');
+cdarklimtext.Position(3:4)=cdarklimtext.Extent(3:4);
+cdarklimtext.Position(1) = crawlimtext.Position(1);
+cdarklimtext.Position(2) =35;
+
+htblDark=uitable('parent',hpRaw,'units','pixels','RowName',{},'ColumnName',{},...
+    'fontsize',8,'ColumnWidth',{45 45},'columneditable',[true true],...
+    'Data',[0 50],'celleditcallback',@climrawdarkcb);
+htblDark.Position(1:2) = cdarklimtext.Position(1:2)+[30 0];
+htblDark.Position(3:4)=[htblDark.Extent(3) htblDark.Extent(4)];
+
+% Callback for changing the color limits table
+    function climrawdarkcb(src,evt)
+        try
+            axDark.CLim=htblDark.Data;
+        catch exception
+            warning('Bad color limits given. Using old value.');
+            src.Data(evt.Indices)=evt.PreviousData;
+        end
+    end
+
+
+
+cBarRawDark=colorbar('fontsize',6,'units','pixels','orientation','horizontal');
+cBarRawDark.Position=[cBarRaw.Position(1) 20 ...
+    120 10]; 
+
+tbl_raw1counts=uitable('parent',hpRaw,'units','pixels','RowName',{},'columnname',{},...
+    'ColumnEditable',[false false],'CellEditCallback',@tbl_rawROICB,...
+    'ColumnWidth',{70 60},'FontSize',7,'Data',[1 size(Z,2) 1 size(Z,1)]);
+tbl_raw1counts.Data={'PWA 1',0;'PWOA 1',0; 'Dark', 0; 'Dark Avg / px',0};
+tbl_raw1counts.Position(3:4)=tbl_raw1counts.Extent(3:4);
+tbl_raw1counts.Position(1:2)=[axDark.Position(1)+axDark.Position(3)+5 10];
+
+tbl_raw2counts=uitable('parent',hpRaw,'units','pixels','RowName',{},'columnname',{},...
+    'ColumnEditable',[false false],'CellEditCallback',@tbl_rawROICB,...
+    'ColumnWidth',{70 60},'FontSize',7,'Data',[1 size(Z,2) 1 size(Z,1)],'Enable','off');
+tbl_raw2counts.Data={'PWA 2',0;'PWOA 2',0; 'Dark', 0; 'Dark Avg / px',0};
+tbl_raw2counts.Position(3:4)=tbl_raw2counts.Extent(3:4);
+tbl_raw2counts.Position(1:2)=[tbl_raw1counts.Position(1)+tbl_raw1counts.Position(3)+5 10 ];
 
 %% Finish graphics initialization
+
+
 % Resize Everything to look good
 hF.SizeChangedFcn=@SizeChangedFcn;
 SizeChangedFcn(hF,[]);
 updateScalebar;
 drawnow;
 %% Initialize Camera
-
 
 % Initialize the trig checker
 trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
@@ -1483,39 +1729,15 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
         data.X=1:camera.W;
         data.Y=1:camera.H;
         data.BitDepth=camera.BitDepth;
-       
-        % Grab the images
-%         if ismember(camera.CameraMode,[16 17])
-%             data.PWA=camera.Images{1};
-%             data.PWOA=camera.Images{2};                     
-%         else
-%             data.PWA=camera.Images{1}(1:1024,:);
-%             data.PWA(:,:,2)=camera.Images{1}(1025:end,:);
-% 
-%             data.PWOA=camera.Images{2}(1:1024,:);        
-%             data.PWOA(:,:,2)=camera.Images{2}(1025:end,:);
-%             
-%             data.X=1:size(data.PWOA,2);
-%             data.Y=1:size(data.PWOA,1);
-%         end
-        
         
         data.PWA=camera.Images{1};
         data.PWOA=camera.Images{2};
         
+        % Add a dark image if present
         if length(camera.Images)>2
            data.Dark = camera.Images{3}; 
         end
-        
-        zz = zeros(camera.H,camera.W);
-        for ff=2:length(camera.Images)
-            zz = zz + camera.Images{ff};
-        end
-        zz = zz/(length(camera.Images)-1);
-        data.PWOA=zz;
-            
-        
-%         keyboard
+
         % Grab the sequence parameters        
         [data.Params,data.Units,data.Flags]=grabSequenceParams2;
 
@@ -1543,6 +1765,10 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
         PWA=data.PWA;
         PWOA=data.PWOA;
         
+        if isfield(data,'Dark')
+           PWA = PWA - data.Dark;
+           PWOA = PWOA - data.Dark;
+        end        
         
         % Apply a gaussianfilter
        if cGaussFilter.Value
@@ -1612,19 +1838,67 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
                 OD = [OD_1; OD_2];
              end            
          end 
-        
+        OD(PWOA<50) = 0;
+        OD(PWA<50) = 0;
+
+        OD = real(OD);
+        OD(isnan(OD))=0;
         data.OD=single(OD);
     end
 
 
-function updateImages(data)
-    
-          
+function updateImages(data)             
     
     % Update images
     set(hPWOA,'XData',data.X,'YData',data.Y,'CData',data.PWOA);
     set(hPWA,'XData',data.X,'YData',data.Y,'CData',data.PWA);
     set(hImg,'XData',data.X,'YData',data.Y,'CData',data.OD);
+    
+    if isfield(data,'Dark')
+        set(hDark,'XData',data.X,'YData',data.Y,'CData',data.Dark);
+    end
+
+    NPWOA_1=sum(sum(data.PWOA(1:1024,:)));
+    NPWA_1=sum(sum(data.PWA(1:1024,:)));
+    
+    tbl_raw1counts.Data{1,2} = num2str(NPWA_1,'%.3e');
+    tbl_raw1counts.Data{2,2} = num2str(NPWOA_1,'%.3e');
+    
+    if isfield(data,'Dark')
+        NDark_1 = sum(sum(data.Dark(1:1024,:)));
+        NDark_1_avg = NDark_1/(1024*1392);
+        
+        tbl_raw1counts.Data{3,2} = num2str(NDark_1,'%.3e');
+        tbl_raw1counts.Data{4,2} = num2str(NDark_1_avg,'%.3e');
+     
+    end
+    
+    
+    if size(data.PWOA,1)>1024
+        NPWOA_2=sum(sum(data.PWOA(1025:end,:)));
+        NPWA_2=sum(sum(data.PWA(1025:end,:)));        
+            
+        tbl_raw2counts.Data{1,2} = num2str(NPWA_2,'%.3e');
+        tbl_raw2counts.Data{2,2} = num2str(NPWOA_2,'%.3e');        
+        tbl_raw2counts.Enable = 'on';
+        
+        if isfield(data,'Dark')
+            NDark_2 = sum(sum(data.Dark(1025:end,:)));
+            NDark_2_avg = NDark_2/(1024*1392);
+            tbl_raw2counts.Data{3,2} = num2str(NDark_2,'%.3e');
+            tbl_raw2counts.Data{4,2} = num2str(NDark_2_avg,'%.3e');    
+        else
+              tbl_raw2counts.Data{3,2} = NaN;
+              tbl_raw2counts.Data{4,2} = NaN;           
+        end
+        
+    else
+        tbl_raw2counts.Data{1,2} = NaN;
+        tbl_raw2counts.Data{2,2} = NaN;
+        tbl_raw2counts.Data{3,2} = NaN;
+        tbl_raw2counts.Data{4,2} = NaN;   
+        tbl_raw2counts.Enable = 'off';
+    end
 
 
     % Update data string
@@ -1721,7 +1995,8 @@ end
 disp('done.');
 end
 
-function data=performFits(data)   
+function data=performFits(data)
+   
 % Use mean wavelength for calculating corss section (simpler)
     lambdaRb=780E-9;lambdaK=770E-9;   % Rb and K wavelengths             
     lambda=mean([lambdaRb lambdaK]);  % mean wavelength      
@@ -2161,12 +2436,15 @@ function dstruct=fitGauss(dstruct)
 end
   
 function fout=gaussfit2D(Dx,Dy,data)
+
  % Ensure data type is double
 data=double(data);Dx=double(Dx);Dy=double(Dy);
 
 % Rescale images for fitting speed (Do this adaptively? or on option?)
 sc=0.4; % Scale factor
 data=imresize(data,sc);Dx=imresize(Dx,sc);Dy=imresize(Dy,sc);
+
+data(isnan(data))=0;
 
 dSmooth=imgaussfilt(data,2);    % Smooth data
 N0=max(max(dSmooth));           % Extract peak, amplitude guess
@@ -2176,6 +2454,9 @@ Z=dSmooth;Z(dSmooth<N0*.5)=0;
 
 % Calculate guesses for center and size
 X=sum(Z,1);Y=sum(Z,2)';             % Get X and Y sum profiles
+
+X(X<0)=0;Y(Y<0)=0;
+
 Nx=sum(X);Ny=sum(Y);                % Get the total number of counts
 Xc=mean(Dx(X>.9*max(X)));           % X center (use >90% SNR)
 Yc=mean(Dy(Y>.9*max(Y)));           % Y center (use >90% SNR)
@@ -2193,7 +2474,7 @@ data2=data;xx2=xx;yy2=yy;
 
 % Elminate data points below a threshold to reduce # points to fit
 th=0.1;
-th=-1;
+th=.05;
 xx2(Zguess<th*N0)=[];yy2(Zguess<th*N0)=[];data2(Zguess<th*N0)=[];
 
 xx2(isinf(data2))=[];
@@ -2670,7 +2951,9 @@ function camera=initCamStruct
     camera=struct;
     camera.ExposureTime=350;
     camera.CameraMode=17;
-    camera.NumImages=2;
+    camera.NumImages=3;
+%     camera.NumImages=2;
+
     camera.isConnected=0;
     camera.RunStatus=0;
     camera.NumAcquired=0;

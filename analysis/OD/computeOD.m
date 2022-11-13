@@ -19,6 +19,10 @@ for kk=1:length(data)
     PWA=double(data(kk).PWA);
     PWOA=double(data(kk).PWOA);    
     
+    if isfield(data,'Dark')
+        PWA = PWA - double(data(kk).Dark);
+        PWOA = PWOA - double(data(kk).Dark);
+    end    
 
     if opts.GaussFilter
         s=opts.GaussFilterSigma;
@@ -99,13 +103,21 @@ for kk=1:length(data)
         end           
     end       
 
+        
     % Create and store the optical density
     OD=log(PWOA./PWA);
 
     % Calculate optical density if high field imaging
     if opts.HighField
         OD=log(abs(PWOA./(2*PWA-PWOA))); %deets on labbook entry 2021.06.26 
-    end     
+    end   
+    if isfield(data,'Dark')
+        OD(PWOA<50) = 0;
+        OD(PWA<50) = 0;
+    end
+    OD = real(OD);
+    OD(isnan(OD))=0;
+    
     
     rotMode = 'bicubic'; % 'nearest','bilinear','bicubic'
     rotCrop = 'crop'; % 'crop' or 'loose'
