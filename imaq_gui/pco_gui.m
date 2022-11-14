@@ -1594,65 +1594,6 @@ htblLight.Position(3:4)=[htblLight.Extent(3) htblLight.Extent(4)];
         end
     end
 
-
-% 
-% % Table for changing display limits
-% tbl_rawROI=uitable('parent',hpRaw,'units','pixels','RowName',{},'columnname',{},...
-%     'ColumnEditable',[true true true true],'CellEditCallback',@tbl_rawROICB,...
-%     'ColumnWidth',{30 30 30 30},'FontSize',8,'Data',[1 size(Z,2) 1 size(Z,1)],'enable','off');
-% tbl_rawROI.Position(3:4)=tbl_rawROI.Extent(3:4);
-% tbl_rawROI.Position(1:2)=[crawlimtext.Position(1) crawlimtext.Position(2)-30];
-
-% 
-% 
-%     function tbl_rawROICB(src,evt)
-%         ROI=src.Data;        % Grab the new ROI     
-%         % Check that the data is numeric
-%         if sum(~isnumeric(ROI)) || sum(isinf(ROI)) || sum(isnan(ROI))
-%             warning('Incorrect data type provided for ROI.');
-%             src.Data(evt.Indices(2))=evt.PreviousData;
-%             return;
-%         end        
-%         ROI=round(ROI);      % Make sure this ROI are integers   
-% 
-%         % Keep the ROI within image bounds (this is hardcoded and could be
-%         % changed if we ever implement hardware ROI but want to keep 
-%         % absolute pixel positions relative to total sensor.)
-%         if ROI(2)<=ROI(1) || ROI(4)<=ROI(3)
-%            warning('Bad ROI specification given.');
-%            ROI(evt.Indices(2))=evt.PreviousData;
-%         end       
-%         if ROI(1)<1; ROI(1)=1; end       
-%         if ROI(3)<1; ROI(3)=1; end   
-%         if ROI(4)>size(dstruct.PWA,1); ROI(4)=size(dstruct.PWA,1);end       
-%         if ROI(2)>size(dstruct.PWA,2); ROI(2)=size(dstruct.PWA,2);end       
-%         src.Data=ROI;       
-%         try
-%             set(axPWA,'XLim',ROI(1:2),'YLim',ROI(3:4));
-%             set(axPWOA,'XLim',ROI(1:2),'YLim',ROI(3:4));  
-%             drawnow;
-%         catch ab
-%             warning('Unable to change display ROI.');
-%             src.Data(evt.Indices)=evt.PreviousData;
-%         end
-%     end
-
-% % % Control stuff
-% cAutoROI=uicontrol('parent',hpRaw,'style','checkbox','string','match ROI to OD?',...
-%     'units','pixels','backgroundcolor','w','value',1,'callback',@cAutoROIcb);
-% cAutoROI.Position(1:2) = tbl_rawROI.Position(1:2)+[0 -20];
-% cAutoROI.Position(3:4) = cAutoROI.Extent(3:4)+[30 0];
-% 
-% 
-%     function cAutoROIcb(src,evt)
-%         if src.Value
-%            tbl_rawROI.Enable = 'on';
-%         else
-%             tbl_rawROI.Enable='off';
-%         end
-%         
-%     end
-
 % Dark Image Axis
 axDark=axes('parent',hpRaw,'units','pixels','UserData','Dark');
 axDark.Position=[htblLight.Position(1)+htblLight.Position(3)+10 3 Wraw Wraw];
