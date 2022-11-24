@@ -48,6 +48,9 @@ nPlotMax = 8;
 clear hFs
 j=1;
 
+lifetime_exp = struct;
+lifetime_pow = struct;
+
 
    Bvec =  zeros(size(runs,1),1);
    fouts={};
@@ -149,136 +152,71 @@ for nn=1:length(data)
     titstr = [titstr ' ' num2str(round(B,2)) ' G (' num2str(round(B_real,2)) ' G)'];
     title(titstr,'interpreter','none')
     ylim([5e3 2e5]);
-%% Fit one
-%     
-%     myfit = fittype('A0+A1*exp(-t/tau)','coefficients',{'A0','A1','tau'},...
-%         'independent','t');
-%     fitopt = fitoptions(myfit);  
-%     
-%     tau_guess = max(X)/2;
-%     A1_guess = range(Y);
-%     A0_guess = min(Y);
-%     
-%     fitopt.StartPoint = [A0_guess A1_guess tau_guess];
-%     fitopt.Lower = [0 A0_guess 0];    
-%     fout = fit(X,Y,myfit,fitopt);    
-%          
-%     xx=linspace(min(X),max(X),100);
-%     pF=plot(xx,feval(fout,xx),'k-','linewidth',1);
-%     
-%     lStr=['$ \tau = ' num2str(round(fout.tau,3)) '~\mathrm{ms}$' ...
-%         newline ...
-%         '$A_0 = ' num2str(round(fout.A0,3),'%.3e') '$' ... 
-%         newline ...
-%         '$A_1 = ' num2str(round(fout.A1,3),'%.3e') '$'];
-%     legend(pF,lStr,'location','best','interpreter','latex');  
-%     
-%     c = confint(fout);
-%     tauerror = abs(0.5*(c(1,3)-c(2,3)));
-%     A1error = abs(0.5*(c(1,2)-c(2,2)));
-% 
-%     fouts{nn} = fout;
-%     tauvec(nn) = fout.tau;
-%     A1vec(nn) = fout.A1;
-% 
-%     tau_err_vec(nn) = tauerror;
-%     A1_err_vec(nn) = A1error;
-    
+
     
     %% Fit with background decay
-%     
-%        myfit = fittype('exp(-t/62.5)*(A0+A1*exp(-t/tau))','coefficients',{'A0','A1','tau'},...
-%         'independent','t');
-%     fitopt = fitoptions(myfit);  
-%     
-%     tau_guess = max(X)/2;
-%     A1_guess = range(Y);
-%     A0_guess = min(Y);
-%     
-%     fitopt.StartPoint = [A0_guess A1_guess tau_guess];
-%     fitopt.Lower = [0 A0_guess 0];    
-%     fout = fit(X,Y,myfit,fitopt);    
-%          
-%     xx=linspace(min(X),max(X),100);
-%     pF=plot(xx,feval(fout,xx),'k-','linewidth',1);
-%     
-%     lStr=['$ \tau = ' num2str(round(fout.tau,3)) '~\mathrm{ms}$' ...
-%         newline ...
-%         '$A_0 = ' num2str(round(fout.A0,3),'%.3e') '$' ... 
-%         newline ...
-%         '$A_1 = ' num2str(round(fout.A1,3),'%.3e') '$'];
-%     legend(pF,lStr,'location','best','interpreter','latex');  
-%     
-%     c = confint(fout);
-%     tauerror = abs(0.5*(c(1,3)-c(2,3)));
-%     A1error = abs(0.5*(c(1,2)-c(2,2)));
-% 
-%     fouts{nn} = fout;
-%     tauvec(nn) = fout.tau;
-%     A1vec(nn) = fout.A1;
-% 
-%     tau_err_vec(nn) = tauerror;
-%     A1_err_vec(nn) = A1error; 
-%     
-%     gamma(nn) = 1/fout.tau;
-%     gamma_err(nn) = (1/(fout.tau))^2*tauerror;
-% 
-
-%% Fit with power law
     
-%        myfit = fittype('A1*(t/(P*tau)+1)^(-P)','coefficients',{'A1','P','tau'},...
-%         'independent','t');
-%     fitopt = fitoptions(myfit);  
-%     
-%     tau_guess = median(X);
-%     A1_guess = max(Y);
-%     P_guess = 2;
-%     
-%     fitopt.StartPoint = [A1_guess P_guess tau_guess];
-%     fitopt.Lower = [0 0 0];    
-%     fout = fit(X,Y,myfit,fitopt);
-%          
-%     xx=linspace(min(X),max(X),100);
-%     pF=plot(xx,feval(fout,xx),'k-','linewidth',1);
-%     
-%     lStr=['$ \tau = ' num2str(round(fout.tau,3)) '~\mathrm{ms}$' ...
-%         newline ...
-%         '$A_1 = ' num2str(round(fout.A1,3),'%.3e') '$' ... 
-%         newline ...
-%         '$P = ' num2str(round(fout.P,3),'%.3e') '$'];
-%     legend(pF,lStr,'location','best','interpreter','latex');  
-%     
-%     c = confint(fout);
-%     tauerror = abs(0.5*(c(1,3)-c(2,3)));
-%     Perror = abs(0.5*(c(1,2)-c(2,2)));
-%     A1error = abs(0.5*(c(1,1)-c(2,1)));
-% 
-%     fouts{nn} = fout;
-%     tauvec(nn) = fout.tau;
-%     Pvec(nn) = fout.P;
-%     A1vec(nn) = fout.A1;
-% 
-%     tau_err_vec(nn) = tauerror;
-%     A1_err_vec(nn) = A1error;
-%     P_err_vec(nn) = Perror;
-%     
-%     gamma(nn) = 1/fout.tau;
-%     gamma_err(nn) = (1/(fout.tau))^2*tauerror;
-%     
-    %% Fit with power law w/ single photon decay
-%     
-       myfit = fittype('A1*(exp(t/(P*62.5))*(1+62.5/tau)-62.5/tau)^(-P)','coefficients',{'A1','P','tau'},...
+    myfit = fittype('exp(-t/62.5)*(A0+A1*exp(-t/tau))',...
+        'coefficients',{'A0','A1','tau'},...
         'independent','t');
     fitopt = fitoptions(myfit);  
+    
+    tau_guess = max(X)/2;
+    A1_guess = range(Y);
+    A0_guess = min(Y);
+    
+    fitopt.StartPoint = [A0_guess A1_guess tau_guess];
+    fitopt.Lower = [0 A0_guess 0];    
+    fout = fit(X,Y,myfit,fitopt);    
+         
+    xx=linspace(min(X),max(X),100);
+    pF=plot(xx,feval(fout,xx),'k--','linewidth',1);
+    
+    lStr=['$ \tau = ' num2str(round(fout.tau,3)) '~\mathrm{ms}$' ...
+        newline ...
+        '$A_0 = ' num2str(round(fout.A0,3),'%.3e') '$' ... 
+        newline ...
+        '$A_1 = ' num2str(round(fout.A1,3),'%.3e') '$'];
+    legend(pF,lStr,'location','best','interpreter','latex');  
+    
+    c = confint(fout);
+    tauerror = abs(0.5*(c(1,3)-c(2,3)));
+    A1error = abs(0.5*(c(1,2)-c(2,2)));
+
+    fouts{nn} = fout;
+    tauvec(nn) = fout.tau;
+    A1vec(nn) = fout.A1;
+
+    tau_err_vec(nn) = tauerror;
+    A1_err_vec(nn) = A1error; 
+    
+    gamma(nn) = 1/fout.tau;
+    gamma_err(nn) = (1/(fout.tau))^2*tauerror;
+    
+    lifetime_exp.B(nn) = B_real;
+    lifetime_exp.tau(nn) = fout.tau;
+    lifetime_exp.tau_err(nn) = tauerror;
+    lifetime_exp.gamma(nn) = 1/fout.tau;
+    lifetime_exp.gamma_err(nn) = (1/(fout.tau))^2*tauerror;
+    lifetime_exp.fits{nn} = fout;
+    lifetime_exp.A1(nn) = fout.A1;
+    lifetime_exp.A1_err(nn) = A1error;
+
+
+    %% Fit with power law w/ single photon decay
+%     
+    fit_powerlaw_w_scattering = fittype('A1*(exp(t/(P*62.5))*(1+62.5/tau)-62.5/tau)^(-P)',...
+        'coefficients',{'A1','P','tau'},...
+        'independent','t');
+    fitopt = fitoptions(fit_powerlaw_w_scattering);  
     
     tau_guess = median(X);
     A1_guess = max(Y);
     P_guess = 6;
     
     fitopt.StartPoint = [A1_guess P_guess tau_guess];
-    fitopt.Lower = [min(Y) 2 0];
-%      fitopt.Upper = [max(Y)*2 7 100];
-    fout = fit(X,Y,myfit,fitopt);
+    fitopt.Lower = [min(Y) 0 0];
+    fout = fit(X,Y,fit_powerlaw_w_scattering,fitopt);
          
     xx=linspace(min(X),max(X),100);
     pF=plot(xx,feval(fout,xx),'k-','linewidth',1);
@@ -307,64 +245,22 @@ for nn=1:length(data)
     gamma(nn) = 1/fout.tau;
     gamma_err(nn) = (1/(fout.tau))^2*tauerror;
     
-     %% Fit with power law w/ non decaying background
-%     
-%        myfit = fittype('A0 + A1*(t/(tau)+1)^(-P)','coefficients',{'A0','P','tau','A1'},...
-%         'independent','t');
-%     fitopt = fitoptions(myfit);  
-%     
-%     tau_guess = median(X);
-%     A1_guess = max(Y);
-%     A0_guess = 10^4;min(Y);
-%     P_guess = 2;
-%     
-%     fitopt.StartPoint = [A0_guess P_guess tau_guess A1_guess];
-%     fitopt.Lower = [0 0 0 0];    
-%     fout = fit(X,Y,myfit,fitopt);
-%          
-%     xx=linspace(min(X),max(X),100);
-%     pF=plot(xx,feval(fout,xx),'k-','linewidth',1);
-%     
-%     lStr=['$ \tau = ' num2str(round(fout.tau,3)) '~\mathrm{ms}$' ...
-%         newline ...
-%         '$A_0 = ' num2str(round(fout.A0,3),'%.3e') '$' ... 
-%         newline ...
-%         '$A_1 = ' num2str(round(fout.A1,3),'%.3e') '$' ... 
-%         newline ...
-%         '$P = ' num2str(round(fout.P,3),'%.3e') '$'];
-%     legend(pF,lStr,'location','best','interpreter','latex');  
-%     
-%     c = confint(fout);
-%     tauerror = abs(0.5*(c(1,3)-c(2,3)));
-%     Perror = abs(0.5*(c(1,2)-c(2,2)));
-%     A0error = abs(0.5*(c(1,1)-c(2,1)));
-%     A1error = abs(0.5*(c(1,4)-c(2,4)));
-% 
-%     fouts{nn} = fout;
-%     tauvec(nn) = fout.tau;
-%     Pvec(nn) = fout.P;
-%     A0vec(nn) = fout.A0;
-%     A1vec(nn) = fout.A1;
-% 
-%     tau_err_vec(nn) = tauerror;
-%     A1_err_vec(nn) = A1error; 
-%     
-%     gamma(nn) = 1/fout.tau;
-%     gamma_err(nn) = (1/(fout.tau))^2*tauerror;
 
-
+    lifetime_pow.B(nn) = B_real;
+    lifetime_pow.tau(nn) = fout.tau;
+    lifetime_pow.tau_err(nn) = tauerror;
+    lifetime_pow.P(nn) = fout.P;
+    lifetime_pow.P_err(nn) = Perror;
+    lifetime_pow.gamma(nn) = 1/fout.tau;
+    lifetime_pow.gamma_err(nn) = (1/(fout.tau))^2*tauerror;
+    lifetime_pow.fits{nn} = fout;
+    lifetime_pow.A1(nn) = fout.A1;
+    lifetime_pow.A1_err(nn) = A1error;
+ 
 end
 
-%% Collate data
-lifetime = struct;
-lifetime.B = Bvec;
-lifetime.tau = tauvec;
-lifetime.tau_err = tau_err_vec;
 
-lifetime.gamma = gamma;
-lifetime.gamma_err = gamma_err;
-lifetime.fits = fouts;
-
+lifetime = lifetime_pow;
 %% Scattering length
 
 abg = 166.978;
@@ -390,8 +286,9 @@ hF_a.Position=[100 200 1200 300];
 
 
 subplot(141);
-errorbar(Bvec,tauvec,tau_err_vec,'ko','markerfacecolor','k',...
+errorbar(lifetime_pow.B,lifetime_pow.tau,lifetime_pow.tau_err,'ko','markerfacecolor','k',...
     'markersize',8);
+
 xlabel('magnetic field (G)');
 ylabel(['tau (ms)']);
 
@@ -401,7 +298,7 @@ text(5,5,pow_str,'units','pixels','horizontalalignment','left',...
 ylim([0,25])
 set(gca,'xgrid','on','ygrid','on','box','on');
 subplot(142);
-errorbar(Bvec,gamma,gamma_err,'ko','markerfacecolor','k',...
+errorbar(lifetime_pow.B,lifetime_pow.gamma,lifetime_pow.gamma_err,'ko','markerfacecolor','k',...
     'markersize',8);
 xlabel('magnetic field (G)');
 ylabel(['1/tau (1/ms)']);
@@ -414,7 +311,7 @@ text(min(get(gca,'XLim')),1/62.5,'single photon 62.5 ms','units',...
 
 set(gca,'xgrid','on','ygrid','on','box','on');
 subplot(143);
-errorbar(Bvec,Pvec,P_err_vec,'ko','markerfacecolor','k',...
+errorbar(lifetime_pow.B,lifetime_pow.P,lifetime_pow.P_err,'ko','markerfacecolor','k',...
     'markersize',8);
 xlabel('magnetic field (G)');
 ylabel(['P (arb.)']);
@@ -423,7 +320,7 @@ ylim([0 10]);
 hold on
 
 subplot(144);
-errorbar(Bvec,A1vec,A1_err_vec,'ko','markerfacecolor','k',...
+errorbar(lifetime_pow.B,lifetime_pow.A1,lifetime_pow.A1_err,'ko','markerfacecolor','k',...
     'markersize',8);
 xlabel('magnetic field (G)');
 ylabel(['N_A (10^5)']);
@@ -434,15 +331,19 @@ ylim([0 yL(2)]);
 
 
 %% UPload data
-doUpload = 0;
+doUpload = 1;
 
-GDrive_root = 'G:\My Drive\Lattice Shared\SharedData\2022 PA experiment\11_01 dipole trap lifetime\lifetimes_powerlawfit';
+GDrive_root = 'G:\My Drive\Lattice Shared\SharedData\2022 PA experiment\11_01 dipole trap lifetime\lifetimes';
 
 if  doUpload && exist(GDrive_root,'dir')   
-    gFile = [GDrive_root filesep out_name]; 
+%     gFile = [GDrive_root filesep 'lifetime']; 
 
-    save(gFile,'lifetime');
+    gFile = [GDrive_root filesep 'lifetime_pow']; 
+    save(gFile,'lifetime_pow');
 
+    gFile = [GDrive_root filesep 'lifetime_exp']; 
+    save(gFile,'lifetime_exp');
+    
     saveas(hF_a,[GDrive_root filesep 'lifetime_summary_w_background_scattering.png'])
     
     for jj=1:length(hFs)

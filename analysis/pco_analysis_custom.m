@@ -36,7 +36,7 @@ gauss_neg_single=0;
 gauss_double = 0;
 expdecay = 0;
 
-lorentz_neg_single=0;    
+lorentz_neg_single=1;    
 lorentz_neg_double=0;  
 
 lorentz_single=0;
@@ -475,8 +475,8 @@ end
         xC=X(ind);
         
         % Assign guess
-        xC1 = -44.13;
-        xC2 = -44;
+        xC1 = -43.5;
+        xC2 = -43.7;
 %         G=[A/2 20 xC1 A 20 xC2 bg];        
         G=[A/2 0.2 xC1 A 0.2 xC2 bg];
         

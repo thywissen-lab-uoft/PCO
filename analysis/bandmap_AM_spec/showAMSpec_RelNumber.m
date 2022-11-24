@@ -312,7 +312,7 @@ hold on
 p2 = plot(Uvec,freqEdge,'k-','linewidth',2);
 set(hax2,'box','on','linewidth',1,'fontsize',10,...
     'xgrid','on','ygrid','on');
-xlabel('lattice depth (1054Er)');
+xlabel('lattice depth (1054nm Er)');
 ylabel('\Delta_{31} (kHz)');
 
 pData1 = plot(Ufit1,fout1.x1,'ro','markerfacecolor','r','markersize',8,'linewidth',1);

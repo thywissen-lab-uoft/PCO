@@ -67,10 +67,10 @@ end
 
 % Defautl variable to plot against
 % pco_xVar = 'pulse_time';
-pco_xVar = 'K_probe_pwr';
+pco_xVar = 'rf_freq_HF_shift';
 
 % Should the analysis attempt to automatically find the xvariable?
-pco_autoXVar = 1;
+pco_autoXVar = 0;
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit = 1;
@@ -112,11 +112,11 @@ doErfFit      = 0;
 % Band map fit
 % Fit to a square band map, this includes the vertical and horizontal
 % excited bands
-doBMFit = 0;
+doBMFit = 1;
 
 % Fermi-Fit
 % Fit a DFG in long time of flight
-doFermiFitLong = 1;     
+doFermiFitLong = 0;     
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Custom Analyses
@@ -136,10 +136,10 @@ doLandauZener       =  0;
 doRamanSpec   = 0;   
 
 % Band Map Fit and Analysis
-doBMFit_AM   = 0; doBMFit_AM_Dir = 'V';
+doBMFit_AM   = 0; doBMFit_AM_Dir = 'H';
 doBMFit_AM_Spec  = 0; 
 
-doCustom_BM = 0;
+doCustom_BM = 1;
 
 % Custom Box counts
 doCustom       =  0;          % Custom Box Count
@@ -333,11 +333,17 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % ROI = [810 970 420 580]; %XDT Rb after evap 15ms 
 
 %    ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
+% 
 
-% ROI = [830 930 860 940;    
+% 15 ms XT SG
+% Nbox = 5;
+% ROI = [830 930 860 960;    
 %     830 930 780 860;
-%     830 930 700 780;
+%     830 930 690 760;
+%     830 930 610 690;
+%     830 930 230 320;
 %     ];
+% ROI = ROI(1:Nbox,:);
 
 % ROI=[800 960 390 500;
 %        800 960 500 610]; % 15 ms  xcam,XDT F SG
@@ -358,7 +364,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %      ROI=[390 800 680 1000]; % 15 ms BM TOF y cam
 
 %   ROI=[412 755 552 778]; % 10 ms BM TOF y cam
-% %   ROI=[412 755 700 1000]; % 15 ms BM TOF y cam
+%   ROI=[412 755 700 1000]; % 15 ms BM TOF y cam
 
 
 %  ROI = [830 940 230 300;
@@ -380,11 +386,11 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %    800 950 1228 2040];   % XDT full TOF\
 
 
-% ROI=[800 950 475 630;
-%     800 950 1540 1695];   % XDT 15ms tof high field
+ROI=[800 950 475 630;
+    800 950 1540 1695];   % XDT 15ms tof high field
 
-ROI=[800 950 680 830;
-                800 950 1750 1900];  % XDT 21ms tof high field
+% ROI=[800 950 680 830;
+%                 800 950 1750 1900];  % XDT 21ms tof high field
 
 % 
 %  ROI=[760 1000 590 830;
@@ -398,8 +404,8 @@ ROI=[800 950 680 830;
 % % 
 % ROI=[800 950 1700 1800];   % XDT 20 ms TOF
 % % % 
-%  ROI = [800 950 1520 1630;
-%       800 950 490 600];   %  band map 15 ms TOF  7box, 9 box
+%  ROI = [800 950 1520 1700;
+%       800 950 490 620];   %  band map 15 ms TOF  7box, 9 box
 
 % most commonly used
 % ROI=[770 970 450 650;
@@ -443,6 +449,7 @@ end
 %     ROI=[800 960 700 870;
 %         800 960 870 1000];   % XDT  TOF 25 ms evaporation ZOOM
 % % end
+% ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% FLUORESCENE %%%%%%%%%%%%
 %ROI = [200 1200 1 800];
@@ -1097,17 +1104,17 @@ if doAnimate && doSave
 % %     % Color limits
 %     animateOpts.CLim=[0 0.5;
 %         0 0.5];   
-    animateOpts.CLim=[0 .2;
-        0 1]; 
-%      animateOpts.CLim=[0 .2;
-%         0 .2]; 
+%     animateOpts.CLim=[0 1;
+%         0 1]; 
+     animateOpts.CLim=[0 .2;
+        0 .2]; 
 %     animateOpts.CLim=[0 .2;
 %         0 .5]; 
 % 
 %     animateOpts.CLim=[0 2;
 %         0 .2]; 
 
-%     animateOpts.CLim=[-.1 5];   
+%     animateOpts.CLim=[-.1 4];   
 
     if doFermiFitLong
         animateOpts.CLim=[0 .8;0 .8];

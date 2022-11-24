@@ -1838,11 +1838,11 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
                 OD = [OD_1; OD_2];
              end            
          end 
-        OD(PWOA<50) = 0;
-        OD(PWA<50) = 0;
+        %OD(PWOA<50) = 0;
+        %OD(PWA<50) = 0;
 
         OD = real(OD);
-        OD(isnan(OD))=0;
+%         OD(isnan(OD))=0;
         data.OD=single(OD);
     end
 

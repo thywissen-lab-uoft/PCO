@@ -53,7 +53,7 @@ set(gca,'fontsize',12,'linewidth',1,'box','on','xgrid','on','ygrid','on');
 % Y Limits
 yL = get(gca,'YLim');
 ylim(yL);
-% ylim([0.05 0.4]);
+ylim([0 yL(2)]);
 
 % X Limits
 xL = get(gca,'XLim');
