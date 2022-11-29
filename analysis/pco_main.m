@@ -66,8 +66,8 @@ end
 % display properties.
 
 % Defautl variable to plot against
-% pco_xVar = 'pulse_time';
-pco_xVar = 'rf_freq_HF_shift';
+pco_xVar = 'pulse_time';
+% pco_xVar = 'rf_freq_HF_shift';
 
 % Should the analysis attempt to automatically find the xvariable?
 pco_autoXVar = 0;
@@ -386,8 +386,8 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %    800 950 1228 2040];   % XDT full TOF\
 
 
-ROI=[800 950 475 630;
-    800 950 1540 1695];   % XDT 15ms tof high field
+% ROI=[800 950 475 630;
+%     800 950 1540 1695];   % XDT 15ms tof high field
 
 % ROI=[800 950 680 830;
 %                 800 950 1750 1900];  % XDT 21ms tof high field
@@ -408,8 +408,8 @@ ROI=[800 950 475 630;
 %       800 950 490 620];   %  band map 15 ms TOF  7box, 9 box
 
 % most commonly used
-% ROI=[770 970 450 650;
-%        770 970 1510 1710];   %  band map 15 ms  
+ROI=[770 970 450 650;
+       770 970 1510 1710];   %  band map 15 ms  
 % ROI = ROI(1,:); % 9 only 
 %ROI = ROI(2,:); % 7 only
 

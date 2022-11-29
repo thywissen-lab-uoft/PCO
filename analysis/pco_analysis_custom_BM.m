@@ -60,6 +60,11 @@ y_Lbl{30}     = 'N7/N9';
 
 %%%%%%%%%% relative excited
 y_Lbl{31}     = 'Ne/Ntot';
+
+y_Lbl{32}     = 'Ns/Ntot';
+
+
+y_Lbl{33}     = 'Ns';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%% Choose what to plot %%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -75,7 +80,7 @@ y_Lbl{31}     = 'Ne/Ntot';
 
 p_inds=[02,04,05,01,25];
 
-p_inds=[01,02,25,31];
+p_inds=[01,02,25,31,32,33,4];
 
 % % Excitations to 9
 % p_inds = [03,06,08,15,16,17,25];
@@ -382,6 +387,14 @@ Y(30).Y          = N7./N9;
 Y(31).YName      = y_Lbl{31};
 Y(31).FigName    = 'bm_custom_Ne_ratio';
 Y(31).Y          = (N7-N7s+N9-N9s)./(N7+N9);
+
+Y(32).YName      = y_Lbl{32};
+Y(32).FigName    = 'bm_custom_Ns_ratio';
+Y(32).Y          = (N7s+N9s)./(N7+N9);
+
+Y(33).YName      = y_Lbl{33};
+Y(33).FigName    = 'bm_custom_Ns';
+Y(33).Y          = (N7s+N9s);
 
 % Assign to output
 custom_data_bm.Y = Y;
