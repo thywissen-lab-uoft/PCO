@@ -228,7 +228,7 @@ set(gca,'xgrid','on','ygrid','on','box','on','linewidth',1,...
 
 
 %% UPload data
-doUpload = 1;
+doUpload = 0;
 
 GDrive_root = 'G:\My Drive\Lattice Shared\SharedData\Composite S-wave RF';
 

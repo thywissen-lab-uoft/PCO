@@ -1,4 +1,3 @@
-
 %% Introduction
 % These analyses represent our swave anaysis at the end period of 2021.
 
@@ -9,7 +8,6 @@ data_set_name = 'swave_rf_1';
 % 200 Er
 
 if isequal(data_set_name,'swave_rf_1')
-
     runs=[
         2021 09 24 02
         2021 09 24 08
@@ -127,6 +125,11 @@ nPlotMax = 6;
 clear hFs
 j=1;
 for nn=1:length(data)   
+    titstr = [num2str(runs(nn,1)) '/' num2str(runs(nn,2)) '/' ...
+        num2str(runs(nn,3)) ' R' num2str(runs(nn,4))];
+
+    
+    
     myco = cmaps(nn,:);
 
     % X Data
@@ -152,7 +155,7 @@ for nn=1:length(data)
         hFs(j)=figure(100+floor(nn/nPlotMax));
         clf
         hFs(j).Color='w';
-        hFs(j).Position=[100 50 800 400];
+        hFs(j).Position=[100 50 600 600];
         hFs(j).Name = [data_label '_' num2str(j)];
         co=get(gca,'colororder');
          t=uicontrol('style','text','string',ystr,'units','pixels',...
@@ -165,7 +168,7 @@ for nn=1:length(data)
     
     % Make Axis and Plot Data
     subplot(3,2,mod(nn-1,nPlotMax)+1);
-    errorbar(ux,Yu(:,1),Yu(:,2),'o','markerfacecolor',myco,...
+    pData=errorbar(ux,Yu(:,1),Yu(:,2),'o','markerfacecolor',myco,...
         'markeredgecolor',myco*.5,'color',myco,...
         'linewidth',1,'markersize',6);    
     hold on
@@ -173,8 +176,6 @@ for nn=1:length(data)
         'fontsize',8);
     xlabel(xstr);
     ylabel(ystr);    
-    
-    title(num2str(runs(nn,:)))
     
     % Perform the Fit
     if isequal(fit_type{nn},'gauss')
@@ -226,7 +227,7 @@ for nn=1:length(data)
                 
         all_freqs1(nn) = freq1;
         all_sigma1(nn) = fouts{nn}.s1;
-        all_A1(nn) = fouts{nn}.A0;
+        all_A1(nn) = fouts{nn}.A1;
         
         all_B(nn) = rf2B(freq0*1e3,-7/2,-5/2) ;
         
@@ -238,10 +239,15 @@ for nn=1:length(data)
         all_B_err(nn) = fouts{nn}.s0*dBdf;   
         
         tt=linspace(min(X),max(X),1000);
-        pF=plot(tt,feval(fouts{nn},tt),'k-','linewidth',1);
-%         text(.98,.98,str,'units','normalized','verticalalignment','cap',...
-%             'horizontalalignment','right','interpreter','latex','fontsize',8); 
+        pF=plot(tt-freq0,feval(fouts{nn},tt),'k-','linewidth',1);        
+        pData.XData = pData.XData-freq0;
+
+        xlabel('delta freq (kHz)');
+        titstr = [titstr ' ' num2str(round(all_B(nn),2)) ' G'];
     end
+    
+    title(titstr);
+
             
     data_out(nn).Directory = dirNames{nn};
     data_out(nn).X = X;
@@ -257,6 +263,8 @@ data_process.s0 = all_sigma0;
 data_process.s1 = all_sigma1;
 data_process.B = all_B;
 data_process.B_err = all_B_err;
+data_process.A0 = all_A0;
+data_process.A1 = all_A1;
 
 
 %% Plot the differential frequencies
@@ -282,6 +290,52 @@ xlim([round(min(all_B)-1,1) round(max(all_B)+1,1)]);
 
 set(gca,'xgrid','on','ygrid','on','box','on','linewidth',1,...
     'fontsize',10);
+
+%% Plot the amplitudes
+
+hf1=figure(111);
+clf
+hf1.Color='w';
+hf1.Position = [100 100 500 400];
+co = get(gca,'colororder');
+
+errorbar(all_B,all_A1./all_A0,...
+    [],[],...
+    [],[],...
+    'o','markerfacecolor',co(1,:),...
+    'markeredgecolor','k','color','k',...
+    'linewidth',2,'markersize',8); 
+
+xlabel('magnetic field (G)');
+ylabel('A1/A0 (kHz)');
+
+ylim([0 1]);
+
+set(gca,'xgrid','on','ygrid','on','box','on','linewidth',1,...
+    'fontsize',10);
+
+%% Plot the amplitudes
+
+hf1=figure(112);
+clf
+hf1.Color='w';
+hf1.Position = [100 100 500 400];
+co = get(gca,'colororder');
+
+Bvec = linspace(195,225,1e3);
+
+plot(Bvec,feshbach_97(Bvec),'b-','linewidth',2);
+hold on
+plot(Bvec,feshbach_95(Bvec),'r-','linewidth',2);
+
+ylim([-200 400]);
+
+legend({'97','95'});
+
+set(gca,'xgrid','on','ygrid','on','box','on','linewidth',1,...
+    'fontsize',10);
+xlabel('magnetic field (G)');
+ylabel('scattering length (a_0)');
 
 
 %% UPload data
