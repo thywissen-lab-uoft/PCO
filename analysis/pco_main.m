@@ -155,8 +155,8 @@ doRabiContrast = 0;
 % Raman Common Mode Detuning
 doWavemeter    = 0;
 doCavity       = 0;
-doVortexLock   = 0;
-
+doVortexLock   = 1;
+doPAPD          = 1;
 %% GDrive Settings
 GDrive_root = 'G:\My Drive\Lattice Shared\LabData';
 doUpload = 1;       % Upload to google drive?
@@ -651,6 +651,16 @@ if doVortexLock
     end
 end
     
+%% PA PD
+if doPAPD
+    atomdata = PD_Pulse_analysis(atomdata);
+    PAopts = struct;
+    PAopts.FigLabel = FigLabel;
+    
+    [hF_PD] = plotPAPD(atomdata,pco_xVar,PAopts);
+    if doSave;saveFigure(hF_PD,'PD',saveOpts);end
+
+end
 
 %% Box Count
 % This section of code computes the box counts on all your data and ROIs.
