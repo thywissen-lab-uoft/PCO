@@ -75,7 +75,7 @@ for nn=1:length(data)
     % Get Magnetic Field
 %     B=[data(nn).Source.Params.HF_FeshValue_Final_Lattice];
 %     B(isnan(B))=[];
-%     Bunq=unique(B);
+     Bunq=unique(fields);
 %     B=Bunq(1);
 B= fields(nn);
     

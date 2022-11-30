@@ -45,7 +45,28 @@ w0 = 400*1e-6; % in m
 
 % Data Label for Saving
 data_label =['lattice_pa_lifetime_power_204_G'];
+%% 11/29/2022
+% 203 G, 200 Er (ish).
+% Lattice PA lifetime
 
+runs=[
+        2022 11 29 07;
+        2022 11 29 08;
+        2022 11 29 09;
+
+    ];
+    
+%  Magnetic Fields
+fields = [203]; 
+
+% Optical Powers
+powers = [.33]';
+
+% Beam Waist
+w0 = 400*1e-6; % in m
+
+% Data Label for Saving
+data_label =['lattice_pa_lifetime_power_203_G'];
 %% Load the data
 file_name = 'custom_data_bm.mat';
 [all_data,dirNames,dirDates] = loadBulk(runs,file_name);
@@ -80,7 +101,7 @@ for nn=1:length(data)
     myco = cmaps(nn,:);
     B= fields(nn);
 
-    if length(Bunq)>1
+    if length(unique(B))>1
        warning('more than one magnetic field given'); 
     end 
     Bvec(nn) = B(1);
