@@ -1,20 +1,20 @@
 
 %% 11/24/2022
 
-    runs=[
-            2022 11 24 10;
-            2022 11 24 11;
-            2022 11 24 12;
-            2022 11 24 13;
-            2022 11 24 14;
-            2022 11 24 15;
-            2022 11 24 16;
-            2022 11 25 2;
-            2022 11 25 3;
-            2022 11 25 4;
-        ];
-    
-    fields = [204 205 206 207 208 209 205 204 205 206];
+runs=[
+        2022 11 24 10;
+        2022 11 24 11;
+        2022 11 24 12;
+        2022 11 24 13;
+        2022 11 24 14;
+        2022 11 24 15;
+        2022 11 24 16;
+        2022 11 25 2;
+        2022 11 25 3;
+        2022 11 25 4;
+    ];
+
+fields = [204 205 206 207 208 209 205 204 205 206];
     
 data_label =['lattice_pa_lifetime'];
 
@@ -24,14 +24,14 @@ w0 = 400; % Waist in um
 
 %% 11/24/2022 Select
 
-    runs=[
- 
-            2022 11 24 13 207;
-            2022 11 24 14 208;
-            2022 11 25 2 204;
-            2022 11 25 3 205;
-            2022 11 25 4 206;
-        ];
+runs=[
+
+        2022 11 24 13 207;
+        2022 11 24 14 208;
+        2022 11 25 2 204;
+        2022 11 25 3 205;
+        2022 11 25 4 206;
+    ];
     
 fields = runs(:,end);   
 runs=runs(:,1:4);
@@ -40,14 +40,21 @@ data_label =['lattice_pa_lifetime'];
 powers = [1.16]';
 w0 = 400; % Waist in um
 
+%% 12/06/2022 30 uW or so
 
-%% Magnetic Field
-% We saved the variable PA_field_close to be HF_FeshValue + 2.35*zshim+0.11
-% as the magnetic field. zshim is 3.
-%
-% We know that this gives a frequency larger than the measured RF
-% singlon spin flip for 75 by 5 kHz. You can use this information to
-% calculate our actual magnetic field.
+runs    =[ 
+        2022 12 06 9 206;
+        2022 12 06 10 205;
+        2022 12 06 11 204;
+
+        ];
+    
+fields = runs(:,end);   
+runs=runs(:,1:4);
+data_label =['lattice_pa_lifetime_30uW'];
+
+powers = [0.026]';
+w0 = 400; % Waist in um
 
 %% Load the data
 
@@ -57,7 +64,8 @@ data = [all_data.custom_data_bm];
 
 %% Plot and Analyze
 
-outdata = struct;
+% output data
+out = struct;
 
 cmaps = hsv(length(data));
 nPlotMax = 8;
@@ -71,18 +79,20 @@ doFit = 1;
 
 for nn=1:length(data)      
     myco = cmaps(nn,:);
-
-    % Get Magnetic Field
-%     B=[data(nn).Source.Params.HF_FeshValue_Final_Lattice];
-%     B(isnan(B))=[];
-     Bunq=unique(fields);
-%     B=Bunq(1);
-B= fields(nn);
     
-    if length(Bunq)>1
-       warning('more than one magnetic field given'); 
-    end 
-    Bvec(nn) = B(1);
+    P = [data(nn).Source.Params];
+    
+    if isfield(P,'PA_field')
+        Bunq=unique([P.PA_field]);        
+        if length(Bunq)>1
+            error('more than one magnetic field given'); 
+        end 
+        B = Bunq(1);
+    else
+        B = fields(nn);
+    end
+
+    out(nn).B = B;
     
     % X Data
     X = data(nn).X;
@@ -102,6 +112,13 @@ B= fields(nn);
         Yu(kk,1)=mean(Y(inds));
         Yu(kk,2)=std(Y(inds));       
     end 
+    
+    out(nn).X = X;
+    out(nn).Y = Y;
+    out(nn).Xu = ux;
+    out(nn).Yu = Yu(:,1);
+    out(nn).Yu_std = Yu(:,2);
+
     
     % Make a new figure if necessary
     if ~mod(nn-1,nPlotMax)
@@ -134,69 +151,30 @@ B= fields(nn);
     titstr = [num2str(runs(nn,1)) '.' num2str(runs(nn,2)) '.'  num2str(runs(nn,3)) ...
         '_R' num2str(runs(nn,4))];
     
-    
-%     set(gca,'XScale','log');
-    
-%     set(gca,'YScale','log');    
-      set(gca,'YScale','linear');    
+      
+    set(gca,'YScale','linear');    
 
     titstr = [titstr ' ' num2str(round(B,2)) ' G'];
     title(titstr,'interpreter','none')
-    
-    if nn==1
-       xlim([0 1.5]);
-       ylim([6e4 1e5]);
-    end
-    
-    if nn==2
-        xlim([0 1.5]);
-        ylim([7e4 1.2e5]);
-    end
-    
-    if nn==3
-        xlim([0 .08]);
-        ylim([1e5 1.5e5]);
-    end
 
-    if nn==4
-        xlim([0 .15]);
-        ylim([1e5 1.5e5]);
-    end
     
-    if nn==5
-        xlim([0 .7]);
-        ylim([1e5 1.5e5]);
-    end
-    
-    %% Fit with background decay
-%     
-%     tt=linspace(0,max(X),1000);
-%     plot(tt,7e4+2e4*exp(-tt/0.5));
-    
+    % Fit with background decay
     doFit=1;
-    if doFit
-        
-        if nn==3
-           i = [X>0.1];
-           X(i)=[];
-           Y(i)=[];
-        end
-    
+    if doFit    
         myfit = fittype('(A0+A1*exp(-t/tau))',...
             'coefficients',{'A0','A1','tau'},...
             'independent','t');
         fitopt = fitoptions(myfit);  
-        tau_guesses = [.5 .5 .02 .05 .3];
-        tau_guess= tau_guesses(nn);
-%         tau_guess = max(X)/2;
+        
+        tau_guess = max(X)/2;
         A1_guess = range(Yu(:,1));
         A0_guess = min(Yu(:,1));
 
         fitopt.StartPoint = [A0_guess A1_guess tau_guess];
         fitopt.StartPoint = [A0_guess A1_guess tau_guess];
 
-        fitopt.Lower = [A0_guess-1e4 0 0];   
-        fitopt.Upper = [A0_guess+1e4 A1_guess+2e4 2];    
+        fitopt.Lower = [A0_guess-2e4 0 0];   
+        fitopt.Upper = [A0_guess+2e4 A1_guess+2e4 20];    
 
         fout = fit(X,Y,myfit,fitopt);    
 
@@ -213,59 +191,46 @@ B= fields(nn);
         c = confint(fout);
         tauerror = abs(0.5*(c(1,3)-c(2,3)));
         A1error = abs(0.5*(c(1,2)-c(2,2)));
+        A0error = abs(0.5*(c(1,1)-c(2,1)));
 
-        fouts{nn} = fout;
-        tauvec(nn) = fout.tau;
-        A1vec(nn) = fout.A1;
-
-        tau_err_vec(nn) = tauerror;
-        A1_err_vec(nn) = A1error; 
-
-        gamma(nn) = 1/fout.tau;
-        gamma_err(nn) = (1/(fout.tau))^2*tauerror;
-
-
-    end
-  
+        out(nn).Fit = fout;
+        out(nn).tau = fout.tau;
+        out(nn).A1 = fout.A1;
+        out(nn).A0 = fout.A0;
+        
+        out(nn).tau_err = tauerror;
+        out(nn).A1_err = A1error;
+        out(nn).A0_err = A0error;
+        
+        out(nn).gamma = 1/fout.tau;
+        out(nn).gamma_err = (1/(fout.tau))^2*tauerror;
+    end  
  
 end
 %%
 hf = figure(25);
 hf.Color='w';
 clf
-errorbar(fields,gamma,gamma_err,'ko','markerfacecolor','k',...
+errorbar([out.B],[out.gamma],[out.gamma_err],'ko','markerfacecolor','k',...
     'markersize',10);
 xlabel('field (G)');
 ylabel('loss rate (kHz)');
-% lifetime = lifetime_pow
 
 xlim([203 210]);
-ylim([0 50]);
+% ylim([0 50]);
 set(gca,'xgrid','on','ygrid','on');
 
 lifetime = struct;
-lifetime.B = fields;
-lifetime.gamma= gamma;
-lifetime.gamma_err = gamma_err;
+lifetime.B = [out.B];
+lifetime.gamma= [out.gamma];
+lifetime.gamma_err = [out.gamma_err];
 
 %% UPload data
-doUpload = 1;
+doUpload = 0;
 
 GDrive_root = 'G:\My Drive\Lattice Shared\SharedData\2022 PA experiment\11_25 lattice_lifetime';
 
 if  doUpload && exist(GDrive_root,'dir')   
-     gFile = [GDrive_root filesep 'lifetime']; 
-
-   % gFile = [GDrive_root filesep 'lifetime_pow']; 
+    gFile = [GDrive_root filesep 'lifetime']; 
     save(gFile,'lifetime');
-
-  %  gFile = [GDrive_root filesep 'lifetime_exp']; 
-  %  save(gFile,'lifetime_exp');
-    
-   % saveas(hF_a,[GDrive_root filesep 'lifetime_summary_w_background_scattering.png'])
-    
-   % for jj=1:length(hFs)
-    %    saveas(hFs(jj),[GDrive_root filesep hFs(jj).Name '.png'])
-    %end
-
 end
