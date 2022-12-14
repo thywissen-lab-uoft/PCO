@@ -70,7 +70,7 @@ pco_xVar = 'pulse_time';
 % pco_xVar = 'rf_freq_HF_shift';
 
 % Should the analysis attempt to automatically find the xvariable?
-pco_autoXVar = 0;
+pco_autoXVar = 1;
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit = 1;
@@ -112,11 +112,11 @@ doErfFit      = 0;
 % Band map fit
 % Fit to a square band map, this includes the vertical and horizontal
 % excited bands
-doBMFit = 1;
+doBMFit = 0;
 
 % Fermi-Fit
 % Fit a DFG in long time of flight
-doFermiFitLong = 0;     
+doFermiFitLong = 1;     
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Custom Analyses
@@ -139,7 +139,7 @@ doRamanSpec   = 0;
 doBMFit_AM   = 0; doBMFit_AM_Dir = 'H';
 doBMFit_AM_Spec  = 0; 
 
-doCustom_BM = 1;
+doCustom_BM = 0;
 
 % Custom Box counts
 doCustom       =  0;          % Custom Box Count
@@ -155,8 +155,8 @@ doRabiContrast = 0;
 % Raman Common Mode Detuning
 doWavemeter    = 0;
 doCavity       = 0;
-doVortexLock   = 1;
-doPAPD          = 1;
+doVortexLock   = 0;
+doPAPD         = 0;
 %% GDrive Settings
 GDrive_root = 'G:\My Drive\Lattice Shared\LabData';
 doUpload = 1;       % Upload to google drive?
@@ -292,12 +292,13 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %
 % While in principle different images can have different analysis ROIs,
 % this is currently disabled because it creates code issues at the moment.
-%%%%%%% RF1a
+%%%%%%% RF1A X CAM
+
 % ROI = [395 1330 190 1010]; % RF1A 10ms TOF
 
 % ROI = [460 1370 200 800]; % RF1A 5ms TOF
 
-%%%%% RF 1B
+%%%%% RF1B X CAM
 % ROI = [720 1040 330 640];   % RF1B 5 ms TOF
 
 % ROI =  [700 1100 300 600];
@@ -305,12 +306,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 % ROI = [740 1015 230 430]; %XDT Loading K 5 ms TOF
 
-%%%%% XDT 1/2 ONLY
-%
-% ROI = [500 1392 250 360]; % XDT 1/2 insitu long X
-% ROI = [500 1392 300 500]; % XDT 1/2 TOF 10 ms long X9
-
-%%%%% XDT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% XDT LOW FIELD X CAM %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  ROI = [800 950 280 350]; %K XDT insitu
 
 % ROI = [780 990 310 510]; %K XDT 5ms tof
@@ -333,7 +329,6 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % ROI = [810 970 420 580]; %XDT Rb after evap 15ms 
 
 %    ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
-% 
 
 % 15 ms XT SG
 % Nbox = 5;
@@ -363,7 +358,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %      ROI=[750 1010 350 630]; % 15 ms BM TOF x cam
 %      ROI=[390 800 680 1000]; % 15 ms BM TOF y cam
 
-%   ROI=[412 755 552 778]; % 10 ms BM TOF y cam
+  %ROI=[412 755 552 778]; % 10 ms BM TOF y cam
 %   ROI=[412 755 700 1000]; % 15 ms BM TOF y cam
 
 
@@ -382,37 +377,18 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 %%%%%%%%%%%%%%%%%%%%% X CAM DOUBLE SHUTTER %%%%%%%%%%%%%%%%%%%%%
 
-%ROI=[800 950 182 1011;
-%    800 950 1228 2040];   % XDT full TOF\
+%  ROI=[800 950 475 630;
+%      800 950 1540 1695];   % XDT 15ms tof high field
 
-
-% ROI=[800 950 475 630;
-%     800 950 1540 1695];   % XDT 15ms tof high field
-
-% ROI=[800 950 680 830;
-%                 800 950 1750 1900];  % XDT 21ms tof high field
-
-% 
-%  ROI=[760 1000 590 830;
-%     760 1000 590+1064 830+1064];   % XDT 20 ms TOF
-% % % 
-% ROI=[760 1000 590+1064 830+1064];   % XDT 20 ms TOF
-
-% 
-%  ROI=[757 1002 586 831;
-%     757 1002 586+1064 831+1064];   % XDT 20 ms TOF
-% % 
-% ROI=[800 950 1700 1800];   % XDT 20 ms TOF
-% % % 
-%  ROI = [800 950 1520 1700;
-%       800 950 490 620];   %  band map 15 ms TOF  7box, 9 box
+ROI=[800 950 680 830;
+     800 950 1750 1900];  % XDT 21ms tof high field
 
 % most commonly used
-ROI=[770 970 450 650;
-       770 970 1510 1710];   %  band map 15 ms  
+%ROI=[770 970 450 650;
+%       770 970 1510 1710];   %  band map 15 ms  
+
 % ROI = ROI(1,:); % 9 only 
 %ROI = ROI(2,:); % 7 only
-
 
 %%%%%%%%%%%%%%%%%%% Y CAM %%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -433,6 +409,9 @@ ROI=[770 970 450 650;
 
  %ROI=[500 700 200 1000];   % XDT  Full TOF analysis
 
+%% Auto ROI and assignment
+ 
+ 
 if doFermiFitLong
         ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
     if isfield(data(1).Flags,'High_Field_Imaging')
@@ -443,17 +422,7 @@ if doFermiFitLong
         end
     end
 end
-%     ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 
-% % if doFermiFitLong && atomdata(1).Flags.do_stern_gerlach
-%     ROI=[800 960 700 870;
-%         800 960 870 1000];   % XDT  TOF 25 ms evaporation ZOOM
-% % end
-% ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%% FLUORESCENE %%%%%%%%%%%%
-%ROI = [200 1200 1 800];
-% ROI = [1 1200 5  1024]; % 15.5 deg rot
 
 % Assign the ROI
 disp(' ')
@@ -762,9 +731,11 @@ if doGaussFit
     disp(repmat('-',1,60));    
     disp('Performing 2D gauss fit');
     disp(repmat('-',1,60));    
+    % Iterate over all images (atomdata)
     for kk=1:length(atomdata)
         disp(repmat('-',1,60));   
         disp(['(' num2str(kk) ') ' atomdata(kk).Name]);
+        % Iterate over all ROIs in an image
         for nn=1:size(atomdata(kk).ROI,1)   % Iterate over all ROIs
             sROI=atomdata(kk).ROI(nn,:);     % Grab the analysis ROI
             Dx=sROI(1):sROI(2);               % X Vector
