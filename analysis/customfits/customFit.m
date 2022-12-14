@@ -133,32 +133,63 @@ end
 
 %% Exponential decay
 if FitFlags.expdecay
-    myfit=fittype('A0 + A1*exp(-1*t/tau)',...
-        'coefficients',{'A0','A1','tau'},...
+    myfit=fittype('A1*exp(-1*t/tau)',...
+        'coefficients',{'A1','tau'},...
         'independent','t');
 
     % Fit options and guess
     opt=fitoptions(myfit);        
-    Ag = 0.2;
+    Ag = range(Y);
     A0 = min(X);
-    taug = median(X);
-    G=[A0 Ag taug];        
+    taug = mean(X);
+    G=[Ag taug];        
     opt.StartPoint=G;
 
     % Perform the fit
-    fout=fit(X,Y,myfit,opt)
+    fout=fit(X,Y,myfit,opt);
 
     % Plot the fit
     tt=linspace(0,max(X),1000);
     xlim([0 max(X)]);
     pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
-    lStr=['$ \tau = ' num2str(round(fout.tau,3)) '~\mathrm{ms}$'];
+    lStr=['$ \tau = ' num2str(round(fout.tau,3)) '~\mathrm{ms}$' newline ...
+        '$A_1 = ' num2str(fout.A1,'%.3e') '$'];
     legend(pF,lStr,'location','best','interpreter','latex');        
-    str = '$A_0+ A_1\exp(-t/\tau)$';
+    str = '$A_1\exp(-t/\tau)$';
     t=text(.02,.03,str,'units','normalized',...
         'fontsize',10,'interpreter','latex');
 end
 
+%% Exponential decay with offset
+if FitFlags.expdecayoffset
+    myfit=fittype('A1*exp(-1*t/tau)+A0',...
+        'coefficients',{'A1','A0','tau'},...
+        'independent','t');
+
+    % Fit options and guess
+    opt=fitoptions(myfit);        
+    Ag = range(Y);
+    A0 = min(X);
+    taug = mean(X);
+    
+    G=[Ag A0 taug];        
+    opt.StartPoint=G;
+
+    % Perform the fit
+    fout=fit(X,Y,myfit,opt);
+
+    % Plot the fit
+    tt=linspace(0,max(X),1000);
+    xlim([0 max(X)]);
+    pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
+    lStr=['$ \tau = ' num2str(round(fout.tau,3)) '~\mathrm{ms}$' newline ...
+        '$A_1 = ' num2str(fout.A1,'%.3e') '$' newline ...
+         '$A_0 = ' num2str(fout.A0,'%.3e') '$'];
+    legend(pF,lStr,'location','best','interpreter','latex');        
+    str = '$A_1\exp(-t/\tau)+A_0$';
+    t=text(.02,.03,str,'units','normalized',...
+        'fontsize',10,'interpreter','latex');
+end
 %% Negative Double Gauss
 if length(X)>8 && FitFlags.gauss_neg_double
     myfit=fittype(['bg-A1*exp(-(x-x1).^2/(2*s1.^2))- ' ...
@@ -460,7 +491,7 @@ if length(X)>4 && FitFlags.lorentz_neg_single
     xC=X(ind);
 
     % Assign guess
-    G=[A 35 -50 bg];
+    G=[A 0.04 -49.55 bg];
     opt.StartPoint=G;
 
     % Perform the fit
@@ -470,8 +501,8 @@ if length(X)>4 && FitFlags.lorentz_neg_single
     % Plot the fit
     tt=linspace(min(X),max(X),1000);
     pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
-      lStr=['xC=(' num2str(round(fout.x0,1)) ')' ...
-        ' FWHM=(' num2str(round(fout.G,1)) ')' ];
+      lStr=['xC=(' num2str(round(fout.x0,3)) ')' ...
+        ' FWHM=(' num2str(round(fout.G,3)) ')' ];
     legend(pF,lStr,'location','best');
 end
     

@@ -78,9 +78,13 @@ y_Lbl{33}     = 'Ns';
 % p_inds = [01,02,03,04];
 %  p_inds = [01,02,03,04,05,06];
 
-p_inds=[02,04,05,01,25];
+%p_inds=[02,04,05,01,25];
 
 p_inds=[01,02,25,31,32,33,4];
+
+p_inds=[25,32,33];
+
+% p_inds = [01];
 
 % % Excitations to 9
 % p_inds = [03,06,08,15,16,17,25];
@@ -113,8 +117,14 @@ p_inds=[01,02,25,31,32,33,4];
 
 FitFlags = struct;
 
+% Exponential Decay
+FitFlags.expdecay =0;               % Exponential Decay no offset
+FitFlags.expdecayoffset = 0;        % Exponential Decay w/offset
+
+
 FitFlags.T2exp=0;
-FitFlags.expdecay =0;
+
+
 FitFlags.Rabi_oscillation = 0;
 FitFlags.Rabi_oscillation2 = 0;
 FitFlags.NGaussPeak=0;
@@ -126,7 +136,7 @@ FitFlags.gauss_neg_single=0;
 FitFlags.gauss_double = 0;
 FitFlags.gauss_triple = 0;
  
-FitFlags.lorentz_neg_single=0;    
+FitFlags.lorentz_neg_single=1;    
 FitFlags.lorentz_neg_double=0;  
 
 FitFlags.lorentz_single=0;
