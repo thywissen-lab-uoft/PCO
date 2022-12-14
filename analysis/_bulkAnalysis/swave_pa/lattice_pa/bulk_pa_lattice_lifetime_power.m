@@ -1,3 +1,4 @@
+doUpload = 0;
 
 %% 11/28/2022 
 % 206 G, 200 Er (ish).
@@ -45,7 +46,52 @@ w0 = 400*1e-6; % in m
 
 % Data Label for Saving
 data_label =['lattice_pa_lifetime_power_204_G'];
+%% 11/29/2022
+% 203 G, 200 Er (ish).
+% Lattice PA lifetime
 
+runs=[
+        2022 11 29 07;
+        2022 11 29 08;
+        2022 11 29 09;
+        2022 11 29 10;
+
+    ];
+    
+%  Magnetic Fields
+fields = [203 203 203 203]; 
+
+% Optical Powers
+powers = [.33 .07 .07 .58]';
+
+% Beam Waist
+w0 = 400*1e-6; % in m
+
+% Data Label for Saving
+data_label =['lattice_pa_lifetime_power_203_G'];
+%% 11/30/2022
+% 202.5 G, 200 Er (ish).
+% % Lattice PA lifetime
+% 
+% runs=[
+%         2022 11 30 02;
+%         2022 11 30 03;
+%         2022 11 30 04;
+%         2022 11 30 05;
+% 
+%     ];
+%     
+% %  Magnetic Fields
+% fields = [203 203 203 203]; 
+% 
+% % Optical Powers
+% powers = [.57 .0067 .027 .0069]';
+% 
+% % Beam Waist
+% w0 = 400*1e-6; % in m
+% 
+% % Data Label for Saving
+% data_label =['lattice_pa_lifetime_power_202.5_G'];
 %% Load the data
 file_name = 'custom_data_bm.mat';
 [all_data,dirNames,dirDates] = loadBulk(runs,file_name);
@@ -80,7 +126,7 @@ for nn=1:length(data)
     myco = cmaps(nn,:);
     B= fields(nn);
 
-    if length(Bunq)>1
+    if length(unique(B))>1
        warning('more than one magnetic field given'); 
     end 
     Bvec(nn) = B(1);
@@ -212,7 +258,6 @@ lifetime.gamma= gamma;
 lifetime.gamma_err = gamma_err;
 
 %% UPload data
-doUpload = 1;
 
 GDrive_root = 'G:\My Drive\Lattice Shared\SharedData\2022 PA experiment\11_29 lattice lifetime';
 
