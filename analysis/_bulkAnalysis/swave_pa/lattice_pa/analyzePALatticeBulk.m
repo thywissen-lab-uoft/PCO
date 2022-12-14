@@ -1,142 +1,68 @@
-
-%% 11/24/2022
-
-% runs=[
-%         2022 11 24 10;
-%         2022 11 24 11;
-%         2022 11 24 12;
-%         2022 11 24 13;
-%         2022 11 24 14;
-%         2022 11 24 15;
-%         2022 11 24 16;
-%         2022 11 25 2;
-%         2022 11 25 3;
-%         2022 11 25 4;
-%     ];
-% 
-% fields = [204 205 206 207 208 209 205 204 205 206];    
-% data_label =['lattice_pa_lifetime'];
-% powers = [1.16]';
-% w0 = 400; % Waist in um
-
-%% 11/24/2022 Select
-
-runs=[
-
-        2022 11 24 13 207;
-        2022 11 24 14 208;
-        2022 11 25 2 204;
-        2022 11 25 3 205;
-        2022 11 25 4 206;
-    ];
-    
-fields = runs(:,end);   
-runs=runs(:,1:4);
-data_label =['lattice_pa_lifetime_1mW'];
-
-powers = [1.16]';
-w0 = 400; % Waist in um
-Omega = 2*pi*1600;
-
-%% 12/06/2022 30 uW or so
-
-s1 = struct;
-s1.Label    = 'Lattice_Lifetime_30uW_200_Er';
-s1.Runs     = [ 
-                2022 12 06 9;
-                2022 12 06 10;
-                2022 12 06 13;
-                2022 12 07 01;
-                2022 12 07 03;
-                2022 12 07 06; 
-                ];
-s1.Power    = 0.026;
-s1.Vin      = 200;
-s1.FileName = 'custom_data_bm.mat';
-s1.w0       = 400;
-s1.gamma    = 2*pi*12e6;
-s1.Omega    = 2*pi*350;
+function [out,summary,figs]=analyzePALatticeBulk(npt)
 
 
-runs    =[ 
-        2022 12 06 9;
-        2022 12 06 10;
-        2022 12 06 13;
-        2022 12 07 01;
-        2022 12 07 03;
-        2022 12 07 06; 
-        ];
-    
-fields = runs(:,end);   
-runs=runs(:,1:4);
-data_label =['lattice_pa_lifetime_30uW'];
+%% Load the Data
+[all_data,~,~] = loadBulk(npt.Runs,npt.FileName);
+data = [all_data.(strrep(npt.FileName,'.mat',''))];
 
-powers = [0.026]';
-w0 = 400; % Waist in um
-Omega = 2*pi*350;
+%% Grab Magnetic Field if necessary
+if ~isfield(npt,'B')
+    Bvec = zeros(size(npt.Runs,1),1);
+    for nn=1:length(data)
+        P = [data(nn).Source.Params];
 
+        if isfield(P,'PA_field')
+            Bunq=unique([P.PA_field]);        
+            if length(Bunq)>1
+                error('more than one magnetic field given'); 
+            end 
+            B = Bunq(1);
+        else
+            B = fields(nn);
+        end
 
-%% Load the data
-
-file_name = 'custom_data_bm.mat';
-[all_data,dirNames,dirDates] = loadBulk(runs,file_name);
-data = [all_data.custom_data_bm];
-
-
-%% Grab Magnetic Fields
-Bvec = zeros(size(runs,1),1);
-for nn=1:length(data)
-    P = [data(nn).Source.Params];
-    
-    if isfield(P,'PA_field')
-        Bunq=unique([P.PA_field]);        
-        if length(Bunq)>1
-            error('more than one magnetic field given'); 
-        end 
-        B = Bunq(1);
-    else
-        B = fields(nn);
+        Bvec(nn) = B;
     end
     
-    Bvec(nn) = B;
+    npt.B = Bvec;
 end
-
-%% Plot and Analyze
-
+%% Output and Settings
 out = struct;
+summary = struct;
 
+% Color vector
 cmaps = hsv(length(data));
+
+% Maximum number of plots per figure
 nPlotMax = 8;
 
-clear hFs
+% What sub figure we are on
 j=1;
 
-lifetime_exp = struct;
+% Do we fit?
+doExpFit = 1;
+%% Plot and Analyze
 
-doFit = 1;
-
-for nn=1:length(data)      
-    myco = cmaps(nn,:);    
-
+for nn=1:length(data)   
     % Magnetic Field
-    out(nn).B = Bvec(nn);
+    out(nn).B = npt.B(nn);
     
     % X Data
     X = data(nn).X;
     xstr = 'pulse time (ms)';
 
-    % Ydata
+    % Assemble Y Data as total atom number
     N1 = data(nn).Natoms(:,1);
     N2 = data(nn).Natoms(:,2);   
     Y = N1+N2;       
     ystr = 'total atom number';
 
     % Assemble Y Data as Ns
-    Ns = [data(nn).Y(33).Y];
-    Y = Ns;
-    ystr = 'Ns';
+%     Ns = [data(nn).Y(33).Y];
+%     Y = Ns;
+%     ystr = 'Ns';
 
-    % Find Unique Value    
+    % Find Unique X and Y Values
     [ux,ia,ib]=unique(X);    
     Yu=zeros(length(ux),2);    
     for kk=1:length(ux)
@@ -145,7 +71,7 @@ for nn=1:length(data)
         Yu(kk,2)=std(Y(inds));       
     end 
     
-    % Output the data
+    % Create output data
     out(nn).X = X;
     out(nn).Y = Y;
     out(nn).Xu = ux;
@@ -155,11 +81,11 @@ for nn=1:length(data)
     % Make a new figure if necessary
     if ~mod(nn-1,nPlotMax)
         % Plot Data    
-        hFs(j)=figure(100+floor(nn/nPlotMax));
+        hFs(j)=figure(npt.FigNumStart+floor(nn/nPlotMax));
         clf
         hFs(j).Color='w';
         hFs(j).Position=[100 50 1200 600];
-        hFs(j).Name = [data_label '_' num2str(j)];
+        hFs(j).Name = [npt.Label '_' num2str(j)];
         co=get(gca,'colororder');
          t=uicontrol('style','text','string',ystr,'units','pixels',...
              'backgroundcolor','w','horizontalalignment','left','fontsize',10);
@@ -171,6 +97,7 @@ for nn=1:length(data)
     
     % Make Axis and Plot Data
     subplot(2,4,mod(nn-1,nPlotMax)+1);
+    myco = cmaps(nn,:);    
     errorbar(ux,Yu(:,1),Yu(:,2),'o','markerfacecolor',myco,...
         'markeredgecolor',myco*.5,'color',myco,...
         'linewidth',1,'markersize',6);    
@@ -181,48 +108,56 @@ for nn=1:length(data)
     ylabel(ystr);    
     
     % Title
-    titstr = [num2str(runs(nn,1)) '.' num2str(runs(nn,2)) '.'  num2str(runs(nn,3)) ...
-        '_R' num2str(runs(nn,4))]; 
-    titstr = [titstr ' ' num2str(round(B,2)) ' G'];
+    titstr = [num2str(npt.Runs(nn,1)) '.' ...
+        num2str(npt.Runs(nn,2)) '.'  ...
+        num2str(npt.Runs(nn,3)) ...
+        '_R' num2str(npt.Runs(nn,4))]; 
+    titstr = [titstr ' ' num2str(round(out(nn).B,2)) ' G'];
     title(titstr,'interpreter','none')
 
     set(gca,'YScale','log');        
 
- % Fit with background decay
-    doFit=1;
-    if doFit    
+    % Fit with background decay
+    if doExpFit    
         myfit = fittype('(A0+A1*exp(-gamma*t))',...
             'coefficients',{'A0','A1','gamma'},...
             'independent','t');
         fitopt = fitoptions(myfit);  
         
+        % Initial guesses
         tau_guess = max(X)/10;
         A1_guess = range(Yu(:,1));
         A0_guess = min(Yu(:,1));
 
+        % Assign guess and bounds
         fitopt.StartPoint = [A0_guess A1_guess 1/tau_guess];
-        fitopt.StartPoint = [A0_guess A1_guess 1/tau_guess];
-
         fitopt.Lower = [A0_guess-2e4 0 0];   
         fitopt.Upper = [A0_guess+2e4 A1_guess+1e3 20];    
 
+        % Perform the fit
         fout = fit(X,Y,myfit,fitopt);    
 
+        % Plot the fit
         xx=linspace(min(X),max(X),100);
         pF=plot(xx,feval(fout,xx),'k--','linewidth',1);
 
+        % Legend String
         lStr=['$ \gamma = ' num2str(round(fout.gamma,3)) '~\mathrm{kHz}$' ...
             newline ...
             '$A_0 = ' num2str(round(fout.A0,3),'%.3e') '$' ... 
             newline ...
             '$A_1 = ' num2str(round(fout.A1,3),'%.3e') '$'];
+        
+        % Make the legend
         legend(pF,lStr,'location','best','interpreter','latex');  
 
+        % Get confidence interval
         c = confint(fout,.6667);
         gerror = abs(0.5*(c(1,3)-c(2,3)));
         A1error = abs(0.5*(c(1,2)-c(2,2)));
         A0error = abs(0.5*(c(1,1)-c(2,1)));
 
+        % Append fit outputs
         out(nn).Fit = fout;
         out(nn).A1 = fout.A1;
         out(nn).A0 = fout.A0;
@@ -234,46 +169,43 @@ for nn=1:length(data)
         out(nn).gamma_err =gerror;
     end  
 end
+%% Summary output
 
-lifetime = struct;
-lifetime.B = [out.B];
-lifetime.gamma= [out.gamma];
-lifetime.gamma_err = [out.gamma_err];
+summary.B = [out.B];
+summary.gamma= [out.gamma];
+summary.gamma_err = [out.gamma_err];
+summary.A1 = [out.A1];
+summary.A1_err = [out.A1_err];
+summary.A0 = [out.A0];
+summary.A0_err = [out.A0_err];
 
-%%
-hf = figure(25);
+%% Summary plot
+
+hf = figure(npt.FigNumStart+25);
 hf.Color='w';
 hf.Position = [50 50 300 600];
 clf
 
 harmonic_dir = 'C:\Users\Sephora\Documents\GitHub\harmonic_oscillator_s-wave_contact\lattice_fujiwara';
 addpath(genpath(harmonic_dir))
-Vin = 200;
-Bin = linspace(202.6,208,1e3);
-gamma = 2*pi*12E6;
+Bin = linspace(190,208,1e3);
 
-
-[R1,R2] = getLossRate(Vin,Bin,Omega,gamma);
+[R1,R2] = getLossRate(npt.Vin,Bin,npt.Omega,npt.gamma);
 plot(Bin,R1*1e3,'k-')
 hold on
-% plot(Bin,R2*1e3,'k-')
-
-
+plot(Bin,R2*1e3,'k--')
 
 errorbar([out.B],[out.gamma],[out.gamma_err],'ko','markerfacecolor','k',...
     'markersize',10);
 xlabel('field (G)');
 ylabel('loss rate (kHz)');
-xlim([202 208]);
+xlim([190 208]);
 set(gca,'xgrid','on','ygrid','on','yscale','linear');
 hold on
 
-%% UPload data
-doUpload = 0;
 
-GDrive_root = 'G:\My Drive\Lattice Shared\SharedData\2022 PA experiment\11_25 lattice_lifetime';
+%% 
 
-if  doUpload && exist(GDrive_root,'dir')   
-    gFile = [GDrive_root filesep 'lifetime']; 
-    save(gFile,'lifetime');
+figs = [hFs hf];
 end
+
