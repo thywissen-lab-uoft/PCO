@@ -31,58 +31,13 @@ for kk=1:length(data)
         disp(['Applying gaussian filter. s=' num2str(s) ' px']);
     end
     
-    if opts.SubtractDark
-        R=opts.DarkROI;
-        Y=R(3):R(4);
-        X=R(1):R(2);
-        Npx=(R(4)-R(3)+1)*(R(2)-R(1)+1);
-
-        if size(PWOA,1)==1024
-            bgPWOAa=sum(sum(PWOA(Y,X)))/Npx;
-            bgPWAa=sum(sum(PWA(Y,X)))/Npx;            
-            
-            PWOA=PWOA-bgPWOAa;
-            PWA=PWA-bgPWAa;
-            
-            
-            PWOA(PWOA<1)=1;
-            PWA(PWA<1)=1;            
-        else
-            bgPWOAa=sum(sum(PWOA(Y,X)))/Npx;
-            bgPWAa=sum(sum(PWA(Y,X)))/Npx;
-            
-            bgPWOAb=sum(sum(PWOA(Y+1024,X)))/Npx;
-            bgPWAb=sum(sum(PWA(Y+1024,X)))/Npx;
-            
-            PWOA(1:1024,:)=PWOA(1:1024,:)-bgPWOAa;
-            PWOA(1025:2048,:)=PWOA(1025:2048,:)-bgPWOAb;
-
-            PWA(1:1024,:)=PWA(1:1024,:)-bgPWAa;
-            PWA(1025:2048,:)=PWA(1025:2048,:)-bgPWAb;       
-            
-            disp(bgPWOAa)
-            disp(bgPWAa)
-
-            disp(bgPWOAb)
-            disp(bgPWAb)
-
-            PWOA(PWOA<1)=1;
-            PWA(PWA<1)=1;
-        end
-        
-
-
-    end
     
     if opts.ScaleProbe
-        R=opts.ScaleProbeROI;
-        
-        if size(PWOA,1)==1024        
-
+        R=opts.ScaleProbeROI;        
+        if size(PWOA,1)==1024  
             s1=sum(sum(PWOA([R(3):R(4)],R(1):R(2))));
             s2=sum(sum(PWA([R(3):R(4)],R(1):R(2))));
-            s=s2/s1;            
-            
+            s=s2/s1;                        
             PWOA=s*PWOA;
             disp([' Scaling the PWOA image by ' num2str(round(s,4))]);
         else
@@ -110,14 +65,16 @@ for kk=1:length(data)
     % Calculate optical density if high field imaging
     if opts.HighField
         OD=log(abs(PWOA./(2*PWA-PWOA))); %deets on labbook entry 2021.06.26 
-    end   
+    end  
+    
     if isfield(data,'Dark')
         OD(PWOA<50) = 0;
-        OD(PWA<50) = 0;
+%         OD(PWA<50) = 0;
     end
     OD = real(OD);
     OD(isnan(OD))=0;
-    
+    OD(isinf(OD))=0;
+
     
     rotMode = 'bicubic'; % 'nearest','bilinear','bicubic'
     rotCrop = 'crop'; % 'crop' or 'loose'

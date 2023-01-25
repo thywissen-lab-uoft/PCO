@@ -39,7 +39,7 @@ expdecay = 0;
 lorentz_neg_single=1;    
 lorentz_neg_double=0;  
 
-lorentz_single=0;
+lorentz_single=1;
 lorentz_double=0;    
 lorentz_triple=0;    
 
@@ -245,7 +245,7 @@ end
     Ntot = sum(N,2);     
      N(:,2) = N(:,2)*8.6/7.2; %fudge factor
 
-     dataMode= 3;      
+     dataMode= 2;      
      
      Ytype = 'relative';
 
@@ -621,6 +621,7 @@ if length(X)>4 && expdecay
     G=[A0 Ag taug];        
     opt.StartPoint=G;
     opt.Lower = [0 0 0];
+    opt.Upper = [0 inf inf];
 
     % Perform the fit
     fout=fit(X,Y,myfit,opt);

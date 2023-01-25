@@ -66,8 +66,8 @@ end
 % display properties.
 
 % Defautl variable to plot against
-pco_xVar = 'pulse_time';
-% pco_xVar = 'rf_freq_HF_shift';
+%pco_xVar = 'rf_tof_shiftshift';
+pco_xVar = 'rf_freq_HF_shift_XDT';
 
 % Should the analysis attempt to automatically find the xvariable?
 pco_autoXVar = 1;
@@ -77,12 +77,14 @@ pco_autoUnit = 1;
 
 % If ixon_autoUnit=0, this will be used.
 pco_overrideUnit='kHz'; 
-
+%%
+ODopts=struct;
+ODopts.GaussFilter=1;
 
 %% Analysis Flags
 
 % Standard Analysis
-doODProfile = 0;
+doODProfile = 1;
 doStandard = 1;
 
 doAnimate = 1;
@@ -358,7 +360,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %      ROI=[750 1010 350 630]; % 15 ms BM TOF x cam
 %      ROI=[390 800 680 1000]; % 15 ms BM TOF y cam
 
-  %ROI=[412 755 552 778]; % 10 ms BM TOF y cam
+%   ROI=[412 755 552 778]; % 10 ms BM TOF y cam
 %   ROI=[412 755 700 1000]; % 15 ms BM TOF y cam
 
 
@@ -379,12 +381,26 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 %  ROI=[800 950 475 630;
 %      800 950 1540 1695];   % XDT 15ms tof high field
-
-ROI=[800 950 680 830;
-     800 950 1750 1900];  % XDT 21ms tof high field
+ 
+%  
+ ROI=[800 950 200 550;
+     800 950 1450 1600];   % XDT 15ms tof high field, 195 G, QP 0.117
+% % 
+%   ROI=[800 950 285 600;
+%      800 950 1309 1650];   % XDT 15ms tof high field, 195 G, vary QP
+%  
+ 
+  ROI=[800 950 285 900;
+     800 950 1309 1900];   % XDT 195 G, 0.115, full TOF
+ 
+%  ROI=[800 950 550 750;
+%      800 950 1600 1820];  % XDT 21ms tof high field QP 0.117
+ 
+% ROI=[800 950 680 830;
+%      800 950 1750 1900];  % XDT 21ms tof high field
 
 % most commonly used
-%ROI=[770 970 450 650;
+% ROI=[770 970 450 650;
 %       770 970 1510 1710];   %  band map 15 ms  
 
 % ROI = ROI(1,:); % 9 only 
@@ -409,20 +425,38 @@ ROI=[800 950 680 830;
 
  %ROI=[500 700 200 1000];   % XDT  Full TOF analysis
 
-%% Auto ROI and assignment
+ 
+%% Magtrap ROI
+
+if ~(data.Flags.do_dipole_trap)
+    if data.Flags.In_Trap_imaging
+         ROI = [830 950 280 340];
+         ODopts.GaussFilter=0;
+
+    end
+    
+    
+end
+
+ 
+ 
+%% Fermi Fit Long
  
  
 if doFermiFitLong
-        ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
+    ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation 
+        
     if isfield(data(1).Flags,'High_Field_Imaging')
         if data(1).Flags.High_Field_Imaging == 1
 %             ROI=[800 950 680 830;
 %                 800 950 1750 1900];  % XDT High field 21 ms TOF
-          ROI=[800 950 680 830];
+          ROI=[800 950 680 850]; % 25 ms TOF, gradient cancel
         end
     end
 end
 
+
+%% Aissgn the ROI
 
 % Assign the ROI
 disp(' ')
@@ -432,7 +466,6 @@ disp(ROI);
 [atomdata.ROI]=deal(ROI);
 
 %% Calculate the optical density
-ODopts=struct;
 ODopts.ScaleProbe=1;
 % ODopts.ScaleProbeROI=[1 100 900 1000];  % ROI to do the scaling
 % ODopts.ScaleProbeROI=[200 400 800 1000];  % ROI to do the scaling
@@ -440,9 +473,6 @@ ODopts.ScaleProbe=1;
 ODopts.ScaleProbeROI=[1200 1350 300 900];  % ROI to do the scaling
 
 % ODopts.ScaleProbeROI=[1000 1100 400 700];
-
-ODopts.SubtractDark=0;
-ODopts.DarkROI=[700 800 20 100];
 
 if isequal(camaxis,'Y')
     ODopts.doRotate = 1;
@@ -453,7 +483,6 @@ else
 end
 
 % Apply gaussian filter to images?
-ODopts.GaussFilter=1;
 ODopts.GaussFilterSigma=1;
 
 if doFermiFitLong
@@ -740,7 +769,8 @@ if doGaussFit
             sROI=atomdata(kk).ROI(nn,:);     % Grab the analysis ROI
             Dx=sROI(1):sROI(2);               % X Vector
             Dy=sROI(3):sROI(4);               % Y Vector
-            data=atomdata(kk).OD(Dy,Dx);    % Optical density        
+            data=atomdata(kk).OD(Dy,Dx);    % Optical density   
+            
             [fout,gof,output]=gaussFit2D(Dx,Dy,data);    % Perform the fit               
             atomdata(kk).GaussFit{nn}=fout; % Assign the fit object       
             atomdata(kk).GaussGOF{nn}=gof; % Assign the fit object  
@@ -760,7 +790,6 @@ if doGaussFit
         save(gFile,'gauss_data');
     end
 end
-
 
 
 %% 2D Erf Fit
@@ -1075,20 +1104,23 @@ if doAnimate && doSave
     animateOpts.xUnit=pco_unit;
     
     % Stacking images (applicable only for double exposure)
-     animateOpts.doubleStack='vertical';
-%      animateOpts.doubleStack='horizontal';
+%      animateOpts.doubleStack='vertical';
+     animateOpts.doubleStack='horizontal';
 
      % Asceneding or descending
 %     animateOpts.Order='descend';   
       animateOpts.Order='ascend';
-    
+        animateOpts.CLim='auto';
+        
+        animateOpts.CLim=[0 4]
+
 % %     % Color limits
 %     animateOpts.CLim=[0 0.5;
 %         0 0.5];   
 %     animateOpts.CLim=[0 1;
-%         0 1]; 
-     animateOpts.CLim=[0 .2;
-        0 .2]; 
+%         0  1]; 
+%      animateOpts.CLim=[0 .2;
+%         0 .2]; 
 %     animateOpts.CLim=[0 .2;
 %         0 .5]; 
 % 

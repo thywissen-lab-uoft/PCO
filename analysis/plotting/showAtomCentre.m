@@ -58,7 +58,15 @@ hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 co=get(gca,'colororder');
 for nn=1:size(Xc,2)
-   plot(xvals,Xc(:,nn),'o','color',co(nn,:),'linewidth',1,'markersize',8,...
+        
+    if median(Yc(:,nn))>1092
+        m = 's';     
+    else
+        m = 'o';   
+    end
+    
+    
+   plot(xvals,Xc(:,nn),m,'color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
 
@@ -94,10 +102,42 @@ set(hax2,'box','on','linewidth',1,'fontsize',10,...
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 co=get(gca,'colororder');
+
+yyaxis left
+set(gca,'YColor','k');
+
+yyaxis right
+set(gca,'YColor','k');
+yL = 1024;
+yH = 1;
 for nn=1:size(Yc,2)
-   plot(xvals,Yc(:,nn),'o','color',co(nn,:),'linewidth',1,'markersize',8,...
+    
+    if median(Yc(:,nn))>1092
+        yyaxis right
+        m = 's';
+        
+        yL = min([yL min(Yc(:,nn))-1024]);
+        yH = max([yH max(Yc(:,nn))-1024]);
+
+    else
+        yyaxis left        
+        m = 'o';
+        yL = min([yL min(Yc(:,nn))]);
+        yH = max([yH max(Yc(:,nn))]);
+
+    end
+    
+   plot(xvals,Yc(:,nn),m,'color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
+
+yLCam = [yL yH]+(yH-yL)*.1*[-1 1];
+
+yyaxis left
+ylim(yLCam);
+
+yyaxis right
+ylim(yLCam+1024);
 
 if isequal(xVar,'ExecutionDate')
     datetick('x');
@@ -227,7 +267,8 @@ end
 if opts.CenterParabolaFit && length(xvals)>1
     tVec=linspace(min(xvals),max(xvals),100);   
     
-        tbl_data={};
+    tbl_dataX={};
+    tbl_dataY={};
 
     for nn=1:size(Xc,2)
         D1=Xc(:,nn);    
@@ -238,55 +279,62 @@ if opts.CenterParabolaFit && length(xvals)>1
         plot(tVec,polyval(fit1,tVec),'r-','linewidth',1);  
 
         sTblX.Data={};
-        tbl_data{1+6*(nn-1),1}='curvature (px/var^2)';
-        tbl_data{2+6*(nn-1),1}='curvature (um/var^2)';
-        tbl_data{3+6*(nn-1),1}='slope (px/var)';
-         tbl_data{4+6*(nn-1),1}='slope (um/var)';
-        tbl_data{5+6*(nn-1),1}='intercept (px)';
-         tbl_data{6+6*(nn-1),1}='intercept (um) ';
 
-        tbl_data{1+6*(nn-1),2}=fit1(1);
-        tbl_data{2+6*(nn-1),2}=fit1(1)*PixelSize*1e6;
-        tbl_data{3+6*(nn-1),2}=fit1(2);
-        tbl_data{4+6*(nn-1),2}=fit1(2)*PixelSize*1e6;
-        tbl_data{5+6*(nn-1),2}=fit1(3);
-        tbl_data{6+6*(nn-1),2}=fit1(3)*PixelSize*1e6;    
+        tbl_dataX{1+6*(nn-1),1}='curvature (px/var^2)';
+        tbl_dataX{2+6*(nn-1),1}='curvature (um/var^2)';
+        tbl_dataX{3+6*(nn-1),1}='slope (px/var)';
+         tbl_dataX{4+6*(nn-1),1}='slope (um/var)';
+        tbl_dataX{5+6*(nn-1),1}='intercept (px)';
+         tbl_dataX{6+6*(nn-1),1}='intercept (um) ';
+
+        tbl_dataX{1+6*(nn-1),2}=fit1(1);
+        tbl_dataX{2+6*(nn-1),2}=fit1(1)*PixelSize*1e6;
+        tbl_dataX{3+6*(nn-1),2}=fit1(2);
+        tbl_dataX{4+6*(nn-1),2}=fit1(2)*PixelSize*1e6;
+        tbl_dataX{5+6*(nn-1),2}=fit1(3);
+        tbl_dataX{6+6*(nn-1),2}=fit1(3)*PixelSize*1e6;    
 
     %     tbl_data{5,1}='<HTML> &Delta;X (px)</HTML>';
     %     tbl_data{5,2}=range(Xc(:,nn));
     %     tbl_data{6,1}='<HTML> Mean(x) </HTML>';
     %     tbl_data{6,2}=mean(Xc(:,nn));
 
-        sTblX.Data=tbl_data;
+        sTblX.Data=tbl_dataX;
         sTblX.Position(3)=sTblX.Extent(3);
         sTblX.Position(4)=sTblX.Extent(4); 
 
         % X Fit
         axes(hax2);
         fit2=polyfit(xvals',D2,2);
+        
+        if median(D2)>1024
+            yyaxis right
+        else
+            yyaxis left
+        end
         plot(tVec,polyval(fit2,tVec),'r-','linewidth',1);  
 
         sTblY.Data={};
-        tbl_data{1+6*(nn-1),1}='curve (px/var^2)';
-        tbl_data{2+6*(nn-1),1}='curve (um/var^2)';
-        tbl_data{3+6*(nn-1),1}='slope (px/var)';
-        tbl_data{4+6*(nn-1),1}='slope (um/var)';
-        tbl_data{5+6*(nn-1),1}='intercept (px)';
-        tbl_data{6+6*(nn-1),1}='intercept (um) ';
+        tbl_dataY{1+6*(nn-1),1}='curve (px/var^2)';
+        tbl_dataY{2+6*(nn-1),1}='curve (um/var^2)';
+        tbl_dataY{3+6*(nn-1),1}='slope (px/var)';
+        tbl_dataY{4+6*(nn-1),1}='slope (um/var)';
+        tbl_dataY{5+6*(nn-1),1}='intercept (px)';
+        tbl_dataY{6+6*(nn-1),1}='intercept (um) ';
 
-        tbl_data{1+6*(nn-1),2}=fit2(1);
-        tbl_data{2+6*(nn-1),2}=fit2(1)*PixelSize*1e6;
-        tbl_data{3+6*(nn-1),2}=fit2(2);
-        tbl_data{4+6*(nn-1),2}=fit2(2)*PixelSize*1e6;
-        tbl_data{5+6*(nn-1),2}=fit2(3);
-        tbl_data{6+6*(nn-1),2}=fit2(3)*PixelSize*1e6;   
+        tbl_dataY{1+6*(nn-1),2}=fit2(1);
+        tbl_dataY{2+6*(nn-1),2}=fit2(1)*PixelSize*1e6;
+        tbl_dataY{3+6*(nn-1),2}=fit2(2);
+        tbl_dataY{4+6*(nn-1),2}=fit2(2)*PixelSize*1e6;
+        tbl_dataY{5+6*(nn-1),2}=fit2(3);
+        tbl_dataY{6+6*(nn-1),2}=fit2(3)*PixelSize*1e6;   
 
-        tbl_data{5+6*(nn-1),1}='<HTML> &Delta;Y (px)</HTML>';
-        tbl_data{5+6*(nn-1),2}=range(Yc(:,nn));
-        tbl_data{6+6*(nn-1),1}='<HTML> Mean(y) </HTML>';
-        tbl_data{6+6*(nn-1),2}=mean(Yc(:,nn));
+        tbl_dataY{5+6*(nn-1),1}='<HTML> &Delta;Y (px)</HTML>';
+        tbl_dataY{5+6*(nn-1),2}=range(Yc(:,nn));
+        tbl_dataY{6+6*(nn-1),1}='<HTML> Mean(y) </HTML>';
+        tbl_dataY{6+6*(nn-1),2}=mean(Yc(:,nn));
 
-        sTblY.Data=tbl_data;
+        sTblY.Data=tbl_dataY;
         sTblY.Position(3)=sTblY.Extent(3);
         sTblY.Position(4)=sTblY.Extent(4); 
     end
@@ -384,15 +432,43 @@ set(hax1,'box','on','linewidth',1,'fontsize',10,...
     'xgrid','on','ygrid','on');
 hold on
 xlabel(['x centre'],'interpreter','none');
-ylabel(['y centre'],'interpreter','none');
+ylabel(['y centre (circle)'],'interpreter','none');
+
+% yyaxis right
 
 co=get(gca,'colororder');
 
-for nn=1:size(Xc,2)
-   plot(Xc(:,nn),Yc(:,nn),'o','color',co(nn,:),'linewidth',1,'markersize',8,...
-       'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
-   
+yyaxis left
+set(gca,'YColor','k');
+yyaxis right
+set(gca,'YColor','k');
+ylabel(['y centre (square)'],'interpreter','none');
+
+for nn=1:size(Xc,2)    
+    if median(Yc(:,nn))>1092
+        yyaxis right
+        m = 's';        
+        yL = min([yL min(Yc(:,nn))-1024]);
+        yH = max([yH max(Yc(:,nn))-1024]);
+    else
+        yyaxis left        
+        m = 'o';
+        yL = min([yL min(Yc(:,nn))]);
+        yH = max([yH max(Yc(:,nn))]);
+    end
+    
+    
+   plot(Xc(:,nn),Yc(:,nn),m,'color',co(nn,:),'linewidth',1,'markersize',8,...
+       'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);   
 end
+
+yLCam = [yL yH]+(yH-yL)*.1*[-1 1];
+
+yyaxis left
+ylim(yLCam);
+
+yyaxis right
+ylim(yLCam+1024);
 
 % if opts.angleTrack
 %     fit_xy=polyfit(Xc(:,1),Yc(:,1),1);

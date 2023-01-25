@@ -69,7 +69,7 @@ set(hax,'box','on','linewidth',1,'fontsize',10,...
     'xgrid','on','ygrid','on');
 hold on
 
-xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
+xlabel([xVar ' (kHz)'],'interpreter','none');
 ylabel(['relative excited d band']);
         
 % Plot the measured data

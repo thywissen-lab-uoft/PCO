@@ -1,25 +1,24 @@
 
-function [fout,gof,output]=gaussFit2D(Dx,Dy,data)
-
-% mask = isnan(data);
-
-% data(mask)=0;
-
+function [fout,gof,output]=gaussHoleFit2D(Dx,Dy,data)
+%% Prepare Data
  % Ensure data type is double
 data=double(data);Dx=double(Dx);Dy=double(Dy);
 
-% Rescale images for fitting speed (Do this adaptively? or on option?)
-sc=0.4; % Scale factor
+% For gauss hole, do not rescale the data
+sc=.4; % Scale factor
 data=imresize(data,sc);Dx=imresize(Dx,sc);Dy=imresize(Dy,sc);
 
-% mask = imresize(mask,sc);
 
-dSmooth=imgaussfilt(data,2);    % Smooth data
-N0=max(max(dSmooth));           % Extract peak, amplitude guess
+% 
+% dSmooth=imgaussfilt(data,2);    % Smooth data
+% 
+% % Remove low data points
+% Z=dSmooth;Z(dSmooth<N0*.3)=0;
 
-% Remove low data points
-Z=dSmooth;Z(dSmooth<N0*.3)=0;
+Z = data;
+N0=max(max(Z));           % Extract peak, amplitude guess
 
+%% Make Guesses
 % Calculate guesses for center and size
 X=sum(Z,1);Y=sum(Z,2)';             % Get X and Y sum profiles
 Nx=sum(X);Ny=sum(Y);                % Get the total number of counts
@@ -31,40 +30,38 @@ Ys=1.5*sqrt(sum((Dy-Yc).^2.*Y)/Ny); % Y standard deviation * 1.5
 % Make a mesh grid for fitting
 [xx,yy]=meshgrid(Dx,Dy);
 
-% Make an initial guess
-Zguess=N0*exp(-(xx-Xc).^2./(2*Xs)^2).*exp(-(yy-Yc).^2./(2*Ys)^2);
-
 % Copy the data
 data2=data;xx2=xx;yy2=yy;
 
-% Elminate data points below a threshold to reduce # points to fit
-th=0.1;
-% th=-.1;
-xx2(Zguess<th*N0)=[];yy2(Zguess<th*N0)=[];data2(Zguess<th*N0)=[];
-
- %CHEATING
-inds = [data2 == 0];
-xx2(inds)=[];
-yy2(inds)=[];
-data2(inds)=[];
-
-% xx2(mask)=[];yy2(mask)=[];data2(mask)=[];
-
 % Calculate the appropriate background
-bg=sum(sum(data-Zguess))/(length(X)*length(Y));
-
 bg = min(min(data));
 
 % Create fit object
 myfit=fittype('A*exp(-(xx-Xc).^2./(2*Xs^2)).*exp(-(yy-Yc).^2./(2*Ys^2))+nbg',...
     'independent',{'xx','yy'},'coefficients',{'A','Xc','Xs','Yc','Ys','nbg'});
+
+
+gaussHole = @(A,Xc,Xs,Yc,Ys,nbg,Xc2,Xs2,Yc2,Ys2,xx,yy) ...
+    A*exp(-(xx-Xc).^2./(2*Xs^2)).*exp(-(yy-Yc).^2./(2*Ys^2)).*...
+    (1-exp(-(xx-Xc2).^2./(2*Xs2^2)).*exp(-(yy-Yc2).^2./(2*Ys2^2)))+nbg;
+
+myfit = fittype(gaussHole, 'independent',{'xx','yy'},...
+   'coefficients',{'A','Xc','Xs','Yc','Ys','nbg','Xc2','Xs2','Yc2','Ys2'});
+Xc2 = Xc;
+Yc2 = Yc;
+
+Xs2 = 5;
+Ys2 = 5;
+
 opt=fitoptions(myfit);
-opt.StartPoint=[N0 Xc Xs Yc Ys bg];
-opt.Lower=[N0/10 10 1 10 1 -.1];
+opt.StartPoint=[N0 Xc Xs Yc Ys bg Xc2 Xs2 Yc2 Ys2];
+% opt.Lower=[N0/10 10 1 10 1 -.1];
 % opt.Upper=[1.5*N0 1.5*max(Dx) range(Dx) 1.5*max(Dy) range(Dy) 0.1];
-opt.Upper=[1.5*N0 1.5*max(Dx) range(Dx) 1.5*max(Dy) range(Dy) inf];
+% opt.Upper=[1.5*N0 1.5*max(Dx) range(Dx) 1.5*max(Dy) range(Dy) inf];
 
 opt.Weights=[];
+
+
 
 % Check that the upper and lower bounds make sense
 badInds=opt.Upper<opt.Lower;
@@ -81,7 +78,10 @@ end
 % Display initial guess
 str1=['(Xc0,Yc0)=(' num2str(round(Xc)) ',' num2str(round(Yc)) ');'];
 str2=['(Xs0,Ys0)=(' num2str(round(Xs)) ',' num2str(round(Ys)) ')'];
-fprintf([str1 str2 ';']);
+str3=['(Xc1,Yc1)=(' num2str(round(Xc2)) ',' num2str(round(Yc2)) ');'];
+str4=['(Xs1,Ys1)=(' num2str(round(Xs2)) ',' num2str(round(Ys2)) ')'];
+
+fprintf([str1 str2 str3 str4]);
 
 % Perform the fit
 fprintf(' gauss fitting...');

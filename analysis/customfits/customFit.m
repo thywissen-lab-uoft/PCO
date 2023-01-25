@@ -144,6 +144,7 @@ if FitFlags.expdecay
     taug = mean(X);
     G=[Ag taug];        
     opt.StartPoint=G;
+    
 
     % Perform the fit
     fout=fit(X,Y,myfit,opt);
@@ -174,6 +175,7 @@ if FitFlags.expdecayoffset
     
     G=[Ag A0 taug];        
     opt.StartPoint=G;
+    opt.Lower= [0 0 0];
 
     % Perform the fit
     fout=fit(X,Y,myfit,opt);
