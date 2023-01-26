@@ -291,11 +291,19 @@ end
    
 if doFermiFitLong
     % This is the default fermi analysis.
+    
+    flagList = {...
+        'xdt_d1op_start',
+        'xdt_rfmix_start',
+        'xdt_d1op_end'
+        'xdt_rfmix_end',
+        };
 
     fermiPopts=struct;
     fermiPopts.FigLabel = FigLabel;
     fermiPopts.xUnit=pco_unit;
-
+    fermiPopts.Flags = flagList;
+    
     % Error 
     hF_fermi_error=showFermiError(fermi_data,pco_xVar,fermiPopts);    
     if doSave;saveFigure(hF_fermi_error,'fermi_error',saveOpts);end      

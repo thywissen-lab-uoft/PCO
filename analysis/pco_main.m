@@ -106,7 +106,7 @@ doBoxCount    = 0;      % Box count analysis
 
 % Gaussian Fit
 % Fit to a gaussian distribution (thermal cloud)
-doGaussFit    = 0;      % Enable gauss fitting
+doGaussFit    = 1;      % Enable gauss fitting
 
 % Erf Fit
 doErfFit      = 0;    
@@ -294,19 +294,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %
 % While in principle different images can have different analysis ROIs,
 % this is currently disabled because it creates code issues at the moment.
-%%%%%%% RF1A X CAM
 
-% ROI = [395 1330 190 1010]; % RF1A 10ms TOF
-
-% ROI = [460 1370 200 800]; % RF1A 5ms TOF
-
-%%%%% RF1B X CAM
-% ROI = [720 1040 330 640];   % RF1B 5 ms TOF
-
-% ROI =  [700 1100 300 600];
-% ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
-
-% ROI = [740 1015 230 430]; %XDT Loading K 5 ms TOF
 
 %%%%% XDT LOW FIELD X CAM %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  ROI = [800 950 280 350]; %K XDT insitu
@@ -406,6 +394,8 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % ROI = ROI(1,:); % 9 only 
 %ROI = ROI(2,:); % 7 only
 
+
+ROI = [600 1175 200 900];
 %%%%%%%%%%%%%%%%%%% Y CAM %%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % ROI = [1 1392 400 600]; % XDT Insitu long
@@ -425,17 +415,30 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
  %ROI=[500 700 200 1000];   % XDT  Full TOF analysis
 
- 
+
 %% Magtrap ROI
 
 if ~(data.Flags.do_dipole_trap)
     if data.Flags.In_Trap_imaging
          ROI = [830 950 280 340];
-         ODopts.GaussFilter=0;
-
     end
     
+    %%%%%%% RF1A X CAM
+
+% ROI = [395 1330 190 1010]; % RF1A 10ms TOF
+
+% ROI = [460 1370 200 800]; % RF1A 5ms TOF
+
+%%%%% RF1B X CAM
+% ROI = [720 1040 330 640];   % RF1B 5 ms TOF
+
+% ROI =  [700 1100 300 600];
+% ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
+
     
+%      ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
+         ROI = [580 1200 375 1020];  % RF1B full TOF
+
 end
 
  
@@ -453,9 +456,20 @@ if doFermiFitLong
           ROI=[800 950 680 850]; % 25 ms TOF, gradient cancel
         end
     end
+    
+%       ROI=[800 950 285 900];
+
 end
 
-
+ %% KRb Imaging
+ 
+ if atomdata(1).Flags.image_atomtype==2         
+    % XDT 25 ms evaporation
+    ROI=[800 960 700 870
+        800 960 1700 1950];   % XDT  TOF 25 ms evaporation 
+ end
+     
+ 
 %% Aissgn the ROI
 
 % Assign the ROI
@@ -1026,7 +1040,8 @@ if doFermiFitLong
                 % Perform the fit  
                 [fitFermi, fitGauss, hF] = ...
                     fermiFit(Dx,Dy,Z,fermiFitOpts); 
-                
+%                  [fitFermi, fitGauss, hF] = ...
+%                     fermiFitAssym(Dx,Dy,Z,fermiFitOpts);                
                 % Append the output
                 atomdata(kk).FermiFit{nn} = fitFermi; 
                 atomdata(kk).FermiGaussFit{nn} = fitGauss;
@@ -1112,7 +1127,7 @@ if doAnimate && doSave
       animateOpts.Order='ascend';
         animateOpts.CLim='auto';
         
-        animateOpts.CLim=[0 4]
+        animateOpts.CLim=[0 1];
 
 % %     % Color limits
 %     animateOpts.CLim=[0 0.5;

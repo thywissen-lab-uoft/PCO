@@ -6,6 +6,12 @@ else
     FigLabel = '';
 end
 
+if isfield(opts,'Flags')
+    Flags = opts.Flags; 
+else
+    Flags = {};
+end
+
 %% Grab the Data
 params=[data.Params];
 X=[params.(xVar)];
@@ -50,7 +56,10 @@ for ll=1:size(data.Natoms,2)
         'position',[2 2 40 20]);
 
     % Plot the temperatures
-    hax4=subplot(2,8,[1 2 3 9 10 11 ]);
+   hax4=subplot(2,8,[1 2 3 9 10 11 ]);    
+   
+%    hax4=subplot(2,10,[1 2 3 11 12 13]);
+
     set(hax4,'box','on','linewidth',1,'fontsize',10,'units','normalized','xgrid','on','ygrid','on');
     hold on
     xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
@@ -77,6 +86,8 @@ for ll=1:size(data.Natoms,2)
 
     strs={'$T$','$T (-6\mathrm{Li}_3(-\zeta))^{1/3} $','$\hbar {\bar \omega} (6N)^{1/3}/k_B$',...
         '$\hbar {\bar \omega} (3N)^{1/3}/k_B$'};
+    strs={'$T$','$T_f$ shape','$T_f$ pure',...
+        '$T_f$ mix'};
     hL=legend([p1 p2 p3 p4],strs,'location','best','interpreter','latex','fontsize',8,...
         'orientation','horizontal');
     hL.Position(3) = hax4.Position(3);
@@ -97,6 +108,8 @@ for ll=1:size(data.Natoms,2)
 
     % Plot T/Tf
     hax1=subplot(2,8,[4 5 6 12 13 14]);
+%     hax1=subplot(2,10,[4 5 6 14 15 16]);
+
     set(hax1,'box','on','linewidth',1,'fontsize',10,'units','normalized','xgrid','on','ygrid','on');
     hold on
     xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
@@ -123,6 +136,26 @@ for ll=1:size(data.Natoms,2)
     hL=legend([p1 p2 p3],strs,'location','southwest','interpreter','latex','fontsize',8,...
     'orientation','horizontal','units','normalized');
 
+    fstr = [];
+    
+    for kk=1:length(Flags)
+        vals = unique([data.Flags.(Flags{kk})]);
+        vals(isnan(vals))=[];
+        
+        fstr = [fstr pad(Flags{kk},16) ' : '];
+        if length(vals==1)
+           fstr = [fstr num2str(vals) newline];
+        else
+           fstr = [fstr nan newline];
+        end               
+    end
+    fstr(end)=[];
+    
+    text(.01,.99,fstr,'units','normalized','verticalalignment','top',...
+        'horizontalalignment','left','interpreter','none',...
+        'backgroundcolor',[1 1 1 1],'edgecolor','k','margin',1,...
+        'fontsize',8,'fontname','courier');
+
 
     % For transparent markers
     % legendMarkers([p1 p2 p3],hL,co(2:4,:),[1 .6 .6]);
@@ -136,6 +169,8 @@ for ll=1:size(data.Natoms,2)
 
     % Plot the atom number
     hax2=subplot(2,8,[15 16]);
+%     hax2=subplot(2,10,[17 18]);
+
     set(hax2,'box','on','linewidth',1,'fontsize',10,'units','normalized',...
         'yaxislocation','right','xgrid','on','ygrid','on');
     hold on
@@ -153,8 +188,10 @@ for ll=1:size(data.Natoms,2)
     end
 
 
-    % Plot the trap frequency
+%     Plot the trap frequency
     hax3=subplot(2,8,[7 8]);
+%     hax3=subplot(2,10,[7 8]);
+
     set(hax3,'box','on','linewidth',1,'fontsize',10,'units','normalized',...
         'yaxislocation','right','xgrid','on','ygrid','on');
     hold on
@@ -168,6 +205,25 @@ for ll=1:size(data.Natoms,2)
         datetick('x');
         xlabel('ExecutionDate');
     end
+    
+%     % flag table
+%     a=subplot(2,10,[9 10 19 20]);
+%     pos=get(a,'position');
+%     delete(a)
+% 
+%     tbl=uitable('FontSize',8,'RowName',{},'ColumnName',{},...
+%         'ColumnEditable',[false false],'units','normalized');
+%     tbl.ColumnWidth={100 10};
+%     tbl.Position=pos;
+%     tbl.Position(1) = tbl.Position(1)+.05;
+%     drawnow;
+%     
+%     for kk=1:length(Flags)
+%         
+%         tbl.Data{kk,1} = Flags{kk};
+%         
+%     end
+
 
     resizeFig(hF,t);
 

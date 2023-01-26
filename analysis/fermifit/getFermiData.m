@@ -34,6 +34,9 @@ for kk=1:length(atomdata)
             % Grab Fit parameters
             Xc(kk,nn)=fout.Xc;Yc(kk,nn)=fout.Yc;        % X and Y center
             W(kk,nn)=fout.W;                        % X and Y widths
+
+%             W(kk,nn)=sqrt(fout.Wx*fout.Wy);                        % X and Y widths
+
             Q(kk,nn) = fout.Q;
             A(kk,nn)=fout.A;                            % Amplitude            
             nbg(kk,nn)=fout.bg;                         % Background
