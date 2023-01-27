@@ -67,24 +67,24 @@ end
 
 % Defautl variable to plot against
 %pco_xVar = 'rf_tof_shiftshift';
-pco_xVar = 'rf_freq_HF_shift_XDT';
+pco_xVar = 'xdt_hf_field_2';
 
 % Should the analysis attempt to automatically find the xvariable?
-pco_autoXVar = 1;
+pco_autoXVar = 0;
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit = 1;
 
 % If ixon_autoUnit=0, this will be used.
-pco_overrideUnit='kHz'; 
+pco_overrideUnit='G'; 
 %%
 ODopts=struct;
-ODopts.GaussFilter=1;
+ODopts.GaussFilter=0;
 
 %% Analysis Flags
 
 % Standard Analysis
-doODProfile = 1;
+doODProfile = 0;
 doStandard = 1;
 
 doAnimate = 1;
@@ -106,7 +106,7 @@ doBoxCount    = 0;      % Box count analysis
 
 % Gaussian Fit
 % Fit to a gaussian distribution (thermal cloud)
-doGaussFit    = 1;      % Enable gauss fitting
+doGaussFit    = 0;      % Enable gauss fitting
 
 % Erf Fit
 doErfFit      = 0;    
@@ -266,7 +266,7 @@ disp(['Sorting atomdata by the given ''' pco_xVar '''']);
 x=zeros(length(atomdata),1);
 for kk=1:length(atomdata)
     if isfield(atomdata(kk).Params,pco_xVar)
-        x(kk)=atomdata(kk).Params.(pco_xVar);
+        x(kk)=atomdata(kk).Params.(pco_xVar) + 3;
     else
         warning(['atomdata(' num2str(kk) ') has no ''' pco_xVar '''']);
     end
@@ -419,11 +419,8 @@ ROI = [600 1175 200 900];
 %% Magtrap ROI
 
 if ~(data.Flags.do_dipole_trap)
-    if data.Flags.In_Trap_imaging
-         ROI = [830 950 280 340];
-    end
     
-    %%%%%%% RF1A X CAM
+       %%%%%%% RF1A X CAM
 
 % ROI = [395 1330 190 1010]; % RF1A 10ms TOF
 
@@ -438,7 +435,15 @@ if ~(data.Flags.do_dipole_trap)
     
 %      ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
          ROI = [580 1200 375 1020];  % RF1B full TOF
+         ROI = [580 1200 200 1020];  % RF1B full TOF
 
+         
+         
+    if data.Flags.In_Trap_imaging
+         ROI = [830 950 280 340];
+    end
+    
+ 
 end
 
  

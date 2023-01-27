@@ -376,6 +376,11 @@ if opts.CenterLinearFit && length(xvals)>1
     
      % Y Fit
     axes(hax2);
+    if median(D2)>1024
+        yyaxis right
+    else
+        yyaxis left
+    end
     fit2=polyfit(xvals',D2,1);
     plot(tVec,polyval(fit2,tVec),'r-','linewidth',1);  
     
