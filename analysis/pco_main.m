@@ -58,7 +58,7 @@ switch camaxis
     otherwise
         error('You didn''t pick a camera');
 end
-
+%ben is here
 %% Analysis Variable
 % This section of code chooses the variable to plot against for aggregate
 % plots.  The chosen variable MUST match a variable provided in the params
