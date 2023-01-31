@@ -32,6 +32,9 @@ for kk=1:length(a.Children)
     end
 end
 
+camera_control_file='Y:\_communication\pco_control.mat';
+
+
 % Whether to enter debug mode
 doDebug=0;
 
@@ -108,7 +111,9 @@ coNew=brighten([coNew;coNew;coNew],.2);
                 stop(trigTimer);    % Stop trigger check
             end
             % Delete trigger check timer
-            delete(trigTimer);      
+            delete(trigTimer);   
+            delete(commTimer);      
+
             % Close camera
             
             if camera.isConnected
@@ -810,11 +815,32 @@ hbstop=uicontrol(hpAcq,'style','pushbutton','string','stop',...
     'backgroundcolor',[255 102 120]/255,'callback',@stopCamCB,...
     'ToolTipString',ttstr);
 
+
+% Auto Read Settings?
+ttstr=['Read in camera settings from adwin computer'];
+hcAdwinControl=uicontrol(hpAcq,'style','checkbox','string','adwin control?',...
+    'fontsize',8,...
+    'backgroundcolor','w','Position',[280 0 100 30],'callback',@andwinControlCheck,...
+    'ToolTipString',ttstr);
+
+% Save checkbox callback
+    function andwinControlCheck(src,~)
+        if src.Value
+            tSaveDir.Enable='on';
+            bBrowse.Enable='on';
+            start(commTimer)
+        else
+            tSaveDir.Enable='off';
+            bBrowse.Enable='off';
+            stop(commTimer)
+        end
+    end
+
 % Auto Save check box
-ttstr=['Enable/Disable automatic saving to external directory. Does ' ...
+ttstr=['Enable/Disable saving to external directory. Does ' ...
     'not override saving to image history.'];
-hcSave=uicontrol(hpAcq,'style','checkbox','string','save?','fontsize',10,...
-    'backgroundcolor','w','Position',[280 0 60 30],'callback',@saveCheck,...
+hcSave=uicontrol(hpAcq,'style','checkbox','string','save?','fontsize',8,...
+    'backgroundcolor','w','Position',[370 0 60 30],'callback',@saveCheck,...
     'ToolTipString',ttstr);
 
 % Save checkbox callback
@@ -822,21 +848,23 @@ hcSave=uicontrol(hpAcq,'style','checkbox','string','save?','fontsize',10,...
         if src.Value
             tSaveDir.Enable='on';
             bBrowse.Enable='on';
+            hcDetectDir.Enable='on';
         else
             tSaveDir.Enable='off';
             bBrowse.Enable='off';
+            hcDetectDir.Enable='off';
         end
     end
 
 % Browse button
 cdata=imresize(imread('images/browse.jpg'),[20 20]);
 bBrowse=uicontrol(hpAcq,'style','pushbutton','CData',cdata,'callback',@browseCB,...
-    'enable','off','backgroundcolor','w','position',[340 5 size(cdata,[1 2])]);
+    'enable','off','backgroundcolor','w','position',[420 5 size(cdata,[1 2])]);
 
 % String for current save directory
 tSaveDir=uicontrol(hpAcq,'style','text','string','directory','fontsize',8,...
     'backgroundcolor','w','units','pixels','horizontalalignment','left',...
-    'enable','off','UserData','','Position',[360 0 hF.Position(3)-290 22]);
+    'enable','off','UserData','','Position',[450 0 hF.Position(3)-290 22]);
 
 % Browse button callback
     function browseCB(~,~)
@@ -1715,6 +1743,10 @@ SizeChangedFcn(hF,[]);
 updateScalebar;
 drawnow;
 %% Initialize Camera
+% Initialize the trig checker
+commTimer=timer('name','Adwin Comm Checker','Period',1.0,...
+    'ExecutionMode','FixedSpacing','TimerFcn',@commCheckerCB);
+
 
 % Initialize the trig checker
 trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
@@ -2163,6 +2195,48 @@ function data=performFits(data)
     assignin('base','fitresults',fitresults);       % Rewrite fitresults        
 end
 
+%% Communication Checker
+    function commCheckerCB(src,evt)
+        if exist(camera_control_file,'file')
+            ctrl = load(camera_control_file);            
+            if isfield(ctrl,'adwin_ROI')
+                ROI = ctrl.adwin_ROI;
+                
+                if sum(sum(ROI~=tblROI.Data))>0
+                    disp('changing ROI');                    
+                end
+
+                if sum(~isnumeric(ROI)) || sum(isinf(ROI)) || sum(isnan(ROI))
+                    warning('Incorrect data type provided for ROI.');
+                    src.Data(m,n)=evt.PreviousData;
+                    return;
+                end    
+
+                ROI=round(ROI);      % Make sure this ROI are integers   
+                % Check that limits go from low to high
+                if ROI(2)<=ROI(1) || ROI(4)<=ROI(3)
+                   warning('Bad ROI specification given.');
+                end               
+                % Check that ROI is within image bounds
+                if ROI(1)<1; ROI(1)=1; end       
+                if ROI(3)<1; ROI(3)=1; end   
+                
+                tblROI.Data = ROI;
+
+                % Try to update ROI graphics
+                try
+                    pos=[ROI(1) ROI(3) ROI(2)-ROI(1) ROI(4)-ROI(3)];                    
+                    set(pROI(1),'Position',pos);                    
+                    drawnow;
+                catch
+                   warning('Unable to change display ROI.');
+                end
+            end
+        end            
+        
+    end
+
+
 %% GUI callbacks of camera functions
     function trigCheckerCB(src,evt)        
         doProcess=0;           
@@ -2346,6 +2420,8 @@ end
 try
 chData([],[],0);   
 end
+
+
 end
 
 
