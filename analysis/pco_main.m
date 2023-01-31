@@ -67,10 +67,10 @@ end
 
 % Defautl variable to plot against
 %pco_xVar = 'rf_tof_shiftshift';
-pco_xVar = 'xdt_hf_field_2';
+pco_xVar = 'ExecutionDate';
 
 % Should the analysis attempt to automatically find the xvariable?
-pco_autoXVar = 0;
+pco_autoXVar = 1;
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit = 1;
@@ -367,23 +367,23 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 %%%%%%%%%%%%%%%%%%%%% X CAM DOUBLE SHUTTER %%%%%%%%%%%%%%%%%%%%%
 
-%  ROI=[800 950 475 630;
-%      800 950 1540 1695];   % XDT 15ms tof high field
+ ROI=[730 1000 400 700;
+     800 1000 1500 1700];   % XDT 15ms tof high field
  
 %  
- ROI=[800 950 200 550;
-     800 950 1450 1600];   % XDT 15ms tof high field, 195 G, QP 0.117
+%  ROI=[800 950 200 550;
+%      800 950 1450 1600];   % XDT 15ms tof high field, 195 G, QP 0.117
 % % 
 %   ROI=[800 950 285 600;
 %      800 950 1309 1650];   % XDT 15ms tof high field, 195 G, vary QP
 %  
- 
-  ROI=[800 950 285 900;
-     800 950 1309 1900];   % XDT 195 G, 0.115, full TOF
+%  
+%   ROI=[800 950 285 900;
+%      800 950 1309 1900];   % XDT 195 G, 0.115, full TOF
  
 %  ROI=[800 950 550 750;
 %      800 950 1600 1820];  % XDT 21ms tof high field QP 0.117
- 
+%  
 % ROI=[800 950 680 830;
 %      800 950 1750 1900];  % XDT 21ms tof high field
 
@@ -395,7 +395,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %ROI = ROI(2,:); % 7 only
 
 
-ROI = [600 1175 200 900];
+% ROI = [600 1175 200 900];
 %%%%%%%%%%%%%%%%%%% Y CAM %%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % ROI = [1 1392 400 600]; % XDT Insitu long
@@ -418,7 +418,7 @@ ROI = [600 1175 200 900];
 
 %% Magtrap ROI
 
-if ~(data.Flags.do_dipole_trap)
+if ~(data.Flags.xdt)
     
        %%%%%%% RF1A X CAM
 
@@ -451,8 +451,8 @@ end
 %% Fermi Fit Long
  
  
-if doFermiFitLong
-    ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation 
+if doFermiFitLong || doBEC
+    ROI=[800 980 700 870];   % XDT  TOF 25 ms evaporation 
         
     if isfield(data(1).Flags,'High_Field_Imaging')
         if data(1).Flags.High_Field_Imaging == 1
@@ -474,7 +474,8 @@ end
         800 960 1700 1950];   % XDT  TOF 25 ms evaporation 
  end
      
- 
+%  ROI=[800 960 200 1000
+%      800 960 200+1024 1000+1024];
 %% Aissgn the ROI
 
 % Assign the ROI
@@ -998,8 +999,11 @@ fermiFitOpts.DFGinds=DFGinds;
     
 % Do the fermi fit
 if doFermiFitLong        
-    xdt_end_power_var = 'Evap_End_Power';
+%     xdt_end_power_var = 'Evap_End_Power';
 %     xdt_end_power_var = 'power_val';
+
+    xdt_end_power_var = 'xdt1_final_power';
+
     xdt_pow2freq = @(P) 61.5*sqrt(P./(0.085)); % Calibrated 2021.02.25
     
     for kk=1:length(atomdata)
@@ -1124,12 +1128,12 @@ if doAnimate && doSave
     animateOpts.xUnit=pco_unit;
     
     % Stacking images (applicable only for double exposure)
-%      animateOpts.doubleStack='vertical';
-     animateOpts.doubleStack='horizontal';
+     animateOpts.doubleStack='vertical';
+%      animateOpts.doubleStack='horizontal';
 
      % Asceneding or descending
-%     animateOpts.Order='descend';   
-      animateOpts.Order='ascend';
+    animateOpts.Order='descend';   
+%       animateOpts.Order='ascend';
         animateOpts.CLim='auto';
         
         animateOpts.CLim=[0 1];
@@ -1152,6 +1156,15 @@ if doAnimate && doSave
     if doFermiFitLong
         animateOpts.CLim=[0 .8;0 .8];
     end
+    
+    if doBEC
+        if atomdata(1).Flags.image_atomtype==2       
+            animateOpts.CLim=[0 .8;0 4];
+        else
+            animateOpts.CLim=[-.1 4];
+        end
+    end
+        
         
     
     animateCloud(atomdata,pco_xVar,animateOpts);    

@@ -400,7 +400,7 @@ if opts.ShowDetails
     % iX=[iX-1 iX iX+1];
     % iX=
     ZxCut=sum(Z(:,iX),2)/length(iX);
-    plot(Y,feval(foutG,foutG.Xc,Y),'-','linewidth',2,'color','cyan');
+    plot(Y,feval(foutG,foutG.Xc,Y),'-','linewidth',2,'color','b');
     hold on
     plot(Y,feval(fout,fout.Xc,Y),'r-','linewidth',2);
     hold on

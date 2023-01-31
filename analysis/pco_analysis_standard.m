@@ -119,11 +119,15 @@ if doGaussFit
     
     % Determine which ROIs to perform BEC analysis on (for double shutter)
     if doBEC 
+        
+        p=[gauss_data.Params];
         BECopts=struct;
         BECopts.FigLabel = FigLabel;
         BECopts.xUnit=pco_unit;   
         BECopts.pow2freq = @(P) 0.725*61.5*sqrt(P./(0.085)); % Calibrated 2021.02.25
-%         BECopts.pows = 
+        BECopts.pows = [p.xdt1_final_power];
+        BECopts.PixelSize = PixelSize;
+
         [hF_BEC,BECdata]=BECanalysis(gauss_data,pco_xVar,BECopts);    
 
         if doSave;saveFigure(hF_BEC,'gauss_BEC',saveOpts);end        

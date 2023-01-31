@@ -52,15 +52,21 @@ xvals=[params.(xVar)];
 
 tofs=[params.tof];
 tofs = tofs*1e-3;
+tofs = tofs';
 
-freqs = BECopts.pow2freq(pows);
+freqs = opts.pow2freq(opts.pows);
+freqs = freqs';
 
 Natoms  = gauss_data.Natoms(:,ind);
 Xs      = gauss_data.Xs(:,ind);
 Ys      = gauss_data.Ys(:,ind);
 
-Tx      = Xs.*(PixelSize/tofs).^2*m/kB;
-Ty      = Ys.*(PixelSize/tofs).^2*m/kB;
+
+
+
+Tx      = (opts.PixelSize*Xs./tofs).^2*m/kB;
+Ty      = (opts.PixelSize*Ys./tofs).^2*m/kB;
+
 
 Nlim=[3E4 max(Natoms)*2];
 
@@ -83,12 +89,12 @@ data.TBEC=T_BEC(data.Freqs,data.Natoms);
 data.PSD=data.Density.*debroglie(data.T).^3;
 
 showBECTransition=0;
-if sum(data.T<data.TBEC)
-    showBECTransition=1;
-    ind=find(flip(data.T<data.TBEC),1);    
-    ind=length(gauss_data)-ind+0;
-end
-
+% if sum(data.T<data.TBEC)
+%     showBECTransition=1;
+%     ind=find(flip(data.T<data.TBEC),1);    
+%     ind=length(gauss_data)-ind+0;
+%     ind
+% end
 
 %% Figures
 
@@ -113,6 +119,8 @@ pTheory=plot(data.Natoms,data.TBEC,'s--','markerfacecolor',co(2,:),...
 hold on
 ylim([1E-8 2E-6]);
 xlim(Nlim);
+
+
 
 if showBECTransition
    plot(data.Natoms(ind,1)*[1 1],get(gca,'YLim'),'--','color',[.6 .6 .6]);
