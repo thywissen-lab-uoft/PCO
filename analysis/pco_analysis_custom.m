@@ -36,10 +36,10 @@ gauss_neg_single=0;
 gauss_double = 0;
 expdecay = 0;
 
-lorentz_neg_single=1;    
-lorentz_neg_double=0;  
+lorentz_neg_single=0;    
+lorentz_neg_double=1;  
 
-lorentz_single=1;
+lorentz_single=0;
 lorentz_double=0;    
 lorentz_triple=0;    
 

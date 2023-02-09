@@ -200,17 +200,17 @@ end
 if doBMFit  
 % This is the default bm analysis.
     
-    bmPopts = struct;
-    bmPopts.FigLabel = FigLabel;
-    bmPopts.xUnit=pco_unit;
-    bmPopts.NumberExpFit = 0;        % Fit exponential decay to atom number
-    bmPopts.NumberLorentzianFit=0;   % Fit atom number to lorentzian
-    bmPopts.CenterSineFit = 0;       % Fit sine fit to cloud center
-    bmPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
-    bmPopts.CenterParabolaFit = 0;
-    bmPopts.CenterLinearFit = 0;     % Linear fit to cloud center
-    bmPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
-    bmPopts.angleTrack = 0;
+    bmPopts                     = struct;
+    bmPopts.FigLabel            = FigLabel;
+    bmPopts.xUnit               = pco_unit;
+    bmPopts.NumberExpFit        = 0;        % Fit exponential decay to atom number
+    bmPopts.NumberLorentzianFit = 0;   % Fit atom number to lorentzian
+    bmPopts.CenterSineFit       = 0;       % Fit sine fit to cloud center
+    bmPopts.CenterDecaySineFit  = 0;  % Fit decaying sine to cloud center
+    bmPopts.CenterParabolaFit   = 0;
+    bmPopts.CenterLinearFit     = 0;     % Linear fit to cloud center
+    bmPopts.NumberExpOffsetFit  = 0; % Exp decay fit with nonzero offset
+    bmPopts.angleTrack          = 0;
 
     % Plot the statistics of bmian fit
     hF_stats_bm=showBMStats(bm_data,bmPopts);     

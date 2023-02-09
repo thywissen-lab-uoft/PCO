@@ -286,8 +286,8 @@ if length(X)>4 && FitFlags.lorentz_neg_double
     xC=X(ind);
 
     % Assign guess
-    xC1 = -10;
-    xC2 = -30;
+    xC1 = -5;
+    xC2 = -35;
     G=[A 20 xC1 A/10 20 xC2 bg];        
 
     opt.StartPoint=G;

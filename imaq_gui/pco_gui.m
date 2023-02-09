@@ -33,7 +33,7 @@ for kk=1:length(a.Children)
 end
 
 camera_control_file='Y:\_communication\pco_control.mat';
-
+analysis_history_dir = 'Y:\_communication\analysis_history';
 
 % Whether to enter debug mode
 doDebug=0;
@@ -826,12 +826,8 @@ hcAdwinControl=uicontrol(hpAcq,'style','checkbox','string','adwin control?',...
 % Save checkbox callback
     function andwinControlCheck(src,~)
         if src.Value
-            tSaveDir.Enable='on';
-            bBrowse.Enable='on';
             start(commTimer)
         else
-            tSaveDir.Enable='off';
-            bBrowse.Enable='off';
             stop(commTimer)
         end
     end
@@ -848,11 +844,9 @@ hcSave=uicontrol(hpAcq,'style','checkbox','string','save?','fontsize',8,...
         if src.Value
             tSaveDir.Enable='on';
             bBrowse.Enable='on';
-            hcDetectDir.Enable='on';
         else
             tSaveDir.Enable='off';
             bBrowse.Enable='off';
-            hcDetectDir.Enable='off';
         end
     end
 
@@ -1747,7 +1741,6 @@ drawnow;
 commTimer=timer('name','Adwin Comm Checker','Period',1.0,...
     'ExecutionMode','FixedSpacing','TimerFcn',@commCheckerCB);
 
-
 % Initialize the trig checker
 trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
     'ExecutionMode','FixedSpacing','TimerFcn',@trigCheckerCB);
@@ -2077,6 +2070,8 @@ function data=performFits(data)
     %%%%% Post-processing for exporting to tables and variables
     fprintf('Processing fits ... ');
 
+    gauss_fit_data = struct;
+    
     % Update Analysis table
     for m=1:size(ROI,1)
         ind=2;fr(m,ind)=m;ind=ind+1; %
@@ -2090,6 +2085,8 @@ function data=performFits(data)
                 N=2*pi*fout.Xs*fout.Ys*fout.A;          % OD counts from gaussian
                 Natoms=N*((pxsize*1E-6)^2/crosssec);   % Atom nuber
 
+                gauss_fit_data(m).GaussAtomNumber = Natoms;
+                
                 % Generate table string
                 str={
                     ['Ng (OD,N)'],N,Natoms;
@@ -2136,6 +2133,13 @@ function data=performFits(data)
 
                 % Update analysis table
                 tbl_analysis(m).Data=[tbl_analysis(m).Data; str]; 
+                
+                
+         
+                gauss_fit_data(m).GaussTemperatureRb = sqrt(TyRb*TxRb);
+                gauss_fit_data(m).GaussTemperatureK = sqrt(TyK*TxK);
+
+
             end 
 
             % Box Counts analysis
@@ -2180,7 +2184,19 @@ function data=performFits(data)
     disp('done');
 
     % Update plots        
-    updatePlots(data); 
+    updatePlots(data);     
+    
+    % Save Partial Analysis
+    adwin_data = struct;
+    adwin_data.Name = data.Name;
+    adwin_data.Date = data.Date;
+    adwin_data.ExecutionDate = data.Params.ExecutionDate;
+    adwin_data.AnalysisDate = now;
+    adwin_data.ROI = tblROI.Data;
+    adwin_data.GaussData = gauss_fit_data;   
+%     save(summary_analysis_output_file,'adwin_data');
+
+    saveSummaryData(adwin_data);
 
     %%%%%% Output to fit results
     % Output some analysis to the main workspace, this is done to be
@@ -2417,8 +2433,31 @@ end
         disp(' done'); 
     end
 
+    function saveSummaryData(data,saveDir)
+        if nargin==1
+           saveDir=analysis_history_dir;
+           filenames=dir([saveDir filesep '*.mat']);
+           filenames={filenames.name};
+           filenames=sort(filenames);
+
+           % Delete old images
+           if length(filenames)>1000
+               f=[saveDir filesep filenames{1}];
+               delete(f);
+           end               
+        end
+        fname=[data.Name '.mat']; 
+        if ~exist(saveDir,'dir')
+           mkdir(saveDir);
+        end        
+        fname=fullfile(saveDir,fname);
+        fprintf('%s',[fname ' ...']);
+        save(fname,'data');
+        disp(' done'); 
+    end
+
 try
-chData([],[],0);   
+    chData([],[],0);   
 end
 
 

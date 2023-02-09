@@ -66,8 +66,8 @@ end
 % display properties.
 
 % Defautl variable to plot against
-%pco_xVar = 'rf_tof_shiftshift';
-pco_xVar = 'ExecutionDate';
+pco_xVar = 'rf_freq_HF_shift';
+% pco_xVar = 'ExecutionDate';
 
 % Should the analysis attempt to automatically find the xvariable?
 pco_autoXVar = 1;
@@ -84,7 +84,7 @@ ODopts.GaussFilter=0;
 %% Analysis Flags
 
 % Standard Analysis
-doODProfile = 0;
+doODProfile = 1;
 doStandard = 1;
 
 doAnimate = 1;
@@ -116,7 +116,7 @@ doErfFit      = 0;
 % excited bands
 doBMFit = 0;
 
-% Fermi-Fit
+% Fermi-Fithvgj
 % Fit a DFG in long time of flight
 doFermiFitLong = 1;     
 
@@ -321,7 +321,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %    ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 
 % 15 ms XT SG
-% Nbox = 5;
+% Nbox = 2;
 % ROI = [830 930 860 960;    
 %     830 930 780 860;
 %     830 930 690 760;
@@ -329,6 +329,11 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %     830 930 230 320;
 %     ];
 % ROI = ROI(1:Nbox,:);
+
+
+%15 ms XDT mF SG
+ROI=[830 930 880 984;
+    830 930 760 880];     
 
 % ROI=[800 960 390 500;
 %        800 960 500 610]; % 15 ms  xcam,XDT F SG
@@ -366,9 +371,9 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %        830 900 630 695];
 
 %%%%%%%%%%%%%%%%%%%%% X CAM DOUBLE SHUTTER %%%%%%%%%%%%%%%%%%%%%
-
- ROI=[730 1000 400 700;
-     800 1000 1500 1700];   % XDT 15ms tof high field
+% 
+%  ROI=[730 1000 400 700;
+%      800 1000 1500 1700];   % XDT 15ms tof high field
  
 %  
 %  ROI=[800 950 200 550;
@@ -462,7 +467,7 @@ if doFermiFitLong || doBEC
         end
     end
     
-%       ROI=[800 950 285 900];
+%       ROI=[800 950 200 900];
 
 end
 
