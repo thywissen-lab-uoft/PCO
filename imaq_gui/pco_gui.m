@@ -1747,12 +1747,10 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
     %% Process Images Callback
     
     function data=processImages(tin)
-        timg = now;
-        
         % Create the image data structure
         data=struct;
         data.Date=tin;        
-        data.Name=['PixelflyImage_' datestr(timg,'yyyy-mm-dd_HH-MM-SS')];        
+        data.Name=['PixelflyImage_' datestr(now,'yyyy-mm-dd_HH-MM-SS')];        
         data.X=1:camera.W;
         data.Y=1:camera.H;
         data.BitDepth=camera.BitDepth;
@@ -1764,18 +1762,9 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
         if length(camera.Images)>2
            data.Dark = camera.Images{3}; 
         end
-        
-        
-        % Grab the sequence parameters        
-        [data.Params,data.Units,data.Flags]=grabSequenceParams2;        
-        
-        if isfield(data.Params,'ExecutionDate')
-           data.Name=['PixelflyImage_' datestr(data.Params.ExecutionDate,'yyyy-mm-dd_HH-MM-SS')];         
-        end
-        
-        data.Params.ImageDate = timg;
-        data.Params.ImageDateStr = datestr(timg);
 
+        % Grab the sequence parameters        
+        [data.Params,data.Units,data.Flags]=grabSequenceParams2;
 
         % If in debug mode, create some example data
         if doDebug  
