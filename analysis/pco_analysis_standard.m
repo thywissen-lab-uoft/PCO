@@ -102,6 +102,9 @@ if doGaussFit
     % Single shot temperature analysis
     [hF_tempsingle,Tdata]=showGaussSingleTemperature(gauss_data,pco_xVar,gaussPopts);    
     if doSave;saveFigure(hF_tempsingle,'gauss_tempsingle',saveOpts);end     
+    
+    hF_NT_gauss = showNT(gauss_data,pco_xVar,gaussPopts);  
+    if doSave;saveFigure(hF_NT_gauss,'gauss_number_temp',saveOpts);end
         
     % Aspect ratio
     hF_ratio=showAspectRatio(gauss_data,pco_xVar,gaussPopts);    

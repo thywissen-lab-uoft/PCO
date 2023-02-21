@@ -175,7 +175,7 @@ hF=figure('Name',[FigLabel ' : Animate Cloud'],...
     'WindowStyle','modal');
 hF.Position=[100 100 W H];
 colormap(whitejet(2^5));
-
+colormap(inferno(2^5));
 if doubleImage
     if isequal(opts.doubleStack,'horizontal')
         Nr=1;

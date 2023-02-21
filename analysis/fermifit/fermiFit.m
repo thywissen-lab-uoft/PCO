@@ -354,11 +354,11 @@ if opts.ShowDetails
     hF = figure(1917);
     clf
     set(hF,'color','w','Name','Fermi-Fit');
-    hF.Position(3:4)=[600 950];
+    hF.Position(3:4)=[1200 600];
     hF.Position(1:2)=[5 50];
-
+colormap inferno
     % Plot the data
-    subplot(321)
+    subplot(231)
     imagesc(X,Y,Z);
     cl=get(gca,'CLim');
     axis equal tight
@@ -368,7 +368,7 @@ if opts.ShowDetails
         'color','r');
 
     % Plot the fit
-    subplot(322)
+    subplot(234)
     imagesc(X,Y,Zfit);
     axis equal tight
     caxis(cl);
@@ -378,7 +378,7 @@ if opts.ShowDetails
         'color','r');
 
     % Plot xcut
-    subplot(323)
+    subplot(232)
     p1=plot(X,feval(foutG,X,foutG.Yc),'-','linewidth',2,'color','cyan');
     hold
     p2=plot(X,feval(fout,X,fout.Yc),'r-','linewidth',2);
@@ -395,7 +395,7 @@ if opts.ShowDetails
     ylabel('optical density');
 
     % Plot ycut
-    subplot(324)
+    subplot(235)
     iX=find(X==round(fout.Xc),1);
     % iX=[iX-1 iX iX+1];
     % iX=
@@ -412,7 +412,7 @@ if opts.ShowDetails
     ylabel('optical density');
 
 
-    subplot(325)
+    subplot(233)
     imagesc(X,Y,Z-Zfit);
     axis equal tight
     caxis([-.1 .1]);
@@ -421,7 +421,7 @@ if opts.ShowDetails
     text(5,5,'residue','units','pixels','verticalalignment','bottom',...
         'color','r');
 
-    ax6=subplot(326);
+    ax6=subplot(236);
 
 
     tbl=uitable('fontsize',8,'ColumnEditable',[false false false],'units','normalized');

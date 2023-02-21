@@ -5,7 +5,9 @@ function pco_gui
 % 
 % This code run the PCO cameras which the lattice experiment uses for
 % absorption imaging along the X and Y lattice directions.
-
+cmap = colormap(whitejet);
+cmap = colormap(bone);
+cmap = colormap(inferno);
 %% Load dependencies
 % Add all subdirectories for this m file
 curpath = fileparts(mfilename('fullpath'));
@@ -248,7 +250,7 @@ l=80;   % Left gap for fitting and data analysis summary
 axImg=axes('parent',hp,'UserData','OD');cla
 hImg=imagesc(X,Y,Z);
 set(axImg,'box','on','linewidth',.1,'fontsize',10,'units','pixels',...
-    'XAxisLocation','top','colormap',colormap(whitejet));
+    'XAxisLocation','top','colormap',cmap);
 hold on
 axImg.Position=[50 150 hp.Position(3)-200 hp.Position(4)-200];
 axis equal tight
@@ -390,11 +392,11 @@ hbSlctLim=uicontrol(hp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
         disp(['Selecting display ROI .' ...
             ' Click two points that form the rectangle ROI.']);
         axes(axImg)                 % Select the OD image axis
-        [x1,y1]=ginput(1);          % Get a mouse click
+        [x1,y1]=ginputMe(1);          % Get a mouse click
         x1=round(x1);y1=round(y1);  % Round to interger        
         p1=plot(x1,y1,'+','color','k','linewidth',1); % Plot it
         
-        [x2,y2]=ginput(1);          % Get a mouse click
+        [x2,y2]=ginputMe(1);          % Get a mouse click
         x2=round(x2);y2=round(y2);  % Round it        
         p2=plot(x2,y2,'+','color','k','linewidth',1);  % Plot it
 
@@ -1073,11 +1075,11 @@ uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
         disp(['Selecting ROI ' num2str(RNum) '.' ...
             ' Click two points that form the rectangle ROI.']);
         axes(axImg)                 % Select the OD image axis
-        [x1,y1]=ginput(1);          % Get a mouse click
+        [x1,y1]=ginputMe(1);          % Get a mouse click
         x1=round(x1);y1=round(y1);  % Round to interger        
         p1=plot(x1,y1,'+','color',co(RNum,:),'linewidth',1); % Plot it
         
-        [x2,y2]=ginput(1);          % Get a mouse click
+        [x2,y2]=ginputMe(1);          % Get a mouse click
         x2=round(x2);y2=round(y2);  % Round it        
         p2=plot(x2,y2,'+','color',co(RNum,:),'linewidth',1);  % Plot it
 

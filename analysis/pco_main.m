@@ -66,8 +66,8 @@ end
 % display properties.
 
 % Defautl variable to plot against
-pco_xVar = 'rf_freq_HF_shift';
-% pco_xVar = 'ExecutionDate';
+% pco_xVar = 'rf_freq_HF_shift';
+pco_xVar = 'xdt1_final_power';
 
 % Should the analysis attempt to automatically find the xvariable?
 pco_autoXVar = 1;
@@ -84,7 +84,7 @@ ODopts.GaussFilter=0;
 %% Analysis Flags
 
 % Standard Analysis
-doODProfile = 1;
+doODProfile = 0;
 doStandard = 1;
 
 doAnimate = 1;
@@ -106,7 +106,7 @@ doBoxCount    = 0;      % Box count analysis
 
 % Gaussian Fit
 % Fit to a gaussian distribution (thermal cloud)
-doGaussFit    = 0;      % Enable gauss fitting
+doGaussFit    =0;      % Enable gauss fitting
 
 % Erf Fit
 doErfFit      = 0;    
@@ -129,7 +129,7 @@ doFermiFitLong = 1;
 % are used when the particular flag is enabled.
 
 doGaussRabi   = 0;      % Enable gauss rabi
-doBEC         = 0;      % Enable BEC analys
+doBEC         = 1;      % Enable BEC analys
 
 % Landau Zener Analysis
 doLandauZener       =  0;         
@@ -332,8 +332,11 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 
 %15 ms XDT mF SG
-ROI=[830 930 880 984;
-    830 930 760 880];     
+% ROI=[830 930 880 984;
+%     830 930 760 880];     
+
+% big box
+% ROI = [723 1071 200 872];
 
 % ROI=[800 960 390 500;
 %        800 960 500 610]; % 15 ms  xcam,XDT F SG
@@ -396,6 +399,9 @@ ROI=[830 930 880 984;
 % ROI=[770 970 450 650;
 %       770 970 1510 1710];   %  band map 15 ms  
 
+ROI = [800 960 715 870;
+        800 960 1800 1940]; % double shutter 25 ms tof
+
 % ROI = ROI(1,:); % 9 only 
 %ROI = ROI(2,:); % 7 only
 
@@ -427,25 +433,18 @@ if ~(data.Flags.xdt)
     
        %%%%%%% RF1A X CAM
 
-% ROI = [395 1330 190 1010]; % RF1A 10ms TOF
-
-% ROI = [460 1370 200 800]; % RF1A 5ms TOF
+% ROI = [395 1330 190 1010]; % RF1A 10ms TOF WRONG
+ 
 
 %%%%% RF1B X CAM
-% ROI = [720 1040 330 640];   % RF1B 5 ms TOF
+% ROI = [830 1270 240 600];     % RF1B 5ms TOF 
+% ROI = [830 1270 570 970];     % RF1B 15 ms TOF
 
-% ROI =  [700 1100 300 600];
-% ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
-
-    
-%      ROI = [600 1150 450 1000];  % RF1B 15 ms TOF
-         ROI = [580 1200 375 1020];  % RF1B full TOF
-         ROI = [580 1200 200 1020];  % RF1B full TOF
 
          
          
     if data.Flags.In_Trap_imaging
-         ROI = [830 950 280 340];
+         ROI = [830 950 280 340]; % wrong
     end
     
  
@@ -457,8 +456,9 @@ end
  
  
 if doFermiFitLong || doBEC
-    ROI=[800 980 700 870];   % XDT  TOF 25 ms evaporation 
-        
+%     ROI=[800 980 700 870];   % XDT  TOF 25 ms evaporation  OLD
+    ROI=[940 1130 570 730];   % XDT  TOF 25 ms evaporation 
+
     if isfield(data(1).Flags,'High_Field_Imaging')
         if data(1).Flags.High_Field_Imaging == 1
 %             ROI=[800 950 680 830;
@@ -477,8 +477,13 @@ end
     % XDT 25 ms evaporation
     ROI=[800 960 700 870
         800 960 1700 1950];   % XDT  TOF 25 ms evaporation 
+    
+    
+    ROI=[750 1000 650 920
+        750 1000 1750 2000];   % XDT  TOF 25 ms evaporation 
  end
-     
+%          ROI=[800 980 700 870];   % XDT  TOF 25 ms evaporation 
+
 %  ROI=[800 960 200 1000
 %      800 960 200+1024 1000+1024];
 %% Aissgn the ROI
@@ -1137,8 +1142,8 @@ if doAnimate && doSave
 %      animateOpts.doubleStack='horizontal';
 
      % Asceneding or descending
-    animateOpts.Order='descend';   
-%       animateOpts.Order='ascend';
+%     animateOpts.Order='descend';   
+      animateOpts.Order='ascend';
         animateOpts.CLim='auto';
         
         animateOpts.CLim=[0 1];
@@ -1159,14 +1164,14 @@ if doAnimate && doSave
 %     animateOpts.CLim=[-.1 4];   
 
     if doFermiFitLong
-        animateOpts.CLim=[0 .8;0 .8];
+        animateOpts.CLim=[0 .8;0 .4];
     end
     
     if doBEC
         if atomdata(1).Flags.image_atomtype==2       
-            animateOpts.CLim=[0 .8;0 4];
+            animateOpts.CLim=[0 .8;0 .4];
         else
-            animateOpts.CLim=[-.1 4];
+            animateOpts.CLim=[-.1 3];
         end
     end
         
