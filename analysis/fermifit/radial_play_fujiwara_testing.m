@@ -1,6 +1,9 @@
 xc=886;
 yc=790;
 
+xc = round(atomdata(1).FermiFit{1}.Fit.Xc);
+yc = round(atomdata(1).FermiFit{1}.Fit.Yc);
+
 % Find the width of the box
 ROI = atomdata.ROI;
 
@@ -23,7 +26,8 @@ foo2=atomdata.FermiGaussFit{1}.Fit;
 
 dd=foo(XX,YY);
 
-figure(3)
+f=figure
+f.Position(3:4)=[900 300]
 clf
 set(gcf,'color','w');
 subplot(121);
@@ -45,52 +49,66 @@ xlabel('x px');
 ylabel('y px');
 colormap inferno
 
-figure(1)
+f2=figure
+f2.Position=[1 1 800 400]
+
 clf
 set(gcf,'color','w');
-subplot(121);
+
+
+co=get(gca,'colororder');
+subplot(221);
 imagesc(d)
 axis equal tight
-
-
+colormap inferno
 [Tics,Average,dev,n]=radial_profile(d,1);
-
-% figure(1)
-% clf
-
 colorbar 
 caxis([-.05 .55]);
 xlabel('x px');
 ylabel('y px');
-subplot(122);
-errorbar(Tics(2:end),Average(2:end),dev(2:end),'ko','markerfacecolor','k')
+
+ subplot(223);
+imagesc(imgaussfilt(d-dd,1))
+axis equal tight
+colorbar 
+caxis([-.07 .07]);
+xlabel('x px');
+ylabel('y px');
+colormap inferno
 
 
-
-
+subplot(2,2,[2 4]);
+cla
 hold on
-
 nPx=80;
-plot(0:nPx,feval(foo,xc,yc+[0:nPx]),'linewidth',3)
-plot(0:nPx,feval(foo2,xc,yc+[0:nPx]),'linewidth',3)
+pG=plot(0:nPx,feval(foo2,xc,yc+[0:nPx]),'linewidth',3,'color',co(1,:));
+hold on
+pD=errorbar(Tics(2:end),Average(2:end),dev(2:end),'ko','markerfacecolor','k');
+
+pF=plot(0:nPx,feval(foo,xc,yc+[0:nPx]),'linewidth',3,'color',co(2,:));
 xlim([0 nPx])
+xlim([0 60])
+
 xlabel('radial position (px)');
 ylabel('average radial OD');
 ylim([-.05 .7]);
-
-legend({'data',['fermi ' num2str(atomdata.FermiFit{1}.TTf_shape) ' Tf'] ,'gauss'});
 grid on
-
-
-figure(2)
 plot(Tics,n)
 xlabel('radial position (px)');
 ylabel('num points');
-
 yyaxis right
 plot(Tics,dev)
-% yyaxis right
-% 
-% plot(Tics,n,'k-');
-% ylabel('number of points');
 ylabel('standard deviation');
+legend([pD,pG,pF],{'data','gauss',['fermi ' num2str(atomdata.FermiFit{1}.TTf_shape) ' Tf']});
+
+% 
+% 
+% subplot(133);
+% imagesc(imgaussfilt(d-dd,1))
+% axis equal tight
+% colorbar 
+% caxis([-.07 .07]);
+% xlabel('x px');
+% ylabel('y px');
+% colormap inferno
+% 

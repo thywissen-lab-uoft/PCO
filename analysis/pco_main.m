@@ -47,8 +47,8 @@ CrossSection = 3/(2*pi)*lambda^2;
 
 
 % Choose your camera
-camaxis='X';
-%  camaxis='Y';
+% camaxis='X';
+ camaxis='Y';
 % Choose the pixel size base on the camera
 switch camaxis
     case 'X'
@@ -67,10 +67,10 @@ end
 
 % Defautl variable to plot against
 % pco_xVar = 'rf_freq_HF_shift';
-pco_xVar = 'xdt1_final_power';
+pco_xVar = 'AM_spec_freq';
 
 % Should the analysis attempt to automatically find the xvariable?
-pco_autoXVar = 1;
+pco_autoXVar = 0;
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit = 1;
@@ -84,7 +84,7 @@ ODopts.GaussFilter=0;
 %% Analysis Flags
 
 % Standard Analysis
-doODProfile = 0;
+doODProfile = 1;
 doStandard = 1;
 
 doAnimate = 1;
@@ -106,7 +106,7 @@ doBoxCount    = 0;      % Box count analysis
 
 % Gaussian Fit
 % Fit to a gaussian distribution (thermal cloud)
-doGaussFit    =0;      % Enable gauss fitting
+doGaussFit    = 0;      % Enable gauss fitting
 
 % Erf Fit
 doErfFit      = 0;    
@@ -114,11 +114,11 @@ doErfFit      = 0;
 % Band map fit
 % Fit to a square band map, this includes the vertical and horizontal
 % excited bands
-doBMFit = 0;
+doBMFit = 1;
 
 % Fermi-Fithvgj
 % Fit a DFG in long time of flight
-doFermiFitLong = 1;     
+doFermiFitLong = 0;     
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Custom Analyses
@@ -129,7 +129,7 @@ doFermiFitLong = 1;
 % are used when the particular flag is enabled.
 
 doGaussRabi   = 0;      % Enable gauss rabi
-doBEC         = 1;      % Enable BEC analys
+doBEC         = 0;      % Enable BEC analys
 
 % Landau Zener Analysis
 doLandauZener       =  0;         
@@ -138,8 +138,8 @@ doLandauZener       =  0;
 doRamanSpec   = 0;   
 
 % Band Map Fit and Analysis
-doBMFit_AM   = 0; doBMFit_AM_Dir = 'H';
-doBMFit_AM_Spec  = 0; 
+doBMFit_AM   = 1; doBMFit_AM_Dir = 'H';
+doBMFit_AM_Spec  = 1; 
 
 doCustom_BM = 0;
 
@@ -344,19 +344,19 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % %%%%%%%%%%%%%%%%%%%%%%%%%%% LATTICE LOW FIELD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ROI=[800 960 570 730;
 %        800 960 300 460]; % 15 ms BM TOF x cam, SG F
-%  ROI=[800 960 380 500;
-%         800 960 500 620]; % 15 ms BM TOF x cam, SG F
+%  ROI=[980 1080 260 350;
+%         980 1080 360 460]; % 15 ms BM TOF x cam, SG F
 % ROI=[800 960 300 650]; % 15 ms BM TOF x cam, SG F
 
 % ROI=[800 960 380 500];
 %    ROI=[820 960 200 310;
 %        820 960 650 760]; % 10 ms BM TOF x cam, SG F
 
-%    ROI=[800 960 400 580]; % 15 ms BM TOF x cam
+%    ROI=[880 1200 250 450]; % 15 ms BM TOF x cam
 %      ROI=[750 1010 350 630]; % 15 ms BM TOF x cam
 %      ROI=[390 800 680 1000]; % 15 ms BM TOF y cam
 
-%   ROI=[412 755 552 778]; % 10 ms BM TOF y cam
+  ROI=[380 760 500 820]; % 10 ms BM TOF y cam
 %   ROI=[412 755 700 1000]; % 15 ms BM TOF y cam
 
 
@@ -399,8 +399,8 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % ROI=[770 970 450 650;
 %       770 970 1510 1710];   %  band map 15 ms  
 
-ROI = [800 960 715 870;
-        800 960 1800 1940]; % double shutter 25 ms tof
+% ROI = [800 960 715 870;
+%         800 960 1800 1940]; % double shutter 25 ms tof
 
 % ROI = ROI(1,:); % 9 only 
 %ROI = ROI(2,:); % 7 only
@@ -437,13 +437,13 @@ if ~(data.Flags.xdt)
  
 
 %%%%% RF1B X CAM
-% ROI = [830 1270 240 600];     % RF1B 5ms TOF 
+ROI = [830 1270 240 600];     % RF1B 5ms TOF 
 % ROI = [830 1270 570 970];     % RF1B 15 ms TOF
 
 
          
          
-    if data.Flags.In_Trap_imaging
+    if data.Flags.image_insitu
          ROI = [830 950 280 340]; % wrong
     end
     
@@ -457,7 +457,12 @@ end
  
 if doFermiFitLong || doBEC
 %     ROI=[800 980 700 870];   % XDT  TOF 25 ms evaporation  OLD
-    ROI=[940 1130 570 730];   % XDT  TOF 25 ms evaporation 
+
+    if camaxis == 'X'
+        ROI=[940 1130 570 730];   % XDT  TOF 25 ms evaporation 
+    else
+        ROI=[412 755 700 1000]; %XDT TOF 15ms evaporation
+    end
 
     if isfield(data(1).Flags,'High_Field_Imaging')
         if data(1).Flags.High_Field_Imaging == 1
@@ -1146,7 +1151,7 @@ if doAnimate && doSave
       animateOpts.Order='ascend';
         animateOpts.CLim='auto';
         
-        animateOpts.CLim=[0 1];
+        animateOpts.CLim=[0 .1];
 
 % %     % Color limits
 %     animateOpts.CLim=[0 0.5;
@@ -1164,7 +1169,7 @@ if doAnimate && doSave
 %     animateOpts.CLim=[-.1 4];   
 
     if doFermiFitLong
-        animateOpts.CLim=[0 .8;0 .4];
+        animateOpts.CLim=[0 .6;0 .4];
     end
     
     if doBEC

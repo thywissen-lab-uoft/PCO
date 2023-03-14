@@ -53,6 +53,7 @@ rotation_angle = [0 -1.7]; % Rotation angles of X and Y cams respectively
 % mostly fix this issue by recropping the image to be the same size. This
 % technique WILL FAIL for large rotation angles
 rotMode = 'bicubic'; % 'nearest','bilinear','bicubic'
+
 rotCrop = 'crop'; % 'crop' or 'loose'
 % X Cam has 200 mm objective, 200 mm refocuing
 % Y Cam has 200 mm objective, 400 mm refocusing

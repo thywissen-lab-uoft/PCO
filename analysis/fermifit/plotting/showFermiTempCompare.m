@@ -92,7 +92,7 @@ for ll=1:size(data.Natoms,2)
         'orientation','horizontal');
     hL.Position(3) = hax4.Position(3);
     hL.Position(1) = hax4.Position(1);
-    hL.Position(2) = hax4.Position(2);
+    hL.Position(2) = hax4.Position(2)+hax4.Position(4)-hL.Position(4);
 
     yL=get(gca,'YLim');
     set(gca,'YLim',[0 yL(2)]);
@@ -131,7 +131,10 @@ for ll=1:size(data.Natoms,2)
     end
 
 
-    ylim([0 .45]);
+%     ylim([0 .45]);
+        yL=get(gca,'YLim');
+    set(gca,'YLim',[0 yL(2)]);
+
     strs={'shape','pure','mix'};
     hL=legend([p1 p2 p3],strs,'location','southwest','interpreter','latex','fontsize',8,...
     'orientation','horizontal','units','normalized');
@@ -166,6 +169,7 @@ for ll=1:size(data.Natoms,2)
     setMarkerColor(p3,co(4,:),.9);
 
     hL.Position(1:2) = hax1.Position(1:2);
+%     hL.Position(2) = hax1.Position(2)+hax1.Position(4)-hL.Position(4);
 
     % Plot the atom number
     hax2=subplot(2,8,[15 16]);
