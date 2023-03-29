@@ -86,6 +86,12 @@ Ay2G = sum(sum(Id.*Z))/sum(sum(Id))-AbgG;
 Ay2G = max([Ax2G 0]);
 
 
+if AcG<0.02;AcG = 0;end
+if Ax1G<0.02;Ax1G = 0;end
+if Ax2G<0.02;Ax2G = 0;end
+if Ay1G<0.02;Ay1G = 0;end
+if Ay2G<0.02;Ay2G = 0;end
+
 %% Define Fit Functions
 
 % 1D Square 
@@ -110,9 +116,9 @@ myfit=fittype(...
 fitopt = fitoptions(myfit);
 fitopt.StartPoint = [1.0*AcG XcG+00 YcG+00 sG+0 07.0  09.0 ...
     AbgG+0.00 1.0*Ax1G 1.0*Ax2G 1.0*Ay1G 1.0*Ay2G];
-fitopt.Lower      = [0.0*AcG XcG-10 YcG-10 sG-1 00.1  00.1 ...
+fitopt.Lower      = [0.0*AcG XcG-5 YcG-5 sG-1 00.1  00.1 ...
     AbgG-0.05 0.0*Ax1G 0.0*Ax2G 0.0*Ay1G 0.0*Ay2G];
-fitopt.Upper      = [1.5*AcG XcG+10 YcG+10 sG+1 15.0  15.0 ...
+fitopt.Upper      = [1.5*AcG XcG+5 YcG+5 sG+1 15.0  15.0 ...
     AbgG+0.05 1.5*Ax1G+.05 1.5*Ax2G+.05 1.5*Ay1G+.05 1.5*Ay2G+.05];
 
 if sum((fitopt.Upper-fitopt.Lower)<0)

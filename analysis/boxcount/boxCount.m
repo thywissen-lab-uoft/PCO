@@ -30,6 +30,8 @@ function atomdata=boxCount(atomdata,boxOpts)
                 zbg=double(atomdata(kk).OD(bgROI(3):bgROI(4),bgROI(1):bgROI(2)));
                 Nsum=sum(sum(zbg));
                 nbg=Nsum/(size(zbg,1)*size(zbg,2)); % count density
+            else 
+               bgROI = NaN;
             end    
             
             Nraw=sum(sum(z));

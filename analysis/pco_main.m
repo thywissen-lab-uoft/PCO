@@ -47,8 +47,8 @@ CrossSection = 3/(2*pi)*lambda^2;
 
 
 % Choose your camera
-% camaxis='X';
- camaxis='Y';
+camaxis='X';
+%  camaxis='Y';
 % Choose the pixel size base on the camera
 switch camaxis
     case 'X'
@@ -67,10 +67,10 @@ end
 
 % Defautl variable to plot against
 % pco_xVar = 'rf_freq_HF_shift';
-pco_xVar = 'AM_spec_freq';
+pco_xVar = 'qgm_raman_2photon_detuning';
 
 % Should the analysis attempt to automatically find the xvariable?
-pco_autoXVar = 0;
+pco_autoXVar = 1;
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit = 1;
@@ -79,7 +79,7 @@ pco_autoUnit = 1;
 pco_overrideUnit='G'; 
 %%
 ODopts=struct;
-ODopts.GaussFilter=0;
+ODopts.GaussFilter=.5;
 
 %% Analysis Flags
 
@@ -114,11 +114,11 @@ doErfFit      = 0;
 % Band map fit
 % Fit to a square band map, this includes the vertical and horizontal
 % excited bands
-doBMFit = 1;
+doBMFit = 0;
 
 % Fermi-Fithvgj
 % Fit a DFG in long time of flight
-doFermiFitLong = 0;     
+doFermiFitLong = 1;     
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Custom Analyses
@@ -138,8 +138,8 @@ doLandauZener       =  0;
 doRamanSpec   = 0;   
 
 % Band Map Fit and Analysis
-doBMFit_AM   = 1; doBMFit_AM_Dir = 'H';
-doBMFit_AM_Spec  = 1; 
+doBMFit_AM   = 0; doBMFit_AM_Dir = 'H';
+doBMFit_AM_Spec  = 0; 
 
 doCustom_BM = 0;
 
@@ -342,36 +342,13 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %        800 960 500 610]; % 15 ms  xcam,XDT F SG
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%% LATTICE LOW FIELD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% ROI=[800 960 570 730;
-%        800 960 300 460]; % 15 ms BM TOF x cam, SG F
-%  ROI=[980 1080 260 350;
-%         980 1080 360 460]; % 15 ms BM TOF x cam, SG F
-% ROI=[800 960 300 650]; % 15 ms BM TOF x cam, SG F
 
-% ROI=[800 960 380 500];
-%    ROI=[820 960 200 310;
-%        820 960 650 760]; % 10 ms BM TOF x cam, SG F
+ ROI=[920 1120 250 360;
+        920 1120 360 470]; % 15 ms BM TOF x cam, SG F
 
-%    ROI=[880 1200 250 450]; % 15 ms BM TOF x cam
-%      ROI=[750 1010 350 630]; % 15 ms BM TOF x cam
-%      ROI=[390 800 680 1000]; % 15 ms BM TOF y cam
-
-  ROI=[380 760 500 820]; % 10 ms BM TOF y cam
-%   ROI=[412 755 700 1000]; % 15 ms BM TOF y cam
+   ROI=[880 1200 250 450]; % 15 ms BM TOF x cam
 
 
-%  ROI = [830 940 230 300;
-%      830 940 540 610];
-
-% ROI= [830 930 230 430;830 930 430 590];  % BM, SG, 10 ms
-% ROI= [820 930 450 550;820 930 350 450];  % BM, SG, 13 ms
-
-% ROI = [730 1050 660 940]; % BM 25 ms TOF
-
-% 12ms tof SG from lattice
-% #850 900 300 560;
-% ROI = [830 900 695 760;
-%        830 900 630 695];
 
 %%%%%%%%%%%%%%%%%%%%% X CAM DOUBLE SHUTTER %%%%%%%%%%%%%%%%%%%%%
 % 
@@ -706,11 +683,16 @@ boxOpts.doSubBG = 1;
 % bgROI=[750 820 350 450];
 % bgROI=[700 800 450 500];
 % bgROI=[700 800 500 600];
-bgROI=[700 790 500 600];
-% bgROI=[900 1000 450 500]; % even more zoom in for BM
+% bgROI=[700 790 500 600];
 % bgROI=[800 1000 600 700]; % for k dfg long tof
 
-bgROI=[1000 1100 400 700];
+% bgROI=[1000 1100 400 700];
+
+bgROI=[850 900 300 400]; % SG BM 15 ms
+
+bgROI=ROI(1,:);
+bgROI = [bgROI(1)-100 bgROI(1) bgROI(3) bgROI(4)];% SG BM 15 ms
+
 
 boxOpts.bgROI = bgROI;
 
@@ -743,39 +725,34 @@ raman.doSubBG=1;
 raman.PixelSize = PixelSize;
 raman.CrossSection = CrossSection;
 
-raman.bgROI=[920 970 350 450];
-raman.ROI_1=[835 920 400 465];
-raman.ROI_2=[835 920 330 400];
+raman.bgROI=[800 900 250 470];
 
-raman.ROI_2_V=[860 895 330 350;
-   860 895 385 400];
-raman.ROI_2_H=[835 865 350 390;
-   895 920 350 390];
+% Works best if transfers go from ROI2 --> ROI1
+
+% Full ROI of each F Manifold
+raman.ROI_1=[920 1120 250 360];
+raman.ROI_2=[920 1120 360 470];
+
+% NOTE : FOr each of the sub-zones, pick an ROI that is efinitely only
+% containg those atoms, as it means you won't pick up a false signal
+
+% ROI for each zone
+raman.ROI_1_FBZ=[1015 1035 295 315];
+raman.ROI_1_H=[950 985 280 320;
+   1065 1100 280 320];
+raman.ROI_1_V=[990 1060 250 275;
+   990 1060 330 355];
+
+% ROI for each zone
+raman.ROI_2_FBZ=[1010 1030 400 420];
+raman.ROI_2_H=[945 980 385 440;
+   1065 1100 385 440];
+raman.ROI_2_V=[990 1060 360 375;
+   990 1055 450 465];
+
 
 % Spectrum Fitting
 raman.doFit=0;
-
-% 750 750 750
-raman.CFitBounds=[-300 -50;
-   -50 200];
-raman.VFitBounds=[-50 200;
-   200 450];
-raman.HFitBounds=[-50 200;
-       200 450];
-   
-% 700 700 700
-raman.CFitBounds=[-300 -50;
-   -50 200];
-raman.VFitBounds=[-50 200;
-   200 450];
-raman.HFitBounds=[-50 200;
-       200 450];   
-
-% 500 500 500
-raman.CFitBounds=[-300 -50;
-   -50 200];
-raman.VFitBounds=[-70 150];
-raman.HFitBounds=[-70 150];   
    
 raman.CLim=[0 .5];
    
@@ -783,8 +760,8 @@ if doRamanSpec
     disp(repmat('-',1,60));
     disp('Analyzing box count with Raman Spectroscopy...');
     disp(repmat('-',1,60));
-    atomdata=ramanSpectroscopy(atomdata,raman);
-    hF_raman=showRamanSpectroscopy(atomdata,pco_xVar,raman);      
+    atomdata=ramanSpectroscopy2(atomdata,raman);
+    hF_raman=showRamanSpectroscopy2(atomdata,pco_xVar,raman);      
     if doSave;saveFigure(hF_raman,'raman_spec',saveOpts);end        
 end
 
@@ -1151,7 +1128,7 @@ if doAnimate && doSave
       animateOpts.Order='ascend';
         animateOpts.CLim='auto';
         
-        animateOpts.CLim=[0 .1];
+        animateOpts.CLim=[0 .2];
 
 % %     % Color limits
 %     animateOpts.CLim=[0 0.5;

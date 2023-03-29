@@ -42,6 +42,9 @@ if doLandauZener && size(data.Natoms,2)>1
     SweepTimeVar='uWave_time';'sweep_time';      % Variable that defines sweep time
     SweepRangeVar='uwave_delta_freq';'sweep_range';    %    Variable that defines sweep range
 
+      SweepTimeVar='Raman_Time';'sweep_time';      % Variable that defines sweep time
+    SweepRangeVar='Sweep_Range';'sweep_range';    %    Variable that defines sweep range
+
 
     % Convert the parameter into df and dt (add whatever custom processing
     % you want).
