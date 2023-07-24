@@ -2609,7 +2609,7 @@ myfit=fittype('A*exp(-(xx-Xc).^2./(2*Xs^2)).*exp(-(yy-Yc).^2./(2*Ys^2))+nbg',...
 opt=fitoptions(myfit);
 opt.StartPoint=[N0 Xc Xs Yc Ys bg];
 opt.Lower=[N0/10 10 1 10 1 -1];
-opt.Upper=[5*N0 max(Dx) range(Dx) max(Dy) range(Dy) N0];
+opt.Upper=[1.5*N0 max(Dx) range(Dx) max(Dy) range(Dy) N0];
 opt.Weights=[];
 
 % Check that guesses are not nan or inf
@@ -3006,7 +3006,7 @@ end
 %% Helper Functions
 function s3=getDayDir
     t=now;
-    d=['Y:\Data'];
+    d=['X:\Data'];
     s1=datestr(t,'yyyy');s2=datestr(t,'yyyy.mm');s3=datestr(t,'mm.dd');
     s1=[d filesep s1];s2=[s1 filesep s2];s3=[s2 filesep s3];
 

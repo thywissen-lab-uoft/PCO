@@ -119,7 +119,7 @@ p_inds = [01,02,25];
 FitFlags = struct;
 
 % Exponential Decay
-FitFlags.expdecay =0;               % Exponential Decay no offset
+FitFlags.expdecay =1;               % Exponential Decay no offset
 FitFlags.expdecayoffset = 0;        % Exponential Decay w/offset
 
 

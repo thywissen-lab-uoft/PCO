@@ -48,7 +48,7 @@ CrossSection = 3/(2*pi)*lambda^2;
 
 % Choose your camera
 camaxis='X';
-%  camaxis='Y';
+%   camaxis='Y';
 % Choose the pixel size base on the camera
 switch camaxis
     case 'X'
@@ -67,7 +67,7 @@ end
 
 % Defautl variable to plot against
 % pco_xVar = 'rf_freq_HF_shift';
-pco_xVar = 'qgm_raman_2photon_detuning';
+pco_xVar = 'ExecutionDate';
 
 % Should the analysis attempt to automatically find the xvariable?
 pco_autoXVar = 1;
@@ -76,7 +76,7 @@ pco_autoXVar = 1;
 pco_autoUnit = 1;
 
 % If ixon_autoUnit=0, this will be used.
-pco_overrideUnit='G'; 
+pco_overrideUnit='W'; 
 %%
 ODopts=struct;
 ODopts.GaussFilter=.5;
@@ -102,23 +102,23 @@ doProbeFit    = 0;      % Fit probe beam  to 2D Gaussian
 % processed data outputs of the below fits are typically <fit_type>_name
 
 % Box Count
-doBoxCount    = 0;      % Box count analysis
+doBoxCount      = 0;      % Box count analysis
 
 % Gaussian Fit
 % Fit to a gaussian distribution (thermal cloud)
-doGaussFit    = 0;      % Enable gauss fitting
+doGaussFit      = 1;      % Enable gauss fitting
 
 % Erf Fit
-doErfFit      = 0;    
+doErfFit        = 0;    
 
 % Band map fit
 % Fit to a square band map, this includes the vertical and horizontal
 % excited bands
-doBMFit = 0;
+doBMFit         = 0;
 
-% Fermi-Fithvgj
+% Fermi-Fit
 % Fit a DFG in long time of flight
-doFermiFitLong = 1;     
+doFermiFitLong  = 1;     
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Custom Analyses
@@ -128,11 +128,11 @@ doFermiFitLong = 1;
 % More details are typically found in the specific scripts/functions that
 % are used when the particular flag is enabled.
 
-doGaussRabi   = 0;      % Enable gauss rabi
-doBEC         = 0;      % Enable BEC analys
+doGaussRabi     = 0;      % Enable gauss rabi
+doBEC           = 0;      % Enable BEC analys
 
 % Landau Zener Analysis
-doLandauZener       =  0;         
+doLandauZener   =  0;         
 
 % Raman box count count analyis
 doRamanSpec   = 0;   
@@ -140,6 +140,7 @@ doRamanSpec   = 0;
 % Band Map Fit and Analysis
 doBMFit_AM   = 0; doBMFit_AM_Dir = 'H';
 doBMFit_AM_Spec  = 0; 
+doBMFit_AM_Spec2 = 0;
 
 doCustom_BM = 0;
 
@@ -305,7 +306,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 % ROI = [750 1050 300 530]; %K XDT 10ms tof
 
-% ROI=[649 1160 580 1024];   % XDT TOF 15 ms
+% ROI=[925 1125 250 450];   % XDT TOF 15 ms
 % ROI=[617 1091 258 385];   % XDT1 only TOF 5 ms
 % ROI=[610 1232 180 540];    % XDT  TOF 5 ms
 % ROI=[741 1014 616 858];   % XDT  TOF 15 ms HF imaging
@@ -313,27 +314,31 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % ROI=[741 1014 780 1024];  % XDT  TOF 15 ms HF+SG imaging
 % ROI=[708 1089 377 608];   % XDT  TOF 20 ms evaporation
 % ROI=[713 1015 310 601];
-
-%  ROI=[810 970 200 860];   % XDT  Full TOF analysis
- 
-% ROI = [810 970 420 580]; %XDT Rb after evap 15ms 
-
-%    ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
-
-% 15 ms XT SG
-% Nbox = 2;
-% ROI = [830 930 860 960;    
-%     830 930 780 860;
-%     830 930 690 760;
-%     830 930 610 690;
-%     830 930 230 320;
+% 
+%  ROI=[950 1100 100 1000];   % XDT  Full TOF analysis
+% %   ROI=[950 1100 100 1000];   % XDT  Full TOF analysis
+% 
+% ROI = [800 1250 500 950]; %RF1b Rb after evap 15ms 
+% 
+   ROI=[850 1150 500 800];   % XDT  TOF 25 ms evaporation
+% % 
+% % 15 ms XT SG
+% Nbox = 3;
+% ROI = [960 1080 730 820;    
+%     960 1080 640 730;
+%     960 1080 550 640;
+%     960 1080 460 550;
+%     960 1080 370 460;
 %     ];
 % ROI = ROI(1:Nbox,:);
 
 
-%15 ms XDT mF SG
+% 15 ms XDT mF SG
 % ROI=[830 930 880 984;
-%     830 930 760 880];     
+%     830 930 760 880];
+% 
+% ROI=[950 1080 620 720;
+%     950 1080 720 820];
 
 % big box
 % ROI = [723 1071 200 872];
@@ -343,10 +348,10 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%% LATTICE LOW FIELD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
- ROI=[920 1120 250 360;
-        920 1120 360 470]; % 15 ms BM TOF x cam, SG F
+%  ROI=[920 1120 250 360;
+%         920 1120 360 470]; % 15 ms BM TOF x cam, SG F
 
-   ROI=[880 1200 250 450]; % 15 ms BM TOF x cam
+%    ROI=[880 1200 250 450]; % 15 ms BM TOF x cam
 
 
 
@@ -401,21 +406,25 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %     830 940 450 560]; 
 %     ROI=[800 960 700 870];   % XDT  TOF 25 ms evaporation ZOOM
 
- %ROI=[500 700 200 1000];   % XDT  Full TOF analysis
+%  ROI=[500 700 200 1000];   % XDT  Full TOF analysis
 
+%  ROI = [480 700 560 750];
 
 %% Magtrap ROI
 
-if ~(data.Flags.xdt)
+if isfield(data.Flags,'xdt') && ~(data.Flags.xdt)
     
        %%%%%%% RF1A X CAM
 
-% ROI = [395 1330 190 1010]; % RF1A 10ms TOF WRONG
+% ROI = [429 1381 104 1004]; % RF1A 15ms TOF
+% ROI = [666 1329 219 958]; % RF1A 15ms TOF
+
+% ROI = [500 1380 50 750]; %RF1A 5ms TOF
  
 
 %%%%% RF1B X CAM
-ROI = [830 1270 240 600];     % RF1B 5ms TOF 
-% ROI = [830 1270 570 970];     % RF1B 15 ms TOF
+% ROI = [830 1270 150 625];     % RF1B 5ms TOF 
+% ROI = [800 1250 500 950];     % RF1B 15 ms TOF
 
 
          
@@ -437,6 +446,9 @@ if doFermiFitLong || doBEC
 
     if camaxis == 'X'
         ROI=[940 1130 570 730];   % XDT  TOF 25 ms evaporation 
+        ROI=[920 1150 550 750];   % XDT  TOF 25 ms evaporation 
+%         ROI = [850 1150 500 800];
+        
     else
         ROI=[412 755 700 1000]; %XDT TOF 15ms evaporation
     end
@@ -1116,7 +1128,7 @@ if doAnimate && doSave
     animateOpts.MidDelay=.5;    % Time to hold in middle picutres
     animateOpts.EndDelay=1;     % Time to hold final picture
     animateOpts.doAverage=1;    % Average over duplicates?
-    animateOpts.doRotate=0;     % Rotate the image?
+    animateOpts.doRotate=1;     % Rotate the image?
     animateOpts.xUnit=pco_unit;
     
     % Stacking images (applicable only for double exposure)
@@ -1128,7 +1140,7 @@ if doAnimate && doSave
       animateOpts.Order='ascend';
         animateOpts.CLim='auto';
         
-        animateOpts.CLim=[0 .2];
+        animateOpts.CLim=[0 .3];
 
 % %     % Color limits
 %     animateOpts.CLim=[0 0.5;

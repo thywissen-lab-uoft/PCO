@@ -41,6 +41,8 @@ switch opts.xUnit
     case 'MHz'
         X = X*1e3;
 end
+
+X=X*1e-3;
 %% Make Figure
 
 hF=figure('Name',[pad([bm_am_spec_data.FitType ' am spec'],20) FigLabel],...
@@ -128,9 +130,9 @@ fitopt=fitoptions(myfit);
 
 % Assymetry
 a1 = 1/(0.05); % Long on right
+G1 = 15;
 
-fitopt.StartPoint=[bg a1 xC G1 A1];  
-fitopt.Robust='bisquare';
+fitopt.StartPoint=[bg a1 xC G1 A1];
 fitopt.TolFun=1e-10;
 
 fout1=fit(X,Y,myfit,fitopt);
@@ -166,22 +168,28 @@ myfit=fittype(@(bg,a1,x1,G1,A1,x) A1*yN(G1,x1,a1,x)+bg,...
 
 % Form the guesses
 G = 2;
-a = max([GR GL])
+a = max([GR GL]);
+
+a=20;
 
 % Modify fit options
 fitopt=fitoptions(myfit);
-fitopt.StartPoint=[bg a fout1.x1 G A1]
-fitopt.Robust='bisquare';
+fitopt.StartPoint=[bg a fout1.x1 10 A1];
+% fitopt.StartPoint=[0 20e3 240e3 10e3 0.06]
+
+fitopt.Robust='bisquare'; 
 
 % Perform the fit
-fout2=fit(X,Y,myfit,fitopt)
+fout2=fit(X,Y,myfit,fitopt);
 
 %% Process the fit output
 
 % Fit outputs
 bg = fout2.bg;
 asymm = fout2.a1;
-freq = fout2.x1;
+freq2 = fout2.x1;
+freq1 = fout1.x1;
+
 gamma = fout2.G1;
 A = fout2.A1;
 
@@ -203,13 +211,13 @@ yF1 = feval(fout1,xF);
 yF2 = feval(fout2,xF);
 
 % Calculate the fitted lattice depth
-Ufit1 = freq2depth(fout1.x1); 
-Ufit2 = freq2depth(fout2.x1);
+Ufit1 = freq2depth(freq1); 
+Ufit2 = freq2depth(freq2);
 
 % Lattice Depth Error
 % Error is quadruture sum of gamma and the frequency uncertainty 
 % Then multiply by the conversion of frequency to lattice depth
-Ufit2_err = abs(dudf(freq))*sqrt(gamma.^2+freq_err^2);
+Ufit2_err = abs(dudf(freq2))*sqrt(gamma.^2+freq_err^2);
 
 % Amplitude at peak frequency
 yFreqPeak1 = feval(fout1,fout1.x1);
@@ -255,13 +263,10 @@ output.Umeas_err            = Ufit2_err;
 output.adwin_X = adwin_X;
 output.adwin_Y = adwin_Y;
 output.adwin_Z = adwin_Z;
-
 output.Ureq = Ureq;
-
-
 output.Fit                  = fout2;
 output.Params               = Params;
-output.Freq                 = freq;
+output.Freq                 = freq2;
 output.Freq_err             = freq_err;
 output.Gamma                = gamma;
 output.Gamma_err            = gamma_err;
@@ -283,8 +288,8 @@ pF1=plot(xF,yF1,'r-','linewidth',1);
 pF2=plot(xF,yF2,'b-','linewidth',1);
 
 % Plot center frequency as vertical bars
-pF1_max = plot([1 1]*fout1.x1,[0 1]*yFreqPeak1,'r--','linewidth',1);
-pF2_max = plot([1 1]*fout2.x1,[0 1]*yFreqPeak2,'b--','linewidth',1);
+pF1_max = plot([1 1]*fout1.x1*1e-3,[0 1]*yFreqPeak1,'r--','linewidth',1);
+pF2_max = plot([1 1]*fout2.x1*1e-3,[0 1]*yFreqPeak2,'b--','linewidth',1);
 
 str1=['Variable $\Gamma~:~' num2str(round(fout1.x1,1)) '\pm' ...
     num2str(round((ci1(2,2)-ci1(1,2))/2,1)) '$ kHz, '  ...
