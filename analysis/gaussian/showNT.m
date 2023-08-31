@@ -130,15 +130,17 @@ for nn=1:size(Ty,2)
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
 
-str='$T_x (\mu \mathrm{K})$';
-text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',...
-    'interpreter','latex');
+
 
 if isequal(xVar,'ExecutionDate')
     datetick('x');
     xlabel('ExecutionDate');
 end
 % 
+str='$T_x (\mu \mathrm{K})$';
+text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',...
+    'interpreter','latex');
+
 
 % Make axis
 hax3=subplot(133);
@@ -155,14 +157,16 @@ for nn=1:size(Ty,2)
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
 
-str='$T_y (\mu \mathrm{K})$';
-text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',...
-    'interpreter','latex');
+
 
 if isequal(xVar,'ExecutionDate')
     datetick('x');
     xlabel('ExecutionDate');
 end
+
+str='$T_y (\mu \mathrm{K})$';
+text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',...
+    'interpreter','latex');
 
 resizeFig(hF,t,[hax1 hax2 hax3]);
 end

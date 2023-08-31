@@ -84,7 +84,7 @@ ODopts.GaussFilter=.5;
 %% Analysis Flags
 
 % Standard Analysis
-doODProfile = 1;
+doODProfile = 0;
 doStandard = 1;
 
 doAnimate = 1;
@@ -106,7 +106,7 @@ doBoxCount      = 0;      % Box count analysis
 
 % Gaussian Fit
 % Fit to a gaussian distribution (thermal cloud)
-doGaussFit      = 1;      % Enable gauss fitting
+doGaussFit      = 0;      % Enable gauss fitting
 
 % Erf Fit
 doErfFit        = 0;    
@@ -137,8 +137,8 @@ doLandauZener   =  0;
 % Raman box count count analyis
 doRamanSpec   = 0;   
 
-% Band Map Fit and Analysis
-doBMFit_AM   = 0; doBMFit_AM_Dir = 'H';
+% Band Map Fit and Analysis for AM Spec
+doBMFit_AM   = 0; doBMFit_AM_Dir = 'V';
 doBMFit_AM_Spec  = 0; 
 doBMFit_AM_Spec2 = 0;
 
@@ -288,7 +288,7 @@ rpt_opts.FigLabel = FigLabel;
 if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 
-%% Analysis ROI
+%% X CAM Analysis ROI
 % Analysis ROI is an Nx4 matrix of [X1 X2 Y1 Y2] which specifies a region
 % to analyze. Each new row in the matrix indicates a separate ROI to
 % perform analysis on.
@@ -320,7 +320,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % 
 % ROI = [800 1250 500 950]; %RF1b Rb after evap 15ms 
 % 
-   ROI=[850 1150 500 800];   % XDT  TOF 25 ms evaporation
+%    ROI=[850 1150 500 800];   % XDT  TOF 25 ms evaporation
 % % 
 % % 15 ms XT SG
 % Nbox = 3;
@@ -345,15 +345,20 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 % ROI=[800 960 390 500;
 %        800 960 500 610]; % 15 ms  xcam,XDT F SG
+%% X CAM LATTICE
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%% LATTICE LOW FIELD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %  ROI=[920 1120 250 360;
 %         920 1120 360 470]; % 15 ms BM TOF x cam, SG F
 
-%    ROI=[880 1200 250 450]; % 15 ms BM TOF x cam
+%   ROI=[880 1200 250 450]; % 15 ms BM TOF x cam
 
+  
+%     ROI=[910 1130 250 450]; % 15 ms BM TOF x cam
+   ROI=[940 1100 180 320]; % 10 ms BM TOF x cam
 
+   %% X CAM DOUBLE SHUTTER
 
 %%%%%%%%%%%%%%%%%%%%% X CAM DOUBLE SHUTTER %%%%%%%%%%%%%%%%%%%%%
 % 
@@ -389,7 +394,11 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 
 % ROI = [600 1175 200 900];
+%% Y CAM
 %%%%%%%%%%%%%%%%%%% Y CAM %%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% BM 10 ms TOF
+% ROI = [400 800 550 790];
 
 % ROI = [1 1392 400 600]; % XDT Insitu long
 
@@ -408,32 +417,21 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 %  ROI=[500 700 200 1000];   % XDT  Full TOF analysis
 
-%  ROI = [480 700 560 750];
 
 %% Magtrap ROI
 
-if isfield(data.Flags,'xdt') && ~(data.Flags.xdt)
-    
-       %%%%%%% RF1A X CAM
+if isfield(data.Flags,'xdt') && ~(data.Flags.xdt)    
+    %%%%%%% RF1A X CAM
+    % ROI = [429 1381 104 1004]; % RF1A 15ms TOF
+    % ROI = [666 1329 219 958]; % RF1A 15ms TOF
 
-% ROI = [429 1381 104 1004]; % RF1A 15ms TOF
-% ROI = [666 1329 219 958]; % RF1A 15ms TOF
-
-% ROI = [500 1380 50 750]; %RF1A 5ms TOF
- 
-
-%%%%% RF1B X CAM
-% ROI = [830 1270 150 625];     % RF1B 5ms TOF 
-% ROI = [800 1250 500 950];     % RF1B 15 ms TOF
-
-
-         
+    % ROI = [500 1380 50 750]; %RF1A 5ms TOF
+    %%%%% RF1B X CAM
+    ROI = [750 1250 200 600];     % RF1B 5ms TOF          
          
     if data.Flags.image_insitu
-         ROI = [830 950 280 340]; % wrong
-    end
-    
- 
+         ROI = [820 1220 50 270]; % wrong
+    end     
 end
 
  
@@ -1128,7 +1126,7 @@ if doAnimate && doSave
     animateOpts.MidDelay=.5;    % Time to hold in middle picutres
     animateOpts.EndDelay=1;     % Time to hold final picture
     animateOpts.doAverage=1;    % Average over duplicates?
-    animateOpts.doRotate=1;     % Rotate the image?
+    animateOpts.doRotate=0;     % Rotate the image?
     animateOpts.xUnit=pco_unit;
     
     % Stacking images (applicable only for double exposure)
@@ -1140,7 +1138,7 @@ if doAnimate && doSave
       animateOpts.Order='ascend';
         animateOpts.CLim='auto';
         
-        animateOpts.CLim=[0 .3];
+%         animateOpts.CLim=[0 .3];
 
 % %     % Color limits
 %     animateOpts.CLim=[0 0.5;

@@ -37,7 +37,7 @@ Ne = bm_am_spec_data.NatomsBands(:,6) + bm_am_spec_data.NatomsBands(:,7);
 Y = Ne./Natoms;
 switch opts.xUnit
     case 'Hz'
-        X = X*1e-3;
+        X = X;
     case 'MHz'
         X = X*1e3;
 end
