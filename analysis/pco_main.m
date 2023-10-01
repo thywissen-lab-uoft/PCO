@@ -106,7 +106,7 @@ doBoxCount      = 0;      % Box count analysis
 
 % Gaussian Fit
 % Fit to a gaussian distribution (thermal cloud)
-doGaussFit      = 0;      % Enable gauss fitting
+doGaussFit      = 1;      % Enable gauss fitting
 
 % Erf Fit
 doErfFit        = 0;    
@@ -118,7 +118,7 @@ doBMFit         = 0;
 
 % Fermi-Fit
 % Fit a DFG in long time of flight
-doFermiFitLong  = 1;     
+doFermiFitLong  = 0;     
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Custom Analyses
@@ -298,7 +298,10 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 
 %%%%% XDT LOW FIELD X CAM %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  ROI = [800 950 280 350]; %K XDT insitu
+
+% ROI = [500 1392 50 800]; % RF1A 5 ms K
+
+ ROI = [800 1150 100 350]; %K XDT insitu
 
 % ROI = [780 990 310 510]; %K XDT 5ms tof
 % ROI = [730 1060 250 550]; %K XDT 10ms tof
@@ -356,7 +359,12 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
   
 %     ROI=[910 1130 250 450]; % 15 ms BM TOF x cam
-   ROI=[940 1100 180 320]; % 10 ms BM TOF x cam
+%    ROI=[940 1100 180 320]; % 10 ms BM TOF x cam
+
+
+%% X CAM Double Shutter
+ROI = [850 1250 200 550;
+    800 1300 1500 2000];
 
    %% X CAM DOUBLE SHUTTER
 
@@ -435,7 +443,7 @@ if isfield(data.Flags,'xdt') && ~(data.Flags.xdt)
 end
 
  
- 
+
 %% Fermi Fit Long
  
  
@@ -1138,7 +1146,7 @@ if doAnimate && doSave
       animateOpts.Order='ascend';
         animateOpts.CLim='auto';
         
-%         animateOpts.CLim=[0 .3];
+%         animateOpts.CLim=[0 .5];
 
 % %     % Color limits
 %     animateOpts.CLim=[0 0.5;
