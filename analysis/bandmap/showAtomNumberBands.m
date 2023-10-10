@@ -67,6 +67,9 @@ if isequal(xVar,'ExecutionDate')
 end
 
 resizeFig(hF,t,[hax]);
+
+
+
 end
 
 function [axX,axY,axWidth,axHeight]=getAxesPos(nInd,nTot,xSize,ySize)

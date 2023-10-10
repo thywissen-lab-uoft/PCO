@@ -67,7 +67,7 @@ end
 
 % Defautl variable to plot against
 % pco_xVar = 'rf_freq_HF_shift';
-pco_xVar = 'ExecutionDate';
+pco_xVar = 'conductivity_rf_freq_shift';
 
 % Should the analysis attempt to automatically find the xvariable?
 pco_autoXVar = 1;
@@ -84,7 +84,7 @@ ODopts.GaussFilter=.5;
 %% Analysis Flags
 
 % Standard Analysis
-doODProfile = 0;
+doODProfile = 1;
 doStandard = 1;
 
 doAnimate = 1;
@@ -106,19 +106,19 @@ doBoxCount      = 0;      % Box count analysis
 
 % Gaussian Fit
 % Fit to a gaussian distribution (thermal cloud)
-doGaussFit      = 1;      % Enable gauss fitting
+doGaussFit      = 0;      % Enable gauss fitting
 
 % Erf Fit
 doErfFit        = 0;    
 
 % Band map fit
 % Fit to a square band map, this includes the vertical and horizontal
-% excited bands
+% excited P bands
 doBMFit         = 0;
 
 % Fermi-Fit
 % Fit a DFG in long time of flight
-doFermiFitLong  = 0;     
+doFermiFitLong  = 1;     
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Custom Analyses
@@ -278,6 +278,9 @@ end
 [~, inds]=sort(x);
 atomdata=atomdata(inds);
 
+flags = [atomdata.Flags];
+f = flags(1);
+
 %% Variable Number
 rpt_opts=struct;
 rpt_opts.xUnit=pco_unit;
@@ -286,7 +289,7 @@ rpt_opts.FigLabel = FigLabel;
 
 [hF_var_counts]=showRepeats(atomdata,pco_xVar,rpt_opts);
 if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
-
+%% 
 
 %% X CAM Analysis ROI
 % Analysis ROI is an Nx4 matrix of [X1 X2 Y1 Y2] which specifies a region
@@ -357,14 +360,14 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 %   ROI=[880 1200 250 450]; % 15 ms BM TOF x cam
 
-  
+    ROI=[940 1110 720 840;
+        940 1110 620 720]; % 15 ms BM TOF SG qp reverse stuff conducvitivty
+
 %     ROI=[910 1130 250 450]; % 15 ms BM TOF x cam
 %    ROI=[940 1100 180 320]; % 10 ms BM TOF x cam
 
 
-%% X CAM Double Shutter
-ROI = [850 1250 200 550;
-    800 1300 1500 2000];
+
 
    %% X CAM DOUBLE SHUTTER
 
@@ -402,7 +405,75 @@ ROI = [850 1250 200 550;
 
 
 % ROI = [600 1175 200 900];
-%% Y CAM
+
+
+%% Magtrap ROI
+
+if isfield(data.Flags,'xdt') && ~(data.Flags.xdt)    
+    %%%%%%% RF1A X CAM
+    % ROI = [429 1381 104 1004]; % RF1A 15ms TOF
+    % ROI = [666 1329 219 958]; % RF1A 15ms TOF
+
+    % ROI = [500 1380 50 750]; %RF1A 5ms TOF
+    %%%%% RF1B X CAM
+    ROI = [750 1250 200 600];     % RF1B 5ms TOF          
+         
+    if data.Flags.image_insitu
+         ROI = [820 1220 50 270]; % wrong
+    end     
+end
+
+
+
+%% Fermi Fit Long
+  
+if doFermiFitLong || doBEC
+    if camaxis == 'X'
+        ROI=[920 1150 550 750];   % XDT  TOF 25 ms evaporation         
+    else
+        ROI=[412 755 700 1000]; %XDT TOF 15ms evaporation
+    end
+
+    if isfield(data(1).Flags,'High_Field_Imaging')
+        if data(1).Flags.High_Field_Imaging == 1
+          ROI=[800 950 680 850]; % 25 ms TOF, gradient cancel
+        end
+    end   
+end
+ 
+%% K + Rb Double Shutter Imaging
+ 
+ if atomdata(1).Flags.image_atomtype==2           
+     if isfield(f,'mt') && f.mt
+         % 5ms + 15 ms tof
+         ROI = [850 1250 200 550;
+                700 1392 1400 2000];
+            
+         % RF1A
+         % 5ms + 15 ms tof
+%          ROI = [850 1250 200 550;
+%                 500 1392 1200 2048];
+            
+        % For RF1B Lifetime
+%          ROI = [850 1250 200 550;
+%                 600 1392 1400 2048];
+            
+        % For RF1B Lifetime no plug
+         ROI = [850 1250 100 550;
+                600 1392 1200 2048];
+     end     
+     if isfield(f,'xdt') && f.xdt
+         if isfield(f,'CDT_evap') && f.CDT_evap
+            ROI=[800 960 700 870
+                800 960 1700 1950];   % XDT  TOF 25 ms evaporation
+         end
+     end 
+ end
+%%
+if isequal(camaxis,'Y')
+    ROI = [470 750 375 600];
+    
+    %% Y CAM
 %%%%%%%%%%%%%%%%%%% Y CAM %%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % BM 10 ms TOF
@@ -425,67 +496,10 @@ ROI = [850 1250 200 550;
 
 %  ROI=[500 700 200 1000];   % XDT  Full TOF analysis
 
-
-%% Magtrap ROI
-
-if isfield(data.Flags,'xdt') && ~(data.Flags.xdt)    
-    %%%%%%% RF1A X CAM
-    % ROI = [429 1381 104 1004]; % RF1A 15ms TOF
-    % ROI = [666 1329 219 958]; % RF1A 15ms TOF
-
-    % ROI = [500 1380 50 750]; %RF1A 5ms TOF
-    %%%%% RF1B X CAM
-    ROI = [750 1250 200 600];     % RF1B 5ms TOF          
-         
-    if data.Flags.image_insitu
-         ROI = [820 1220 50 270]; % wrong
-    end     
 end
 
+
  
-
-%% Fermi Fit Long
- 
- 
-if doFermiFitLong || doBEC
-%     ROI=[800 980 700 870];   % XDT  TOF 25 ms evaporation  OLD
-
-    if camaxis == 'X'
-        ROI=[940 1130 570 730];   % XDT  TOF 25 ms evaporation 
-        ROI=[920 1150 550 750];   % XDT  TOF 25 ms evaporation 
-%         ROI = [850 1150 500 800];
-        
-    else
-        ROI=[412 755 700 1000]; %XDT TOF 15ms evaporation
-    end
-
-    if isfield(data(1).Flags,'High_Field_Imaging')
-        if data(1).Flags.High_Field_Imaging == 1
-%             ROI=[800 950 680 830;
-%                 800 950 1750 1900];  % XDT High field 21 ms TOF
-          ROI=[800 950 680 850]; % 25 ms TOF, gradient cancel
-        end
-    end
-    
-%       ROI=[800 950 200 900];
-
-end
-
- %% KRb Imaging
- 
- if atomdata(1).Flags.image_atomtype==2         
-    % XDT 25 ms evaporation
-    ROI=[800 960 700 870
-        800 960 1700 1950];   % XDT  TOF 25 ms evaporation 
-    
-    
-    ROI=[750 1000 650 920
-        750 1000 1750 2000];   % XDT  TOF 25 ms evaporation 
- end
-%          ROI=[800 980 700 870];   % XDT  TOF 25 ms evaporation 
-
-%  ROI=[800 960 200 1000
-%      800 960 200+1024 1000+1024];
 %% Aissgn the ROI
 
 % Assign the ROI
@@ -501,6 +515,7 @@ ODopts.ScaleProbe=1;
 % ODopts.ScaleProbeROI=[200 400 800 1000];  % ROI to do the scaling
 % ODopts.ScaleProbeROI=[700 790 500 600];  % ROI to do the scaling
 ODopts.ScaleProbeROI=[1200 1350 300 900];  % ROI to do the scaling
+ODopts.ScaleProbeROI=[1250 1350 45 130];  % ROI to do the scaling
 
 % ODopts.ScaleProbeROI=[1000 1100 400 700];
 

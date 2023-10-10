@@ -17,7 +17,7 @@ if doBoxCount
     boxPopts.CenterParabolaFit = 0;
     boxPopts.CenterLinearFit = 0;     % Linear fit to cloud center
     boxPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset    
-       
+    boxPopts.RelNumberLorentzian = 0;
     hF_number_box = showAtomNumber(box_data,pco_xVar,boxPopts);  
     ylim([0 max(get(gca,'YLim'))]);    
     if doSave;saveFigure(hF_number_box,'box_number',saveOpts);end
@@ -62,6 +62,8 @@ if doGaussFit
     gaussPopts.CenterLinearFit = 0;     % Linear fit to cloud center
     gaussPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
     gaussPopts.angleTrack = 0;
+        gaussPopts.RelNumberLorentzian = 0;
+
     % Plot the statistics of gaussian fit
     hF_stats=showGaussStats(gauss_data,gaussPopts);     
     if doSave;saveFigure(hF_stats,'gauss_stats',saveOpts);end       
@@ -84,6 +86,11 @@ if doGaussFit
         if doSave;saveFigure(hF_number_gauss_ratio,'gauss_number_ratio',saveOpts);end
     end
     
+         if size(gauss_data.Natoms,2)==2
+       hF_number_gauss_ratio2=showNumberRatioDifference(gauss_data,pco_xVar,gaussPopts);
+        if doSave;saveFigure(hF_number_gauss_ratio2,'gauss_number_ratio_difference',saveOpts);end
+         end
+      
     % Cloud Error
     hF_Error=showError(gauss_data,pco_xVar,gaussPopts);    
     if doSave;saveFigure(hF_Error,'gauss_error',saveOpts);end  
@@ -153,6 +160,7 @@ if doErfFit
     ErfPopts.CenterLinearFit = 0;     % Linear fit to cloud center
     ErfPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
     ErfPopts.angleTrack = 0;
+        ErfPopts.RelNumberLorentzian = 0;
 
     % Plot the statistics of erfian fit
     hF_stats_erf=showErfStats(erf_data,ErfPopts);     
@@ -175,6 +183,11 @@ if doErfFit
         hF_number_erf_ratio=showNumberRatio(erf_data,pco_xVar,ErfPopts);
         if doSave;saveFigure(hF_number_erf_ratio,'erf_number_ratio',saveOpts);end
     end
+    
+      if size(erf_data.Natoms,2)==2
+       hF_number_erf_ratio2=showNumberRatioDifference(erf_data,pco_xVar,ErfPopts);
+        if doSave;saveFigure(hF_number_erf_ratio2,'erf_number_ratio_difference',saveOpts);end
+      end
     
     % Cloud Error
     hF_Error=showError(erf_data,pco_xVar,ErfPopts);    
@@ -214,6 +227,7 @@ if doBMFit
     bmPopts.CenterLinearFit     = 0;     % Linear fit to cloud center
     bmPopts.NumberExpOffsetFit  = 0; % Exp decay fit with nonzero offset
     bmPopts.angleTrack          = 0;
+    bmPopts.RelNumberLorentzian = 1;
 
     % Plot the statistics of bmian fit
     hF_stats_bm=showBMStats(bm_data,bmPopts);     
@@ -239,6 +253,11 @@ if doBMFit
         if doSave;saveFigure(hF_number_bm_ratio,'bm_number_ratio',saveOpts);end
     end    
     
+    if size(bm_data.Natoms,2)==2
+       hF_number_bm_ratio2=showNumberRatioDifference(bm_data,pco_xVar,bmPopts);
+        if doSave;saveFigure(hF_number_bm_ratio2,'bm_number_ratio_difference',saveOpts);end
+    end
+%     
     % Atom number bands
     hF_number_bm_bands = showAtomNumberBands(bm_data,pco_xVar,bmPopts);  
     ylim([0 max(get(gca,'YLim'))]);    
@@ -280,7 +299,7 @@ if doBMFit_AM
     bmPopts.CenterLinearFit = 0;     % Linear fit to cloud center
     bmPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
     bmPopts.angleTrack = 0;
-    
+
     if length(unique(bm_am_spec_data.X))>6 && doBMFit_AM_Spec
         [hF_am_spec, am_spec_output] = showAMSpec_RelNumber(bm_am_spec_data,bmPopts);
         if doSave

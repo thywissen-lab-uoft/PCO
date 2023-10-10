@@ -1577,7 +1577,7 @@ set(axPWA,'box','on','XTick',[],'YTick',[]);
 axis equal tight
 % pDisp=rectangle('position',[1 1 1392 1024],'edgecolor','k','linewidth',2);
 hold on
-caxis([0 1000]);
+caxis([0 4096]);
 
 axPWOA=axes('parent',hpRaw,'units','pixels','UserData','PWOA');
 
@@ -1970,6 +1970,7 @@ for n=1:size(data.ROI,1)
     y=ROI(3):ROI(4); 
     [xx,yy]=meshgrid(x,y);
     subOD=data.OD(ROI(3):ROI(4),ROI(1):ROI(2));
+    
     
     if rbSum.Value
         ODySum=sum(subOD,2);
@@ -2539,6 +2540,9 @@ function dstruct=fitGauss(dstruct)
         ROI=dstruct.ROI(n,:);         
         disp(['Fitting 2D gaussian on [' num2str(ROI) '].']);
         t1=now;
+
+
+        
         % Grab data from the data structure
         x=dstruct.X(ROI(1):ROI(2));                 % X vector
         y=dstruct.Y(ROI(3):ROI(4));                 % Y vector
@@ -2574,6 +2578,9 @@ Z=dSmooth;Z(dSmooth<N0*.5)=0;
 X=sum(Z,1);Y=sum(Z,2)';             % Get X and Y sum profiles
 
 X(X<0)=0;Y(Y<0)=0;
+
+X(isnan(X)) = 0;
+Y(isnan(Y)) = 0;
 
 Nx=sum(X);Ny=sum(Y);                % Get the total number of counts
 Xc=mean(Dx(X>.9*max(X)));           % X center (use >90% SNR)

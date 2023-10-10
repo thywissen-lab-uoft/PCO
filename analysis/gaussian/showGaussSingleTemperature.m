@@ -26,16 +26,21 @@ end
        
 %% Grab the Data
 params=[gauss_data.Params];
+
+
 xvals=[params.(xVar)];
 
 TOFs=[params.tof];
 TOFs=TOFs*1E-3;
+
 
 PixelSize = gauss_data.PixelSize;
 
 Xs = gauss_data.Xs*PixelSize;
 Ys = gauss_data.Ys*PixelSize;
            
+TOFs = repmat(TOFs,[size(Xs,2) 1]);
+TOFs=TOFs';
 
 %% Calculate Temperature
 for kk=1:size(Xs,1) 
@@ -50,6 +55,9 @@ for kk=1:size(Xs,1)
                    m=mK;
                else
                    m=mRb;
+                   dt = [params(kk).tof_krb_diff]*1e-3;
+                   TOFs(kk,nn) = TOFs(kk,nn) + dt;
+
                end
             case 3 % Rb and K
                if gauss_data.Yc(kk,nn)<=1024
@@ -63,8 +71,8 @@ for kk=1:size(Xs,1)
                    'with comments in the imaging code']);
        end              
                 
-        Tx(kk,nn)=(Xs(kk,nn)./TOFs(kk)).^2*m/kB;
-        Ty(kk,nn)=(Ys(kk,nn)./TOFs(kk)).^2*m/kB;
+        Tx(kk,nn)=(Xs(kk,nn)./TOFs(kk,nn)).^2*m/kB;
+        Ty(kk,nn)=(Ys(kk,nn)./TOFs(kk,nn)).^2*m/kB;
    end        
 end
 

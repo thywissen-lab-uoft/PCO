@@ -49,12 +49,24 @@ sG = vR/((opts.PixelSize*1e6)/((opts.TOF+dt)*1e3));
 %% Initial Guess
 Zg = Z;
 Zg = Z - min(min(Z));
+% Zg(Zg<max(Zg)*.2)=0;
+
 % X Center
 Zx = sum(Zg,1)/sum(sum(Zg));
+Zx = Zx - min(Zx);
+Zx = Zx/sum(Zx);
+Zx(Zx<max(Zx)*.2)=0;
+Zx = Zx/sum(Zx);
+
 XcG = sum(Zx.*X);
 
 % Y center
 Zy = sum(Zg,2)'/sum(sum(Zg));
+Zy = Zy- min(Zy);
+Zy = Zy/sum(Zy);
+Zy(Zy<max(Zy)*.2)=0;
+Zy = Zy/sum(Zy);
+
 YcG = sum(Zy.*Y);
 
 % Background Amplitude
@@ -127,6 +139,8 @@ if sum((fitopt.Upper-fitopt.Lower)<0)
    fitopt.Lower=[];
    keyboard
 end
+
+
 
 %% Perform the Fit
 fprintf(' band map fitting ... ')
