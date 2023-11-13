@@ -63,6 +63,7 @@ frVar='ExecutionDate';
 camera=initCamStruct;
 
 scaleProbeDefaultROI=[30 100 900 980];
+scaleProbeDefaultROI=[1300 1350 60 100];
 
 boxBkgdDefaultROI = [400 500 400 500];
 
@@ -1497,7 +1498,7 @@ tblROIPScale.Position(3)=tblROIPScale.Extent(3);
 tblROIPScale.Position(4)=20;
 tblROIPScale.Position(1:2)=[55 cScaleProbe.Position(2)-3];
 
-pROIPScale=rectangle('position',pp,'edgecolor','k','linewidth',2,...
+pROIPScale=rectangle('position',pp,'edgecolor','r','linewidth',2,...
     'visible','on','parent',axImg,'linestyle',':');
 
 
@@ -1821,8 +1822,9 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
                s2=sum(sum(PWA(R(3):R(4),R(1):R(2))));
                sa=s2/s1;
                
-               s3=sum(sum(PWOA(1024+[R(3):R(4)],R(1):R(2))));
-               s4=sum(sum(PWA(1024+[R(3):R(4)],R(1):R(2))));
+               Rb = R + [0 0 1024 1024];
+               s3=sum(sum(PWOA(Rb(3):Rb(4),Rb(1):Rb(2))));
+               s4=sum(sum(PWA(Rb(3):Rb(4),Rb(1):Rb(2))));
                sb=s4/s3;
                
                 PWOA(1:1024,:)=sa*PWOA(1:1024,:);               
@@ -2541,13 +2543,12 @@ function dstruct=fitGauss(dstruct)
         disp(['Fitting 2D gaussian on [' num2str(ROI) '].']);
         t1=now;
 
-
+        
         
         % Grab data from the data structure
         x=dstruct.X(ROI(1):ROI(2));                 % X vector
         y=dstruct.Y(ROI(3):ROI(4));                 % Y vector
         z=dstruct.OD(ROI(3):ROI(4),ROI(1):ROI(2));  % optical density     
-
         % Perform the fit
         fout=gaussfit2D(x,y,z);
         t2=now;
@@ -2566,6 +2567,8 @@ data=double(data);Dx=double(Dx);Dy=double(Dy);
 sc=0.4; % Scale factor
 data=imresize(data,sc);Dx=imresize(Dx,sc);Dy=imresize(Dy,sc);
 
+data(isinf(data))=0;
+
 data(isnan(data))=0;
 
 dSmooth=imgaussfilt(data,2);    % Smooth data
@@ -2581,6 +2584,8 @@ X(X<0)=0;Y(Y<0)=0;
 
 X(isnan(X)) = 0;
 Y(isnan(Y)) = 0;
+
+
 
 Nx=sum(X);Ny=sum(Y);                % Get the total number of counts
 Xc=mean(Dx(X>.9*max(X)));           % X center (use >90% SNR)

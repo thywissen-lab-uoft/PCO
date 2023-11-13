@@ -67,7 +67,7 @@ end
 
 % Defautl variable to plot against
 % pco_xVar = 'rf_freq_HF_shift';
-pco_xVar = 'conductivity_rf_freq_shift';
+pco_xVar = 'ExecutionDate';
 
 % Should the analysis attempt to automatically find the xvariable?
 pco_autoXVar = 1;
@@ -75,7 +75,7 @@ pco_autoXVar = 1;
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit = 1;
 
-% If ixon_autoUnit=0, this will be used.
+% If ixon_autoUnit=0, this will be used.o
 pco_overrideUnit='W'; 
 %%
 ODopts=struct;
@@ -84,7 +84,7 @@ ODopts.GaussFilter=.5;
 %% Analysis Flags
 
 % Standard Analysis
-doODProfile = 1;
+doODProfile = 0;
 doStandard = 1;
 
 doAnimate = 1;
@@ -102,7 +102,7 @@ doProbeFit    = 0;      % Fit probe beam  to 2D Gaussian
 % processed data outputs of the below fits are typically <fit_type>_name
 
 % Box Count
-doBoxCount      = 0;      % Box count analysis
+doBoxCount      = 1;      % Box count analysis
 
 % Gaussian Fit
 % Fit to a gaussian distribution (thermal cloud)
@@ -304,7 +304,7 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 
 % ROI = [500 1392 50 800]; % RF1A 5 ms K
 
- ROI = [800 1150 100 350]; %K XDT insitu
+%  ROI = [800 1150 100 350]; %K XDT insitu
 
 % ROI = [780 990 310 510]; %K XDT 5ms tof
 % ROI = [730 1060 250 550]; %K XDT 10ms tof
@@ -358,10 +358,10 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 %  ROI=[920 1120 250 360;
 %         920 1120 360 470]; % 15 ms BM TOF x cam, SG F
 
-%   ROI=[880 1200 250 450]; % 15 ms BM TOF x cam
+  ROI=[880 1200 250 450]; % 15 ms BM TOF x cam
 
-    ROI=[940 1110 720 840;
-        940 1110 620 720]; % 15 ms BM TOF SG qp reverse stuff conducvitivty
+%     ROI=[940 1110 720 840;
+%         940 1110 620 720]; % 15 ms BM TOF SG qp reverse stuff conducvitivty
 
 %     ROI=[910 1130 250 450]; % 15 ms BM TOF x cam
 %    ROI=[940 1100 180 320]; % 10 ms BM TOF x cam
@@ -396,6 +396,9 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % most commonly used
 % ROI=[770 970 450 650;
 %       770 970 1510 1710];   %  band map 15 ms  
+  
+% ROI=[930 1110 300 500;
+%       930 1110 1350 1604];   %  band map 15 ms HF 
 
 % ROI = [800 960 715 870;
 %         800 960 1800 1940]; % double shutter 25 ms tof
@@ -416,7 +419,8 @@ if isfield(data.Flags,'xdt') && ~(data.Flags.xdt)
 
     % ROI = [500 1380 50 750]; %RF1A 5ms TOF
     %%%%% RF1B X CAM
-    ROI = [750 1250 200 600];     % RF1B 5ms TOF          
+%     ROI = [750 1250 200 600];     % RF1B 5ms TOF    
+    ROI = [750 1250 400 900];     % RF1B 15ms TOF    
          
     if data.Flags.image_insitu
          ROI = [820 1220 50 270]; % wrong
@@ -459,13 +463,15 @@ end
 %                 600 1392 1400 2048];
             
         % For RF1B Lifetime no plug
-         ROI = [850 1250 100 550;
-                600 1392 1200 2048];
+%          ROI = [850 1250 100 550;
+%                 600 1392 1200 2048];
      end     
      if isfield(f,'xdt') && f.xdt
          if isfield(f,'CDT_evap') && f.CDT_evap
-            ROI=[800 960 700 870
-                800 960 1700 1950];   % XDT  TOF 25 ms evaporation
+            ROI=[880 1200 570 750
+                920 1120 1680 1850];   % XDT  TOF 25 ms evaporation
+%             ROI = [800 1200 290 630
+%                    900 1170 1640 1825];
          end
      end 
  end
@@ -511,10 +517,9 @@ disp(ROI);
 
 %% Calculate the optical density
 ODopts.ScaleProbe=1;
-% ODopts.ScaleProbeROI=[1 100 900 1000];  % ROI to do the scaling
 % ODopts.ScaleProbeROI=[200 400 800 1000];  % ROI to do the scaling
 % ODopts.ScaleProbeROI=[700 790 500 600];  % ROI to do the scaling
-ODopts.ScaleProbeROI=[1200 1350 300 900];  % ROI to do the scaling
+%ODopts.ScaleProbeROI=[1200 1350 300 900];  % ROI to do the scaling
 ODopts.ScaleProbeROI=[1250 1350 45 130];  % ROI to do the scaling
 
 % ODopts.ScaleProbeROI=[1000 1100 400 700];
@@ -1173,8 +1178,8 @@ if doAnimate && doSave
 %     animateOpts.CLim=[0 .2;
 %         0 .5]; 
 % 
-%     animateOpts.CLim=[0 2;
-%         0 .2]; 
+     animateOpts.CLim=[0 0.2;
+         0 .2]; 
 
 %     animateOpts.CLim=[-.1 4];   
 
