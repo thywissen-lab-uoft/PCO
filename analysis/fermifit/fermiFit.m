@@ -185,7 +185,7 @@ if isfield(opts,'Freq')
     disp(['     Freq (Hz)         : ' num2str(round(opts.Freq,2))]);
 end
 
-if opts.ShowDetails
+if opts.ShowGuess
 
     % Plot the initial guess
     hF_guess = figure(1200);
@@ -333,20 +333,69 @@ end
 fitFermi.SSE=gof.sse;
 fitFermi.R2=gof.rsquare;
 
+%% Entropy per particle
+%
+% S/(Nkb) = (D+1) Li_{D+1}(-zeta)/(Li_{D}(-zeta)-log(-zeta)
+% S/(Nkb) = D*pi^2/3*T/Tf in low T limit
+% Q = log(zeta)
+% fout.Q
+% 
+D = 3; % spatial dimensions
+
+
+zeta2S = @(zeta) (D+1)*polylog(D+1,-zeta)/polylog(D,-zeta)-log(zeta);
+
+
+% Approximate form of 
+TTf2S_approx = @(TTf) D*pi^2/3*TTf;
+
+
+S = zeta2S(exp(fout.Q));
+
+
+fitFermi.EntropyPerParticleShape = S;
+% fitFermi.EntropyPerParticleShapeApprox = S;
+% 
+% fitFermi.EntropyPerParticleFreq = S;
+% fitFermi.EntropyPerParticleFreqApprox = S;
+
+%% Spin Mix Scattering Rate Shape
+a0 = 5.29177210903e-11; % bohr radius in SI (m)
+abg = 167*a0;               % background scattering length (m)
+sigma0 = 4*pi*abg^2;        % background cross ection (m^2)
+amu = 1.66053907e-27;
+m = 40*amu;
+
+kB = 1.380649e-23;          % boltzmann constant
+
+TTf = fitFermi.TTf_shape;   % T/Tf from shape fit
+omegabar = 2*pi*fitFermi.Freq;  % trap frequency 2*pi*Hz
+Ef = fitFermi.Tf_shape*kB;      % Fermi Energy from shape
+Nup = 0.5*fitFermi.AtomNumber; % number of ups (assuming 50:50 mixture)
+
+
+
+% gamma = Nup*(m*omegabar^2/Ef)*sigma0*(TTf)*omegabar;
+
+gamma = Nup*(m*omegabar^3/Ef)*sigma0*(TTf)^2; 
+% From S47 o fScience Advances, 5, eaax1568 (2019)
+%  our oldpaper
+fitFermi.ScatteringRate = gamma;
 %% Get Fermi Error
 disp(fout);
 %% Display Fermi Fit Result
 
 % disp('%%%%%%%%%%%%%%%%')
 disp(['     Fermi Fit Result']);
-disp(['     Center       (px) : ' '[' num2str(round(fout.Xc,1)) ',' num2str(round(fout.Yc,1)) ']']);
-disp(['     Fugacity          : ' num2str(exp(fout.Q),'%e')]);
-disp(['     Width        (px) : ' num2str(round(fout.W,3))]);
-disp(['     Atom Number       : ' num2str(fitFermi.AtomNumber,'%e')]);
-disp(['     Temp.        (nK) : ' num2str(fitFermi.T*1E9)]);
-disp(['     Fermi Temp.  (nK) : ' num2str(fitFermi.Tf_shape*1E9)]);
-disp(['     T/Tf              : ' num2str(fitFermi.TTf_shape)]);
-disp(['     sum square err  : ' num2str(gof.sse)]);
+disp(['     Center       (px)     : ' '[' num2str(round(fout.Xc,1)) ',' num2str(round(fout.Yc,1)) ']']);
+disp(['     Fugacity              : ' num2str(exp(fout.Q),'%e')]);
+disp(['     Width        (px)     : ' num2str(round(fout.W,3))]);
+disp(['     Atom Number           : ' num2str(fitFermi.AtomNumber,'%e')]);
+disp(['     Temp.        (nK)     : ' num2str(fitFermi.T*1E9)]);
+disp(['     Fermi Temp.  (nK)     : ' num2str(fitFermi.Tf_shape*1E9)]);
+disp(['     T/Tf                  : ' num2str(fitFermi.TTf_shape)]);
+disp(['     sum square err        : ' num2str(gof.sse)]);
+disp(['     Entropy per atom (kB) : ' num2str(fitFermi.EntropyPerParticleShape)]);
 
 %% Plot the results
 hF=[];
@@ -439,6 +488,7 @@ colormap inferno
     data{8,1}='Fermi Temp. (nK)';
     data{9,1}='T/Tf';
     data{10,1}='Wx/Wy';
+    data{11,1}='S/N Shape (kB)';
 
     data{1,2}=opts.TOF*1E3;
     data{1,3}=opts.TOF*1E3;
@@ -459,6 +509,7 @@ colormap inferno
     data{9,3}=round(fitFermi.TTf_shape,4);
 
     data{10,2}=round(fitGauss.AspectRatio,4);
+    data{11,3}=round(fitFermi.EntropyPerParticleShape,4);
 
     tbl.Data=data;
 

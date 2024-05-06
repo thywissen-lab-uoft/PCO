@@ -18,6 +18,8 @@ if doBoxCount
     boxPopts.CenterLinearFit = 0;     % Linear fit to cloud center
     boxPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset    
     boxPopts.RelNumberLorentzian = 0;
+    boxPopts.CenterOneOverXFit = 0;
+
     hF_number_box = showAtomNumber(box_data,pco_xVar,boxPopts);  
     ylim([0 max(get(gca,'YLim'))]);    
     if doSave;saveFigure(hF_number_box,'box_number',saveOpts);end
@@ -59,6 +61,10 @@ if doGaussFit
     gaussPopts.CenterSineFit = 0;       % Fit sine fit to cloud center
     gaussPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
     gaussPopts.CenterParabolaFit = 0;
+    
+    gaussPopts.CenterOneOverXFit = 0;
+
+    
     gaussPopts.CenterLinearFit = 0;     % Linear fit to cloud center
     gaussPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
     gaussPopts.angleTrack = 0;
@@ -227,7 +233,7 @@ if doBMFit
     bmPopts.CenterLinearFit     = 0;     % Linear fit to cloud center
     bmPopts.NumberExpOffsetFit  = 0; % Exp decay fit with nonzero offset
     bmPopts.angleTrack          = 0;
-    bmPopts.RelNumberLorentzian = 1;
+    bmPopts.RelNumberLorentzian = 0;
 
     % Plot the statistics of bmian fit
     hF_stats_bm=showBMStats(bm_data,bmPopts);     
@@ -350,6 +356,9 @@ if doFermiFitLong
     hF_fermi_stats=showFermiStats(fermi_data,fermiPopts);    
     if doSave;saveFigure(hF_fermi_stats,'fermi_stats',saveOpts);end    
 
+    % Aspect ratio
+    hF_fermi_gauss_aspect=showFermiAspectRatio(fermi_data,pco_xVar,fermiPopts);    
+    if doSave;saveFigure(hF_fermi_gauss_aspect,'fermi_aspect_ratio',saveOpts);end    
 
     % Summary
     hF_fermi_summary=showFermiTempCompare(fermi_data,pco_xVar,fermiPopts);    

@@ -23,6 +23,8 @@ fopen(g)
 %   (analog control default)
 fprintf(g,'pc')
 
+pause(0.2);
+
 %% Send Commands
 
 %Move the specified number of steps
@@ -34,7 +36,11 @@ pause(1+abs(move_steps)/120000)
 %   (clear input buffer first since some info will be left there by the
 %   move command etc...)
 flushinput(g)
+
+pause(0.2);
+
 fprintf(g,'tp')
+pause(0.2);
 
 %Read the command into a string 
 %   (use fgetl to discard the end of line character)

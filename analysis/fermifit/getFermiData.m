@@ -58,6 +58,10 @@ for kk=1:length(atomdata)
             Tf_N_Freq_Pure(kk,nn)   = fermi.Tf_N_Freq_Pure;
             Tf_N_Freq_Mix(kk,nn)    = fermi.Tf_N_Freq_Mix;
             
+            EntropyShape(kk,nn)     = fermi.EntropyPerParticleShape;
+            
+            ScatteringRate(kk,nn) = fermi.ScatteringRate;
+            
              % Grab the Fermi Gauss Fit
             gauss = atomdata(kk).FermiGaussFit{nn};
             fout=gauss.Fit;              
@@ -120,6 +124,9 @@ output.TTf_shape_error      = TTf_shape_error;
 
 output.Tf_shape             = Tf_shape;
 output.Tf_shape_error       = Tf_shape_error;
+
+output.EntropyShape         = EntropyShape;
+output.ScatteringRate       = ScatteringRate;
 
 
 output.Tf_N_Freq_Pure       = Tf_N_Freq_Pure;

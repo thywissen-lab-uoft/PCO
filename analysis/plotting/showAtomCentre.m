@@ -147,7 +147,7 @@ end
 str='Y centre (px)';
 text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',...
     'interpreter','latex');
-
+yyaxis left
 %% Table Y
 
 a=subplot(224);
@@ -164,6 +164,78 @@ drawnow;
 %% Fits
     tbl_data={};
 
+    if isfield(opts,'CenterOneOverXFit') && opts.CenterOneOverXFit && length(xvals)>3
+       myfit = fittype('r0+A/x','independent','x','coefficients',{'r0','A'});
+        fitopts = fitoptions(myfit);
+        
+        tVec=linspace(min(xvals),max(xvals),100);    
+
+        % X FIT       
+        [vH,iH]=max(Xc(:,nn));
+        [vL,iL]=min(Xc(:,nn));       
+        xH = xvals(iH);
+        xL = xvals(iL);           
+        Ag = (vL-vH)/(1/xL-1/xH);       
+        r0g = vL-Ag/xL;
+        fitopts.Start = [r0g Ag];
+        fitX=fit(xvals',Xc(:,nn),myfit,fitopts);
+
+        axes(hax1);
+        plot(tVec,feval(fitX,tVec),'r-');  
+
+         % Y FIT       
+        [vH,iH]=max(Yc(:,nn));
+        [vL,iL]=min(Yc(:,nn));       
+        xH = xvals(iH);
+        xL = xvals(iL);           
+        Ag = (vL-vH)/(1/xL-1/xH);       
+        r0g = vL-Ag/xL;
+        fitopts.Start = [r0g Ag];
+        fitY=fit(xvals',Yc(:,nn),myfit,fitopts)
+
+        axes(hax2);
+        plot(tVec,feval(fitY,tVec),'r-');  
+        
+        % Table Stuff
+        
+            
+    
+    if isfield(opts, 'xUnit')
+        str1 =[ 'A (px*' opts.xUnit ')'];
+        str2 =[ 'A (um*' opts.xUnit ')'];
+    else
+        str1 =[ 'A (px*var)'];
+        str2 =[ 'A (um*var)'];
+    end
+    
+    tbl_data={};
+    tbl_data{1,1}=str1;
+    tbl_data{2,1}=str2;
+    tbl_data{3,1}='r0 (px)';
+    tbl_data{4,1}='r0 (um)'; 
+    tbl_data{1,2}=fitX.A;
+    tbl_data{2,2}=fitX.A*PixelSize*1e6;
+    tbl_data{3,2}=fitX.r0;
+    tbl_data{4,2}=fitX.r0*PixelSize*1e6;    
+    tbl_data{5,1}='<HTML> &Delta;X (px)</HTML>';
+    tbl_data{5,2}=range(Xc(:,nn));
+     sTblX.Data=tbl_data;
+  
+     tbl_data={};
+    tbl_data{1,1}=str1;
+    tbl_data{2,1}=str2;
+    tbl_data{3,1}='r0 (px)';
+    tbl_data{4,1}='r0 (um)'; 
+    tbl_data{1,2}=fitY.A;
+    tbl_data{2,2}=fitY.A*PixelSize*1e6;
+    tbl_data{3,2}=fitY.r0;
+    tbl_data{4,2}=fitY.r0*PixelSize*1e6;    
+    tbl_data{5,1}='<HTML> &Delta;X (px)</HTML>';
+    tbl_data{5,2}=range(Yc(:,nn));
+     sTblY.Data=tbl_data;
+     
+    end
+    
 
 if isequal(opts.CenterDecaySineFit,1) && length(xvals)>4
     tVec=linspace(min(xvals),max(xvals),100);    
@@ -180,16 +252,9 @@ if isequal(opts.CenterDecaySineFit,1) && length(xvals)>4
     cIntX=confint(fit1);
     
     
-    %tbl_data{1,3}=range(cInt(:,1))/2;
-    %tbl_data{2,3}=range(cInt(:,2))/2;
-
-    %tbl_data{3,3}=1./(range(cInt(:,2))/2);
-    %tbl_data{4,3}=range(cInt(:,3))/2;
-    %tbl_data{5,3}=range(cInt(:,4))/2;
-    %tbl_data{6,3}=range(cInt(:,5))/2;
 
     
-    sTblX.tbl_data={};
+    sTblX.Data={};
     tbl_data{1,1}='amp (px)';
     tbl_data{2,1}='period';
     tbl_data{3,1}='freq';
@@ -211,7 +276,18 @@ if isequal(opts.CenterDecaySineFit,1) && length(xvals)>4
     tbl_data{8,1}='<HTML> Mean(x) </HTML>';
     tbl_data{8,2}=mean(Xc(:,nn));
     
-    sTblX.tbl_data=tbl_data;
+    
+    tbl_data{1,3}=range(cIntX(:,1))/2;
+    tbl_data{2,3}=range(cIntX(:,2))/2;
+    tbl_data{3,3}=(range(cIntX(:,2))/2)/cX(2)^2;
+    tbl_data{4,3}=range(cIntX(:,3))/2;
+    tbl_data{5,3}=range(cIntX(:,4))/2;
+    tbl_data{6,3}=range(cIntX(:,5))/2;
+    
+    
+    
+    
+    sTblX.Data=tbl_data;
     sTblX.Position(3)=sTblX.Extent(3);
     sTblX.Position(4)=sTblX.Extent(4); 
     
@@ -223,20 +299,13 @@ if isequal(opts.CenterDecaySineFit,1) && length(xvals)>4
     fit2=makeSineDecayFit(xvals',Yc(:,nn));
     cIntY=confint(fit2);
     
-    %tbl_data{1,3}=range(cInt(:,1))/2;
-    %tbl_data{2,3}=range(cInt(:,2))/2;
 
-    %tbl_data{3,3}=1./(range(cInt(:,2))/2);
-    %tbl_data{4,3}=range(cInt(:,3))/2;
-    %tbl_data{5,3}=range(cInt(:,4))/2;
-    %tbl_data{6,3}=range(cInt(:,5))/2;
-    
     
     plot(tVec,feval(fit2,tVec),'r-');  
 
     cY=coeffvalues(fit2);
     
-    sTblY.tbl_data={};
+    sTblY.Data={};
     tbl_data{1,1}='amp (px)';
     tbl_data{2,1}='period';
     tbl_data{3,1}='freq';
@@ -252,12 +321,21 @@ if isequal(opts.CenterDecaySineFit,1) && length(xvals)>4
     tbl_data{5,2}=cY(4);
     tbl_data{6,2}=cY(5);
     
+    
+        
+    tbl_data{1,3}=range(cIntY(:,1))/2;
+    tbl_data{2,3}=range(cIntY(:,2))/2;
+    tbl_data{3,3}=(range(cIntY(:,2))/2)/cY(2)^2;
+    tbl_data{4,3}=range(cIntY(:,3))/2;
+    tbl_data{5,3}=range(cIntY(:,4))/2;
+    tbl_data{6,3}=range(cIntY(:,5))/2;
+    
     tbl_data{7,1}='<HTML> &Delta;Y (px)</HTML>';
     tbl_data{7,2}=range(Yc(:,nn));
     tbl_data{8,1}='<HTML> Mean(y) </HTML>';
     tbl_data{8,2}=mean(Yc(:,nn));
     
-    sTblY.tbl_data=tbl_data;
+    sTblY.Data=tbl_data;
     sTblY.Position(3)=sTblY.Extent(3);
     sTblY.Position(4)=sTblY.Extent(4); 
     drawnow;
@@ -503,7 +581,7 @@ iHigh=find((Y-gD)/gA>.8,1);
 iLow=find((Y-gD)/gA<-.8,1);
 gB=abs(X(iHigh)-X(iLow))*2.2;
 
-
+% gB=8;
 
 minValues=X(Y==min(Y));
 maxValues=X(Y==max(Y));
