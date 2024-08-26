@@ -5,9 +5,9 @@ function pco_gui
 % 
 % This code run the PCO cameras which the lattice experiment uses for
 % absorption imaging along the X and Y lattice directions.
-cmap = colormap(whitejet);
-cmap = colormap(bone);
-cmap = colormap(inferno);
+
+if nargin == 0; doDebug=0;end
+
 %% Load dependencies
 % Add all subdirectories for this m file
 curpath = fileparts(mfilename('fullpath'));
@@ -23,6 +23,12 @@ addpath(sdk_dir);
 
 % Name of the GUI
 guiname='PCO Pixelfly Image Acq';
+cmap = colormap(whitejet);
+cmap = colormap(bone);
+cmap = colormap(inferno);
+
+camera_control_file='Y:\_communication\pco_control.mat';
+analysis_history_dir = 'Y:\_communication\analysis_history';
 
 % Close instances of the GUI incase you ran this without closing 
 a=groot;
@@ -33,12 +39,7 @@ for kk=1:length(a.Children)
        end
     end
 end
-
-camera_control_file='Y:\_communication\pco_control.mat';
-analysis_history_dir = 'Y:\_communication\analysis_history';
-
-% Whether to enter debug mode
-doDebug=0;
+%% Camera and Imaging Settings
 
 % Camera properties
 raw_pixel_size=6.45E-6; % Pixelsize on the pixefly cameras
@@ -62,7 +63,6 @@ historyDir=['C:' filesep 'ImageHistory'];
 frVar='ExecutionDate';
 camera=initCamStruct;
 
-scaleProbeDefaultROI=[30 100 900 980];
 scaleProbeDefaultROI=[1300 1350 60 100];
 
 boxBkgdDefaultROI = [400 500 400 500];
@@ -81,9 +81,7 @@ dstruct.Name='example';
 
 %% Initialize GUI Figure
 % Initialize the primary figure
-hF=figure;
-clf
-
+hF=figure;clf
 set(hF,'Color','w','units','pixels','Name',guiname,...
     'toolbar','none','Tag','GUI','CloseRequestFcn',@closeGUI,...
     'NumberTitle','off','Position',[50 50 1600 800]);
@@ -129,6 +127,7 @@ coNew=brighten([coNew;coNew;coNew],.2);
         end
         delete(fig);                % Delete the figure
     end
+
 
 %% Initialize the image panel
 Htop = 130;         % Settings height
@@ -290,6 +289,9 @@ pXF=plot(X,0*ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2)
 hAxY=axes('box','on','linewidth',1,'fontsize',10,'units','pixels',...
     'YAxisLocation','Right','YDir','Reverse','parent',hp,'UserData','ODy');
 hAxY.Position=[axImg.Position(1)+axImg.Position(3) axImg.Position(2) l axImg.Position(4)];
+
+linkaxes([axImg hAxY],'y');
+linkaxes([axImg hAxX],'x');
 
 hold on
 % Add Y data data and fit plots
@@ -2465,6 +2467,13 @@ end
 try
     chData([],[],0);   
 end
+
+enableInteractivity;
+
+function enableInteractivity
+    enableDefaultInteractivity(axImg);
+end
+
 
 
 end
