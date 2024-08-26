@@ -140,19 +140,19 @@ hpCam=uipanel(hpControl,'units','pixels','backgroundcolor','w','title','camera',
     'fontsize',6);
 hpCam.Position(3) = hpControl.Position(3);
 hpCam.Position(4) = 30;
-hpCam.Position(1) = 0;
+hpCam.Position(1) = 1;
 hpCam.Position(2) = hpControl.Position(4) - hpCam.Position(4);
 
 % Connect button
 ttstr='Connect to camera and initialize settings.';
 hbConnect=uicontrol(hpCam,'style','pushbutton','string','connect','units','pixels',...
-    'fontsize',10,'Position',[5 5 60 20],'backgroundcolor',[80 200 120]/255,...
+    'fontsize',8,'Position',[1 1 50 15],'backgroundcolor',[80 200 120]/255,...
     'Callback',@connectCamCB,'ToolTipString',ttstr,'enable','on');
 
 % Disconnect button
 ttstr='Connect to camera and initialize settings.';
 hbDisconnect=uicontrol(hpCam,'style','pushbutton','string','disconnect','units','pixels',...
-    'fontsize',10,'Position',[65 5 75 20],'backgroundcolor',[255 102 120]/255,...
+    'fontsize',8,'Position',[51 1 65 15],'backgroundcolor',[255 102 120]/255,...
     'Callback',@disconnectCamCB,'ToolTipString',ttstr,'enable','off');
 
 % 16 - hardware trigger 
@@ -201,29 +201,21 @@ hbDisconnect=uicontrol(hpCam,'style','pushbutton','string','disconnect','units',
 % Start acquisition button
 ttstr='Start the camera and image acquisition';
 hbstart=uicontrol(hpCam,'style','pushbutton','string','start','units','pixels',...
-    'fontsize',10,'Position',[145 5 40 20],'backgroundcolor',[80 200 120]/255,...
+    'fontsize',8,'Position',[116 1 35 15],'backgroundcolor',[80 200 120]/255,...
     'Callback',@startCamCB,'ToolTipString',ttstr,'enable','off');
 
 % Clear the camera buffer
 ttstr='Clear the camera buffer.';
 hbclear=uicontrol(hpCam,'style','pushbutton','string','clear',...
-    'units','pixels','fontsize',10,'Position',[190 5 40 20],'enable','off',...
+    'units','pixels','fontsize',8,'Position',[151 1 40 15],'enable','off',...
     'backgroundcolor',[255 204 0]/255,'callback',@clearBuffer,...
     'ToolTipString',ttstr);
 
 % Stop acquisition button
 ttstr='Stop the camera.';
 hbstop=uicontrol(hpCam,'style','pushbutton','string','stop',...
-    'units','pixels','fontsize',10,'Position',[235 5 40 20],'enable','off',...
+    'units','pixels','fontsize',8,'Position',[191 1 40 15],'enable','off',...
     'backgroundcolor',[255 102 120]/255,'callback',@stopCamCB,...
-    'ToolTipString',ttstr);
-
-
-% Auto Read Settings?
-ttstr=['Read in camera settings from adwin computer'];
-hcAdwinControl=uicontrol(hpCam,'style','checkbox','string','adwin control?',...
-    'fontsize',8,...
-    'backgroundcolor','w','Position',[280 0 100 30],'callback',@andwinControlCheck,...
     'ToolTipString',ttstr);
 
 % Save checkbox callback
@@ -238,8 +230,8 @@ hcAdwinControl=uicontrol(hpCam,'style','checkbox','string','adwin control?',...
 % Auto Save check box
 ttstr=['Enable/Disable saving to external directory. Does ' ...
     'not override saving to image history.'];
-hcSave=uicontrol(hpCam,'style','checkbox','string','save?','fontsize',8,...
-    'backgroundcolor','w','Position',[370 0 60 30],'callback',@saveCheck,...
+hcSave=uicontrol(hpCam,'style','checkbox','string','save?','fontsize',6,...
+    'backgroundcolor','w','Position',[235 0 60 15],'callback',@saveCheck,...
     'ToolTipString',ttstr);
 
 % Save checkbox callback
@@ -286,25 +278,15 @@ hbSWtrig=uicontrol(hpCam,'style','pushbutton','backgroundcolor','w',...
 function swTrigCB(~,~)
    triggerCamera(camera); 
 end
-%% Image Acqusition Panel
-% Panel for image acquisition controls and settings.
-% hpAcq=uipanel(hpControl,'units','pixels','backgroundcolor','w',...
-%     'title','acquisition','fontsize', 6);
-% hpAcq.Position(3) = hpControl.Position(3);
-% hpAcq.Position(4) = 50;
-% hpAcq.Position(1) = 0;
-% hpAcq.Position(2) = hpCam.Position(2) - hpAcq.Position(4);
-
-%% Camera Settings Panel
-hpAcq2=uipanel('parent',hpControl,'units','pixels','backgroundcolor','w',...
+%% Acquisition Settings
+hpAcq=uipanel('parent',hpControl,'units','pixels','backgroundcolor','w',...
     'title','acquisition','fontsize',6);
-% hpAcq2.Position=[hpAnl.Position(1)+hpAnl.Position(3) hpImg.Position(4) 150 Htop];
-hpAcq2.Position(3) = hpControl.Position(3)/2;
-hpAcq2.Position(4) = 100;
-hpAcq2.Position(1) = 0;
-hpAcq2.Position(2) = hpCam.Position(2) - hpAcq2.Position(4);
+hpAcq.Position(3) = hpControl.Position(3)/2;
+hpAcq.Position(4) = 110;
+hpAcq.Position(1) = 1;
+hpAcq.Position(2) = hpCam.Position(2) - hpAcq.Position(4);
 
-tbl_cama=uitable('parent',hpAcq2,'units','pixels','RowName',{},...
+tbl_cama=uitable('parent',hpAcq,'units','pixels','RowName',{},...
     'ColumnName',{},'fontsize',8,'ColumnWidth',{90,40},...
     'columneditable',[false true],'celleditcallback',@chCamSettingsCB,...
     'ColumnFormat',{'char','numeric'});
@@ -314,7 +296,7 @@ tbl_cama.Data={...
     'num images', camera.NumImages};
 
 tbl_cama.Position(3:4)=tbl_cama.Extent(3:4);
-tbl_cama.Position(1:2)=[5 65];
+tbl_cama.Position(1:2)=[5 hpAcq.Position(4)-tbl_cama.Position(4)-15];
 
     function chCamSettingsCB(src,evt)
        disp('Changing camera settings');
@@ -344,21 +326,21 @@ tbl_cama.Position(1:2)=[5 65];
     end
 
 % Button group for deciding what the X/Y plots show
-bgCamMode = uibuttongroup(hpAcq2,'units','pixels','backgroundcolor','w','BorderType','None',...
+bgCamMode = uibuttongroup(hpAcq,'units','pixels','backgroundcolor','w','BorderType','None',...
     'SelectionChangeFcn',@chCamModeCB);  
-bgCamMode.Position(3:4)=[150 56];
-bgCamMode.Position(1:2)=[5 5];
+bgCamMode.Position(3:4)=[150 50];
+bgCamMode.Position(1:2)=[5 1];
     
 % Radio buttons for cuts vs sum
 rbSingleAcq=uicontrol(bgCamMode,'Style','radiobutton','String','single exp (0x10)',...
-    'Position',[0 36 150 20],'units','pixels','backgroundcolor','w',...
-    'Value',1,'UserData',16);
+    'Position',[0 32 150 18],'units','pixels','backgroundcolor','w',...
+    'Value',1,'UserData',16,'fontsize',8);
 rbDoubleAcq=uicontrol(bgCamMode,'Style','radiobutton','String','double exp (0x20)',...
-    'Position',[0 18 150 20],'units','pixels','backgroundcolor','w',...
-    'UserData',32);
+    'Position',[0 16 150 18],'units','pixels','backgroundcolor','w',...
+    'UserData',32,'fontsize',8);
 rbSingleVideo=uicontrol(bgCamMode,'Style','radiobutton','String','single video (0x30)',...
-    'Position',[0 0 150 20],'units','pixels','backgroundcolor','w',...
-    'UserData',48);
+    'Position',[0 0 150 18],'units','pixels','backgroundcolor','w',...
+    'UserData',48,'fontsize',8);
 
 
     function chCamModeCB(~,~)
@@ -367,25 +349,26 @@ rbSingleVideo=uicontrol(bgCamMode,'Style','radiobutton','String','single video (
     end
 
 
-%% Camera Settings Panel
-hpSet=uipanel('parent',hpControl,'units','pixels','backgroundcolor','w',...
+%% Optics Panel
+hpOptics=uipanel('parent',hpControl,'units','pixels','backgroundcolor','w',...
     'title','optics','fontsize',6);
 % hpSet.Position=[hpAcq2.Position(1)+hpAcq2.Position(3) hpImg.Position(4) 150 Htop];
 
-hpSet.Position(3) = hpControl.Position(3)/2;
-hpSet.Position(4) = hpAcq2.Position(4);
-hpSet.Position(1) = hpControl.Position(3)/2;
-hpSet.Position(2) = hpAcq2.Position(2);
+hpOptics.Position(3) = hpControl.Position(3)/2;
+hpOptics.Position(4) = hpAcq.Position(4);
+hpOptics.Position(1) = hpControl.Position(3)/2;
+hpOptics.Position(2) = hpAcq.Position(2);
 
 bgCam = uibuttongroup('units','pixels','backgroundcolor','w',...
-    'position',[0 75 150 20],...
-    'SelectionChangedFcn',@chCam,'parent',hpSet,'BorderType','None');        
+    'position',[5 75 150 15],...
+    'SelectionChangedFcn',@chCam,'parent',hpOptics,'BorderType','None');        
+bgCam.Position(2) = hpOptics.Position(4)-bgCam.Position(4)-12;
 % Create radio buttons in the button group.
 uicontrol(bgCam,'Style','radiobutton','String','X Cam',...
-    'Position',[5 0 50 20],'units','pixels','backgroundcolor','w',...
+    'Position',[0 0 50 15],'units','pixels','backgroundcolor','w',...
     'Value',1);
 uicontrol(bgCam,'Style','radiobutton','String','Y Cam',...
-    'Position',[60 0 70 20],'units','pixels','backgroundcolor','w');
+    'Position',[55 0 70 15],'units','pixels','backgroundcolor','w');
 
     function chCam(~,evt)
         switch evt.NewValue.String
@@ -403,23 +386,23 @@ uicontrol(bgCam,'Style','radiobutton','String','Y Cam',...
        updateScalebar;
     end
 
-tbl_optics=uitable('parent',hpSet,'units','pixels','RowName',{},'ColumnName',{},...
+tbl_optics=uitable('parent',hpOptics,'units','pixels','RowName',{},'ColumnName',{},...
     'fontsize',8,'ColumnWidth',{100,40},'columneditable',[false true]);
 tbl_optics.Data={...
     ['raw pixelsize (' char(956) 'm)'], raw_pixel_size*1E6;
     'magnification',mag(1)};
 
 tbl_optics.Position(3:4)=tbl_optics.Extent(3:4);
-tbl_optics.Position(1:2)=[1 bgCam.Position(2)-tbl_optics.Position(4)];
+tbl_optics.Position(1:2)=[5 bgCam.Position(2)-tbl_optics.Position(4)-2];
 
 
-tbl_cam=uitable('parent',hpSet,'units','pixels','RowName',{},'ColumnName',{},...
+tbl_cam=uitable('parent',hpOptics,'units','pixels','RowName',{},'ColumnName',{},...
     'fontsize',8,'ColumnWidth',{100,40},'columneditable',[false false]);
 
 tbl_cam.Data={...
     ['img pixelsize (' char(956) 'm)'], raw_pixel_size*1E6/mag(1)};
 tbl_cam.Position(3:4)=tbl_cam.Extent(3:4);
-tbl_cam.Position(1:2)=[1 0];    
+tbl_cam.Position(1:2)=[5 5];    
 
 %% Navigator Panel 
 
@@ -428,7 +411,7 @@ hpNav=uipanel(hpControl,'units','pixels','backgroundcolor','w',...
 hpNav.Position(3) = hpControl.Position(3);
 hpNav.Position(4) = 50;
 hpNav.Position(1) = 0;
-hpNav.Position(2) = hpAcq2.Position(2) - hpNav.Position(4);
+hpNav.Position(2) = hpAcq.Position(2) - hpNav.Position(4);
 
 % Button to change navigator directory to default
 ttstr='Revert previewer source directory to default location.';
@@ -995,10 +978,7 @@ hp=uitabgroup(hF,'units','pixels','Position',...
     [hpControl.Position(3) 0 hF.Position(3)-hpControl.Position(3) hF.Position(4)-40],...
     'SelectionChangedFcn',@(src,evt) disp('hi'));
 hp.Position=[hpControl.Position(3) 0 hF.Position(3)-hpControl.Position(3) hF.Position(4)];
-% 
-% tab_od_1=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
-%     'Position',[200 0 hF.Position(3)-200 hF.Position(4)-(Htop+Hacqbar)],...
-%     'bordertype','beveledin');
+
 
 % Tab Groups for each display
 tab_od_1=uitab(hp,'Title','OD 1','units','pixels','backgroundcolor','w');
@@ -1095,9 +1075,9 @@ l=80;   % Left gap for fitting and data analysis summary
 
         %%%%% Resize Top Row Panels %%%%%
         hpROISettings.Position(2)=hp.Position(4);
-        hpAcq2.Position(2)=hp.Position(4);
+        hpAcq.Position(2)=hp.Position(4);
         
-        hpSet.Position(2)=hp.Position(4);
+        hpOptics.Position(2)=hp.Position(4);
         % hpAnl.Position(2)=hp.Position(4);
         % hpImgProcess.Position(2)=hp.Position(4);
         
@@ -1111,9 +1091,9 @@ l=80;   % Left gap for fitting and data analysis summary
         
         
         hpCam.Position(2) = hpControl.Position(4) - hpCam.Position(4);
-        hpSet.Position(2) = hpCam.Position(2) - hpAcq2.Position(4);
-        hpAcq2.Position(2) = hpCam.Position(2) - hpAcq2.Position(4);
-        hpNav.Position(2) = hpAcq2.Position(2) - hpNav.Position(4);
+        hpOptics.Position(2) = hpCam.Position(2) - hpAcq.Position(4);
+        hpAcq.Position(2) = hpCam.Position(2) - hpAcq.Position(4);
+        hpNav.Position(2) = hpAcq.Position(2) - hpNav.Position(4);
         hpROISettings.Position(2)=hpNav.Position(2)-hpROISettings.Position(4);
         hpDisp.Position(2) = hpROISettings.Position(2);
                 hpImgProcess.Position(2) = hpROISettings.Position(2)-hpImgProcess.Position(4);
@@ -1447,7 +1427,7 @@ hpImgProcess=uipanel('parent',hpControl,'units','pixels','backgroundcolor','w',.
 hpImgProcess.Position = [0 hpROISettings.Position(2)-100 hpControl.Position(3)/2 120];
 % Method of calculating OD
 bgODFieldText=uicontrol('style','text','parent',hpImgProcess,...
-    'String','field : ','backgroundcolor','w','position',[0 hpImgProcess.Position(4)-35 30 20]);
+    'String','Bfield:','backgroundcolor','w','position',[0 hpImgProcess.Position(4)-35 35 20]);
 bgODField = uibuttongroup('units','pixels','backgroundcolor','w',...
     'position',[30 hpImgProcess.Position(4)-30 180 20],...
     'SelectionChangedFcn',@chOD,'parent',hpImgProcess,'BorderType','None');        
@@ -1771,6 +1751,7 @@ cBMdY.Position=[110 cBM.Position(2)-15 50 15];
 
 
 %% Raw Image Panel
+%{
 hpRaw=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
     'title','raw images','fontsize',6);
 hpRaw.Position=[hpImgProcess.Position(1)+hpImgProcess.Position(3) tab_od_1.Position(4) 800 Htop];
@@ -1828,63 +1809,6 @@ htblLight.Position(3:4)=[htblLight.Extent(3) htblLight.Extent(4)];
     end
 
 
-% 
-% % Table for changing display limits
-% tbl_rawROI=uitable('parent',hpRaw,'units','pixels','RowName',{},'columnname',{},...
-%     'ColumnEditable',[true true true true],'CellEditCallback',@tbl_rawROICB,...
-%     'ColumnWidth',{30 30 30 30},'FontSize',8,'Data',[1 size(Z,2) 1 size(Z,1)],'enable','off');
-% tbl_rawROI.Position(3:4)=tbl_rawROI.Extent(3:4);
-% tbl_rawROI.Position(1:2)=[crawlimtext.Position(1) crawlimtext.Position(2)-30];
-
-% 
-% 
-%     function tbl_rawROICB(src,evt)
-%         ROI=src.Data;        % Grab the new ROI     
-%         % Check that the data is numeric
-%         if sum(~isnumeric(ROI)) || sum(isinf(ROI)) || sum(isnan(ROI))
-%             warning('Incorrect data type provided for ROI.');
-%             src.Data(evt.Indices(2))=evt.PreviousData;
-%             return;
-%         end        
-%         ROI=round(ROI);      % Make sure this ROI are integers   
-% 
-%         % Keep the ROI within image bounds (this is hardcoded and could be
-%         % changed if we ever implement hardware ROI but want to keep 
-%         % absolute pixel positions relative to total sensor.)
-%         if ROI(2)<=ROI(1) || ROI(4)<=ROI(3)
-%            warning('Bad ROI specification given.');
-%            ROI(evt.Indices(2))=evt.PreviousData;
-%         end       
-%         if ROI(1)<1; ROI(1)=1; end       
-%         if ROI(3)<1; ROI(3)=1; end   
-%         if ROI(4)>size(dstruct.PWA,1); ROI(4)=size(dstruct.PWA,1);end       
-%         if ROI(2)>size(dstruct.PWA,2); ROI(2)=size(dstruct.PWA,2);end       
-%         src.Data=ROI;       
-%         try
-%             set(axPWA,'XLim',ROI(1:2),'YLim',ROI(3:4));
-%             set(axPWOA,'XLim',ROI(1:2),'YLim',ROI(3:4));  
-%             drawnow;
-%         catch ab
-%             warning('Unable to change display ROI.');
-%             src.Data(evt.Indices)=evt.PreviousData;
-%         end
-%     end
-
-% % % Control stuff
-% cAutoROI=uicontrol('parent',hpRaw,'style','checkbox','string','match ROI to OD?',...
-%     'units','pixels','backgroundcolor','w','value',1,'callback',@cAutoROIcb);
-% cAutoROI.Position(1:2) = tbl_rawROI.Position(1:2)+[0 -20];
-% cAutoROI.Position(3:4) = cAutoROI.Extent(3:4)+[30 0];
-% 
-% 
-%     function cAutoROIcb(src,evt)
-%         if src.Value
-%            tbl_rawROI.Enable = 'on';
-%         else
-%             tbl_rawROI.Enable='off';
-%         end
-%         
-%     end
 
 % Dark Image Axis
 axDark=axes('parent',hpRaw,'units','pixels','UserData','Dark');
@@ -1939,6 +1863,8 @@ tbl_raw2counts.Data={'PWA 2',0;'PWOA 2',0; 'Dark', 0; 'Dark Avg / px',0};
 tbl_raw2counts.Position(3:4)=tbl_raw2counts.Extent(3:4);
 tbl_raw2counts.Position(1:2)=[tbl_raw1counts.Position(1)+tbl_raw1counts.Position(3)+5 10 ];
 %}
+
+
 %% Finish graphics initialization
 
 
