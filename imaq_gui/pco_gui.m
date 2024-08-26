@@ -27,6 +27,10 @@ cmap = colormap(whitejet);
 cmap = colormap(bone);
 cmap = colormap(inferno);
 
+defaultDir = ['C:' filesep 'ImageHistory'];
+
+currDir = defaultDir;
+
 camera_control_file='Y:\_communication\pco_control.mat';
 analysis_history_dir = 'Y:\_communication\analysis_history';
 
@@ -59,7 +63,7 @@ rotCrop = 'crop'; % 'crop' or 'loose'
 % X Cam has 200 mm objective, 200 mm refocuing
 % Y Cam has 200 mm objective, 400 mm refocusing
 
-historyDir=['C:' filesep 'ImageHistory'];
+% historyDir=['C:' filesep 'ImageHistory'];
 frVar='ExecutionDate';
 camera=initCamStruct;
 
@@ -80,6 +84,7 @@ dstruct=dstruct.data;
 dstruct.Name='example';
 
 %% Initialize GUI Figure
+
 % Initialize the primary figure
 hF=figure;clf
 set(hF,'Color','w','units','pixels','Name',guiname,...
@@ -314,15 +319,10 @@ tbl_cama.Position(1:2)=[5 hpAcq.Position(4)-tbl_cama.Position(4)-15];
         % Reassign the ROI
         src.Data{m,n}=data;      
         
-%         if m==3 && ~ismember(data,[16 17 32 33])
-%             warning(['Invalid camera mode. Going back to the previous value. ' ...
-%                 'You collosal nincompoop']);
-%             src.Data{m,n}=evt.PreviousData;               
-%         end
+
         
         camera.ExposureTime=tbl_cama.Data{1,2};
         camera.NumImages=tbl_cama.Data{2,2};
-%         camera.CameraMode=tbl_cama.Data{3,2};   
     end
 
 % Button group for deciding what the X/Y plots show
@@ -436,7 +436,7 @@ hbchdir=uicontrol(hpNav,'style','pushbutton','CData',cdata,'callback',@chDirCB,.
 
 % Get directory from user and load first image in the folder
     function chDirCB(~,~)
-        str=ixon_getDayDir;
+        str=getDayDir;
         str=uigetdir(str);        
         if ~isequal(str,0) && ~isequal(str,currDir)       
             disp(['Changing directory to ' str]);
@@ -643,22 +643,97 @@ b=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
 
 % Button for decreasing ROI selector
 ttstr='Decrease the selected ROI by one';
-uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
-    'backgroundcolor','w','String',char(10094),'Position',[2 b.Position(2)-20 12 20],....
+hbROI_down=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
+    'backgroundcolor',coNew(1,:),'String',char(10094),'Position',[2 b.Position(2)-20 12 20],....
     'callback',{@chSelectROI, '-'},'ToolTipString',ttstr)
 
+ttstr='Maximize analysis ROI to full image size.';
+cdata_fullLim=imread('images/fullLim.png');
+cdata_full_lim_mask = [sum(cdata_fullLim,3)/255==3];
+    function CData=fullLim_colored(index)
+        a1 = cdata_fullLim(:,:,1);
+        a1(cdata_full_lim_mask) = 255*coNew(index,1);
+        a2= cdata_fullLim(:,:,2);
+        a2(cdata_full_lim_mask) = 255*coNew(index,2);
+        a3 = cdata_fullLim(:,:,3);
+        a3(cdata_full_lim_mask) = 255*coNew(index,3);        
+        CData = zeros(size(cdata_fullLim,1),size(cdata_fullLim,2),3);
+        CData(:,:,1)=a1;
+        CData(:,:,2)=a2;
+        CData(:,:,3)=a3;        
+        CData = imresize(uint8(CData),[15 15]);
+    end
+
+hbROI_full=uicontrol(hpROISettings,'style','pushbutton','Cdata',fullLim_colored(1),'Fontsize',10,...
+    'Backgroundcolor',coNew(1,:),'Position',[1 60 21 20],'Callback',@fullDispCB,...
+    'ToolTipString',ttstr,'UserData',1);
+hbROI_full.Position(1:2)=[22 b.Position(2)-20];
+
+% ttstr='Snap analysis ROI to data ROI(s).';
+cdata_snapLim=imread('images/snapLim.png');
+cdata_snapLim_mask = [sum(cdata_snapLim,3)/255==3];
+    function CData=snapLim_colored(index)
+        a1 = cdata_snapLim(:,:,1);
+        a1(cdata_snapLim_mask) = 255*coNew(index,1);
+        a2= cdata_snapLim(:,:,2);
+        a2(cdata_snapLim_mask) = 255*coNew(index,2);
+        a3 = cdata_snapLim(:,:,3);
+        a3(cdata_snapLim_mask) = 255*coNew(index,3);        
+        CData = zeros(size(cdata_snapLim,1),size(cdata_snapLim,2),3);
+        CData(:,:,1)=a1;
+        CData(:,:,2)=a2;
+        CData(:,:,3)=a3;        
+        CData = imresize(uint8(CData),[15 15]);
+    end
+
+hbROI_snap=uicontrol(hpROISettings,'style','pushbutton','Cdata',snapLim_colored(1),'Fontsize',10,...
+    'Backgroundcolor',coNew(1,:),'Position',[1  60 21 20],'Callback',@snapDispCB,...
+    'ToolTipString',ttstr,'UserData',1);
+hbROI_snap.Position(1:2)=[hbROI_full.Position(1)+21 hbROI_full.Position(2)];
+
+
+% Button to enable GUI selection of display limits
+
+% ttstr='Snap analysis ROI to data ROI(s).';
+cdata_selectLim=imread('images/target.jpg');
+cdata_selectLim_mask = [sum(cdata_selectLim,3)/255==3];
+    function CData=selectLim_colored(index)
+        a1 = cdata_selectLim(:,:,1);
+        a1(cdata_selectLim_mask) = 255*coNew(index,1);
+        a2= cdata_selectLim(:,:,2);
+        a2(cdata_selectLim_mask) = 255*coNew(index,2);
+        a3 = cdata_selectLim(:,:,3);
+        a3(cdata_selectLim_mask) = 255*coNew(index,3);        
+        CData = zeros(size(cdata_selectLim,1),size(cdata_selectLim,2),3);
+        CData(:,:,1)=a1;
+        CData(:,:,2)=a2;
+        CData(:,:,3)=a3;        
+        CData = imresize(uint8(CData),[15 15]);
+    end
+
+ttstr='Select the analysis ROI.';
+% cdata=imresize(imread('images/target.jpg'),[15 15]);
+hbROI_slct=uicontrol(hpROISettings,'style','pushbutton','Cdata',selectLim_colored(1),'Fontsize',10,...
+    'Backgroundcolor',coNew(1,:),'Position',[1 60 20 20],'Callback',@selectROICB,...
+    'ToolTipString',ttstr,'UserData',1);
+hbROI_slct.Position(1:2)=[hbROI_snap.Position(1)+21 hbROI_snap.Position(2)];
+
+
 % Button for GUI selection of ROI
-ttstr='Use mouse clicks to choose the selected analysis ROI.';
-bROISelect=uicontrol(hpROISettings,'style','pushbutton',...
-    'enable','on','backgroundcolor','w','position',[14 b.Position(2)-20 150 20],...
-    'String','Select ROI 1','fontsize',8,'UserData',1,...
-    'callback',@selectROICB,'ToolTipString',ttstr);
+% ttstr='Use mouse clicks to choose the selected analysis ROI.';
+% bROISelect=uicontrol(hpROISettings,'style','pushbutton',...
+%     'enable','on','backgroundcolor',coNew(1,:),'position',[50 b.Position(2)-20 150 20],...
+%     'String','Select ROI 1','fontsize',8,'UserData',1,...
+%     'callback',@selectROICB,'ToolTipString',ttstr);
+
 
 % Button for increasing ROI selector
 ttstr='Increase the selected ROI by one';
-uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
-    'backgroundcolor','w','String',char(10095),'Position',[bROISelect.Position(1)+bROISelect.Position(3) b.Position(2)-20 12 20],...
+hbROI_up=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
+    'backgroundcolor',coNew(1,:),'String',char(10095),'Position',[hbROI_slct.Position(1)+hbROI_slct.Position(3) b.Position(2)-20 12 20],...
     'callback',{@chSelectROI, '+'},'ToolTipString',ttstr);
+
+   
 
 % Callback function for GUI selection of ROI
     function selectROICB(src,~)
@@ -673,6 +748,7 @@ uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
         [x2,y2]=ginputMe(1);          % Get a mouse click
         x2=round(x2);y2=round(y2);  % Round it        
         p2=plot(x2,y2,'+','color',co(RNum,:),'linewidth',1);  % Plot it
+        delete(p1);delete(p2);                   % Delete markers
 
         % Create the ROI
         ROI=[min([x1 x2]) max([x1 x2]) min([y1 y2]) max([y1 y2])];
@@ -690,17 +766,28 @@ uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
         catch 
             disp('bad ROI selected.');
         end                
-        delete(p1);delete(p2);                   % Delete markers
+
+        enableInteractivity;
     end
 
     function chSelectROI(~,~,state)
         switch state
            case '-'
-                bROISelect.UserData=max([1 bROISelect.UserData-1]);
+                index=max([1 hbROI_slct.UserData-1]);
+
            case '+'
-                bROISelect.UserData=min([tblNumROIs.Data bROISelect.UserData+1]);               
+                index=min([tblNumROIs.Data hbROI_slct.UserData+1]);    
+            otherwise
+                index=1;
         end
-        bROISelect.String=['Select ROI ' num2str(bROISelect.UserData)];               
+        hbROI_slct.UserData=index;
+        hbROI_snap.UserData=index;
+        hbROI_full.UserData=index;
+        hbROI_up.BackgroundColor=coNew(index,:);
+        hbROI_down.BackgroundColor=coNew(index,:);
+        set(hbROI_slct,'CData',selectLim_colored(index),'BackgroundColor',coNew(index,:));
+        set(hbROI_full,'CData',fullLim_colored(index),'BackgroundColor',coNew(index,:));        
+        set(hbROI_snap,'CData',snapLim_colored(index),'BackgroundColor',coNew(index,:));
         drawnow;
     end
 
@@ -794,7 +881,7 @@ climtext.Position(1:2) = [1 40];
 
 % Color limit table for OD image
 climtbl=uitable('parent',hpDisp,'units','pixels','RowName',{},'ColumnName',{},...
-    'Data',[0 1],'ColumnWidth',{40,40},'ColumnEditable',[true true],...
+    'Data',[0 .5],'ColumnWidth',{40,40},'ColumnEditable',[true true],...
     'CellEditCallback',@climCB);
 climtbl.Position(3:4)=climtbl.Extent(3:4);
 climtbl.Position(1:2) = [40 40];
@@ -920,6 +1007,10 @@ hbSlctLim.Position(1:2)=[hbSnapLim.Position(1)-21 60];
         x2=round(x2);y2=round(y2);  % Round it        
         p2=plot(x2,y2,'+','color','k','linewidth',1);  % Plot it
 
+        delete(p1);delete(p2);                   % Delete markers
+
+        enableInteractivity;                 % Select the OD image axis
+
         % Create the ROI
         ROI=[min([x1 x2]) max([x1 x2]) min([y1 y2]) max([y1 y2])];
 
@@ -932,9 +1023,9 @@ hbSlctLim.Position(1:2)=[hbSnapLim.Position(1)-21 60];
         % Try to update ROI graphics
         tbl_dispROI.Data=ROI;
         tbl_dispROICB(tbl_dispROI);
+
         resizePlots;       
         drawnow;        
-        delete(p1);delete(p2);                   % Delete markers
     end
 
 
@@ -1025,8 +1116,8 @@ ax_gap = 20;
         end
         
         % Match cut limits with the images limits
-        set(hAxX,'XLim',axImg.XLim,'XTick',axImg.XTick);
-        set(hAxY,'YLim',axImg.YLim,'YTick',axImg.YTick);
+        % set(hAxX,'XLim',axImg.XLim,'XTick',axImg.XTick);
+        % set(hAxY,'YLim',axImg.YLim,'YTick',axImg.YTick);
 
         drawnow;
     end
@@ -1110,7 +1201,7 @@ set(axImg,'box','on','linewidth',.1,'fontsize',10,'units','pixels',...
     'XAxisLocation','top','colormap',cmap);
 hold on
 axImg.Position=[50 150 tab_od_1.Position(3)-200 tab_od_1.Position(4)-200];
-
+axImg.CLim=[0 .5];
 
 axis equal tight
 
@@ -1268,8 +1359,9 @@ hbhistoryRight=uicontrol(tab_od_1,'Style','pushbutton','units','pixels',...
 hbhistoryRight.Position(3:4)=[12 20];
 
     function loadImage(filename)
+        
         if nargin<1
-            [filename,pathname]=uigetfile([historyDir filesep '*.mat']);
+            [filename,pathname]=uigetfile([defaultDir filesep '*.mat']);
             if ~filename
                 disp('No mat file chosen!');
                 return;
@@ -1363,11 +1455,11 @@ hbhistoryRight.Position(3:4)=[12 20];
                 end
         end
     end
-
+%{
 % Callback function for changing number of ROIs
     function chData(~,~,state)       
        % Get mat files in history directory
-       filenames=dir([historyDir  filesep '*.mat']);
+       filenames=dir([currDir  filesep '*.mat']);
        filenames={filenames.name};       
        filenames=sort(filenames);
        filenames=flip(filenames);
@@ -1390,8 +1482,52 @@ hbhistoryRight.Position(3:4)=[12 20];
         thistoryInd.String=sprintf('%03d',ind);
         drawnow;        
         filename=filenames{ind};
-        loadImage(fullfile(historyDir,filename));
+        loadImage(fullfile(currDir,filename));
         drawnow;
+    end
+%}
+function chData(src,evt,state)     
+        if isempty(src)
+            index_type='absolute';
+        else
+            index_type = src.UserData;
+        end
+       % Get mat files in history directory          
+       filenames=dir([currDir  filesep '*.mat']);
+       filenames={filenames.name};       
+       filenames=sort(filenames);
+       filenames=flip(filenames);
+       
+       if isempty(filenames)
+          warning('No data in this folder. Aborting loading file.');
+          return;
+       end   
+    
+        % Current data mat  
+       myname=[dstruct.Name '.mat'];        
+
+      % Find current filename in directory
+       i0=find(strcmp(filenames,myname),1);
+       if isempty(i0)
+          i0=1; 
+       end
+
+       switch index_type
+           case 'increment'
+               if isequal(state,-1)
+                    i1=max([i0-1 1]); 
+               elseif isequal(state,1)
+                    i1=min([i0+1 length(filenames)]);
+               end
+           case  'absolute'               
+               i1 = max([min([state length(filenames)]) 1]); 
+       end        
+        newfilename=fullfile(currDir,filenames{i1});
+        tNavInd.Data(1)=i1;
+        tNavName.String = newfilename;
+        tNavMax.String=['of ' num2str(length(filenames))];  
+        drawnow;   
+        loadImage(newfilename);
     end
 
 
@@ -1555,8 +1691,11 @@ uicontrol('parent',hpImgProcess,'units','pixels',...
 
     function recalcODCB(~,~)
         dstruct=computeOD(dstruct);
+        
         updateImages(dstruct);
+        
         dstruct=performFits(dstruct);
+        
         updatePlots(dstruct);
     end
 
@@ -2010,19 +2149,20 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
         OD = real(OD);
 %         OD(isnan(OD))=0;
         data.OD=single(OD);
+
     end
 
 
 function updateImages(data)             
     
     % Update images
-    set(hPWOA,'XData',data.X,'YData',data.Y,'CData',data.PWOA);
-    set(hPWA,'XData',data.X,'YData',data.Y,'CData',data.PWA);
+    % set(hPWOA,'XData',data.X,'YData',data.Y,'CData',data.PWOA);
+    % set(hPWA,'XData',data.X,'YData',data.Y,'CData',data.PWA);
     set(hImg,'XData',data.X,'YData',data.Y,'CData',data.OD);
     
-    if isfield(data,'Dark')
-        set(hDark,'XData',data.X,'YData',data.Y,'CData',data.Dark);
-    end
+    % if isfield(data,'Dark')
+    %     set(hDark,'XData',data.X,'YData',data.Y,'CData',data.Dark);
+    % end
 
     NPWOA_1=sum(sum(data.PWOA(1:1024,:)));
     NPWA_1=sum(sum(data.PWA(1:1024,:)));
@@ -2072,7 +2212,7 @@ function updateImages(data)
     set(tImageFileFig,'String',data.Name);
 
     % Find where in the history this image lies
-    filenames=dir([historyDir  filesep '*.mat']);
+    filenames=dir([currDir  filesep '*.mat']);
     filenames={filenames.name};       
     filenames=sort(filenames);
     filenames=flip(filenames);       
@@ -2101,65 +2241,78 @@ function updatePlots(data)
     
     fprintf('Updating graphics ... ');
     data.ROI=tblROI.Data;
-    
-for n=1:size(data.ROI,1)
-    ROI=data.ROI(n,:);
-    x=ROI(1):ROI(2);
-    y=ROI(3):ROI(4); 
-    [xx,yy]=meshgrid(x,y);
-    subOD=data.OD(ROI(3):ROI(4),ROI(1):ROI(2));
-    
-    
-    if rbSum.Value
-        ODySum=sum(subOD,2);
-        ODxSum=sum(subOD,1);
         
-        set(pX(n),'XData',x,'YData',ODxSum);
-        set(pY(n),'XData',ODySum,'YData',y);
-        drawnow;
-    end       
-
-    if cGaussFit.Value && isfield(data,'GaussFit')
-        fout=data.GaussFit{n};
-        zF=feval(fout,xx,yy); 
+    for n=1:size(data.ROI,1)
+        ROI=data.ROI(n,:);
+        x=ROI(1):ROI(2);
+        y=ROI(3):ROI(4); 
+        [xx,yy]=meshgrid(x,y);
+        subOD=data.OD(ROI(3):ROI(4),ROI(1):ROI(2));
         
-        % Evaluate and plot 1/e^2 gaussian reticle
-        t=linspace(0,2*pi,100);            
-        xR=fout.Xc+1*fout.Xs*cos(t);
-        yR=fout.Yc+1*fout.Ys*sin(t);    
-        set(pGaussRet(n),'XData',xR,'YData',yR,'linewidth',2);  
-        drawnow;
         
-        if rbCut.Value 
-            indy=find(round(fout.Yc)==y);           % Y center
-            indx=find(round(fout.Xc)==x);           % X center               
-
-            ODyCut=subOD(:,indx);
-            ODxCut=subOD(indy,:);
-
-            ODyCutF=zF(:,indx);
-            ODxCutF=zF(indy,:);
-
-            set(pX(n),'XData',x,'YData',ODxCut);
-            set(pXF(n),'XData',x,'YData',ODxCutF,'Visible','on');
-            set(pY(n),'XData',ODyCut,'YData',y);
-            set(pYF(n),'XData',ODyCutF,'YData',y,'Visible','on');
-        else    
+        if rbSum.Value
             ODySum=sum(subOD,2);
             ODxSum=sum(subOD,1);
-
-            ODySumF=sum(zF,2);
-            ODxSumF=sum(zF,1);   
-
+            
             set(pX(n),'XData',x,'YData',ODxSum);
-            set(pXF(n),'XData',x,'YData',ODxSumF,'Visible','on');
             set(pY(n),'XData',ODySum,'YData',y);
-            set(pYF(n),'XData',ODySumF,'YData',y,'Visible','on');
-        end  
-    end
-end  
+            drawnow;
+        end       
+    
+        if cGaussFit.Value && isfield(data,'GaussFit')
+            fout=data.GaussFit{n};
+            zF=feval(fout,xx,yy); 
+            
+            % Evaluate and plot 1/e^2 gaussian reticle
+            t=linspace(0,2*pi,100);            
+            xR=fout.Xc+1*fout.Xs*cos(t);
+            yR=fout.Yc+1*fout.Ys*sin(t); 
 
-disp('done.');
+            x1 = min(data.X);
+            x2 = max(data.X);
+            y1 = min(data.Y);
+            y2 = max(data.Y);
+
+            binds = logical([xR<x1]+[xR>x2]+[yR<y1]+[yR>y2]);
+            xR(binds)=[];
+            yR(binds)=[];
+
+       
+
+            
+            set(pGaussRet(n),'XData',xR,'YData',yR,'linewidth',2);  
+            drawnow;
+            
+            if rbCut.Value 
+                indy=find(round(fout.Yc)==y);           % Y center
+                indx=find(round(fout.Xc)==x);           % X center               
+    
+                ODyCut=subOD(:,indx);
+                ODxCut=subOD(indy,:);
+    
+                ODyCutF=zF(:,indx);
+                ODxCutF=zF(indy,:);
+    
+                set(pX(n),'XData',x,'YData',ODxCut);
+                set(pXF(n),'XData',x,'YData',ODxCutF,'Visible','on');
+                set(pY(n),'XData',ODyCut,'YData',y);
+                set(pYF(n),'XData',ODyCutF,'YData',y,'Visible','on');
+            else    
+                ODySum=sum(subOD,2);
+                ODxSum=sum(subOD,1);
+    
+                ODySumF=sum(zF,2);
+                ODxSumF=sum(zF,1);   
+    
+                set(pX(n),'XData',x,'YData',ODxSum);
+                set(pXF(n),'XData',x,'YData',ODxSumF,'Visible','on');
+                set(pY(n),'XData',ODySum,'YData',y);
+                set(pYF(n),'XData',ODySumF,'YData',y,'Visible','on');
+            end  
+        end
+    end  
+    
+    disp('done.');
 end
 
 function data=performFits(data)
@@ -2410,10 +2563,10 @@ end
                 pause(1);
 %                 startCamera(camera.BoardHandle);
 
-                figure(3123123);
-                clf
-                imagesc(camera.Images{1});
-                caxis([0 30]);
+                % figure(3123123);
+                % clf
+                % imagesc(camera.Images{1});
+                % caxis([0 30]);
             end
             
             
@@ -2554,7 +2707,7 @@ end
 
     function saveData(data,saveDir)
         if nargin==1
-           saveDir=historyDir;
+           saveDir=currDir;
            filenames=dir([saveDir filesep '*.mat']);
            filenames={filenames.name};
            filenames=sort(filenames);
@@ -2590,12 +2743,22 @@ end
         end
         fname=[data.Name '.mat']; 
         if ~exist(saveDir,'dir')
-           mkdir(saveDir);
-        end        
-        fname=fullfile(saveDir,fname);
-        fprintf('%s',[fname ' ...']);
-        save(fname,'data');
-        disp(' done'); 
+            try
+                mkdir(saveDir);
+            end
+        end  
+
+        if exist(saveDir,'dir')
+
+            fname=fullfile(saveDir,fname);
+            fprintf('%s',[fname ' ...']);
+            save(fname,'data');
+            disp(' done'); 
+        else
+            warning('unable to save GUI data')
+        end
+        
+
     end
 
 try
