@@ -565,8 +565,8 @@ tNavName=uicontrol(hpNav,'style','text','string','FILENAME','fontsize',7,...
 
 %% ROI Settings panel
 hpROISettings=uipanel(hpControl,'units','pixels','backgroundcolor','w',...
-    'title','roi','fontsize',6);
-hpROISettings.Position=[0 hpNav.Position(2)-100 hpControl.Position(3) 100];
+    'title','Analysis ROI','fontsize',6);
+hpROISettings.Position=[0 hpNav.Position(2)-100 hpControl.Position(3)/2 300];
 
 % Table for number of ROIs
 tblNumROIs=uitable(hpROISettings,'Data',1,'RowName','Num ROIs','columnName',{},...
@@ -725,18 +725,18 @@ uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
     end
 
 %% ROI Panels
-hpROI=uipanel(hpControl,'units','pixels','backgroundcolor','w',...
-    'title','ROI','fontsize',6);
-hpROI.Position=[0 hpROISettings.Position(2)-200 hpControl.Position(3) 200];
+% hpROI=uipanel(hpControl,'units','pixels','backgroundcolor','w',...
+%     'title','ROI','fontsize',6);
+% hpROI.Position=[0 hpROISettings.Position(2)-200 hpControl.Position(3)/2 200];
 
 % Table of ROIs
-tblROI=uitable(hpROI,'units','pixels','ColumnWidth',{30 30 30 30},...
+tblROI=uitable(hpROISettings,'units','pixels','ColumnWidth',{30 30 30 30},...
     'ColumnEditable',true(ones(1,4)),'ColumnName',{'X1','X2','Y1','Y2'},...
     'Data',[1 size(Z,2) 1 size(Z,1)],'FontSize',8,...
     'CellEditCallback',@chROI,'backgroundcolor',coNew);
 tblROI.Position(3:4)=tblROI.Extent(3:4)+[18 0];
-tblROI.Position(1:2)=[1 hpROI.Position(4)-tblROI.Position(4)-5];
-
+% tblROI.Position(1:2)=[1 hpROI.Position(4)-tblROI.Position(4)-5];
+tblROI.Position(1:2) = [0 tblNumROIs.Position(2)-100];
 % Callback function for changing ROI via table
     function chROI(src,evt)
         m=evt.Indices(1); n=evt.Indices(2);
@@ -771,226 +771,98 @@ tblROI.Position(1:2)=[1 hpROI.Position(4)-tblROI.Position(4)-5];
         end
     end
 
-%% Initialize the image panel
-Htop = 130;         % Settings height
-Hacqbar = 30;       % Acquisition bar height
-
-hp=uitabgroup(hF,'units','pixels','Position',...
-    [hpControl.Position(3) 0 hF.Position(3)-hpControl.Position(3) hF.Position(4)-40],...
-    'SelectionChangedFcn',@(src,evt) disp('hi'));
-hp.Position=[hpControl.Position(3) 0 hF.Position(3)-hpControl.Position(3) hF.Position(4)];
-% 
-% tab_od_1=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
-%     'Position',[200 0 hF.Position(3)-200 hF.Position(4)-(Htop+Hacqbar)],...
-%     'bordertype','beveledin');
-
-% Tab Groups for each display
-tab_od_1=uitab(hp,'Title','OD 1','units','pixels','backgroundcolor','w');
-tab_od_2=uitab(hp,'Title','OD 2','units','pixels','backgroundcolor','w');
-tab_raw_1=uitab(hp,'Title','PWA','units','pixels','backgroundcolor','w');
-tab_raw_2=uitab(hp,'Title','PWOA','units','pixels','backgroundcolor','w');
-tab_raw_3=uitab(hp,'Title','dark','units','pixels','backgroundcolor','w');
-
-% Define spacing for images, useful for resizing
-l=80;   % Left gap for fitting and data analysis summary
+%% Display Settings panel
+hpDisp=uipanel(hpControl,'units','pixels','backgroundcolor','w',...
+    'title','Display Options','fontsize',6);
+hpDisp.Position=[hpControl.Position(3)/2 hpROISettings.Position(2) hpControl.Position(3)/2 hpROISettings.Position(4)];
 
 
-% Size of top row
+%%%%% Upper right area of figure %%%%%
 
-    function resizePlots       
-        % Resize the image axis     
-        
-        if (tab_od_1.Position(3)<250 || tab_od_1.Position(4)<250)
-            
-            return;
-        end
-        
-        axImg.Position=[40 110 tab_od_1.Position(3)-200 tab_od_1.Position(4)-200];        
-        
-        % Get the aspect ratio of plot objects
-        Rimg=axImg.PlotBoxAspectRatio;Rimg=Rimg(1)/Rimg(2);
-        Rax=axImg.Position(3:4);Rax=Rax(1)/Rax(2);
-        
-        % Size of plot objects (position is weird in axis equal tight);
-        if Rax>Rimg
-            h1=axImg.Position(4);
-            w1=axImg.Position(4)*Rimg;   
-            hAxX.Position=[40+(axImg.Position(3)-w1)/2 axImg.Position(2)-l w1 80];
-            hAxY.Position=[40+(axImg.Position(3)+w1)/2 axImg.Position(2) 80 h1];
-        else
-            w1=axImg.Position(3);
-            h1=w1/Rimg;            
-            hAxX.Position=[axImg.Position(1) 110+(axImg.Position(4)-h1)/2-l ...
-                w1 80];
-            hAxY.Position=[axImg.Position(1)+axImg.Position(3) ...
-                110+(axImg.Position(4)-h1)/2 l h1];            
-        end
-        
-        % Match cut limits with the images limits
-        set(hAxX,'XLim',axImg.XLim,'XTick',axImg.XTick);
-        set(hAxY,'YLim',axImg.YLim,'YTick',axImg.YTick);
-        
-    
-        
-        % Move the colorbar
-        cBar.Position=[hAxX.Position(1) hAxY.Position(2)+hAxY.Position(4)+23 ...
-            hAxX.Position(3) 15]; 
+% Button group for deciding what the X/Y plots show
+bgPlot = uibuttongroup(hpDisp,'units','pixels','backgroundcolor','w','BorderType','None',...
+    'SelectionChangeFcn',@chPlotCB);  
+% bgPlot.Position(3:4)=[125 20];
+% bgPlot.Position(1:2)=[hpDisp.Position(3)-bgPlot.Position(3) hpDisp.Position(4)-bgPlot.Position(4)];
+    bgPlot.Position = [1 1 200 20];
+
+% Radio buttons for cuts vs sum
+rbCut=uicontrol(bgPlot,'Style','radiobutton','String','plot cut',...
+    'Position',[0 0 60 20],'units','pixels','backgroundcolor','w','Value',1);
+rbSum=uicontrol(bgPlot,'Style','radiobutton','String','plot sum',...
+    'Position',[60 0 60 20],'units','pixels','backgroundcolor','w');
+
+    function chPlotCB(~,~)
+       updatePlots(dstruct); 
     end
 
-    function SizeChangedFcn(~,~)
-        % This resize fucntion ensures that the X and Y cut/sum plot has
-        % commenserate positioning with respect the actual image shown
-        
-        
-        
-        W=hF.Position(3);H=hF.Position(4);      % Grab figure dimensions     
-        
-        if W<300 || H <300
-            return;
-        end
+% Checkbox for enabling display of the gaussian reticle
+cGaussRet=uicontrol(hpDisp,'style','checkbox','string','show gauss reticle?',...
+    'units','pixels','fontsize',8,'backgroundcolor','w','callback',@cGaussRetCB);
+cGaussRet.Position=[1 20 125 20];
 
-        hpControl.Position=[0 0 400 H];        % Resize image panel        
-        hp.Position=[hpControl.Position(3) 0 W-hpControl.Position(3) H];        % Resize image panel        
-
-        resizePlots;                            % Resize plots
-        
-        % Reposition the display ROI and axis equal options
-        tbl_dispROI.Position(1:2)=[hp.Position(3)-tbl_dispROI.Position(3)-5 5];
-        hbFullLim.Position(1:2)=[tbl_dispROI.Position(1)-22 5];
-        hbSnapLim.Position(1:2)=[hbFullLim.Position(1)-21 5];
-        hbSlctLim.Position(1:2)=[hbSnapLim.Position(1)-21 5];
-        caxisequal.Position(1:2)=[hp.Position(3)-caxisequal.Position(3) 30];
-        cscalebar.Position(1:2)=[hp.Position(3)-cscalebar.Position(3) 50];
-                
-        % Reposition the plot options in the upper right
-        bgPlot.Position(1:2)=[hp.Position(3)-bgPlot.Position(3) hp.Position(4)-bgPlot.Position(4)];
-        cGaussRet.Position=[bgPlot.Position(1) bgPlot.Position(2)-20 125 20];
-        climtbl.Position(1:2)=[hp.Position(3)-90 cGaussRet.Position(2)-25];
-        climtext.Position(1:2)=[climtbl.Position(1)-climtext.Extent(3) climtbl.Position(2)];
-              
-        % Reposition filename
-        cAutoUpdate.Position(1:2)=[1 hp.Position(4)-35];
-        
-        hbSettings.Position(1:2)=[1 hp.Position(4)-21];        
-        bSave.Position(1:2)=[20 hp.Position(4)-21];
-        hbBrowseImage.Position(1:2)=[40 hp.Position(4)-21];
-        hbhistoryNow.Position(1:2)=[60 hp.Position(4)-21];
-        hbhistoryLeft.Position(1:2)=[84 hp.Position(4)-21];
-        thistoryInd.Position(1:2)=[96 hp.Position(4)-21];
-        hbhistoryRight.Position(1:2)=[124 hp.Position(4)-21];
-        tImageFileFig.Position(1:2)=[136 ...
-        hp.Position(4)-tImageFileFig.Position(4)];
-        %%%%%% Resize Acquisition Panel %%%%
-        % hpCam.Position(2:3)=[hF.Position(4)-hpCam.Position(4) hF.Position(3)];
-        tSaveDir.Position(3)=hpCam.Position(3)-2;
-        hbSWtrig.Position(1)=hpCam.Position(3)-60;
-
-        %%%%% Resize Top Row Panels %%%%%
-        hpROISettings.Position(2)=hp.Position(4);
-        hpAcq2.Position(2)=hp.Position(4);
-        
-        hpSet.Position(2)=hp.Position(4);
-        % hpAnl.Position(2)=hp.Position(4);
-        % hpImgProcess.Position(2)=hp.Position(4);
-        
-        
-
-
-
-        % hpRaw.Position(1:2)=[hpImgProcess.Position(1)+hpImgProcess.Position(3) hp.Position(4)];   
-        hpROI.Position(2)=hF.Position(4)-hpROI.Position(4)-Hacqbar;
-        
-        
-        hpCam.Position(2) = hpControl.Position(4) - hpCam.Position(4);
-        hpSet.Position(2) = hpCam.Position(2) - hpAcq2.Position(4);
-        hpAcq2.Position(2) = hpCam.Position(2) - hpAcq2.Position(4);
-        hpNav.Position(2) = hpAcq2.Position(2) - hpNav.Position(4);
-        hpROISettings.Position=[0 hpNav.Position(2)-100 hpControl.Position(3) 100];
-        hpROI.Position=[0 hpROISettings.Position(2)-200 hpControl.Position(3) 200];
-        %%%%%% Resize Left Panel %%%%%
-        % hpFit.Position(4)=hF.Position(4)-200-Hacqbar;
-        drawnow;
+    function cGaussRetCB(src,~)
+       for n=1:size(tblROI.Data,1)
+           pGaussRet(n).Visible=src.Value;
+       end        
     end
 
-% Initialize image axis
-axImg=axes('parent',tab_od_1,'UserData','OD');cla
-hImg=imagesc(X,Y,Z);
-set(axImg,'box','on','linewidth',.1,'fontsize',10,'units','pixels',...
-    'XAxisLocation','top','colormap',cmap);
-hold on
-axImg.Position=[50 150 tab_od_1.Position(3)-200 tab_od_1.Position(4)-200];
-axis equal tight
+% Text label for color limit table on OD image
+climtext=uicontrol('parent',hpDisp,'units','pixels','string','OD:',...
+    'fontsize',7,'backgroundcolor','w','style','text');
+climtext.Position(3:4)=climtext.Extent(3:4);
+climtext.Position(1:2) = [1 40];
 
-% Add plot and text for scale bar
-pScaleX=plot([50 150],[50 50],'color','r','linewidth',2);
-pScaleY=plot([50 50],[50 150],'color','r','linewidth',2);
-tScaleX=text(50,50,'100 \mum','units','data','color','r','fontsize',12,...
-    'verticalalignment','bottom','horizontalalignment','left','fontweight','bold');
-tScaleY=text(50,50,'100 \mum','units','data','color','r',...
-    'verticalalignment','bottom','horizontalalignment','right',...
-    'rotation',90,'fontsize',12,'fontweight','bold');
-tImageFile=text(3,3,'FILENAME','units','pixels','fontsize',8,'fontweight','bold',...
-    'horizontalalignment','left','verticalalignment','bottom','margin',1,...
-    'interpreter','none','backgroundcolor',[1 1 1 .5]);
-
-% Box for ROI (this will become an array later)
-pROI=rectangle('position',[1 1 1392 1024],'edgecolor',co(1,:),'linewidth',2);
-% Reticle for gaussian fit (this will become an array later)
-pGaussRet=plot(0,0,'-','linewidth',1,'Visible','off','color',co(1,:));
-% Color bar
-cBar=colorbar('fontsize',8,'units','pixels','location','northoutside');
-drawnow;
-
-% X Cut/Sum Axis
-hAxX=axes('box','on','linewidth',1,'fontsize',10,...
-    'XAxisLocation','Bottom','units','pixels','parent',tab_od_1,'UserData','ODx');
-hAxX.Position=[axImg.Position(1) axImg.Position(2)-l axImg.Position(3) l];
-hold on
-% Add X data data and fit plots
-pX=plot(X,ones(length(X),1),'k.-');
-pXF=plot(X,0*ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2);
-
-% Y Cut/Sum Axis
-hAxY=axes('box','on','linewidth',1,'fontsize',10,'units','pixels',...
-    'YAxisLocation','Right','YDir','Reverse','parent',tab_od_1,'UserData','ODy');
-hAxY.Position=[axImg.Position(1)+axImg.Position(3) axImg.Position(2) l axImg.Position(4)];
-
-linkaxes([axImg hAxY],'y');
-linkaxes([axImg hAxX],'x');
-
-hold on
-% Add Y data data and fit plots
-pY=plot(ones(length(Y),1),Y,'k.-'); 
-pYF=plot(X,0*ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2);
+% Color limit table for OD image
+climtbl=uitable('parent',hpDisp,'units','pixels','RowName',{},'ColumnName',{},...
+    'Data',[0 1],'ColumnWidth',{40,40},'ColumnEditable',[true true],...
+    'CellEditCallback',@climCB);
+climtbl.Position(3:4)=climtbl.Extent(3:4);
+climtbl.Position(1:2) = [40 40];
+% Callback for changing the color limits table
+    function climCB(src,evt)
+        try
+            axImg.CLim=climtbl.Data;
+        catch exception
+            warning('Bad OD color limits given. Using old value.');
+            src.Data(evt.Indices)=evt.PreviousData;
+        end
+    end
 
 
 %%%%% Lower right area of figure %%%%%
 
 % Table for changing display limits
-tbl_dispROI=uitable('parent',tab_od_1,'units','pixels','RowName',{},'columnname',{},...
+tbl_dispROI=uitable('parent',hpDisp,'units','pixels','RowName',{},'columnname',{},...
     'ColumnEditable',[true true true true],'CellEditCallback',@tbl_dispROICB,...
     'ColumnWidth',{30 30 30 30},'FontSize',8,'Data',[1 size(Z,2) 1 size(Z,1)]);
 tbl_dispROI.Position(3:4)=tbl_dispROI.Extent(3:4);
-tbl_dispROI.Position(1:2)=[0 tab_od_1.Position(4)-tbl_dispROI.Position(4)];
+
+tbl_dispROI.Position(1:2)=[60 60];
+
+
 
 ttstr='Maximize display ROI to full image size.';
 cdata=imresize(imread('images/fullLim.png'),[15 15]);
-hbFullLim=uicontrol(tab_od_1,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
-    'Backgroundcolor','w','Position',[1 1 21 20],'Callback',@fullDispCB,...
+hbFullLim=uicontrol(hpDisp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
+    'Backgroundcolor','w','Position',[1 60 21 20],'Callback',@fullDispCB,...
     'ToolTipString',ttstr);
+hbFullLim.Position(1:2)=[tbl_dispROI.Position(1)-22 60];
 
 ttstr='Snap display ROI to data ROI(s).';
 cdata=imresize(imread('images/snapLim.png'),[15 15]);
-hbSnapLim=uicontrol(tab_od_1,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
-    'Backgroundcolor','w','Position',[1 1 21 20],'Callback',@snapDispCB,...
+hbSnapLim=uicontrol(hpDisp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
+    'Backgroundcolor','w','Position',[1  60 21 20],'Callback',@snapDispCB,...
     'ToolTipString',ttstr);
+hbSnapLim.Position(1:2)=[hbFullLim.Position(1)-21 60];
 
 % Button to enable GUI selection of display limits
 ttstr='Select the display ROI.';
 cdata=imresize(imread('images/target.jpg'),[15 15]);
-hbSlctLim=uicontrol(tab_od_1,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
-    'Backgroundcolor','w','Position',[1 1 20 20],'Callback',@slctDispCB,...
+hbSlctLim=uicontrol(hpDisp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
+    'Backgroundcolor','w','Position',[1 60 20 20],'Callback',@slctDispCB,...
     'ToolTipString',ttstr);
+hbSlctLim.Position(1:2)=[hbSnapLim.Position(1)-21 60];
 
     function tbl_dispROICB(src,evt)
         ROI=src.Data;        % Grab the new ROI     
@@ -1086,6 +958,223 @@ hbSlctLim=uicontrol(tab_od_1,'style','pushbutton','Cdata',cdata,'Fontsize',10,..
         delete(p1);delete(p2);                   % Delete markers
     end
 
+
+% Toggle for axis equal tight
+caxisequal=uicontrol('parent',hpDisp,'style','checkbox','string','axis equal tight?',...
+    'fontsize',8,'Value',1,'units','pixels','backgroundcolor','w','callback',@axisCB);
+caxisequal.Position(3:4)=[110 caxisequal.Extent(4)];
+caxisequal.Position(1:2) = [1 90];
+% Callback for axis equal tight check box
+    function axisCB(src,~)
+        if src.Value
+            set(axImg,'DataAspectRatioMode','manual','DataAspectRatio',[1 1 1]);
+        else
+            set(axImg,'DataAspectRatioMode','auto','PlotBoxAspectRatioMode','auto');                
+        end
+        SizeChangedFcn;        
+    end
+
+% Toggle for showing a scale bar
+cscalebar=uicontrol('parent',hpDisp,'style','checkbox','string','show scale bar?',...
+    'fontsize',8,'Value',1,'units','pixels','backgroundcolor','w','callback',@scaleCB);
+cscalebar.Position(3:4)=[110 cscalebar.Extent(4)];
+cscalebar.Position(1:2) = [1 110];
+
+    function scaleCB(src,~)
+        pScaleX.Visible=src.Value;
+        pScaleY.Visible=src.Value;
+        tScaleX.Visible=src.Value;
+        tScaleY.Visible=src.Value;
+    end
+
+
+%% Initialize the image panel
+Htop = 130;         % Settings height
+Hacqbar = 30;       % Acquisition bar height
+
+hp=uitabgroup(hF,'units','pixels','Position',...
+    [hpControl.Position(3) 0 hF.Position(3)-hpControl.Position(3) hF.Position(4)-40],...
+    'SelectionChangedFcn',@(src,evt) disp('hi'));
+hp.Position=[hpControl.Position(3) 0 hF.Position(3)-hpControl.Position(3) hF.Position(4)];
+% 
+% tab_od_1=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
+%     'Position',[200 0 hF.Position(3)-200 hF.Position(4)-(Htop+Hacqbar)],...
+%     'bordertype','beveledin');
+
+% Tab Groups for each display
+tab_od_1=uitab(hp,'Title','OD 1','units','pixels','backgroundcolor','w');
+tab_od_2=uitab(hp,'Title','OD 2','units','pixels','backgroundcolor','w');
+tab_raw_1=uitab(hp,'Title','PWA','units','pixels','backgroundcolor','w');
+tab_raw_2=uitab(hp,'Title','PWOA','units','pixels','backgroundcolor','w');
+tab_raw_3=uitab(hp,'Title','dark','units','pixels','backgroundcolor','w');
+
+% Define spacing for images, useful for resizing
+l=80;   % Left gap for fitting and data analysis summary
+
+
+% Size of top row
+
+    function resizePlots       
+        % Resize the image axis     
+        
+        if (tab_od_1.Position(3)<250 || tab_od_1.Position(4)<250)
+            
+            return;
+        end
+        
+        axImg.Position=[40 110 tab_od_1.Position(3)-200 tab_od_1.Position(4)-200];        
+        
+        % Get the aspect ratio of plot objects
+        Rimg=axImg.PlotBoxAspectRatio;Rimg=Rimg(1)/Rimg(2);
+        Rax=axImg.Position(3:4);Rax=Rax(1)/Rax(2);
+        
+        % Size of plot objects (position is weird in axis equal tight);
+        if Rax>Rimg
+            h1=axImg.Position(4);
+            w1=axImg.Position(4)*Rimg;   
+            hAxX.Position=[40+(axImg.Position(3)-w1)/2 axImg.Position(2)-l w1 80];
+            hAxY.Position=[40+(axImg.Position(3)+w1)/2 axImg.Position(2) 80 h1];
+        else
+            w1=axImg.Position(3);
+            h1=w1/Rimg;            
+            hAxX.Position=[axImg.Position(1) 110+(axImg.Position(4)-h1)/2-l ...
+                w1 80];
+            hAxY.Position=[axImg.Position(1)+axImg.Position(3) ...
+                110+(axImg.Position(4)-h1)/2 l h1];            
+        end
+        
+        % Match cut limits with the images limits
+        set(hAxX,'XLim',axImg.XLim,'XTick',axImg.XTick);
+        set(hAxY,'YLim',axImg.YLim,'YTick',axImg.YTick);
+        
+    
+        
+        % Move the colorbar
+        cBar.Position=[hAxX.Position(1) hAxY.Position(2)+hAxY.Position(4)+23 ...
+            hAxX.Position(3) 15]; 
+    end
+
+    function SizeChangedFcn(~,~)
+        % This resize fucntion ensures that the X and Y cut/sum plot has
+        % commenserate positioning with respect the actual image shown
+        
+        
+        
+        W=hF.Position(3);H=hF.Position(4);      % Grab figure dimensions     
+        
+        if W<300 || H <300
+            return;
+        end
+
+        hpControl.Position=[0 0 400 H];        % Resize image panel        
+        hp.Position=[hpControl.Position(3) 0 W-hpControl.Position(3) H];        % Resize image panel        
+
+        resizePlots;                            % Resize plots
+        
+        % Reposition the display ROI and axis equal options
+        % tbl_dispROI.Position(1:2)=[hp.Position(3)-tbl_dispROI.Position(3)-5 5];
+        % hbFullLim.Position(1:2)=[tbl_dispROI.Position(1)-22 5];
+        % hbSnapLim.Position(1:2)=[hbFullLim.Position(1)-21 5];
+        % hbSlctLim.Position(1:2)=[hbSnapLim.Position(1)-21 5];
+        % caxisequal.Position(1:2)=[hp.Position(3)-caxisequal.Position(3) 30];
+        % cscalebar.Position(1:2)=[hp.Position(3)-cscalebar.Position(3) 50];
+ 
+        
+        hbSettings.Position(1:2)=[1 hp.Position(4)-21];        
+        bSave.Position(1:2)=[20 hp.Position(4)-21];
+        hbBrowseImage.Position(1:2)=[40 hp.Position(4)-21];
+        hbhistoryNow.Position(1:2)=[60 hp.Position(4)-21];
+        hbhistoryLeft.Position(1:2)=[84 hp.Position(4)-21];
+        thistoryInd.Position(1:2)=[96 hp.Position(4)-21];
+        hbhistoryRight.Position(1:2)=[124 hp.Position(4)-21];
+        tImageFileFig.Position(1:2)=[136 ...
+        hp.Position(4)-tImageFileFig.Position(4)];
+        %%%%%% Resize Acquisition Panel %%%%
+        % hpCam.Position(2:3)=[hF.Position(4)-hpCam.Position(4) hF.Position(3)];
+        tSaveDir.Position(3)=hpCam.Position(3)-2;
+        hbSWtrig.Position(1)=hpCam.Position(3)-60;
+
+        %%%%% Resize Top Row Panels %%%%%
+        hpROISettings.Position(2)=hp.Position(4);
+        hpAcq2.Position(2)=hp.Position(4);
+        
+        hpSet.Position(2)=hp.Position(4);
+        % hpAnl.Position(2)=hp.Position(4);
+        % hpImgProcess.Position(2)=hp.Position(4);
+        
+        
+
+
+
+        % hpRaw.Position(1:2)=[hpImgProcess.Position(1)+hpImgProcess.Position(3) hp.Position(4)];   
+        % hpROI.Position(2)=hF.Position(4)-hpROI.Position(4)-Hacqbar;
+        
+        
+        hpCam.Position(2) = hpControl.Position(4) - hpCam.Position(4);
+        hpSet.Position(2) = hpCam.Position(2) - hpAcq2.Position(4);
+        hpAcq2.Position(2) = hpCam.Position(2) - hpAcq2.Position(4);
+        hpNav.Position(2) = hpAcq2.Position(2) - hpNav.Position(4);
+        hpROISettings.Position(2)=hpNav.Position(2)-hpROISettings.Position(4);
+        hpDisp.Position(2) = hpROISettings.Position(2);
+
+        %%%%%% Resize Left Panel %%%%%
+        % hpFit.Position(4)=hF.Position(4)-200-Hacqbar;
+        drawnow;
+    end
+
+% Initialize image axis
+axImg=axes('parent',tab_od_1,'UserData','OD');cla
+hImg=imagesc(X,Y,Z);
+set(axImg,'box','on','linewidth',.1,'fontsize',10,'units','pixels',...
+    'XAxisLocation','top','colormap',cmap);
+hold on
+axImg.Position=[50 150 tab_od_1.Position(3)-200 tab_od_1.Position(4)-200];
+axis equal tight
+
+% Add plot and text for scale bar
+pScaleX=plot([50 150],[50 50],'color','r','linewidth',2);
+pScaleY=plot([50 50],[50 150],'color','r','linewidth',2);
+tScaleX=text(50,50,'100 \mum','units','data','color','r','fontsize',12,...
+    'verticalalignment','bottom','horizontalalignment','left','fontweight','bold');
+tScaleY=text(50,50,'100 \mum','units','data','color','r',...
+    'verticalalignment','bottom','horizontalalignment','right',...
+    'rotation',90,'fontsize',12,'fontweight','bold');
+tImageFile=text(3,3,'FILENAME','units','pixels','fontsize',8,'fontweight','bold',...
+    'horizontalalignment','left','verticalalignment','bottom','margin',1,...
+    'interpreter','none','backgroundcolor',[1 1 1 .5]);
+
+% Box for ROI (this will become an array later)
+pROI=rectangle('position',[1 1 1392 1024],'edgecolor',co(1,:),'linewidth',2);
+% Reticle for gaussian fit (this will become an array later)
+pGaussRet=plot(0,0,'-','linewidth',1,'Visible','off','color',co(1,:));
+% Color bar
+cBar=colorbar('fontsize',8,'units','pixels','location','northoutside');
+drawnow;
+
+% X Cut/Sum Axis
+hAxX=axes('box','on','linewidth',1,'fontsize',10,...
+    'XAxisLocation','Bottom','units','pixels','parent',tab_od_1,'UserData','ODx');
+hAxX.Position=[axImg.Position(1) axImg.Position(2)-l axImg.Position(3) l];
+hold on
+% Add X data data and fit plots
+pX=plot(X,ones(length(X),1),'k.-');
+pXF=plot(X,0*ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2);
+
+% Y Cut/Sum Axis
+hAxY=axes('box','on','linewidth',1,'fontsize',10,'units','pixels',...
+    'YAxisLocation','Right','YDir','Reverse','parent',tab_od_1,'UserData','ODy');
+hAxY.Position=[axImg.Position(1)+axImg.Position(3) axImg.Position(2) l axImg.Position(4)];
+
+linkaxes([axImg hAxY],'y');
+linkaxes([axImg hAxX],'x');
+
+hold on
+% Add Y data data and fit plots
+pY=plot(ones(length(Y),1),Y,'k.-'); 
+pYF=plot(X,0*ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2);
+
+
+
 %%%%%% Upper left area of figure %%%%%
 
 % String for image file name
@@ -1094,13 +1183,6 @@ tImageFileFig=uicontrol('parent',tab_od_1','units','pixels','string','FILENAME',
     'style','text','horizontalalignment','left');
 tImageFileFig.Position(4)=tImageFileFig.Extent(4);
 tImageFileFig.Position(3)=300;
-
-% Checkbox for auto updating when new images are taken
-ttstr='Automatically refresh to most recent image upon new image acquisition.';
-cAutoUpdate=uicontrol('parent',tab_od_1,'units','pixels','string',...
-    'auto update?','value',1,'fontsize',8,'backgroundcolor','w',...
-    'Style','checkbox','ToolTipString',ttstr);
-cAutoUpdate.Position(3:4)=[90 14];
 
 
 % Save button
@@ -1328,85 +1410,7 @@ hbhistoryRight.Position(3:4)=[12 20];
         drawnow;
     end
 
-% Toggle for axis equal tight
-caxisequal=uicontrol('parent',tab_od_1,'style','checkbox','string','axis equal tight?',...
-    'fontsize',8,'Value',1,'units','pixels','backgroundcolor','w','callback',@axisCB);
-caxisequal.Position(3:4)=[110 caxisequal.Extent(4)];
 
-% Callback for axis equal tight check box
-    function axisCB(src,~)
-        if src.Value
-            set(axImg,'DataAspectRatioMode','manual','DataAspectRatio',[1 1 1]);
-        else
-            set(axImg,'DataAspectRatioMode','auto','PlotBoxAspectRatioMode','auto');                
-        end
-        SizeChangedFcn;        
-    end
-
-% Toggle for showing a scale bar
-cscalebar=uicontrol('parent',tab_od_1,'style','checkbox','string','show scale bar?',...
-    'fontsize',8,'Value',1,'units','pixels','backgroundcolor','w','callback',@scaleCB);
-cscalebar.Position(3:4)=[110 cscalebar.Extent(4)];
-
-    function scaleCB(src,~)
-        pScaleX.Visible=src.Value;
-        pScaleY.Visible=src.Value;
-        tScaleX.Visible=src.Value;
-        tScaleY.Visible=src.Value;
-    end
-
-%%%%% Upper right area of figure %%%%%
-
-% Button group for deciding what the X/Y plots show
-bgPlot = uibuttongroup(tab_od_1,'units','pixels','backgroundcolor','w','BorderType','None',...
-    'SelectionChangeFcn',@chPlotCB);  
-bgPlot.Position(3:4)=[125 20];
-bgPlot.Position(1:2)=[tab_od_1.Position(3)-bgPlot.Position(3) tab_od_1.Position(4)-bgPlot.Position(4)];
-    
-% Radio buttons for cuts vs sum
-rbCut=uicontrol(bgPlot,'Style','radiobutton','String','plot cut',...
-    'Position',[0 0 60 20],'units','pixels','backgroundcolor','w','Value',1);
-rbSum=uicontrol(bgPlot,'Style','radiobutton','String','plot sum',...
-    'Position',[60 0 60 20],'units','pixels','backgroundcolor','w');
-
-    function chPlotCB(~,~)
-       updatePlots(dstruct); 
-    end
-
-% Checkbox for enabling display of the gaussian reticle
-cGaussRet=uicontrol(tab_od_1,'style','checkbox','string','show gauss reticle?',...
-    'units','pixels','fontsize',8,'backgroundcolor','w','callback',@cGaussRetCB);
-cGaussRet.Position=[bgPlot.Position(1) bgPlot.Position(2)-20 125 20];
-
-    function cGaussRetCB(src,~)
-       for n=1:size(tblROI.Data,1)
-           pGaussRet(n).Visible=src.Value;
-       end        
-    end
-
-% Text label for color limit table on OD image
-climtext=uicontrol('parent',tab_od_1,'units','pixels','string','OD:',...
-    'fontsize',7,'backgroundcolor','w','style','text');
-climtext.Position(3:4)=climtext.Extent(3:4);
-
-% Color limit table for OD image
-climtbl=uitable('parent',tab_od_1,'units','pixels','RowName',{},'ColumnName',{},...
-    'Data',[0 1],'ColumnWidth',{40,40},'ColumnEditable',[true true],...
-    'CellEditCallback',@climCB);
-climtbl.Position(3:4)=climtbl.Extent(3:4);
-
-% Callback for changing the color limits table
-    function climCB(src,evt)
-        try
-            axImg.CLim=climtbl.Data;
-        catch exception
-            warning('Bad OD color limits given. Using old value.');
-            src.Data(evt.Indices)=evt.PreviousData;
-        end
-    end
-
-axImg.CLim=climtbl.Data;
-set(axImg,'XLim',tbl_dispROI.Data(1:2),'YLim',tbl_dispROI.Data(3:4));
 
 
 
