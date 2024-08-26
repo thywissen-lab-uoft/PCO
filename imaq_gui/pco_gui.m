@@ -991,18 +991,23 @@ tab_raw_3=uitab(hp,'Title','dark','units','pixels','backgroundcolor','w');
 l=80;   % Left gap for fitting and data analysis summary
 
 
+ax_gap = 20;
+
 % Size of top row
 
     function resizePlots       
         % Resize the image axis     
         
         if (tab_od_1.Position(3)<250 || tab_od_1.Position(4)<250)
-            
+            disp('oh no')
             return;
         end
-        
-        axImg.Position=[40 110 tab_od_1.Position(3)-200 tab_od_1.Position(4)-200];        
-        
+
+        axImg.Position=[50 150 tab_od_1.Position(3)-200 tab_od_1.Position(4)-200];
+        drawnow;
+        axImg.Position=[50 150 tab_od_1.Position(3)-200 tab_od_1.Position(4)-200];
+        drawnow;
+
         % Get the aspect ratio of plot objects
         Rimg=axImg.PlotBoxAspectRatio;Rimg=Rimg(1)/Rimg(2);
         Rax=axImg.Position(3:4);Rax=Rax(1)/Rax(2);
@@ -1011,26 +1016,22 @@ l=80;   % Left gap for fitting and data analysis summary
         if Rax>Rimg
             h1=axImg.Position(4);
             w1=axImg.Position(4)*Rimg;   
-            hAxX.Position=[40+(axImg.Position(3)-w1)/2 axImg.Position(2)-l w1 80];
-            hAxY.Position=[40+(axImg.Position(3)+w1)/2 axImg.Position(2) 80 h1];
+            hAxX.Position=[axImg.Position(1)+(axImg.Position(3)-w1)/2 axImg.Position(2)-80-ax_gap w1 80];
+            hAxY.Position=[axImg.Position(1)+(axImg.Position(3)+w1)/2+ax_gap axImg.Position(2) 80 h1];
         else
             w1=axImg.Position(3);
-            h1=w1/Rimg;            
-            hAxX.Position=[axImg.Position(1) 110+(axImg.Position(4)-h1)/2-l ...
+            h1=w1/Rimg;     
+            hAxX.Position=[axImg.Position(1) axImg.Position(2)+(axImg.Position(4)-h1)/2-80-ax_gap ...
                 w1 80];
-            hAxY.Position=[axImg.Position(1)+axImg.Position(3) ...
-                110+(axImg.Position(4)-h1)/2 l h1];            
+            hAxY.Position=[axImg.Position(1)+axImg.Position(3)+ax_gap ...
+                axImg.Position(2)+(axImg.Position(4)-h1)/2 80 h1];            
         end
         
         % Match cut limits with the images limits
         set(hAxX,'XLim',axImg.XLim,'XTick',axImg.XTick);
         set(hAxY,'YLim',axImg.YLim,'YTick',axImg.YTick);
-        
-    
-        
-        % Move the colorbar
-        cBar.Position=[hAxX.Position(1) hAxY.Position(2)+hAxY.Position(4)+23 ...
-            hAxX.Position(3) 15]; 
+
+        drawnow;
     end
 
     function SizeChangedFcn(~,~)
@@ -1048,7 +1049,6 @@ l=80;   % Left gap for fitting and data analysis summary
         hpControl.Position=[0 0 400 H];        % Resize image panel        
         hp.Position=[hpControl.Position(3) 0 W-hpControl.Position(3) H];        % Resize image panel        
 
-        resizePlots;                            % Resize plots
         
         % Reposition the display ROI and axis equal options
         % tbl_dispROI.Position(1:2)=[hp.Position(3)-tbl_dispROI.Position(3)-5 5];
@@ -1101,6 +1101,8 @@ l=80;   % Left gap for fitting and data analysis summary
 
         %%%%%% Resize Left Panel %%%%%
         % hpFit.Position(4)=hF.Position(4)-200-Hacqbar;
+                resizePlots;                            % Resize plots
+
         drawnow;
     end
 
@@ -1111,6 +1113,8 @@ set(axImg,'box','on','linewidth',.1,'fontsize',10,'units','pixels',...
     'XAxisLocation','top','colormap',cmap);
 hold on
 axImg.Position=[50 150 tab_od_1.Position(3)-200 tab_od_1.Position(4)-200];
+
+
 axis equal tight
 
 % Add plot and text for scale bar
@@ -1130,7 +1134,7 @@ pROI=rectangle('position',[1 1 1392 1024],'edgecolor',co(1,:),'linewidth',2);
 % Reticle for gaussian fit (this will become an array later)
 pGaussRet=plot(0,0,'-','linewidth',1,'Visible','off','color',co(1,:));
 % Color bar
-cBar=colorbar('fontsize',8,'units','pixels','location','northoutside');
+cBar=colorbar('fontsize',8,'units','pixels','location','westoutside');
 drawnow;
 
 % X Cut/Sum Axis
