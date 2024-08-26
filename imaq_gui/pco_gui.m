@@ -566,7 +566,7 @@ tNavName=uicontrol(hpNav,'style','text','string','FILENAME','fontsize',7,...
 %% ROI Settings panel
 hpROISettings=uipanel(hpControl,'units','pixels','backgroundcolor','w',...
     'title','Analysis ROI','fontsize',6);
-hpROISettings.Position=[0 hpNav.Position(2)-100 hpControl.Position(3)/2 300];
+hpROISettings.Position=[0 hpNav.Position(2)-100 hpControl.Position(3)/2 180];
 
 % Table for number of ROIs
 tblNumROIs=uitable(hpROISettings,'Data',1,'RowName','Num ROIs','columnName',{},...
@@ -724,19 +724,18 @@ uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
         drawnow;
     end
 
-%% ROI Panels
-% hpROI=uipanel(hpControl,'units','pixels','backgroundcolor','w',...
-%     'title','ROI','fontsize',6);
-% hpROI.Position=[0 hpROISettings.Position(2)-200 hpControl.Position(3)/2 200];
-
 % Table of ROIs
 tblROI=uitable(hpROISettings,'units','pixels','ColumnWidth',{30 30 30 30},...
     'ColumnEditable',true(ones(1,4)),'ColumnName',{'X1','X2','Y1','Y2'},...
     'Data',[1 size(Z,2) 1 size(Z,1)],'FontSize',8,...
     'CellEditCallback',@chROI,'backgroundcolor',coNew);
-tblROI.Position(3:4)=tblROI.Extent(3:4)+[18 0];
+% tblROI.Position(3:4)=tblROI.Extent(3:4)+[18 0];
+
+tblROI.Position(3)=tblROI.Extent(3)+18;
+tblROI.Position(4) = 100;
+
 % tblROI.Position(1:2)=[1 hpROI.Position(4)-tblROI.Position(4)-5];
-tblROI.Position(1:2) = [0 tblNumROIs.Position(2)-100];
+tblROI.Position(1:2) = [0 0];
 % Callback function for changing ROI via table
     function chROI(src,evt)
         m=evt.Indices(1); n=evt.Indices(2);
@@ -1106,6 +1105,7 @@ l=80;   % Left gap for fitting and data analysis summary
 
 
 
+
         % hpRaw.Position(1:2)=[hpImgProcess.Position(1)+hpImgProcess.Position(3) hp.Position(4)];   
         % hpROI.Position(2)=hF.Position(4)-hpROI.Position(4)-Hacqbar;
         
@@ -1116,6 +1116,8 @@ l=80;   % Left gap for fitting and data analysis summary
         hpNav.Position(2) = hpAcq2.Position(2) - hpNav.Position(4);
         hpROISettings.Position(2)=hpNav.Position(2)-hpROISettings.Position(4);
         hpDisp.Position(2) = hpROISettings.Position(2);
+                hpImgProcess.Position(2) = hpROISettings.Position(2)-hpImgProcess.Position(4);
+        hpAnl.Position(2) = hpImgProcess.Position(2)-hpAnl.Position(4);
 
         %%%%%% Resize Left Panel %%%%%
         % hpFit.Position(4)=hF.Position(4)-200-Hacqbar;
@@ -1415,35 +1417,173 @@ hbhistoryRight.Position(3:4)=[12 20];
 
 
 %% Fit Results Panel
-% hpFit=uitabgroup(hF,'units','pixels');
-% hpFit.Position=[0 0 220 hF.Position(4)-200-Hacqbar];
-% 
-% tabs(1)=uitab(hpFit,'Title','params','units','pixels');
-% tabs(2)=uitab(hpFit,'Title','flags','units','pixels');
-% tabs(3)=uitab(hpFit,'Title','1','units','pixels','foregroundcolor',co(1,:));
-% 
-% % Table for run parameters
-% tbl_params=uitable(tabs(1),'units','normalized','RowName',{},'fontsize',8,...
-%     'ColumnName',{},'ColumnWidth',{135 60},'columneditable',[false false],...
-%     'Position',[0 0 1 1]);
-% % Table for run parameters
-% tbl_flags=uitable(tabs(2),'units','normalized','RowName',{},'fontsize',7,...
-%     'ColumnName',{},'ColumnWidth',{145 50},'columneditable',[false false],...
-%     'Position',[0 0 1 1]);
-% 
-% % Table for analysis outputs
-% tbl_analysis(1)=uitable(tabs(3),'units','normalized','RowName',{},'ColumnName',{},...
-%     'fontsize',8,'ColumnWidth',{60 65 65},'columneditable',false(ones(1,3)),...
-%     'Position',[0 0 1 1],'backgroundcolor',[brighten(coNew(1,:),.5); 1 1 1]);
+hpFit=uitabgroup(hpControl,'units','pixels');
+hpFit.Position=[hpControl.Position(3)/2 0 hpControl.Position(3)/2 300];
+
+tabs(1)=uitab(hpFit,'Title','params','units','pixels');
+tabs(2)=uitab(hpFit,'Title','flags','units','pixels');
+tabs(3)=uitab(hpFit,'Title','1','units','pixels','foregroundcolor',co(1,:));
+
+% Table for run parameters
+tbl_params=uitable(tabs(1),'units','normalized','RowName',{},'fontsize',8,...
+    'ColumnName',{},'ColumnWidth',{135 60},'columneditable',[false false],...
+    'Position',[0 0 1 1]);
+% Table for run parameters
+tbl_flags=uitable(tabs(2),'units','normalized','RowName',{},'fontsize',7,...
+    'ColumnName',{},'ColumnWidth',{145 50},'columneditable',[false false],...
+    'Position',[0 0 1 1]);
+
+% Table for analysis outputs
+tbl_analysis(1)=uitable(tabs(3),'units','normalized','RowName',{},'ColumnName',{},...
+    'fontsize',8,'ColumnWidth',{60 65 65},'columneditable',false(ones(1,3)),...
+    'Position',[0 0 1 1],'backgroundcolor',[brighten(coNew(1,:),.5); 1 1 1]);
+
+%% Image Pre Processing Panel
+
+% This is alpha stage, perhaps enable filtering? or fringe removal?
+hpImgProcess=uipanel('parent',hpControl,'units','pixels','backgroundcolor','w',...
+    'title','processing','fontsize',6);
+% hpImgProcess.Position=[hpSet.Position(1)+hpSet.Position(3) tab_od_1.Position(4) 200 Htop]; 
+hpImgProcess.Position = [0 hpROISettings.Position(2)-100 hpControl.Position(3)/2 120];
+% Method of calculating OD
+bgODFieldText=uicontrol('style','text','parent',hpImgProcess,...
+    'String','field : ','backgroundcolor','w','position',[0 hpImgProcess.Position(4)-35 30 20]);
+bgODField = uibuttongroup('units','pixels','backgroundcolor','w',...
+    'position',[30 hpImgProcess.Position(4)-30 180 20],...
+    'SelectionChangedFcn',@chOD,'parent',hpImgProcess,'BorderType','None');        
+% Create radio buttons in the button group.
+uicontrol(bgODField,'Style','radiobutton','String','Detect',...
+    'Position',[5 0 50 20],'units','pixels','backgroundcolor','w',...
+    'Value',1,'fontsize',8);
+uicontrol(bgODField,'Style','radiobutton','String','High',...
+    'Position',[60 0 50 20],'units','pixels','backgroundcolor','w',...
+    'Value',0,'fontsize',8);
+uicontrol(bgODField,'Style','radiobutton','String','Low',...
+    'Position',[105 0 50 20],'units','pixels','backgroundcolor','w',...
+    'fontsize',8,'value',0);
+
+    function chOD(src,evt)
+        switch evt.NewValue.String
+            case 'High'
+                disp('Switching OD to high field imaging');
+            case 'Low'
+                disp('Switching OD to low field imaging.');
+            case 'Detect'
+                disp('Auto detect Low/High Field imaging from Flags');            
+            otherwise
+                error('error in OD calculation choice');     
+        end
+    end
+
+% Checkbox for enabling 2D gauss fitting
+cGaussFilter=uicontrol('style','checkbox','string','gauss filter',...
+    'units','pixels','parent',hpImgProcess,'backgroundcolor','w',...
+    'value',0);
+cGaussFilter.Position=[5 hpImgProcess.Position(4)-50 75 15];
+
+tblGaussFilter=uitable('parent',hpImgProcess,'units','pixels',...
+    'rowname',{},'columnname',{},'Data',.5,'columneditable',[true],...
+    'columnwidth',{45},'fontsize',8,'ColumnFormat',{'numeric'});
+tblGaussFilter.Position=[80 cGaussFilter.Position(2)-2 50 20];
+
+% Pixels label
+uicontrol('parent',hpImgProcess,'units','pixels',...
+    'style','text','string','px','position',[132 60 15 15],...
+    'fontsize',8,'backgroundcolor','w');
+
+% Checkbox for enabling scaling of the probe
+cScaleProbe=uicontrol('style','checkbox','string','scale',...
+    'value',1,'parent',hpImgProcess,'backgroundcolor','w',...
+    'position',[5 cGaussFilter.Position(2)-20 100 15],...
+    'callback',@cScaleProbeCB);
+
+    function cScaleProbeCB(~,~)
+        pROIPScale.Visible=cScaleProbe.Value;
+        drawnow;
+    end
+
+
+d=scaleProbeDefaultROI;
+pp=[d(1) d(3) d(2)-d(1) d(4)-d(3)];
+tblROIPScale=uitable(hpImgProcess,'units','pixels','ColumnWidth',{30 30 30 30},...
+    'ColumnEditable',true(ones(1,4)),'ColumnName',{},...
+    'Data',d,'FontSize',8,'RowName',{},...
+    'CellEditCallback',@chROIPScale);
+tblROIPScale.Position(3)=tblROIPScale.Extent(3);
+tblROIPScale.Position(4)=20;
+tblROIPScale.Position(1:2)=[55 cScaleProbe.Position(2)-3];
+
+pROIPScale=rectangle('position',pp,'edgecolor','r','linewidth',2,...
+    'visible','on','parent',axImg,'linestyle',':');
+
+
+    function chROIPScale(src,evt)
+        m=evt.Indices(1); n=evt.Indices(2);
+        
+        ROI=src.Data(1,:);
+        % Check that the data is numeric
+        if sum(~isnumeric(ROI)) || sum(isinf(ROI)) || sum(isnan(ROI))
+            warning('Incorrect data type provided for ROI.');
+            src.Data(m,n)=evt.PreviousData;
+            return;
+        end        
+        ROI=round(ROI);      % Make sure this ROI are integers   
+        % Check that limits go from low to high
+        if ROI(2)<=ROI(1) || ROI(4)<=ROI(3)
+           warning('Bad ROI specification given.');
+           ROI(evt.Indices(2))=evt.PreviousData;
+        end               
+        % Check that ROI is within image bounds
+        if ROI(1)<1; ROI(1)=1; end       
+        if ROI(3)<1; ROI(3)=1; end   
+        if ROI(4)>1024; ROI(4)=1024; end       
+        if ROI(2)>1392; ROI(2)=1392; end         
+        % Reassign the ROI
+        src.Data(m,:)=ROI;      
+        % Try to update ROI graphics
+        try
+            pos=[ROI(1) ROI(3) ROI(2)-ROI(1) ROI(4)-ROI(3)];
+            set(pROIPScale,'Position',pos);
+        catch
+           warning('Unable to change display ROI.');
+           src.Data(m,n)=evt.PreviousData;
+        end
+    end
+
+
+% Checkbox for rotating image
+cRotate=uicontrol('style','checkbox','string','rotate',...
+    'units','pixels','parent',hpImgProcess,'backgroundcolor','w',...
+    'value',1);
+cRotate.Position=[5 cScaleProbe.Position(2)-20 75 15];
+
+tblRotate=uitable('parent',hpImgProcess,'units','pixels',...
+    'rowname',{},'columnname',{},'Data',0,'columneditable',[true],...
+    'columnwidth',{45},'fontsize',8,'ColumnFormat',{'numeric'});
+tblRotate.Position=[80 cRotate.Position(2)-5 50 20];
+
+
+
+
+mstr='Calculate the optical density; perform fits; update graphics';
+uicontrol('parent',hpImgProcess,'units','pixels',...
+    'style','pushbutton','string','calculate OD','position',[1 1 70 15],...
+    'fontsize',8,'backgroundcolor','w','callback',@recalcODCB,...
+    'ToolTipString',mstr);
+
+    function recalcODCB(~,~)
+        dstruct=computeOD(dstruct);
+        updateImages(dstruct);
+        dstruct=performFits(dstruct);
+        updatePlots(dstruct);
+    end
 
 %% Analayis Settings Panel
-%{
 
 % Panel for controlling and viewing the automated analysis
-hpAnl=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
+hpAnl=uipanel('parent',hpControl,'units','pixels','backgroundcolor','w',...
     'title','analysis','fontsize',6);
-hpAnl.Position=[hpROISettings.Position(1)+hpROISettings.Position(3) ...
-    tab_od_1.Position(4) 155 Htop];
+hpAnl.Position = [0 hpImgProcess.Position(2)-200 hpControl.Position(3)/2 120];
 
 % Refit button
 hbfit=uicontrol('style','pushbutton','string','analyze',...
@@ -1629,146 +1769,6 @@ cBMdY.Position=[110 cBM.Position(2)-15 50 15];
         end
     end
 
-
-%% Image Pre Processing Panel
-
-% This is alpha stage, perhaps enable filtering? or fringe removal?
-hpImgProcess=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
-    'title','processing','fontsize',6);
-hpImgProcess.Position=[hpSet.Position(1)+hpSet.Position(3) tab_od_1.Position(4) 200 Htop]; 
-
-% Method of calculating OD
-bgODFieldText=uicontrol('style','text','parent',hpImgProcess,...
-    'String','field : ','backgroundcolor','w','position',[0 hpImgProcess.Position(4)-35 30 20]);
-bgODField = uibuttongroup('units','pixels','backgroundcolor','w',...
-    'position',[30 hpImgProcess.Position(4)-30 180 20],...
-    'SelectionChangedFcn',@chOD,'parent',hpImgProcess,'BorderType','None');        
-% Create radio buttons in the button group.
-uicontrol(bgODField,'Style','radiobutton','String','Detect',...
-    'Position',[5 0 50 20],'units','pixels','backgroundcolor','w',...
-    'Value',1,'fontsize',8);
-uicontrol(bgODField,'Style','radiobutton','String','High',...
-    'Position',[60 0 50 20],'units','pixels','backgroundcolor','w',...
-    'Value',0,'fontsize',8);
-uicontrol(bgODField,'Style','radiobutton','String','Low',...
-    'Position',[105 0 50 20],'units','pixels','backgroundcolor','w',...
-    'fontsize',8,'value',0);
-
-    function chOD(src,evt)
-        switch evt.NewValue.String
-            case 'High'
-                disp('Switching OD to high field imaging');
-            case 'Low'
-                disp('Switching OD to low field imaging.');
-            case 'Detect'
-                disp('Auto detect Low/High Field imaging from Flags');            
-            otherwise
-                error('error in OD calculation choice');     
-        end
-    end
-
-% Checkbox for enabling 2D gauss fitting
-cGaussFilter=uicontrol('style','checkbox','string','gauss filter',...
-    'units','pixels','parent',hpImgProcess,'backgroundcolor','w',...
-    'value',0);
-cGaussFilter.Position=[5 hpImgProcess.Position(4)-50 75 15];
-
-tblGaussFilter=uitable('parent',hpImgProcess,'units','pixels',...
-    'rowname',{},'columnname',{},'Data',.5,'columneditable',[true],...
-    'columnwidth',{45},'fontsize',8,'ColumnFormat',{'numeric'});
-tblGaussFilter.Position=[80 cGaussFilter.Position(2)-2 50 20];
-
-% Pixels label
-uicontrol('parent',hpImgProcess,'units','pixels',...
-    'style','text','string','px','position',[132 60 15 15],...
-    'fontsize',8,'backgroundcolor','w');
-
-% Checkbox for enabling scaling of the probe
-cScaleProbe=uicontrol('style','checkbox','string','scale',...
-    'value',1,'parent',hpImgProcess,'backgroundcolor','w',...
-    'position',[5 cGaussFilter.Position(2)-20 100 15],...
-    'callback',@cScaleProbeCB);
-
-    function cScaleProbeCB(~,~)
-        pROIPScale.Visible=cScaleProbe.Value;
-        drawnow;
-    end
-
-
-d=scaleProbeDefaultROI;
-pp=[d(1) d(3) d(2)-d(1) d(4)-d(3)];
-tblROIPScale=uitable(hpImgProcess,'units','pixels','ColumnWidth',{30 30 30 30},...
-    'ColumnEditable',true(ones(1,4)),'ColumnName',{},...
-    'Data',d,'FontSize',8,'RowName',{},...
-    'CellEditCallback',@chROIPScale);
-tblROIPScale.Position(3)=tblROIPScale.Extent(3);
-tblROIPScale.Position(4)=20;
-tblROIPScale.Position(1:2)=[55 cScaleProbe.Position(2)-3];
-
-pROIPScale=rectangle('position',pp,'edgecolor','r','linewidth',2,...
-    'visible','on','parent',axImg,'linestyle',':');
-
-
-    function chROIPScale(src,evt)
-        m=evt.Indices(1); n=evt.Indices(2);
-        
-        ROI=src.Data(1,:);
-        % Check that the data is numeric
-        if sum(~isnumeric(ROI)) || sum(isinf(ROI)) || sum(isnan(ROI))
-            warning('Incorrect data type provided for ROI.');
-            src.Data(m,n)=evt.PreviousData;
-            return;
-        end        
-        ROI=round(ROI);      % Make sure this ROI are integers   
-        % Check that limits go from low to high
-        if ROI(2)<=ROI(1) || ROI(4)<=ROI(3)
-           warning('Bad ROI specification given.');
-           ROI(evt.Indices(2))=evt.PreviousData;
-        end               
-        % Check that ROI is within image bounds
-        if ROI(1)<1; ROI(1)=1; end       
-        if ROI(3)<1; ROI(3)=1; end   
-        if ROI(4)>1024; ROI(4)=1024; end       
-        if ROI(2)>1392; ROI(2)=1392; end         
-        % Reassign the ROI
-        src.Data(m,:)=ROI;      
-        % Try to update ROI graphics
-        try
-            pos=[ROI(1) ROI(3) ROI(2)-ROI(1) ROI(4)-ROI(3)];
-            set(pROIPScale,'Position',pos);
-        catch
-           warning('Unable to change display ROI.');
-           src.Data(m,n)=evt.PreviousData;
-        end
-    end
-
-
-% Checkbox for rotating image
-cRotate=uicontrol('style','checkbox','string','rotate',...
-    'units','pixels','parent',hpImgProcess,'backgroundcolor','w',...
-    'value',1);
-cRotate.Position=[5 cScaleProbe.Position(2)-20 75 15];
-
-tblRotate=uitable('parent',hpImgProcess,'units','pixels',...
-    'rowname',{},'columnname',{},'Data',0,'columneditable',[true],...
-    'columnwidth',{45},'fontsize',8,'ColumnFormat',{'numeric'});
-tblRotate.Position=[80 cRotate.Position(2)-5 50 20];
-
-
-
-
-mstr='Calculate the optical density; perform fits; update graphics';
-uicontrol('parent',hpImgProcess,'units','pixels',...
-    'style','pushbutton','string','calculate OD','position',[1 1 70 15],...
-    'fontsize',8,'backgroundcolor','w','callback',@recalcODCB,...
-    'ToolTipString',mstr);
-
-    function recalcODCB(~,~)
-        dstruct=computeOD(dstruct);
-        updateImages(dstruct);
-        dstruct=performFits(dstruct);
-        updatePlots(dstruct);
-    end
 
 %% Raw Image Panel
 hpRaw=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
