@@ -288,12 +288,12 @@ function swTrigCB(~,~)
 end
 %% Image Acqusition Panel
 % Panel for image acquisition controls and settings.
-hpAcq=uipanel(hpControl,'units','pixels','backgroundcolor','w',...
-    'title','acquisition','fontsize', 6);
-hpAcq.Position(3) = hpControl.Position(3);
-hpAcq.Position(4) = 50;
-hpAcq.Position(1) = 0;
-hpAcq.Position(2) = hpCam.Position(2) - hpAcq.Position(4);
+% hpAcq=uipanel(hpControl,'units','pixels','backgroundcolor','w',...
+%     'title','acquisition','fontsize', 6);
+% hpAcq.Position(3) = hpControl.Position(3);
+% hpAcq.Position(4) = 50;
+% hpAcq.Position(1) = 0;
+% hpAcq.Position(2) = hpCam.Position(2) - hpAcq.Position(4);
 
 %% Camera Settings Panel
 hpAcq2=uipanel('parent',hpControl,'units','pixels','backgroundcolor','w',...
@@ -848,8 +848,10 @@ l=80;   % Left gap for fitting and data analysis summary
         if W<300 || H <300
             return;
         end
-        
-        hp.Position=[220 1 W-220 H-(Htop+Hacqbar)];        % Resize image panel        
+
+        hpControl.Position=[0 0 400 H];        % Resize image panel        
+        hp.Position=[hpControl.Position(3) 0 W-hpControl.Position(3) H];        % Resize image panel        
+
         resizePlots;                            % Resize plots
         
         % Reposition the display ROI and axis equal options
@@ -879,7 +881,7 @@ l=80;   % Left gap for fitting and data analysis summary
         tImageFileFig.Position(1:2)=[136 ...
         hp.Position(4)-tImageFileFig.Position(4)];
         %%%%%% Resize Acquisition Panel %%%%
-        hpCam.Position(2:3)=[hF.Position(4)-hpCam.Position(4) hF.Position(3)];
+        % hpCam.Position(2:3)=[hF.Position(4)-hpCam.Position(4) hF.Position(3)];
         tSaveDir.Position(3)=hpCam.Position(3)-2;
         hbSWtrig.Position(1)=hpCam.Position(3)-60;
 
@@ -893,9 +895,18 @@ l=80;   % Left gap for fitting and data analysis summary
         
         
 
+
+
         % hpRaw.Position(1:2)=[hpImgProcess.Position(1)+hpImgProcess.Position(3) hp.Position(4)];   
         hpROI.Position(2)=hF.Position(4)-hpROI.Position(4)-Hacqbar;
         
+        
+        hpCam.Position(2) = hpControl.Position(4) - hpCam.Position(4);
+        hpSet.Position(2) = hpCam.Position(2) - hpAcq2.Position(4);
+        hpAcq2.Position(2) = hpCam.Position(2) - hpAcq2.Position(4);
+        hpNav.Position(2) = hpAcq2.Position(2) - hpNav.Position(4);
+        hpROISettings.Position=[0 hpNav.Position(2)-100 hpControl.Position(3) 100];
+        hpROI.Position=[0 hpROISettings.Position(2)-200 hpControl.Position(3) 200];
         %%%%%% Resize Left Panel %%%%%
         % hpFit.Position(4)=hF.Position(4)-200-Hacqbar;
         drawnow;
