@@ -127,6 +127,172 @@ coNew=brighten([coNew;coNew;coNew],.2);
         end
         delete(fig);                % Delete the figure
     end
+%% UI Panels
+
+% Control Panel
+hpControl = uipanel(hF,'units','pixels');
+hpControl.Position=[0 0 600 hF.Position(4)];
+
+
+%% Camera Panel
+hpCam=uipanel(hpControl,'units','pixels','backgroundcolor','w','title','camera',...
+    'fontsize',6);
+hpCam.Position(3) = hpControl.Position(3);
+hpCam.Position(4) = 30;
+hpCam.Position(1) = 0;
+hpCam.Position(2) = hpControl.Position(4) - hpCam.Position(4);
+
+% Connect button
+ttstr='Connect to camera and initialize settings.';
+hbConnect=uicontrol(hpCam,'style','pushbutton','string','connect','units','pixels',...
+    'fontsize',10,'Position',[5 5 60 20],'backgroundcolor',[80 200 120]/255,...
+    'Callback',@connectCamCB,'ToolTipString',ttstr,'enable','on');
+
+% Disconnect button
+ttstr='Connect to camera and initialize settings.';
+hbDisconnect=uicontrol(hpCam,'style','pushbutton','string','disconnect','units','pixels',...
+    'fontsize',10,'Position',[65 5 75 20],'backgroundcolor',[255 102 120]/255,...
+    'Callback',@disconnectCamCB,'ToolTipString',ttstr,'enable','off');
+
+% 16 - hardware trigger 
+% 17 - software trigger
+% 32 - double hardware trigger
+
+% Connect to camera callback
+    function connectCamCB(~,~)        
+        camera.ExposureTime=tbl_cama.Data{1,2};
+        camera.NumImages=tbl_cama.Data{2,2};
+        camera.CameraMode=bgCamMode.SelectedObject.UserData;
+        camera=initCam(camera);        
+        
+        hbDisconnect.Enable='on';
+        hbConnect.Enable='off';        
+        hbstart.Enable='on';
+        hbclear.Enable='on';
+        hbstop.Enable='off';
+        tbl_cama.Enable='off';  
+        rbSingleAcq.Enable='off';
+        rbDoubleAcq.Enable='off';
+        rbSingleVideo.Enable='off';
+    end
+
+% Disconnect from camera callback
+    function disconnectCamCB(~,~)
+        disp('Disconnecting from camera.');        
+        closeCam(camera.BoardHandle);           
+        camera=initCamStruct;
+        camera.CameraMode=bgCamMode.SelectedObject.UserData;
+        camera.ExposureTime=tbl_cama.Data{1,2};
+        camera.NumImages=tbl_cama.Data{2,2};
+        
+        hbDisconnect.Enable='off';
+        hbConnect.Enable='on';        
+        hbstart.Enable='off';
+        hbclear.Enable='off';
+        hbstop.Enable='off';
+        tbl_cama.Enable='on';
+        rbSingleAcq.Enable='on';
+        rbDoubleAcq.Enable='on';
+        rbSingleVideo.Enable='on';
+
+    end
+
+% Start acquisition button
+ttstr='Start the camera and image acquisition';
+hbstart=uicontrol(hpCam,'style','pushbutton','string','start','units','pixels',...
+    'fontsize',10,'Position',[145 5 40 20],'backgroundcolor',[80 200 120]/255,...
+    'Callback',@startCamCB,'ToolTipString',ttstr,'enable','off');
+
+% Clear the camera buffer
+ttstr='Clear the camera buffer.';
+hbclear=uicontrol(hpCam,'style','pushbutton','string','clear',...
+    'units','pixels','fontsize',10,'Position',[190 5 40 20],'enable','off',...
+    'backgroundcolor',[255 204 0]/255,'callback',@clearBuffer,...
+    'ToolTipString',ttstr);
+
+% Stop acquisition button
+ttstr='Stop the camera.';
+hbstop=uicontrol(hpCam,'style','pushbutton','string','stop',...
+    'units','pixels','fontsize',10,'Position',[235 5 40 20],'enable','off',...
+    'backgroundcolor',[255 102 120]/255,'callback',@stopCamCB,...
+    'ToolTipString',ttstr);
+
+
+% Auto Read Settings?
+ttstr=['Read in camera settings from adwin computer'];
+hcAdwinControl=uicontrol(hpCam,'style','checkbox','string','adwin control?',...
+    'fontsize',8,...
+    'backgroundcolor','w','Position',[280 0 100 30],'callback',@andwinControlCheck,...
+    'ToolTipString',ttstr);
+
+% Save checkbox callback
+    function andwinControlCheck(src,~)
+        if src.Value
+            start(commTimer)
+        else
+            stop(commTimer)
+        end
+    end
+
+% Auto Save check box
+ttstr=['Enable/Disable saving to external directory. Does ' ...
+    'not override saving to image history.'];
+hcSave=uicontrol(hpCam,'style','checkbox','string','save?','fontsize',8,...
+    'backgroundcolor','w','Position',[370 0 60 30],'callback',@saveCheck,...
+    'ToolTipString',ttstr);
+
+% Save checkbox callback
+    function saveCheck(src,~)
+        if src.Value
+            tSaveDir.Enable='on';
+            bBrowse.Enable='on';
+        else
+            tSaveDir.Enable='off';
+            bBrowse.Enable='off';
+        end
+    end
+
+% Browse button
+cdata=imresize(imread('images/browse.jpg'),[20 20]);
+bBrowse=uicontrol(hpCam,'style','pushbutton','CData',cdata,'callback',@browseCB,...
+    'enable','off','backgroundcolor','w','position',[420 5 size(cdata,[1 2])]);
+
+% String for current save directory
+tSaveDir=uicontrol(hpCam,'style','text','string','directory','fontsize',8,...
+    'backgroundcolor','w','units','pixels','horizontalalignment','left',...
+    'enable','off','UserData','','Position',[450 0 hF.Position(3)-290 22]);
+
+% Browse button callback
+    function browseCB(~,~)
+        str=getDayDir;
+        str=uigetdir(str);
+        if str
+            tSaveDir.UserData=str; % Full directory to save
+            str=strsplit(str,filesep);
+            str=[str{end-1} filesep str{end}];
+            tSaveDir.String=str; % display string
+        else
+            disp('no directory chosen!');
+        end
+    end
+
+% Button for software trigger
+hbSWtrig=uicontrol(hpCam,'style','pushbutton','backgroundcolor','w',...
+    'string','trigger','fontsize',10,'units','pixels','callback',@swTrigCB,...
+    'enable','off','visible','off','Position',[hpCam.Position(3)-60 5 50 20]);
+
+% Call for software trigger button
+function swTrigCB(~,~)
+   triggerCamera(camera); 
+end
+%% Image Acqusition Panel
+% Panel for image acquisition controls and settings.
+hpAcq=uipanel(hpControl,'units','pixels','backgroundcolor','w',...
+    'title','acquisition','fontsize', 6);
+hpAcq.Position(3) = hpControl.Position(3);
+hpAcq.Position(4) = 50;
+hpAcq.Position(1) = 0;
+hpAcq.Position(2) = hpCam.Position(2) - hpAcq.Position(4);
 
 
 %% Initialize the image panel
@@ -225,9 +391,9 @@ l=80;   % Left gap for fitting and data analysis summary
         tImageFileFig.Position(1:2)=[136 ...
         hp.Position(4)-tImageFileFig.Position(4)];
         %%%%%% Resize Acquisition Panel %%%%
-        hpAcq.Position(2:3)=[hF.Position(4)-hpAcq.Position(4) hF.Position(3)];
-        tSaveDir.Position(3)=hpAcq.Position(3)-2;
-        hbSWtrig.Position(1)=hpAcq.Position(3)-60;
+        hpCam.Position(2:3)=[hF.Position(4)-hpCam.Position(4) hF.Position(3)];
+        tSaveDir.Position(3)=hpCam.Position(3)-2;
+        hbSWtrig.Position(1)=hpCam.Position(3)-60;
 
         %%%%% Resize Top Row Panels %%%%%
         hpROISettings.Position(2)=hp.Position(4);
@@ -742,157 +908,11 @@ climtbl.Position(3:4)=climtbl.Extent(3:4);
 
 axImg.CLim=climtbl.Data;
 set(axImg,'XLim',tbl_dispROI.Data(1:2),'YLim',tbl_dispROI.Data(3:4));
-%% Initialize Acquisition Panel
-hpAcq=uipanel(hF,'units','pixels','backgroundcolor','w',...
-    'Position',[0 hp.Position(4) hF.Position(3)-150 Hacqbar]);
 
-% Connect button
-ttstr='Connect to camera and initialize settings.';
-hbConnect=uicontrol(hpAcq,'style','pushbutton','string','connect','units','pixels',...
-    'fontsize',10,'Position',[5 5 60 20],'backgroundcolor',[80 200 120]/255,...
-    'Callback',@connectCamCB,'ToolTipString',ttstr,'enable','on');
-
-% Disconnect button
-ttstr='Connect to camera and initialize settings.';
-hbDisconnect=uicontrol(hpAcq,'style','pushbutton','string','disconnect','units','pixels',...
-    'fontsize',10,'Position',[65 5 75 20],'backgroundcolor',[255 102 120]/255,...
-    'Callback',@disconnectCamCB,'ToolTipString',ttstr,'enable','off');
-
-% 16 - hardware trigger 
-% 17 - software trigger
-% 32 - double hardware trigger
-
-% Connect to camera callback
-    function connectCamCB(~,~)        
-        camera.ExposureTime=tbl_cama.Data{1,2};
-        camera.NumImages=tbl_cama.Data{2,2};
-        camera.CameraMode=bgCamMode.SelectedObject.UserData;
-        camera=initCam(camera);        
-        
-        hbDisconnect.Enable='on';
-        hbConnect.Enable='off';        
-        hbstart.Enable='on';
-        hbclear.Enable='on';
-        hbstop.Enable='off';
-        tbl_cama.Enable='off';  
-        rbSingleAcq.Enable='off';
-        rbDoubleAcq.Enable='off';
-        rbSingleVideo.Enable='off';
-    end
-
-% Disconnect from camera callback
-    function disconnectCamCB(~,~)
-        disp('Disconnecting from camera.');        
-        closeCam(camera.BoardHandle);           
-        camera=initCamStruct;
-        camera.CameraMode=bgCamMode.SelectedObject.UserData;
-        camera.ExposureTime=tbl_cama.Data{1,2};
-        camera.NumImages=tbl_cama.Data{2,2};
-        
-        hbDisconnect.Enable='off';
-        hbConnect.Enable='on';        
-        hbstart.Enable='off';
-        hbclear.Enable='off';
-        hbstop.Enable='off';
-        tbl_cama.Enable='on';
-        rbSingleAcq.Enable='on';
-        rbDoubleAcq.Enable='on';
-        rbSingleVideo.Enable='on';
-
-    end
-
-% Start acquisition button
-ttstr='Start the camera and image acquisition';
-hbstart=uicontrol(hpAcq,'style','pushbutton','string','start','units','pixels',...
-    'fontsize',10,'Position',[145 5 40 20],'backgroundcolor',[80 200 120]/255,...
-    'Callback',@startCamCB,'ToolTipString',ttstr,'enable','off');
-
-% Clear the camera buffer
-ttstr='Clear the camera buffer.';
-hbclear=uicontrol(hpAcq,'style','pushbutton','string','clear',...
-    'units','pixels','fontsize',10,'Position',[190 5 40 20],'enable','off',...
-    'backgroundcolor',[255 204 0]/255,'callback',@clearBuffer,...
-    'ToolTipString',ttstr);
-
-% Stop acquisition button
-ttstr='Stop the camera.';
-hbstop=uicontrol(hpAcq,'style','pushbutton','string','stop',...
-    'units','pixels','fontsize',10,'Position',[235 5 40 20],'enable','off',...
-    'backgroundcolor',[255 102 120]/255,'callback',@stopCamCB,...
-    'ToolTipString',ttstr);
-
-
-% Auto Read Settings?
-ttstr=['Read in camera settings from adwin computer'];
-hcAdwinControl=uicontrol(hpAcq,'style','checkbox','string','adwin control?',...
-    'fontsize',8,...
-    'backgroundcolor','w','Position',[280 0 100 30],'callback',@andwinControlCheck,...
-    'ToolTipString',ttstr);
-
-% Save checkbox callback
-    function andwinControlCheck(src,~)
-        if src.Value
-            start(commTimer)
-        else
-            stop(commTimer)
-        end
-    end
-
-% Auto Save check box
-ttstr=['Enable/Disable saving to external directory. Does ' ...
-    'not override saving to image history.'];
-hcSave=uicontrol(hpAcq,'style','checkbox','string','save?','fontsize',8,...
-    'backgroundcolor','w','Position',[370 0 60 30],'callback',@saveCheck,...
-    'ToolTipString',ttstr);
-
-% Save checkbox callback
-    function saveCheck(src,~)
-        if src.Value
-            tSaveDir.Enable='on';
-            bBrowse.Enable='on';
-        else
-            tSaveDir.Enable='off';
-            bBrowse.Enable='off';
-        end
-    end
-
-% Browse button
-cdata=imresize(imread('images/browse.jpg'),[20 20]);
-bBrowse=uicontrol(hpAcq,'style','pushbutton','CData',cdata,'callback',@browseCB,...
-    'enable','off','backgroundcolor','w','position',[420 5 size(cdata,[1 2])]);
-
-% String for current save directory
-tSaveDir=uicontrol(hpAcq,'style','text','string','directory','fontsize',8,...
-    'backgroundcolor','w','units','pixels','horizontalalignment','left',...
-    'enable','off','UserData','','Position',[450 0 hF.Position(3)-290 22]);
-
-% Browse button callback
-    function browseCB(~,~)
-        str=getDayDir;
-        str=uigetdir(str);
-        if str
-            tSaveDir.UserData=str; % Full directory to save
-            str=strsplit(str,filesep);
-            str=[str{end-1} filesep str{end}];
-            tSaveDir.String=str; % display string
-        else
-            disp('no directory chosen!');
-        end
-    end
-
-% Button for software trigger
-hbSWtrig=uicontrol(hpAcq,'style','pushbutton','backgroundcolor','w',...
-    'string','trigger','fontsize',10,'units','pixels','callback',@swTrigCB,...
-    'enable','off','visible','off','Position',[hpAcq.Position(3)-60 5 50 20]);
-
-% Call for software trigger button
-function swTrigCB(~,~)
-   triggerCamera(camera); 
-end
 
 %% ROI Panels
-hpROI=uipanel(hF,'units','pixels','backgroundcolor','w');
-hpROI.Position=[0 hF.Position(4)-200-Hacqbar 220 200];
+hpROI=uipanel(hpControl,'units','pixels','backgroundcolor','w');
+hpROI.Position=[0 hpControl.Position(4)-200 hpControl.Position(3) 200];
 
 % Table of ROIs
 tblROI=uitable(hpROI,'units','pixels','ColumnWidth',{30 30 30 30},...
