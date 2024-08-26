@@ -163,7 +163,7 @@ end
 
 
 %% Initialize Graphics
-lgap = 50;rgap = 80;
+lgap = 80;rgap = 80;
 bgap = 20;tgap = 20;
 
 hgap = 120;
@@ -245,7 +245,7 @@ else
     set(ax1,'units','pixels','Box','on','XGrid','on',...
         'YGrid','on','YDir','reverse','XAxisLocation','bottom',...
         'fontname','times','fontsize',10);
-    ax1.Position = [10 10 W-20 H-20];
+    ax1.Position = [40 40 W-40 H-40];
     
     hImg1=imagesc(X_a,Y_a,OD_a_u(:,:,1));   
     axis equal tight
@@ -295,7 +295,7 @@ for kk=1:size(ROI,1)
     end
         
     
-    rectangle('position',[x0 y0 W H],'edgecolor',co(kk,:),'linewidth',2,...
+    rectangle('position',[x0 y0 W H],'edgecolor',co(kk,:),'linewidth',4,...
         'parent',parent);
     hold on
 end

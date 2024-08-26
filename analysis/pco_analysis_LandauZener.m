@@ -42,14 +42,21 @@ if doLandauZener && size(data.Natoms,2)>1
     SweepTimeVar='uWave_time';'sweep_time';      % Variable that defines sweep time
     SweepRangeVar='uwave_delta_freq';'sweep_range';    %    Variable that defines sweep range
 
-      SweepTimeVar='Raman_Time';'sweep_time';      % Variable that defines sweep time
-    SweepRangeVar='Sweep_Range';'sweep_range';    %    Variable that defines sweep range
+      SweepTimeVar='qgm_pulse_time';'sweep_time';      % Variable that defines sweep time
+    SweepRangeVar='lattice_rf_freq_shift';'sweep_range';    %    Variable that defines sweep range
+    
+    SweepTimeVar='lattice_rf_pulse_length_pre_op';
+%     SweepRangeVar=50;
 
+    
+    
 
     % Convert the parameter into df and dt (add whatever custom processing
     % you want).
     dT=[params.(SweepTimeVar)];
     dF=[params.(SweepRangeVar)];
+    
+    dF=5;
 
 %     dF=[params.(SweepRangeVar)]*1000; % Factor of two for the SRS
 %     dF=[params.(SweepRangeVar)]*1000*2; % Factor of two for the AOM DP

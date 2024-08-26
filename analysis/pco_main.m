@@ -68,7 +68,9 @@ end
 % Defautl variable to plot against
 % pco_xVar = 'rf_freq_HF_shift';
 pco_xVar = 'ExecutionDate';
-% pco_xVar = 'xdt_evap1_power';
+% pco_xVar = 'qgm_Raman1_shift';
+% pco_xVar = 'lattice_rf_freq_shift';
+% pco_xVar ='mt_hold_time';
 
 % Should the analysis attempt to automatically find the xvariable?
 pco_autoXVar = 1;
@@ -77,7 +79,7 @@ pco_autoXVar = 1;
 pco_autoUnit = 1;
 
 % If ixon_autoUnit=0, this will be used.o
-pco_overrideUnit='W'; 
+pco_overrideUnit='ms'; 
 %%
 ODopts=struct;
 ODopts.GaussFilter=.5;
@@ -103,7 +105,7 @@ doProbeFit    = 0;      % Fit probe beam  to 2D Gaussian
 % processed data outputs of the below fits are typically <fit_type>_name
 
 % Box Count
-doBoxCount      = 1;      % Box count analysis
+doBoxCount      = 0;      % Box count analysis
 
 % Gaussian Fit
 % Fit to a gaussian distribution (thermal cloud)
@@ -115,11 +117,11 @@ doErfFit        = 0;
 % Band map fit
 % Fit to a square band map, this includes the vertical and horizontal
 % excited P bands
-doBMFit         = 1;
+doBMFit         = 0;
 
 % Fermi-Fit
 % Fit a DFG in long time of flight
-doFermiFitLong  = 0;     
+doFermiFitLong  = 1;     
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Custom Analyses
@@ -136,12 +138,12 @@ doBEC           = 0;      % Enable BEC analys
 doLandauZener   =  0;         
 
 % Raman box count count analyis
-doRamanSpec   = 0;   
+doRamanSpec   =0;   
 
 % Band Map Fit and Analysis for AM Spec
 doBMFit_AM   = 0; doBMFit_AM_Dir = 'H';
 doBMFit_AM_Spec  = 0; 
-doBMFit_AM_Spec2 = 0;
+doBMFit_AM_Spec2 = 0; % not used?
 
 doCustom_BM = 0;
 
@@ -303,94 +305,24 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % this is currently disabled because it creates code issues at the moment.
 
 
-%%%%% XDT LOW FIELD X CAM %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% ROI = [500 1392 50 800]; % RF1A 5 ms K
-
-%  ROI = [800 1150 100 350]; %K XDT insitu
-
-% ROI = [780 990 310 510]; %K XDT 5ms tof
-% ROI = [730 1060 250 550]; %K XDT 10ms tof
-% ROI = [700 1050 327 645]; %K XDT 15ms tof rb
-
-% ROI = [750 1050 300 530]; %K XDT 10ms tof
-
-% ROI=[925 1125 250 450];   % XDT TOF 15 ms
-% ROI=[617 1091 258 385];   % XDT1 only TOF 5 ms
-% ROI=[610 1232 180 540];    % XDT  TOF 5 ms
-% ROI=[741 1014 616 858];   % XDT  TOF 15 ms HF imaging
-% ROI=[741 1014 593 858];   % XDT  TOF 20 ms HF imaging
-% ROI=[741 1014 780 1024];  % XDT  TOF 15 ms HF+SG imaging
-% ROI=[708 1089 377 608];   % XDT  TOF 20 ms evaporation
-% ROI=[713 1015 310 601];
-% 
-%  ROI=[950 1100 100 1000];   % XDT  Full TOF analysis
-% %   ROI=[950 1100 100 1000];   % XDT  Full TOF analysis
-% 
-% ROI = [800 1250 500 950]; %RF1b Rb after evap 15ms 
-% 
-ROI=[920 1150 550 750]; % XDT  TOF 25 ms evaporation
-% % 
-% % 15 ms XT SG
-% Nbox = 3;
-% ROI = [960 1080 730 820;    
-%     960 1080 640 730;
-%     960 1080 550 640;
-%     960 1080 460 550;
-%     960 1080 370 460;
-%     ];
-% ROI = ROI(1:Nbox,:);
-
 
 % 15 ms XDT mF SG
 % ROI=[970 1080 745 830;
 %     970 1080 630 745];
+
+% ROI=[970 1080 730 820;
+%     970 1080 640 730;
+%     970 1080 550 640;
+%     970 1080 460 550;
+%     970 1080 370 460
+%     ];
 % 
-% ROI=[950 1080 620 720;
-%     950 1080 720 820];
 
 % big box
 % ROI = [723 1071 200 872];
 
 % ROI=[800 960 390 500;
 %        800 960 500 610]; % 15 ms  xcam,XDT F SG
-%% X CAM LATTICE
-
-% %%%%%%%%%%%%%%%%%%%%%%%%%%% LATTICE LOW FIELD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-%  ROI=[920 1120 250 360;
-%         920 1120 360 470]; % 15 ms BM TOF x cam, SG F
-
-%   ROI=[880 1200 250 450]; % 15 ms BM TOF x cam
-
-%     ROI=[940 1110 720 840;
-%         940 1110 620 720]; % 15 ms BM TOF SG qp reverse stuff conducvitivty
-
-%     ROI=[910 1130 250 450]; % 15 ms BM TOF x cam
-%    ROI=[940 1100 180 320]; % 10 ms BM TOF x cam
-
-
-%     ROI=[910 1130 420 520]; % 20 ms BM TOF x cam
-if isfield(data.Flags,'lattice_off') && ...
-        data.Flags.lattice_off && ...
-        data.Flags.image_stern_gerlach_mF
-    ROI = [950 1110 775 872; % -9/2;
-        950 1110 670 775];   % -7/2;
-    
-   ROI = [950 1110 740 840; % -9/2;
-        950 1110 640 740];   % -7/2;
-end
-
-if isfield(data.Flags,'lattice_off') && ...
-        data.Flags.lattice_off && ...
-        ~data.Flags.image_stern_gerlach_mF && ...
-        ~data.Flags.image_stern_gerlach_F
-
-    ROI = [930 1120 275 415]; % -9/2;
-       
-end
 
 %% Magtrap ROI
 
@@ -401,14 +333,84 @@ if isfield(data.Flags,'xdt') && ~(data.Flags.xdt)
 
     % ROI = [500 1380 50 750]; %RF1A 5ms TOF
     %%%%% RF1B X CAM
-%     ROI = [750 1250 200 600];     % RF1B 5ms TOF    
-    ROI = [750 1250 400 900];     % RF1B 15ms TOF    
+    ROI = [750 1250 200 600];     % RF1B 5ms TOF    
+    
+%         ROI = [700 1300 50 400];     % RF1B 5ms TOF    
+
+%     ROI = [750 1250 400 900];     % RF1B 15ms TOF
+%     ROI = [592 1392 32 932];    %MT no RF1A Rb 10ms TOF
          
     if data.Flags.image_insitu
          ROI = [960 1080 100 200]; 
-        ROI = [900 1150 100 200]; % wrong
+        ROI = [900 1050 100 200]; % wrong
     end     
 end
+
+
+%% X CAM 
+
+if isfield(data.Flags,'image_stern_gerlach_mF') && data.Flags.image_stern_gerlach_mF
+    % 15 ms XDT mF SG
+    Nbox = 2;
+    ROI = [960 1080 740 820;    
+        960 1080 620 740;   
+        ];
+    ROI = ROI(1:Nbox,:);
+end
+
+if isfield(data.Flags,'image_stern_gerlach_F') && data.Flags.image_stern_gerlach_F
+    % 15 ms XDT mF SG
+% F Stern Gerlach
+    ROI=[950 1080 335 400;
+    950 1080 250 335];
+     ROI = ROI(1:Nbox,:);
+end
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%% LATTICE LOW FIELD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+if isfield(data.Flags,'lattice_off') && ...
+        data.Flags.lattice_off && ...
+        data.Flags.image_stern_gerlach_mF
+%     ROI = [950 1110 775 872; % -9/2;
+%         950 1110 670 775];   % -7/2;
+    
+   ROI = [950 1110 640 740; % -7/2
+       950 1110 740 840]; % -9/2;
+%         950 1110 540 640]   % -5/2
+%         950 1110 440 540];   % -3/2
+end
+
+if isfield(data.Flags,'lattice_off') && ...
+        data.Flags.lattice_off && ...
+        data.Flags.image_stern_gerlach_F
+    ROI = [920 1110 170 350; % 7/2
+         920 1110 350 530]; % 9/2;
+          
+    
+%    ROI = [920 1110 740 840; % -9/2;
+%         920 1110 640 740];   % -7/2;
+end
+
+if isfield(data.Flags,'lattice_off') && ...
+        data.Flags.lattice_off && ...
+        ~data.Flags.image_stern_gerlach_mF && ...
+        ~data.Flags.image_stern_gerlach_F
+    ROI = [930 1120 275 415]; % -9/2;       
+end
+
+% if isfield(data.Flags,'lattice_fluor') && ...
+%         data.Flags.lattice_fluor    
+%     ROI=[910 1130 225 445]; % 15 ms BM TOF x cam    
+% end
+
+% ROI=[800 1200 400 800]; % 25 ms TOF x cam
+
+% ROI=[980 1050 130 200]; % in situ ms TOF x cam
 
 
 
@@ -416,17 +418,30 @@ end
   
 if doFermiFitLong || doBEC
     if camaxis == 'X'
-        ROI=[920 1150 550 750];   % XDT  TOF 25 ms evaporation         
+        ROI=[900 1050 550 750];   % XDT  TOF 25 ms evaporation         
     else
         ROI=[412 755 700 1000]; %XDT TOF 15ms evaporation
     end
 
-    if isfield(data(1).Flags,'High_Field_Imaging')
-        if data(1).Flags.High_Field_Imaging == 1
-          ROI=[800 950 680 850]; % 25 ms TOF, gradient cancel
-        end
-    end   
 end
+
+%%
+
+if isfield(data(1).Flags,'HF_Imaging') && data(1).Flags.HF_Imaging
+      ROI=[930 1080 730 870;
+          930 1080 1820 2000]; % 25 ms TOF, gradient cancel
+      
+      
+      ROI=[930 1080 500 900]; 
+
+      
+%       if isequal(pco_xVar,'tof')
+%         ROI=[930 1080 50 900]; 
+%       end
+      
+      ROI = [900 1080 30 250];
+      
+end   
  
   %% X CAM DOUBLE SHUTTER
 
@@ -477,8 +492,8 @@ end
                 700 1392 1400 2000];            
          % RF1A
          % 5ms + 15 ms tof
-%          ROI = [850 1250 200 550;
-%                 500 1392 1200 2048];            
+%          ROI = [550 1390 50 610;
+%                 550 1392 1065 1650];            
         % For RF1B Lifetime
 %          ROI = [850 1250 200 550;
 %                 600 1392 1400 2048];            
@@ -494,10 +509,16 @@ end
 %                    900 1170 1640 1825];
          end
      end 
+     
+        % 5ms + 15 ms tof
+%          ROI = [800 1300 50 300;
+%                 800 1300 50+1024 300+1024];
+         ROI = [750 1300 50 500;
+                750 1300 50+1024 500+1024];  
  end
 %%
 if isequal(camaxis,'Y')
-    ROI = [470 750 375 600];
+%     ROI = [470 750 375 600];
     
     %% Y CAM
 %%%%%%%%%%%%%%%%%%% Y CAM %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -506,9 +527,12 @@ if isequal(camaxis,'Y')
 % ROI = [400 800 550 790];
 
 % BM 10 ms TOF
-ROI = [400 800 700 1000];
+% ROI = [400 800 700 1000];
 
+% ROI = [400 800 650 1000]; % BM 15 ms TOF
 % ROI = [1 1392 400 600]; % XDT Insitu long
+
+% ROI = [530 660 430 560]; % XDT in situ
 
 % 7 ms tof am spec 75-200 recoil y camera
 % ROI = [560 610 535 615;
@@ -525,8 +549,11 @@ ROI = [400 800 700 1000];
 
 %  ROI=[500 700 200 1000];   % XDT  Full TOF analysis
 
-end
 
+% ROI = [510 665 450 550];
+ROI = [400 750 350 600]; % MT in situ 2024.08.22
+
+end
 
  
 %% Aissgn the ROI
@@ -540,21 +567,15 @@ disp(ROI);
 
 %% Calculate the optical density
 ODopts.ScaleProbe=1;
-% ODopts.ScaleProbeROI=[200 400 800 1000];  % ROI to do the scaling
-% ODopts.ScaleProbeROI=[700 790 500 600];  % ROI to do the scaling
-%ODopts.ScaleProbeROI=[1200 1350 300 900];  % ROI to do the scaling
-ODopts.ScaleProbeROI=[1250 1350 45 130];  % ROI to do the scaling
-
-% ODopts.ScaleProbeROI=[1000 1100 400 700];
 
 if isequal(camaxis,'Y')
     ODopts.doRotate = 1;
     ODopts.Theta = -1.7;
     ODopts.ScaleProbeROI=[1250 1350 300 400];  % ROI to do the scaling
-
 else
     ODopts.doRotate = 0;
     ODopts.Theta = 0;
+    ODopts.ScaleProbeROI=[1250 1350 45 130];  % ROI to do the scaling
 end
 
 % Apply gaussian filter to images?
@@ -566,9 +587,8 @@ end
 
 
 % Get the high field flag (this may throw error for old data)
-if isfield(data(1).Flags,'High_Field_Imaging')
-    ODopts.HighField = data(1).Flags.High_Field_Imaging; 
-%     ODopts.HighField = data(1).Flags.CDT_evap_2_high_field; 
+if isfield(data(1).Flags,'HF_Imaging')
+    ODopts.HighField = data(1).Flags.HF_Imaging; 
 else
     ODopts.HighField=0;
 end
@@ -1178,19 +1198,19 @@ if doAnimate && doSave
     animateOpts.FigLabel = FigLabel;
     animateOpts.saveDir = saveDir;
     animateOpts.StartDelay=1;   % Time to hold on first picture
-    animateOpts.MidDelay=.2;    % Time to hold in middle picutres
+    animateOpts.MidDelay=.5;    % Time to hold in middle picutres
     animateOpts.EndDelay=1;     % Time to hold final picture
     animateOpts.doAverage=1;    % Average over duplicates?
     animateOpts.doRotate=0;     % Rotate the image?
     animateOpts.xUnit=pco_unit;
     
     % Stacking images (applicable only for double exposure)
-     animateOpts.doubleStack='vertical';
-%      animateOpts.doubleStack='horizontal';
+%      animateOpts.doubleStack='vertical';
+     animateOpts.doubleStack='horizontal';
 
      % Asceneding or descending
-%     animateOpts.Order='descend';   
-      animateOpts.Order='ascend';
+    animateOpts.Order='descend';   
+%       animateOpts.Order='ascend';
         animateOpts.CLim='auto';
         
 
@@ -1204,8 +1224,7 @@ if doAnimate && doSave
 %     animateOpts.CLim=[0 .2;
 %         0 .5]; 
 % 
-     animateOpts.CLim=[0 0.2;
-         0 .2]; 
+
 
 %     animateOpts.CLim=[-.1 4];   
 
@@ -1221,10 +1240,19 @@ if doAnimate && doSave
 
         end
     end
-    animateOpts.CLim=[0 0.1];
-
-        
+    animateOpts.CLim=[-.01 .35];
     
+   if doBMFit_AM
+         animateOpts.CLim = [0 .3];
+    end
+
+    if doFermiFitLong
+         animateOpts.CLim = [0 .5];
+    end
+    
+    
+         animateOpts.CLim=[0 .2;
+         0 .2]; 
     animateCloud(atomdata,pco_xVar,animateOpts);    
 end
 

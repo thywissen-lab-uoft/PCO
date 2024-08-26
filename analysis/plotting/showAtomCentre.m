@@ -587,7 +587,7 @@ minValues=X(Y==min(Y));
 maxValues=X(Y==max(Y));
 % gB=1*abs(maxValues(1)-minValues(1));
 % gB=range(X)/2;
-
+gB = 1/0.130;
 
 
 
@@ -596,7 +596,7 @@ gC=pi;
 gD=0.5*(max(Y)+min(Y));
 
 gC=pi;
-gE = range(X);
+gE = range(X)*2;
 
 cosFit=fittype('A*cos(2*pi*t/B+C)*exp(-t/E)+D','independent',{'t'},...
     'coefficients',{'A','B','C','D','E'});

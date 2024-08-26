@@ -1837,10 +1837,10 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
        ODtype=bgODField.SelectedObject.String;
 
        if isequal(ODtype,'Detect')
-          if isfield(data.Flags,'High_Field_Imaging') && data.Flags.High_Field_Imaging
+          if isfield(data.Flags,'HF_Imaging') && data.Flags.HF_Imaging
              ODtype='High'; 
           else
-              ODtype='Low';
+             ODtype='Low';
           end
        end       
 
