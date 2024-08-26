@@ -549,30 +549,27 @@ tNavName=uicontrol(hpNav,'style','text','string','FILENAME','fontsize',7,...
 %% ROI Settings panel
 hpROISettings=uipanel(hpControl,'units','pixels','backgroundcolor','w',...
     'title','Analysis ROI','fontsize',6);
-hpROISettings.Position=[0 hpNav.Position(2)-100 hpControl.Position(3)/2 180];
+hpROISettings.Position=[1 hpNav.Position(2)-100 hpControl.Position(3)/2 180];
+
+
+
 
 % Table for number of ROIs
-tblNumROIs=uitable(hpROISettings,'Data',1,'RowName','Num ROIs','columnName',{},...
-    'units','pixels','ColumnWidth',{20});
-tblNumROIs.Position=[1 hpROISettings.Position(4)-35 tblNumROIs.Extent(3:4)];
+tblNumROIs=uitable(hpROISettings,'Data',1,'RowName','Num. of ROIs','columnName',{},...
+    'units','pixels','ColumnWidth',{15});
+tblNumROIs.Position=[13 hpROISettings.Position(4)-35 tblNumROIs.Extent(3:4)];
 
 % Button for decreasing number of ROIs
 ttsr='Increase the number of analysis ROIs by one.';
 uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
-    'backgroundcolor','w','String',char(10094),'Position',[0 tblNumROIs.Position(2)-25 20 25],...
+    'backgroundcolor','w','String',char(10094),'Position',[tblNumROIs.Position(1)-12 tblNumROIs.Position(2) 12 tblNumROIs.Position(4)],...
     'callback',{@chROINum '-'},'ToolTipString',ttstr);
 
 % Button for increasing the number of ROIs
 ttstr='Decrease the number of analysis ROIs by one.';
-uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
-    'backgroundcolor','w','String',char(10095),'Position',[20 tblNumROIs.Position(2)-25 20 25],...
-    'callback',{@chROINum '+'},'ToolTipString',ttstr);
-
-% Button for single full image ROI
-ttstr='Change analysis ROI to a single one the size of the entire sensor.';
 b=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
-    'backgroundcolor','w','String','Single Full','Position',[40 tblNumROIs.Position(2)-25 75 25],...
-    'callback',{@chROINum 0},'FontSize',10,'ToolTipString',ttstr);
+    'backgroundcolor','w','String',char(10095),'Position',[tblNumROIs.Position(1)+tblNumROIs.Position(3) tblNumROIs.Position(2) 12 tblNumROIs.Position(4)],...
+    'callback',{@chROINum '+'},'ToolTipString',ttstr);
 
 % Callback function for changing number of ROIs
     function chROINum(~,~,state)
@@ -647,20 +644,20 @@ b=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
 % Button for decreasing ROI selector
 ttstr='Decrease the selected ROI by one';
 uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
-    'backgroundcolor','w','String',char(10094),'Position',[0 b.Position(2)-20 15 20],....
+    'backgroundcolor','w','String',char(10094),'Position',[2 b.Position(2)-20 12 20],....
     'callback',{@chSelectROI, '-'},'ToolTipString',ttstr)
 
 % Button for GUI selection of ROI
 ttstr='Use mouse clicks to choose the selected analysis ROI.';
 bROISelect=uicontrol(hpROISettings,'style','pushbutton',...
-    'enable','on','backgroundcolor','w','position',[15 b.Position(2)-20 85 20],...
+    'enable','on','backgroundcolor','w','position',[14 b.Position(2)-20 150 20],...
     'String','Select ROI 1','fontsize',8,'UserData',1,...
     'callback',@selectROICB,'ToolTipString',ttstr);
 
 % Button for increasing ROI selector
 ttstr='Increase the selected ROI by one';
 uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
-    'backgroundcolor','w','String',char(10095),'Position',[100 b.Position(2)-20 15 20],...
+    'backgroundcolor','w','String',char(10095),'Position',[bROISelect.Position(1)+bROISelect.Position(3) b.Position(2)-20 12 20],...
     'callback',{@chSelectROI, '+'},'ToolTipString',ttstr);
 
 % Callback function for GUI selection of ROI
@@ -715,10 +712,10 @@ tblROI=uitable(hpROISettings,'units','pixels','ColumnWidth',{30 30 30 30},...
 % tblROI.Position(3:4)=tblROI.Extent(3:4)+[18 0];
 
 tblROI.Position(3)=tblROI.Extent(3)+18;
-tblROI.Position(4) = 100;
+tblROI.Position(4) = 115;
 
 % tblROI.Position(1:2)=[1 hpROI.Position(4)-tblROI.Position(4)-5];
-tblROI.Position(1:2) = [0 0];
+tblROI.Position(1:2) = [5 5];
 % Callback function for changing ROI via table
     function chROI(src,evt)
         m=evt.Indices(1); n=evt.Indices(2);
@@ -1135,6 +1132,7 @@ pROI=rectangle('position',[1 1 1392 1024],'edgecolor',co(1,:),'linewidth',2);
 pGaussRet=plot(0,0,'-','linewidth',1,'Visible','off','color',co(1,:));
 % Color bar
 cBar=colorbar('fontsize',8,'units','pixels','location','westoutside');
+cBar.Label.String='optical density';
 drawnow;
 
 % X Cut/Sum Axis
@@ -1551,8 +1549,8 @@ tblRotate.Position=[80 cRotate.Position(2)-5 50 20];
 
 mstr='Calculate the optical density; perform fits; update graphics';
 uicontrol('parent',hpImgProcess,'units','pixels',...
-    'style','pushbutton','string','calculate OD','position',[1 1 70 15],...
-    'fontsize',8,'backgroundcolor','w','callback',@recalcODCB,...
+    'style','pushbutton','string','process images','position',[0 1 hpImgProcess.Position(3)-1 15],...
+    'fontsize',8,'backgroundcolor',[80 200 120]/255,'callback',@recalcODCB,...
     'ToolTipString',mstr);
 
     function recalcODCB(~,~)
@@ -1567,12 +1565,13 @@ uicontrol('parent',hpImgProcess,'units','pixels',...
 % Panel for controlling and viewing the automated analysis
 hpAnl=uipanel('parent',hpControl,'units','pixels','backgroundcolor','w',...
     'title','analysis','fontsize',6);
-hpAnl.Position = [0 hpImgProcess.Position(2)-200 hpControl.Position(3)/2 120];
+hpAnl.Position = [0 hpImgProcess.Position(2)-200 hpControl.Position(3)/2 140];
 
 % Refit button
 hbfit=uicontrol('style','pushbutton','string','analyze',...
-    'units','pixels','callback',@cbrefit,'parent',hpAnl,'backgroundcolor','w');
-hbfit.Position=[1 1 50 15];
+    'units','pixels','callback',@cbrefit,'parent',hpAnl,'backgroundcolor',[80 200 120]/255);
+hbfit.Position=[0 1 hpAnl.Position(3)-1 15];
+
 
 % Callback function for redoing fits button
     function cbrefit(~,~)
