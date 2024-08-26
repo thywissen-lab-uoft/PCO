@@ -89,7 +89,7 @@ dstruct.Name='example';
 hF=figure;clf
 set(hF,'Color','w','units','pixels','Name',guiname,...
     'toolbar','none','Tag','GUI','CloseRequestFcn',@closeGUI,...
-    'NumberTitle','off','Position',[50 50 1600 800]);
+    'NumberTitle','off','Position',[200 200 1300 650]);
 
 % co=get(gca,'colororder');
 co = colororder;
@@ -135,7 +135,7 @@ coNew=brighten([coNew;coNew;coNew],.2);
 %% UI Panels
 
 % Control Panel
-W_control = 400;
+W_control = 300;
 hpControl = uipanel(hF,'units','pixels');
 hpControl.Position=[0 0 W_control hF.Position(4)];
 
@@ -334,13 +334,13 @@ bgCamMode.Position(1:2)=[5 1];
 % Radio buttons for cuts vs sum
 rbSingleAcq=uicontrol(bgCamMode,'Style','radiobutton','String','single exp (0x10)',...
     'Position',[0 32 150 18],'units','pixels','backgroundcolor','w',...
-    'Value',1,'UserData',16,'fontsize',8);
+    'Value',1,'UserData',16,'fontsize',7);
 rbDoubleAcq=uicontrol(bgCamMode,'Style','radiobutton','String','double exp (0x20)',...
     'Position',[0 16 150 18],'units','pixels','backgroundcolor','w',...
-    'UserData',32,'fontsize',8);
+    'UserData',32,'fontsize',7);
 rbSingleVideo=uicontrol(bgCamMode,'Style','radiobutton','String','single video (0x30)',...
     'Position',[0 0 150 18],'units','pixels','backgroundcolor','w',...
-    'UserData',48,'fontsize',8);
+    'UserData',48,'fontsize',7);
 
 
     function chCamModeCB(~,~)
@@ -387,7 +387,7 @@ uicontrol(bgCam,'Style','radiobutton','String','Y Cam',...
     end
 
 tbl_optics=uitable('parent',hpOptics,'units','pixels','RowName',{},'ColumnName',{},...
-    'fontsize',8,'ColumnWidth',{100,40},'columneditable',[false true]);
+    'fontsize',7,'ColumnWidth',{80,40},'columneditable',[false true]);
 tbl_optics.Data={...
     ['raw pixelsize (' char(956) 'm)'], raw_pixel_size*1E6;
     'magnification',mag(1)};
@@ -397,7 +397,7 @@ tbl_optics.Position(1:2)=[5 bgCam.Position(2)-tbl_optics.Position(4)-2];
 
 
 tbl_cam=uitable('parent',hpOptics,'units','pixels','RowName',{},'ColumnName',{},...
-    'fontsize',8,'ColumnWidth',{100,40},'columneditable',[false false]);
+    'fontsize',7,'ColumnWidth',{80,40},'columneditable',[false false]);
 
 tbl_cam.Data={...
     ['img pixelsize (' char(956) 'm)'], raw_pixel_size*1E6/mag(1)};
@@ -549,26 +549,29 @@ tNavName=uicontrol(hpNav,'style','text','string','FILENAME','fontsize',7,...
 %% ROI Settings panel
 hpROISettings=uipanel(hpControl,'units','pixels','backgroundcolor','w',...
     'title','Analysis ROI','fontsize',6);
-hpROISettings.Position=[1 hpNav.Position(2)-100 hpControl.Position(3)/2 180];
+hpROISettings.Position=[1 hpNav.Position(2)-125 hpControl.Position(3)/2 125];
 
 
-
+tNumROIs = uicontrol(hpROISettings,'units','pixels','backgroundcolor','w',...
+    'style','text','string','Num.:','fontsize',8,'horizontalalignment','left');
+tNumROIs.Position(3:4)=tNumROIs.Extent(3:4);
+tNumROIs.Position(1:2) = [1 hpROISettings.Position(4)-35];
 
 % Table for number of ROIs
-tblNumROIs=uitable(hpROISettings,'Data',1,'RowName','Num. of ROIs','columnName',{},...
-    'units','pixels','ColumnWidth',{15});
-tblNumROIs.Position=[13 hpROISettings.Position(4)-35 tblNumROIs.Extent(3:4)];
+tblNumROIs=uitable(hpROISettings,'Data',1,'RowName',{},'columnName',{},...
+    'units','pixels','ColumnWidth',{15},'fontsize',6);
+tblNumROIs.Position=[tNumROIs.Position(1)+tNumROIs.Position(3)+12 hpROISettings.Position(4)-35 tblNumROIs.Extent(3:4)];
 
 % Button for decreasing number of ROIs
 ttsr='Increase the number of analysis ROIs by one.';
 uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
-    'backgroundcolor','w','String',char(10094),'Position',[tblNumROIs.Position(1)-12 tblNumROIs.Position(2) 12 tblNumROIs.Position(4)],...
+    'backgroundcolor','w','String','-','Position',[tblNumROIs.Position(1)-12 tblNumROIs.Position(2)+1 12 20],...
     'callback',{@chROINum '-'},'ToolTipString',ttstr);
 
 % Button for increasing the number of ROIs
 ttstr='Decrease the number of analysis ROIs by one.';
 b=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
-    'backgroundcolor','w','String',char(10095),'Position',[tblNumROIs.Position(1)+tblNumROIs.Position(3) tblNumROIs.Position(2) 12 tblNumROIs.Position(4)],...
+    'backgroundcolor','w','String','+','Position',[tblNumROIs.Position(1)+tblNumROIs.Position(3) tblNumROIs.Position(2)+1 12 20],...
     'callback',{@chROINum '+'},'ToolTipString',ttstr);
 
 % Callback function for changing number of ROIs
@@ -636,16 +639,16 @@ b=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
             otherwise
                 tblNumROIs.Data=state;                
         end
-        tblROI.Position(4)=min([hpROI.Position(4) tblROI.Extent(4)]);
-        tblROI.Position(2)=hpROI.Position(4)-tblROI.Position(4)-5;
+        % tblROI.Position(4)=min([hpROISettings.Position(4) tblROI.Extent(4)]);
+        % tblROI.Position(2)=hpROISettings.Position(4)-tblROI.Position(4)-5;
         drawnow;
     end
 
 % Button for decreasing ROI selector
 ttstr='Decrease the selected ROI by one';
 hbROI_down=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
-    'backgroundcolor',coNew(1,:),'String',char(10094),'Position',[2 b.Position(2)-20 12 20],....
-    'callback',{@chSelectROI, '-'},'ToolTipString',ttstr)
+    'backgroundcolor',coNew(1,:),'String',char(10094),'Position',[b.Position(1)+b.Position(3)+2 b.Position(2) 12 20],....
+    'callback',{@chSelectROI, '-'},'ToolTipString',ttstr);
 
 ttstr='Maximize analysis ROI to full image size.';
 cdata_fullLim=imread('images/fullLim.png');
@@ -667,7 +670,7 @@ cdata_full_lim_mask = [sum(cdata_fullLim,3)/255==3];
 hbROI_full=uicontrol(hpROISettings,'style','pushbutton','Cdata',fullLim_colored(1),'Fontsize',10,...
     'Backgroundcolor',coNew(1,:),'Position',[1 60 21 20],'Callback',@fullDispCB,...
     'ToolTipString',ttstr,'UserData',1);
-hbROI_full.Position(1:2)=[22 b.Position(2)-20];
+hbROI_full.Position(1:2)=[hbROI_down.Position(1)+hbROI_down.Position(3) b.Position(2)];
 
 % ttstr='Snap analysis ROI to data ROI(s).';
 cdata_snapLim=imread('images/snapLim.png');
@@ -730,7 +733,7 @@ hbROI_slct.Position(1:2)=[hbROI_snap.Position(1)+21 hbROI_snap.Position(2)];
 % Button for increasing ROI selector
 ttstr='Increase the selected ROI by one';
 hbROI_up=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
-    'backgroundcolor',coNew(1,:),'String',char(10095),'Position',[hbROI_slct.Position(1)+hbROI_slct.Position(3) b.Position(2)-20 12 20],...
+    'backgroundcolor',coNew(1,:),'String',char(10095),'Position',[hbROI_slct.Position(1)+hbROI_slct.Position(3) b.Position(2) 12 20],...
     'callback',{@chSelectROI, '+'},'ToolTipString',ttstr);
 
    
@@ -795,11 +798,11 @@ hbROI_up=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
 tblROI=uitable(hpROISettings,'units','pixels','ColumnWidth',{30 30 30 30},...
     'ColumnEditable',true(ones(1,4)),'ColumnName',{'X1','X2','Y1','Y2'},...
     'Data',[1 size(Z,2) 1 size(Z,1)],'FontSize',8,...
-    'CellEditCallback',@chROI,'backgroundcolor',coNew);
+    'CellEditCallback',@chROI,'backgroundcolor',coNew,'RowName',{});
 % tblROI.Position(3:4)=tblROI.Extent(3:4)+[18 0];
 
 tblROI.Position(3)=tblROI.Extent(3)+18;
-tblROI.Position(4) = 115;
+tblROI.Position(4) = 80;
 
 % tblROI.Position(1:2)=[1 hpROI.Position(4)-tblROI.Position(4)-5];
 tblROI.Position(1:2) = [5 5];
@@ -1044,19 +1047,6 @@ caxisequal.Position(1:2) = [1 90];
         SizeChangedFcn;        
     end
 
-% Toggle for showing a scale bar
-cscalebar=uicontrol('parent',hpDisp,'style','checkbox','string','show scale bar?',...
-    'fontsize',8,'Value',1,'units','pixels','backgroundcolor','w','callback',@scaleCB);
-cscalebar.Position(3:4)=[110 cscalebar.Extent(4)];
-cscalebar.Position(1:2) = [1 110];
-
-    function scaleCB(src,~)
-        pScaleX.Visible=src.Value;
-        pScaleY.Visible=src.Value;
-        tScaleX.Visible=src.Value;
-        tScaleY.Visible=src.Value;
-    end
-
 
 %% Initialize the image panel
 Htop = 130;         % Settings height
@@ -1078,8 +1068,7 @@ tab_raw_3=uitab(hp,'Title','dark','units','pixels','backgroundcolor','w');
 % Define spacing for images, useful for resizing
 l=80;   % Left gap for fitting and data analysis summary
 
-
-ax_gap = 20;
+ax_gap = 5;
 
 % Size of top row
 
@@ -1091,28 +1080,37 @@ ax_gap = 20;
             return;
         end
 
-        axImg.Position=[50 150 tab_od_1.Position(3)-200 tab_od_1.Position(4)-200];
+            axImg.Position=[60 80 tab_od_1.Position(3)-120 tab_od_1.Position(4)-120];
         drawnow;
-        axImg.Position=[50 150 tab_od_1.Position(3)-200 tab_od_1.Position(4)-200];
+            axImg.Position=[60 80 tab_od_1.Position(3)-120 tab_od_1.Position(4)-120];
         drawnow;
 
         % Get the aspect ratio of plot objects
-        Rimg=axImg.PlotBoxAspectRatio;Rimg=Rimg(1)/Rimg(2);
+        Rimg=axImg.PlotBoxAspectRatio;
+        
+        Rimg=Rimg(1)/Rimg(2);
         Rax=axImg.Position(3:4);Rax=Rax(1)/Rax(2);
         
         % Size of plot objects (position is weird in axis equal tight);
-        if Rax>Rimg
+        if Rax>Rimg % axes is shorter than image
             h1=axImg.Position(4);
             w1=axImg.Position(4)*Rimg;   
-            hAxX.Position=[axImg.Position(1)+(axImg.Position(3)-w1)/2 axImg.Position(2)-80-ax_gap w1 80];
-            hAxY.Position=[axImg.Position(1)+(axImg.Position(3)+w1)/2+ax_gap axImg.Position(2) 80 h1];
-        else
+            cBar.Location='westoutside';
+            hAxX.Position=[axImg.Position(1)+(axImg.Position(3)-w1)/2 axImg.Position(2)-50-ax_gap w1 50];
+            hAxY.Position=[axImg.Position(1)+(axImg.Position(3)+w1)/2+ax_gap axImg.Position(2) 50 h1];
+
+        else % Axes is taller than image
             w1=axImg.Position(3);
             h1=w1/Rimg;     
-            hAxX.Position=[axImg.Position(1) axImg.Position(2)+(axImg.Position(4)-h1)/2-80-ax_gap ...
-                w1 80];
+            % axImg.Position=[40 80 tab_od_1.Position(3)-130 tab_od_1.Position(4)-100];
+            drawnow;
+            cBar.Location='northoutside';
+
+            hAxX.Position=[axImg.Position(1) axImg.Position(2)+(axImg.Position(4)-h1)/2-50-ax_gap ...
+                w1 50];
             hAxY.Position=[axImg.Position(1)+axImg.Position(3)+ax_gap ...
-                axImg.Position(2)+(axImg.Position(4)-h1)/2 80 h1];            
+                axImg.Position(2)+(axImg.Position(4)-h1)/2 50 h1];        
+
         end
         
         % Match cut limits with the images limits
@@ -1134,7 +1132,7 @@ ax_gap = 20;
             return;
         end
 
-        hpControl.Position=[0 0 400 H];        % Resize image panel        
+        hpControl.Position(4) = H;        % Resize image panel        
         hp.Position=[hpControl.Position(3) 0 W-hpControl.Position(3) H];        % Resize image panel        
 
         
@@ -1205,14 +1203,7 @@ axImg.CLim=[0 .5];
 
 axis equal tight
 
-% Add plot and text for scale bar
-pScaleX=plot([50 150],[50 50],'color','r','linewidth',2);
-pScaleY=plot([50 50],[50 150],'color','r','linewidth',2);
-tScaleX=text(50,50,'100 \mum','units','data','color','r','fontsize',12,...
-    'verticalalignment','bottom','horizontalalignment','left','fontweight','bold');
-tScaleY=text(50,50,'100 \mum','units','data','color','r',...
-    'verticalalignment','bottom','horizontalalignment','right',...
-    'rotation',90,'fontsize',12,'fontweight','bold');
+
 tImageFile=text(3,3,'FILENAME','units','pixels','fontsize',8,'fontweight','bold',...
     'horizontalalignment','left','verticalalignment','bottom','margin',1,...
     'interpreter','none','backgroundcolor',[1 1 1 .5]);
@@ -1543,7 +1534,7 @@ tabs(2)=uitab(hpFit,'Title','flags','units','pixels');
 tabs(3)=uitab(hpFit,'Title','1','units','pixels','foregroundcolor',co(1,:));
 
 % Table for run parameters
-tbl_params=uitable(tabs(1),'units','normalized','RowName',{},'fontsize',8,...
+tbl_params=uitable(tabs(1),'units','normalized','RowName',{},'fontsize',7,...
     'ColumnName',{},'ColumnWidth',{135 60},'columneditable',[false false],...
     'Position',[0 0 1 1]);
 % Table for run parameters
@@ -1565,20 +1556,21 @@ hpImgProcess=uipanel('parent',hpControl,'units','pixels','backgroundcolor','w',.
 hpImgProcess.Position = [0 hpROISettings.Position(2)-100 hpControl.Position(3)/2 120];
 % Method of calculating OD
 bgODFieldText=uicontrol('style','text','parent',hpImgProcess,...
-    'String','Bfield:','backgroundcolor','w','position',[0 hpImgProcess.Position(4)-35 35 20]);
+    'String','field:','backgroundcolor','w','position',[0 hpImgProcess.Position(4)-30 25 15],...
+    'fontsize',7);
 bgODField = uibuttongroup('units','pixels','backgroundcolor','w',...
-    'position',[30 hpImgProcess.Position(4)-30 180 20],...
+    'position',[25 hpImgProcess.Position(4)-30 180 20],...
     'SelectionChangedFcn',@chOD,'parent',hpImgProcess,'BorderType','None');        
 % Create radio buttons in the button group.
 uicontrol(bgODField,'Style','radiobutton','String','Detect',...
-    'Position',[5 0 50 20],'units','pixels','backgroundcolor','w',...
-    'Value',1,'fontsize',8);
+    'Position',[0 0 48 20],'units','pixels','backgroundcolor','w',...
+    'Value',1,'fontsize',7);
 uicontrol(bgODField,'Style','radiobutton','String','High',...
-    'Position',[60 0 50 20],'units','pixels','backgroundcolor','w',...
-    'Value',0,'fontsize',8);
+    'Position',[47 0 40 20],'units','pixels','backgroundcolor','w',...
+    'Value',0,'fontsize',7);
 uicontrol(bgODField,'Style','radiobutton','String','Low',...
-    'Position',[105 0 50 20],'units','pixels','backgroundcolor','w',...
-    'fontsize',8,'value',0);
+    'Position',[85 0 50 20],'units','pixels','backgroundcolor','w',...
+    'fontsize',7,'value',0);
 
     function chOD(src,evt)
         switch evt.NewValue.String
@@ -1596,24 +1588,24 @@ uicontrol(bgODField,'Style','radiobutton','String','Low',...
 % Checkbox for enabling 2D gauss fitting
 cGaussFilter=uicontrol('style','checkbox','string','gauss filter',...
     'units','pixels','parent',hpImgProcess,'backgroundcolor','w',...
-    'value',0);
+    'value',0,'fontsize',7);
 cGaussFilter.Position=[5 hpImgProcess.Position(4)-50 75 15];
 
 tblGaussFilter=uitable('parent',hpImgProcess,'units','pixels',...
     'rowname',{},'columnname',{},'Data',.5,'columneditable',[true],...
-    'columnwidth',{45},'fontsize',8,'ColumnFormat',{'numeric'});
+    'columnwidth',{45},'fontsize',7,'ColumnFormat',{'numeric'});
 tblGaussFilter.Position=[80 cGaussFilter.Position(2)-2 50 20];
 
 % Pixels label
 uicontrol('parent',hpImgProcess,'units','pixels',...
     'style','text','string','px','position',[132 60 15 15],...
-    'fontsize',8,'backgroundcolor','w');
+    'fontsize',7,'backgroundcolor','w');
 
 % Checkbox for enabling scaling of the probe
 cScaleProbe=uicontrol('style','checkbox','string','scale',...
     'value',1,'parent',hpImgProcess,'backgroundcolor','w',...
     'position',[5 cGaussFilter.Position(2)-20 100 15],...
-    'callback',@cScaleProbeCB);
+    'callback',@cScaleProbeCB,'fontsize',7);
 
     function cScaleProbeCB(~,~)
         pROIPScale.Visible=cScaleProbe.Value;
@@ -1623,13 +1615,13 @@ cScaleProbe=uicontrol('style','checkbox','string','scale',...
 
 d=scaleProbeDefaultROI;
 pp=[d(1) d(3) d(2)-d(1) d(4)-d(3)];
-tblROIPScale=uitable(hpImgProcess,'units','pixels','ColumnWidth',{30 30 30 30},...
+tblROIPScale=uitable(hpImgProcess,'units','pixels','ColumnWidth',{25 25 25 25},...
     'ColumnEditable',true(ones(1,4)),'ColumnName',{},...
-    'Data',d,'FontSize',8,'RowName',{},...
+    'Data',d,'FontSize',7,'RowName',{},...
     'CellEditCallback',@chROIPScale);
 tblROIPScale.Position(3)=tblROIPScale.Extent(3);
 tblROIPScale.Position(4)=20;
-tblROIPScale.Position(1:2)=[55 cScaleProbe.Position(2)-3];
+tblROIPScale.Position(1:2)=[45 cScaleProbe.Position(2)-3];
 
 pROIPScale=rectangle('position',pp,'edgecolor','r','linewidth',2,...
     'visible','on','parent',axImg,'linestyle',':');
@@ -1672,12 +1664,12 @@ pROIPScale=rectangle('position',pp,'edgecolor','r','linewidth',2,...
 % Checkbox for rotating image
 cRotate=uicontrol('style','checkbox','string','rotate',...
     'units','pixels','parent',hpImgProcess,'backgroundcolor','w',...
-    'value',1);
+    'value',1,'fontsize',7);
 cRotate.Position=[5 cScaleProbe.Position(2)-20 75 15];
 
 tblRotate=uitable('parent',hpImgProcess,'units','pixels',...
     'rowname',{},'columnname',{},'Data',0,'columneditable',[true],...
-    'columnwidth',{45},'fontsize',8,'ColumnFormat',{'numeric'});
+    'columnwidth',{45},'fontsize',7,'ColumnFormat',{'numeric'});
 tblRotate.Position=[80 cRotate.Position(2)-5 50 20];
 
 
@@ -2013,7 +2005,6 @@ tbl_raw2counts.Position(1:2)=[tbl_raw1counts.Position(1)+tbl_raw1counts.Position
 % Resize Everything to look good
 hF.SizeChangedFcn=@SizeChangedFcn;
 SizeChangedFcn(hF,[]);
-updateScalebar;
 drawnow;
 %% Initialize Camera
 % Initialize the trig checker
@@ -2225,16 +2216,6 @@ function updateImages(data)
     thistoryInd.String=sprintf('%03d',ind);        
 end
 
-    function updateScalebar
-        ROI=tbl_dispROI.Data;
-        set(pScaleX,'XData',axImg.XTick(1:2),'YData',[1 1]*ROI(3)+(ROI(4)-ROI(3))*(1-35/axImg.Position(3)));           
-        set(pScaleY,'YData',axImg.YTick(1:2),'XData',[1 1]*ROI(1)+(ROI(2)-ROI(1))*20/axImg.Position(4));
-        tScaleX.String=[num2str(range(axImg.XTick(1:2))*tbl_optics.Data{2,2}) '\mum'];
-        tScaleY.String=[num2str(range(axImg.YTick(1:2))*tbl_optics.Data{2,2}) '\mum'];
-        tScaleX.Position(1:2)=[axImg.XTick(1) pScaleX.YData(1)];
-        tScaleY.Position(1:2)=[pScaleY.XData(1) axImg.YTick(1)]; 
-        drawnow;
-    end
 
 function updatePlots(data)
 
