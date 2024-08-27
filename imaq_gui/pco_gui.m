@@ -41,35 +41,17 @@ for kk=1:length(a.Children)
     end
 end
 %% Camera and Imaging Settings
-
 default_camera_settings = defaultPCOSettings;
-
 % Camera properties
 raw_pixel_size=6.45E-6; % Pixelsize on the pixefly cameras
-
 % Optics
 mag=[1 2]; % ideal manification of X and Y cams respectively
-
-% Rotation
-rotation_angle = [0 -1.7]; % Rotation angles of X and Y cams respectively
-% Note that rotations are tricky because the total image size changes.
-% However, because our rotation angles are assumed to be small, we can
-% mostly fix this issue by recropping the image to be the same size. This
-% technique WILL FAIL for large rotation angles
 rotMode = 'bicubic'; % 'nearest','bilinear','bicubic'
-
 rotCrop = 'crop'; % 'crop' or 'loose'
-% X Cam has 200 mm objective, 200 mm refocuing
-% Y Cam has 200 mm objective, 400 mm refocusing
-
-% historyDir=['C:' filesep 'ImageHistory'];
 frVar='ExecutionDate';
 camera=initCamStruct;
-
 scaleProbeDefaultROI=[1300 1350 60 100];
-
 boxBkgdDefaultROI = [400 500 400 500];
-
 coNew=default_camera_settings.ColorOrder;
 
 %% Initialize Dummy Data
@@ -387,15 +369,15 @@ uicontrol(bgCam,'Style','radiobutton','String','Y Cam',...
     function chCam(~,evt)
         switch evt.NewValue.String
             case 'X Cam'
-                tbl_optics.Data{2,2}=mag(1);
-                tbl_cam.Data{1,2} = raw_pixel_size*1E6/mag(1);
-                tblRotate.Data = rotation_angle(1);
-                
+                tbl_optics.Data{2,2} = default_camera_settings.Magnification(1);
+                tbl_cam.Data{1,2} = default_camera_settings.PixelSize(1)*1E6/default_camera_settings.Magnification(1);
+                tblRotate.Data = default_camera_settings.RotationAngle(1);
+                tblROIPScale.Data = default_camera_settings.ScaleProbeROI(1,:);                
             case 'Y Cam'
-                tbl_optics.Data{2,2}=mag(2);
-                tbl_cam.Data{1,2} = raw_pixel_size*1E6/mag(2);
-                tblRotate.Data = rotation_angle(2);
-
+                tbl_optics.Data{2,2} = default_camera_settings.Magnification(2);
+                tbl_cam.Data{1,2} = default_camera_settings.PixelSize(2)*1E6/default_camera_settings.Magnification(2);
+                tblRotate.Data = default_camera_settings.RotationAngle(2);
+                tblROIPScale.Data = default_camera_settings.ScaleProbeROI(2,:);  
         end
     end
 
@@ -770,14 +752,14 @@ tbl_dispROI.Position(1:2)=[1 80];
 ttstr='Maximize display ROI to full image size.';
 cdata=imresize(imread('images/fullLim.png'),[15 15]);
 hbFullLim=uicontrol(hpDisp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
-    'Backgroundcolor','w','Position',[1 60 21 20],'Callback',@fullDispCB,...
+    'Backgroundcolor','w','Position',[1 60 21 20],'Callback',@(src,evt) chDispROI('max'),...
     'ToolTipString',ttstr);
 hbFullLim.Position(1:2)=[1 60];
 
 ttstr='Snap display ROI to data ROI(s).';
 cdata=imresize(imread('images/snapLim.png'),[15 15]);
 hbSnapLim=uicontrol(hpDisp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
-    'Backgroundcolor','w','Position',[1  60 21 20],'Callback',@snapDispCB,...
+    'Backgroundcolor','w','Position',[1  60 21 20],'Callback',@(src,evt) chDispROI('snap'),...
     'ToolTipString',ttstr);
 hbSnapLim.Position(1:2)=[21 60];
 
@@ -785,7 +767,7 @@ hbSnapLim.Position(1:2)=[21 60];
 ttstr='Select the display ROI.';
 cdata=imresize(imread('images/target.jpg'),[15 15]);
 hbSlctLim=uicontrol(hpDisp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
-    'Backgroundcolor','w','Position',[1 60 20 20],'Callback',@slctDispCB,...
+    'Backgroundcolor','w','Position',[1 60 20 20],'Callback',@(src,evt) chDispROI('select'),...
     'ToolTipString',ttstr);
 hbSlctLim.Position(1:2)=[42 60];
 
@@ -817,6 +799,23 @@ hbSlctLim.Position(1:2)=[42 60];
                     allROI = tblROI.Data;                             
                     ROI=[min(allROI(:,1)) max(allROI(:,2)) ...
                         min(allROI(:,3)) max(allROI(:,4))];
+                case 'select'
+                    disp(['Selecting display ROI .' ...
+            '        Click two points that form the rectangle ROI.']);
+                    axes(axImg)                 % Select the OD image axis
+                    [x1,y1]=ginputMe(1);          % Get a mouse click
+                    x1=round(x1);y1=round(y1);  % Round to interger        
+                    p1=plot(x1,y1,'+','color','k','linewidth',1); % Plot it
+                    
+                    [x2,y2]=ginputMe(1);          % Get a mouse click
+                    x2=round(x2);y2=round(y2);  % Round it        
+                    p2=plot(x2,y2,'+','color','k','linewidth',1);  % Plot it
+            
+                    delete(p1);delete(p2);                   % Delete markers
+                    enableInteractivity;                 % Select the OD image axis
+            
+                    % Create the ROI
+                    ROI=[min([x1 x2]) max([x1 x2]) min([y1 y2]) max([y1 y2])];
                 otherwise 
                     err=1;
            end
@@ -848,104 +847,8 @@ hbSlctLim.Position(1:2)=[42 60];
             err = 1;
         end    
     end
-% 
-%     function tbl_dispROICB(src,evt)
-%         ROI=src.Data;        % Grab the new ROI     
-%         % Check that the data is numeric
-%         if sum(~isnumeric(ROI)) || sum(isinf(ROI)) || sum(isnan(ROI))
-%             warning('Incorrect data type provided for ROI.');
-%             src.Data(evt.Indices(2))=evt.PreviousData;
-%             return;
-%         end        
-%         ROI=round(ROI);      % Make sure this ROI are integers   
-% 
-%         % Keep the ROI within image bounds (this is hardcoded and could be
-%         % changed if we ever implement hardware ROI but want to keep 
-%         % absolute pixel positions relative to total sensor.)
-%         if ROI(2)<=ROI(1) || ROI(4)<=ROI(3)
-%            warning('Bad ROI specification given.');
-%            ROI(evt.Indices(2))=evt.PreviousData;
-%         end       
-%         if ROI(1)<1; ROI(1)=1; end       
-%         if ROI(3)<1; ROI(3)=1; end   
-%         if ROI(4)>size(dstruct.PWA,1); ROI(4)=size(dstruct.PWA,1);end       
-%         if ROI(2)>size(dstruct.PWA,2); ROI(2)=size(dstruct.PWA,2);end       
-%         src.Data=ROI;       
-%         try
-%             set(axImg,'XLim',ROI(1:2),'YLim',ROI(3:4));
-%             set(axPWA,'XLim',axImg.XLim,'YLim',axImg.YLim);
-%             set(axPWOA,'XLim',axImg.XLim,'YLim',axImg.YLim);
-%             set(axDark,'XLim',axImg.XLim,'YLim',axImg.YLim);
-% 
-% 
-%             resizePlots;
-%             drawnow;
-% %             pDisp.Position=[ROI(1) ROI(3) ROI(2)-ROI(1) ROI(4)-ROI(3)];           
-%             % updateScalebar;
-%             drawnow;
-%         catch ab
-%             warning('Unable to change display ROI.');
-%             src.Data(evt.Indices)=evt.PreviousData;
-%         end
-%     end
 
-    function fullDispCB(~,~)
-       ROI=[1 size(dstruct.PWA,2) 1 size(dstruct.PWOA,1)];
-       tbl_dispROI.Data=ROI;
-       tbl_dispROICB(tbl_dispROI);
-        % set(axPWA,'XLim',axImg.XLim,'YLim',axImg.YLim);
-        % set(axPWOA,'XLim',axImg.XLim,'YLim',axImg.YLim);
-        % set(axDark,'XLim',axImg.XLim,'YLim',axImg.YLim);
 
-       resizePlots;
-       drawnow;
-    end
-
-    function snapDispCB(~,~)
-       ROI=[min(tblROI.Data(:,1)) max(tblROI.Data(:,2)) ...
-           min(tblROI.Data(:,3)) max(tblROI.Data(:,4))];
-       tbl_dispROI.Data=ROI;
-       tbl_dispROICB(tbl_dispROI);
-        % % set(axPWA,'XLim',axImg.XLim,'YLim',axImg.YLim);
-        % set(axPWOA,'XLim',axImg.XLim,'YLim',axImg.YLim);
-        % set(axDark,'XLim',axImg.XLim,'YLim',axImg.YLim);
-
-       resizePlots;
-       drawnow;
-    end
-
-    function slctDispCB(~,~)
-        disp(['Selecting display ROI .' ...
-            ' Click two points that form the rectangle ROI.']);
-        axes(axImg)                 % Select the OD image axis
-        [x1,y1]=ginputMe(1);          % Get a mouse click
-        x1=round(x1);y1=round(y1);  % Round to interger        
-        p1=plot(x1,y1,'+','color','k','linewidth',1); % Plot it
-        
-        [x2,y2]=ginputMe(1);          % Get a mouse click
-        x2=round(x2);y2=round(y2);  % Round it        
-        p2=plot(x2,y2,'+','color','k','linewidth',1);  % Plot it
-
-        delete(p1);delete(p2);                   % Delete markers
-
-        enableInteractivity;                 % Select the OD image axis
-
-        % Create the ROI
-        ROI=[min([x1 x2]) max([x1 x2]) min([y1 y2]) max([y1 y2])];
-
-        % Constrain ROI to image
-        if ROI(1)<1; ROI(1)=1; end       
-        if ROI(3)<1; ROI(3)=1; end   
-        if ROI(4)>size(dstruct.PWA,1); ROI(4)=size(dstruct.PWA,2); end       
-        if ROI(2)>size(dstruct.PWA,2); ROI(2)=size(dstruct.PWA,2); end   
-        
-        % Try to update ROI graphics
-        tbl_dispROI.Data=ROI;
-        tbl_dispROICB(tbl_dispROI);
-
-        resizePlots;       
-        drawnow;        
-    end
 
 
 % Toggle for axis equal tight
@@ -978,7 +881,7 @@ tNumROIs.Position(1:2) = [1 hpROISettings.Position(4)-35];
 
 % Table for number of ROIs
 tblNumROIs=uitable(hpROISettings,'Data',1,'RowName',{},'columnName',{},...
-    'units','pixels','ColumnWidth',{15},'fontsize',6);
+    'units','pixels','ColumnWidth',{15},'fontsize',6,'CellEditCallback',@chROICB);
 tblNumROIs.Position=[tNumROIs.Position(1)+tNumROIs.Position(3)+12 hpROISettings.Position(4)-35 tblNumROIs.Extent(3:4)];
 
 % Button for decreasing number of ROIs
@@ -1092,9 +995,10 @@ cdata_full_lim_mask = [sum(cdata_fullLim,3)/255==3];
     end
 
 hbROI_full=uicontrol(hpROISettings,'style','pushbutton','Cdata',fullLim_colored(1),'Fontsize',10,...
-    'Backgroundcolor',coNew(1,:),'Position',[1 60 21 20],'Callback',@fullDispCB,...
+    'Backgroundcolor',coNew(1,:),'Position',[1 60 21 20],'Callback',@(src,evt) chROI('max'),...
     'ToolTipString',ttstr,'UserData',1);
 hbROI_full.Position(1:2)=[hbROI_down.Position(1)+hbROI_down.Position(3) b.Position(2)];
+
 
 % ttstr='Snap analysis ROI to data ROI(s).';
 cdata_snapLim=imread('images/snapLim.png');
@@ -1114,7 +1018,7 @@ cdata_snapLim_mask = [sum(cdata_snapLim,3)/255==3];
     end
 
 hbROI_snap=uicontrol(hpROISettings,'style','pushbutton','Cdata',snapLim_colored(1),'Fontsize',10,...
-    'Backgroundcolor',coNew(1,:),'Position',[1  60 21 20],'Callback',@snapDispCB,...
+    'Backgroundcolor',coNew(1,:),'Position',[1  60 21 20],'Callback',@(src,evt) chROI('snap'),...
     'ToolTipString',ttstr,'UserData',1);
 hbROI_snap.Position(1:2)=[hbROI_full.Position(1)+21 hbROI_full.Position(2)];
 
@@ -1141,7 +1045,7 @@ cdata_selectLim_mask = [sum(cdata_selectLim,3)/255==3];
 ttstr='Select the analysis ROI.';
 % cdata=imresize(imread('images/target.jpg'),[15 15]);
 hbROI_slct=uicontrol(hpROISettings,'style','pushbutton','Cdata',selectLim_colored(1),'Fontsize',10,...
-    'Backgroundcolor',coNew(1,:),'Position',[1 60 20 20],'Callback',@selectROICB,...
+    'Backgroundcolor',coNew(1,:),'Position',[1 60 20 20],'Callback',@(src,evt) chROI('select'),...
     'ToolTipString',ttstr,'UserData',1);
 hbROI_slct.Position(1:2)=[hbROI_snap.Position(1)+21 hbROI_snap.Position(2)];
 
@@ -1153,40 +1057,40 @@ hbROI_up=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
     'callback',{@chSelectROI, '+'},'ToolTipString',ttstr);
 
    
-% Callback function for GUI selection of ROI
-    function selectROICB(src,~)
-        RNum=src.UserData;          % ROI number
-        disp(['Selecting ROI ' num2str(RNum) '.' ...
-            ' Click two points that form the rectangle ROI.']);
-        axes(axImg)                 % Select the OD image axis
-        [x1,y1]=ginputMe(1);          % Get a mouse click
-        x1=round(x1);y1=round(y1);  % Round to interger        
-        p1=plot(x1,y1,'+','color',co(RNum,:),'linewidth',1); % Plot it
-        
-        [x2,y2]=ginputMe(1);          % Get a mouse click
-        x2=round(x2);y2=round(y2);  % Round it        
-        p2=plot(x2,y2,'+','color',co(RNum,:),'linewidth',1);  % Plot it
-        delete(p1);delete(p2);                   % Delete markers
-
-        % Create the ROI
-        ROI=[min([x1 x2]) max([x1 x2]) min([y1 y2]) max([y1 y2])];
-
-        % Constrain ROI to image
-        if ROI(1)<1; ROI(1)=1; end       
-        if ROI(3)<1; ROI(3)=1; end   
-        if ROI(4)>size(dstruct.PWA,1); ROI(4)=size(dstruct.PWA,1); end       
-        if ROI(2)>size(dstruct.PWA,2); ROI(2)=size(dstruct.PWA,2); end     
-        % Try to update ROI graphics
-        try
-            pos=[ROI(1) ROI(3) ROI(2)-ROI(1) ROI(4)-ROI(3)];
-            set(pROI(RNum),'Position',pos);
-            tblROI.Data(RNum,:)=ROI;      
-        catch 
-            disp('bad ROI selected.');
-        end                
-
-        enableInteractivity;
-    end
+% % Callback function for GUI selection of ROI
+%     function selectROICB(src,~)
+%         RNum=src.UserData;          % ROI number
+%         disp(['Selecting ROI ' num2str(RNum) '.' ...
+%             ' Click two points that form the rectangle ROI.']);
+%         axes(axImg)                 % Select the OD image axis
+%         [x1,y1]=ginputMe(1);          % Get a mouse click
+%         x1=round(x1);y1=round(y1);  % Round to interger        
+%         p1=plot(x1,y1,'+','color',co(RNum,:),'linewidth',1); % Plot it
+% 
+%         [x2,y2]=ginputMe(1);          % Get a mouse click
+%         x2=round(x2);y2=round(y2);  % Round it        
+%         p2=plot(x2,y2,'+','color',co(RNum,:),'linewidth',1);  % Plot it
+%         delete(p1);delete(p2);                   % Delete markers
+% 
+%         % Create the ROI
+%         ROI=[min([x1 x2]) max([x1 x2]) min([y1 y2]) max([y1 y2])];
+% 
+%         % Constrain ROI to image
+%         if ROI(1)<1; ROI(1)=1; end       
+%         if ROI(3)<1; ROI(3)=1; end   
+%         if ROI(4)>size(dstruct.PWA,1); ROI(4)=size(dstruct.PWA,1); end       
+%         if ROI(2)>size(dstruct.PWA,2); ROI(2)=size(dstruct.PWA,2); end     
+%         % Try to update ROI graphics
+%         try
+%             pos=[ROI(1) ROI(3) ROI(2)-ROI(1) ROI(4)-ROI(3)];
+%             set(pROI(RNum),'Position',pos);
+%             tblROI.Data(RNum,:)=ROI;      
+%         catch 
+%             disp('bad ROI selected.');
+%         end                
+% 
+%         enableInteractivity;
+%     end
 
     function chSelectROI(~,~,state)
         switch state
@@ -1202,6 +1106,7 @@ hbROI_up=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
                     index=1;
                 end
         end
+        tblROI.UserData = index;
         hbROI_slct.UserData=index;
         hbROI_snap.UserData=index;
         hbROI_full.UserData=index;
@@ -1217,7 +1122,7 @@ hbROI_up=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
 tblROI=uitable(hpROISettings,'units','pixels','ColumnWidth',{30 30 30 30},...
     'ColumnEditable',true(ones(1,4)),'ColumnName',{'X1','X2','Y1','Y2'},...
     'Data',[1 size(Z,2) 1 size(Z,1)],'FontSize',8,...
-    'CellEditCallback',@chROI,'backgroundcolor',coNew,'RowName',{});
+    'CellEditCallback',@chROI,'backgroundcolor',coNew,'RowName',{},'UserData',1);
 % tblROI.Position(3:4)=tblROI.Extent(3:4)+[18 0];
 
 tblROI.Position(3)=tblROI.Extent(3)+18;
@@ -1226,9 +1131,11 @@ tblROI.Position(4) = 105;
 % tblROI.Position(1:2)=[1 hpROI.Position(4)-tblROI.Position(4)-5];
 tblROI.Position(1:2) = [5 5];
 % Callback function for changing ROI via table
-    function chROI(src,evt)
+
+
+
+    function chROICB(src,evt)
         m=evt.Indices(1); n=evt.Indices(2);
-        
         ROI=src.Data(m,:);
         % Check that the data is numeric
         if sum(~isnumeric(ROI)) || sum(isinf(ROI)) || sum(isnan(ROI))
@@ -1236,29 +1143,77 @@ tblROI.Position(1:2) = [5 5];
             src.Data(m,n)=evt.PreviousData;
             return;
         end        
-        ROI=round(ROI);      % Make sure this ROI are integers   
-        % Check that limits go from low to high
-        if ROI(2)<=ROI(1) || ROI(4)<=ROI(3)
-           warning('Bad ROI specification given.');
-           ROI(evt.Indices(2))=evt.PreviousData;
-        end               
-        % Check that ROI is within image bounds
-        if ROI(1)<1; ROI(1)=1; end       
-        if ROI(3)<1; ROI(3)=1; end   
-        if ROI(4)>size(dstruct.PWA,1); ROI(4)=size(dstruct.PWA,1); end       
-        if ROI(2)>size(dstruct.PWA,2); ROI(2)=size(dstruct.PWA,2); end         
-        % Reassign the ROI
-        src.Data(m,:)=ROI;      
-        % Try to update ROI graphics
-        try
-            pos=[ROI(1) ROI(3) ROI(2)-ROI(1) ROI(4)-ROI(3)];
-            set(pROI(m),'Position',pos);
-        catch
-           warning('Unable to change display ROI.');
-           src.Data(m,n)=evt.PreviousData;
-        end
+        ROI=round(ROI);      % Make sure this ROI are integers 
+        [ROI,err] = chROI(ROI,m);    % Update the ROI         
+        src.Data(m,:)=ROI;
     end
 
+
+% Change analysis ROI
+    function [ROI,err] = chROI(ROI,index)
+        if nargin ==1; index=tblROI.UserData; end
+        % ROI : Input ROI [x1 x2 y1 y2]
+        err = 0;     
+        % this is not good because of double shutter image. how to get the
+        % ROI limits? from the data probably
+        ROI_LIM = [hImg.XData(1) hImg.XData(end) hImg.YData(1) hImg.YData(end)];    
+        
+        % Check for string inputs of max and min
+        if isa(ROI,'char')
+            switch ROI
+                case 'max'
+                    ROI = ROI_LIM;
+                case 'snap'       
+                    ROI = tbl_dispROI.Data ;
+                case 'select'
+                    disp(['Selecting display ROI .' ...
+            '        Click two points that form the rectangle ROI.']);
+                    axes(axImg)                 % Select the OD image axis
+                    [x1,y1]=ginputMe(1);          % Get a mouse click
+                    x1=round(x1);y1=round(y1);  % Round to interger        
+                    p1=plot(x1,y1,'+','color','k','linewidth',1); % Plot it
+                    
+                    [x2,y2]=ginputMe(1);          % Get a mouse click
+                    x2=round(x2);y2=round(y2);  % Round it        
+                    p2=plot(x2,y2,'+','color','k','linewidth',1);  % Plot it
+            
+                    delete(p1);delete(p2);                   % Delete markers
+                    enableInteractivity;                 % Select the OD image axis
+            
+                    % Create the ROI
+                    ROI=[min([x1 x2]) max([x1 x2]) min([y1 y2]) max([y1 y2])];
+                otherwise 
+                    err=1;
+           end
+        end
+        % Make sure ROI is numeric
+         if sum(~isnumeric(ROI)) || sum(isinf(ROI)) || sum(isnan(ROI))
+            warning('Incorrect data type provided for ROI.');
+            err = 1;
+            return
+        end 
+        % Make sure ROI is increasing order
+        if ROI(2)<=ROI(1) || ROI(4)<=ROI(3)
+           warning('Bad ROI specification given.');
+            err = 1;
+            return
+        end 
+        % Keep ROI within the bounds
+        if ROI(1)<ROI_LIM(1); ROI(1)=ROI_LIM(1); end       
+        if ROI(3)<ROI_LIM(3); ROI(3)=ROI_LIM(3); end   
+        if ROI(2)>ROI_LIM(2); ROI(2)=ROI_LIM(2);end       
+        if ROI(4)>ROI_LIM(4); ROI(2)=ROI_LIM(4);end       
+        % Attempt to change the display ROI
+        try        
+            tblROI.Data(index,:) = ROI;    
+            pos=[ROI(1) ROI(3) ROI(2)-ROI(1) ROI(4)-ROI(3)];
+            set(pROI(index),'Position',pos);
+            resizePlots;
+        catch ME
+            warning('Unable to change analysis ROI.');
+            err = 1;
+        end    
+    end
 
 %% Initialize the image panel
 Htop = 130;         % Settings height
@@ -2658,10 +2613,65 @@ try
 end
 
 enableInteractivity;
+addlistener(axImg,'XLim','PostSet',@foo); 
+addlistener(axImg,'YLim','PostSet',@foo); 
+
 
 function enableInteractivity
     enableDefaultInteractivity(axImg);
 end
+
+    function foo(~,~)
+% imgnum = menuSelectImg.Value;
+%         switch menuSelectImgType.Value
+%             case 1
+%                 Z = data.Z(:,:,imgnum);
+%             case 2
+%                 Z = data.ZNoFilter(:,:,imgnum);
+%         end
+% 
+%         if cAutoColor_X.Value;setClim('X');end 
+%         % Find center of update
+%         xC = mean(axImg.XLim);yC = mean(axImg.YLim);
+% 
+%         % Update crosshair
+%         set(pCrossX,'XData',axImg.XLim,'YData',[1 1]*yC);
+%         set(pCrossY,'YData',axImg.YLim,'XData',[1 1]*xC); 
+% 
+%         % Round the table limits
+        tbl_dispROI.Data = round([axImg.XLim axImg.YLim]); 
+% 
+%         % Get the region of interest
+%         ROI =  [axImg.XLim axImg.YLim];
+% 
+%         % Find indeces in which correspond to ROI boundary
+%         [~,c1] = min(abs(data.X-ROI(1)));
+%         [~,c2] = min(abs(data.X-ROI(2)));
+%         [~,r1] = min(abs(data.Y-ROI(3)));
+%         [~,r2] = min(abs(data.Y-ROI(4)));
+% 
+%         % Find indeces corresponding to center of displayed image
+%         [~,iC] = min(abs(data.X-xC));
+%         [~,iR] = min(abs(data.Y-yC));
+% 
+%         % Update plots if cut
+%         if rbCut_X.Value
+%             set(pX,'XData',data.X,'YData',Z(iR,:));
+%             set(pY,'YData',data.Y,'XData',Z(:,iC));
+%         end     
+% 
+%         if rbSum_X.Value    
+%             zsub = Z(r1:r2,c1:c2);    
+%             xsub = data.X(c1:c2);
+%             ysub = data.Y(r1:r2);
+%             set(pX,'XData',xsub,'YData',sum(zsub,1));
+%             set(pY,'YData',ysub,'XData',sum(zsub,2));
+%         end 
+% 
+%         if hc_anlX_Gauss.Value
+%             updateGaussLinePlot;
+%         end
+    end
 
 
 

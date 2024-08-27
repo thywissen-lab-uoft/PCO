@@ -12,11 +12,11 @@ out.NumImages       = [3;3];               % Number of Images
 % Region of interest to scale probe to account for probe beam power
 % fluctuations
 out.ScaleProbeROI = [1300 1350 60 100;      
-                     1300 1350 60 100];
+                     50 200 60 100];
 
 % Region of interest to subtract background counts for box count
 out.BoxBkgdROI = [400 500 400 500;
-                400 500 400 500];
+                400 500 250 400];
 
 % Color order of lines
 coNew=[hex2dec(['78';'a2';'cc'])';
