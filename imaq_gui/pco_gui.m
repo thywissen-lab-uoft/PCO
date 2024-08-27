@@ -135,7 +135,7 @@ coNew=brighten([coNew;coNew;coNew],.2);
 %% UI Panels
 
 % Control Panel
-W_control = 350;
+W_control = 310;
 hpControl = uipanel(hF,'units','pixels');
 hpControl.Position=[0 0 W_control hF.Position(4)];
 
@@ -902,12 +902,12 @@ caxisequal.Position(1:2) = [1 100];
 %% ROI Settings panel
 hpROISettings=uipanel(hpControl,'units','pixels','backgroundcolor','w',...
     'title','Analysis ROI','fontsize',6);
-hpROISettings.Position=[hpControl.Position(3)/2 hpDisp.Position(2)-140 ...
-    hpControl.Position(3)/2 140];
+hpROISettings.Position=[hpControl.Position(3)/2 hpDisp.Position(2)-150 ...
+    hpControl.Position(3)/2 150];
 
 
 tNumROIs = uicontrol(hpROISettings,'units','pixels','backgroundcolor','w',...
-    'style','text','string','Num.:','fontsize',8,'horizontalalignment','left');
+    'style','text','string','','fontsize',8,'horizontalalignment','left');
 tNumROIs.Position(3:4)=tNumROIs.Extent(3:4);
 tNumROIs.Position(1:2) = [1 hpROISettings.Position(4)-35];
 
@@ -1156,7 +1156,7 @@ tblROI=uitable(hpROISettings,'units','pixels','ColumnWidth',{30 30 30 30},...
 % tblROI.Position(3:4)=tblROI.Extent(3:4)+[18 0];
 
 tblROI.Position(3)=tblROI.Extent(3)+18;
-tblROI.Position(4) = 80;
+tblROI.Position(4) = 105;
 
 % tblROI.Position(1:2)=[1 hpROI.Position(4)-tblROI.Position(4)-5];
 tblROI.Position(1:2) = [5 5];
@@ -1220,57 +1220,47 @@ ax_gap = 5;
 % Size of top row
 
     function resizePlots       
-        % Resize the image axis     
-        
+        % Resize the image axis             
         if (tab_od_1.Position(3)<250 || tab_od_1.Position(4)<250)
             disp('oh no')
             return;
         end
-
-            axImg.Position=[60 80 tab_od_1.Position(3)-120 tab_od_1.Position(4)-120];
+        axImg.Position=[60 80 tab_od_1.Position(3)-120 tab_od_1.Position(4)-120];
         drawnow;
-            axImg.Position=[60 80 tab_od_1.Position(3)-120 tab_od_1.Position(4)-120];
+        axImg.Position=[60 80 tab_od_1.Position(3)-120 tab_od_1.Position(4)-120];
         drawnow;
-
         % Get the aspect ratio of plot objects
-        Rimg=axImg.PlotBoxAspectRatio;
-        
+        Rimg=axImg.PlotBoxAspectRatio;        
+        w_tab = tab_od_1.Position(3)-120;
+        h_tab = tab_od_1.Position(4)-120;        
         Rimg=Rimg(1)/Rimg(2);
-        Rax=axImg.Position(3:4);Rax=Rax(1)/Rax(2);
-        
+        Rax = w_tab/h_tab;          
         % Size of plot objects (position is weird in axis equal tight);
         if Rax>Rimg % axes is shorter than image
-            h1=axImg.Position(4);
-            w1=axImg.Position(4)*Rimg;   
+            h1=h_tab;
+            w1=h_tab*Rimg;   
             cBar.Location='westoutside';
+            drawnow;
             hAxX.Position=[axImg.Position(1)+(axImg.Position(3)-w1)/2 axImg.Position(2)-50-ax_gap w1 50];
             hAxY.Position=[axImg.Position(1)+(axImg.Position(3)+w1)/2+ax_gap axImg.Position(2) 50 h1];
-
         else % Axes is taller than image
-            w1=axImg.Position(3);
-            h1=w1/Rimg;     
-            % axImg.Position=[40 80 tab_od_1.Position(3)-130 tab_od_1.Position(4)-100];
-            drawnow;
+            w1=w_tab;
+            h1=w1/Rimg;   
             cBar.Location='northoutside';
+            drawnow;
 
-            hAxX.Position=[axImg.Position(1) axImg.Position(2)+(axImg.Position(4)-h1)/2-50-ax_gap ...
+            hAxX.Position=[axImg.Position(1) ...
+                axImg.Position(2)+(axImg.Position(4)-h1)/2-50-ax_gap ...
                 w1 50];
             hAxY.Position=[axImg.Position(1)+axImg.Position(3)+ax_gap ...
-                axImg.Position(2)+(axImg.Position(4)-h1)/2 50 h1];        
-
-        end
-        
-        % Match cut limits with the images limits
-        % set(hAxX,'XLim',axImg.XLim,'XTick',axImg.XTick);
-        % set(hAxY,'YLim',axImg.YLim,'YTick',axImg.YTick);
-
+                axImg.Position(2)+(axImg.Position(4)-h1)/2 50 h1]; 
+        end     
         drawnow;
     end
 
     function SizeChangedFcn(~,~)
         % This resize fucntion ensures that the X and Y cut/sum plot has
-        % commenserate positioning with respect the actual image shown
-        
+        % commenserate positioning with respect the actual image shown       
         
         
         W=hF.Position(3);H=hF.Position(4);      % Grab figure dimensions     
@@ -1281,16 +1271,6 @@ ax_gap = 5;
 
         hpControl.Position(4) = H;        % Resize image panel        
         hp.Position=[hpControl.Position(3) 0 W-hpControl.Position(3) H];        % Resize image panel        
-
-        
-        % Reposition the display ROI and axis equal options
-        % tbl_dispROI.Position(1:2)=[hp.Position(3)-tbl_dispROI.Position(3)-5 5];
-        % hbFullLim.Position(1:2)=[tbl_dispROI.Position(1)-22 5];
-        % hbSnapLim.Position(1:2)=[hbFullLim.Position(1)-21 5];
-        % hbSlctLim.Position(1:2)=[hbSnapLim.Position(1)-21 5];
-        % caxisequal.Position(1:2)=[hp.Position(3)-caxisequal.Position(3) 30];
-        % cscalebar.Position(1:2)=[hp.Position(3)-cscalebar.Position(3) 50];
- 
         
         hbSettings.Position(1:2)=[1 hp.Position(4)-21];        
         bSave.Position(1:2)=[20 hp.Position(4)-21];
@@ -1343,7 +1323,7 @@ axImg=axes('parent',tab_od_1,'UserData','OD');cla
 
 
 hImg=imagesc(X,Y,Z);
-set(axImg,'box','on','linewidth',.1,'fontsize',10,'units','pixels',...
+set(axImg,'box','on','linewidth',.1,'fontsize',8,'units','pixels',...
     'XAxisLocation','top','colormap',cmap);
 hold on
 axImg.Position=[50 150 tab_od_1.Position(3)-200 tab_od_1.Position(4)-200];
@@ -1368,7 +1348,7 @@ cBar.Label.String='optical density';
 drawnow;
 
 % X Cut/Sum Axis
-hAxX=axes('box','on','linewidth',1,'fontsize',10,...
+hAxX=axes('box','on','linewidth',1,'fontsize',8,...
     'XAxisLocation','Bottom','units','pixels','parent',tab_od_1,'UserData','ODx');
 hAxX.Position=[axImg.Position(1) axImg.Position(2)-l axImg.Position(3) l];
 hold on
@@ -1377,7 +1357,7 @@ pX=plot(X,ones(length(X),1),'k.-');
 pXF=plot(X,0*ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2);
 
 % Y Cut/Sum Axis
-hAxY=axes('box','on','linewidth',1,'fontsize',10,'units','pixels',...
+hAxY=axes('box','on','linewidth',1,'fontsize',8,'units','pixels',...
     'YAxisLocation','Right','YDir','Reverse','parent',tab_od_1,'UserData','ODy');
 hAxY.Position=[axImg.Position(1)+axImg.Position(3) axImg.Position(2) l axImg.Position(4)];
 
@@ -1675,29 +1655,6 @@ function chData(src,evt,state)
 
 
 
-%% Fit Results Panel
-hpFit=uitabgroup(hpControl,'units','pixels');
-hpFit.Position=[hpControl.Position(3)/2 0 hpControl.Position(3)/2 300];
-
-tabs(1)=uitab(hpFit,'Title','params','units','pixels');
-tabs(2)=uitab(hpFit,'Title','flags','units','pixels');
-tabs(3)=uitab(hpFit,'Title','1','units','pixels','foregroundcolor',co(1,:));
-
-% Table for run parameters
-tbl_params=uitable(tabs(1),'units','normalized','RowName',{},'fontsize',7,...
-    'ColumnName',{},'ColumnWidth',{135 60},'columneditable',[false false],...
-    'Position',[0 0 1 1]);
-% Table for run parameters
-tbl_flags=uitable(tabs(2),'units','normalized','RowName',{},'fontsize',7,...
-    'ColumnName',{},'ColumnWidth',{145 50},'columneditable',[false false],...
-    'Position',[0 0 1 1]);
-
-% Table for analysis outputs
-tbl_analysis(1)=uitable(tabs(3),'units','normalized','RowName',{},'ColumnName',{},...
-    'fontsize',8,'ColumnWidth',{60 65 65},'columneditable',false(ones(1,3)),...
-    'Position',[0 0 1 1],'backgroundcolor',[brighten(coNew(1,:),.5); 1 1 1]);
-
-
 %% Analayis Settings Panel
 
 % Panel for controlling and viewing the automated analysis
@@ -1891,6 +1848,29 @@ cBMdY.Position=[110 cBM.Position(2)-15 50 15];
     end
 
 
+
+
+%% Fit Results Panel
+hpFit=uitabgroup(hpControl,'units','pixels');
+hpFit.Position=[1 0 hpControl.Position(3) hpAnl.Position(4)];
+
+tabs(1)=uitab(hpFit,'Title','params','units','pixels');
+tabs(2)=uitab(hpFit,'Title','flags','units','pixels');
+tabs(3)=uitab(hpFit,'Title','1','units','pixels','foregroundcolor',co(1,:));
+
+% Table for run parameters
+tbl_params=uitable(tabs(1),'units','normalized','RowName',{},'fontsize',7,...
+    'ColumnName',{},'ColumnWidth',{220 60},'columneditable',[false false],...
+    'Position',[0 0 1 1]);
+% Table for run parameters
+tbl_flags=uitable(tabs(2),'units','normalized','RowName',{},'fontsize',7,...
+    'ColumnName',{},'ColumnWidth',{220 60},'columneditable',[false false],...
+    'Position',[0 0 1 1]);
+
+% Table for analysis outputs
+tbl_analysis(1)=uitable(tabs(3),'units','normalized','RowName',{},'ColumnName',{},...
+    'fontsize',8,'ColumnWidth',{140 70 70},'columneditable',false(ones(1,3)),...
+    'Position',[0 0 1 1],'backgroundcolor',[brighten(coNew(1,:),.5); 1 1 1]);
 %% Raw Image Panel
 %{
 hpRaw=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
