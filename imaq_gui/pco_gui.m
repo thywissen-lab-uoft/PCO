@@ -42,6 +42,8 @@ for kk=1:length(a.Children)
 end
 %% Camera and Imaging Settings
 
+default_camera_settings = defaultPCOSettings;
+
 % Camera properties
 raw_pixel_size=6.45E-6; % Pixelsize on the pixefly cameras
 
@@ -67,6 +69,8 @@ camera=initCamStruct;
 scaleProbeDefaultROI=[1300 1350 60 100];
 
 boxBkgdDefaultROI = [400 500 400 500];
+
+coNew=default_camera_settings.ColorOrder;
 
 %% Initialize Dummy Data
 
@@ -97,15 +101,6 @@ co = colororder;
 co=circshift(co,3,1);
 co=[co;co;co];
 
-coNew=[hex2dec(['78';'a2';'cc'])';
-        hex2dec(['ff';'c7';'a1'])';
-        hex2dec(['fd';'fd';'96'])';
-        hex2dec(['e9';'d3';'ff'])';
-        hex2dec(['b0';'ff';'ad'])';
-        hex2dec(['c9';'f6';'ff'])';
-        hex2dec(['ff';'a1';'94'])']/255;      
-coNew=circshift(coNew,3,1);
-coNew=brighten([coNew;coNew;coNew],.2);       
 
 
 % Callback for when the GUI is requested to be closed.
@@ -142,23 +137,23 @@ hpControl.Position=[0 0 W_control hF.Position(4)];
 
 
 %% Camera Panel
-hpCam=uipanel(hpControl,'units','pixels','backgroundcolor','w','title','camera',...
+hpCam=uipanel(hpControl,'units','pixels','backgroundcolor','w','title','camera and acquisition',...
     'fontsize',6);
 hpCam.Position(3) = hpControl.Position(3);
-hpCam.Position(4) = 30;
+hpCam.Position(4) = 50;
 hpCam.Position(1) = 1;
 hpCam.Position(2) = hpControl.Position(4) - hpCam.Position(4);
 
 % Connect button
 ttstr='Connect to camera and initialize settings.';
 hbConnect=uicontrol(hpCam,'style','pushbutton','string','connect','units','pixels',...
-    'fontsize',8,'Position',[1 1 50 15],'backgroundcolor',[80 200 120]/255,...
+    'fontsize',8,'Position',[1 20 50 15],'backgroundcolor',[80 200 120]/255,...
     'Callback',@connectCamCB,'ToolTipString',ttstr,'enable','on');
 
 % Disconnect button
 ttstr='Connect to camera and initialize settings.';
 hbDisconnect=uicontrol(hpCam,'style','pushbutton','string','disconnect','units','pixels',...
-    'fontsize',8,'Position',[51 1 65 15],'backgroundcolor',[255 102 120]/255,...
+    'fontsize',8,'Position',[51 hbConnect.Position(2) 65 15],'backgroundcolor',[255 102 120]/255,...
     'Callback',@disconnectCamCB,'ToolTipString',ttstr,'enable','off');
 
 % 16 - hardware trigger 
@@ -169,7 +164,9 @@ hbDisconnect=uicontrol(hpCam,'style','pushbutton','string','disconnect','units',
     function connectCamCB(~,~)        
         camera.ExposureTime=tbl_cama.Data{1,2};
         camera.NumImages=tbl_cama.Data{2,2};
-        camera.CameraMode=bgCamMode.SelectedObject.UserData;
+        % camera.CameraMode=bgCamMode.SelectedObject.UserData;
+        camera.CameraMode=pdCamMode.UserData(pdCamMode.Value);
+
         camera=initCam(camera);        
         
         hbDisconnect.Enable='on';
@@ -188,7 +185,9 @@ hbDisconnect=uicontrol(hpCam,'style','pushbutton','string','disconnect','units',
         disp('Disconnecting from camera.');        
         closeCam(camera.BoardHandle);           
         camera=initCamStruct;
-        camera.CameraMode=bgCamMode.SelectedObject.UserData;
+        % camera.CameraMode=bgCamMode.SelectedObject.UserData;
+        camera.CameraMode=pdCamMode.UserData(pdCamMode.Value);
+
         camera.ExposureTime=tbl_cama.Data{1,2};
         camera.NumImages=tbl_cama.Data{2,2};
         
@@ -207,20 +206,20 @@ hbDisconnect=uicontrol(hpCam,'style','pushbutton','string','disconnect','units',
 % Start acquisition button
 ttstr='Start the camera and image acquisition';
 hbstart=uicontrol(hpCam,'style','pushbutton','string','start','units','pixels',...
-    'fontsize',8,'Position',[116 1 35 15],'backgroundcolor',[80 200 120]/255,...
+    'fontsize',8,'Position',[116 hbConnect.Position(2) 35 15],'backgroundcolor',[80 200 120]/255,...
     'Callback',@startCamCB,'ToolTipString',ttstr,'enable','off');
 
 % Clear the camera buffer
 ttstr='Clear the camera buffer.';
 hbclear=uicontrol(hpCam,'style','pushbutton','string','clear',...
-    'units','pixels','fontsize',8,'Position',[151 1 40 15],'enable','off',...
+    'units','pixels','fontsize',8,'Position',[151 hbConnect.Position(2) 40 15],'enable','off',...
     'backgroundcolor',[255 204 0]/255,'callback',@clearBuffer,...
     'ToolTipString',ttstr);
 
 % Stop acquisition button
 ttstr='Stop the camera.';
 hbstop=uicontrol(hpCam,'style','pushbutton','string','stop',...
-    'units','pixels','fontsize',8,'Position',[191 1 40 15],'enable','off',...
+    'units','pixels','fontsize',8,'Position',[191 hbConnect.Position(2) 40 15],'enable','off',...
     'backgroundcolor',[255 102 120]/255,'callback',@stopCamCB,...
     'ToolTipString',ttstr);
 
@@ -237,7 +236,7 @@ hbstop=uicontrol(hpCam,'style','pushbutton','string','stop',...
 ttstr=['Enable/Disable saving to external directory. Does ' ...
     'not override saving to image history.'];
 hcSave=uicontrol(hpCam,'style','checkbox','string','save?','fontsize',6,...
-    'backgroundcolor','w','Position',[235 0 60 15],'callback',@saveCheck,...
+    'backgroundcolor','w','Position',[230 hbConnect.Position(2) 60 15],'callback',@saveCheck,...
     'ToolTipString',ttstr);
 
 % Save checkbox callback
@@ -252,14 +251,14 @@ hcSave=uicontrol(hpCam,'style','checkbox','string','save?','fontsize',6,...
     end
 
 % Browse button
-cdata=imresize(imread('images/browse.jpg'),[20 20]);
+cdata=imresize(imread('images/browse.jpg'),[15 15]);
 bBrowse=uicontrol(hpCam,'style','pushbutton','CData',cdata,'callback',@browseCB,...
-    'enable','off','backgroundcolor','w','position',[420 5 size(cdata,[1 2])]);
+    'enable','off','backgroundcolor','w','position',[1 2 size(cdata,[1 2])]);
 
 % String for current save directory
 tSaveDir=uicontrol(hpCam,'style','text','string','directory','fontsize',8,...
     'backgroundcolor','w','units','pixels','horizontalalignment','left',...
-    'enable','off','UserData','','Position',[450 0 hF.Position(3)-290 22]);
+    'enable','off','UserData','','Position',[bBrowse.Position(1)+bBrowse.Position(3) 2 hF.Position(3)-290 15]);
 
 % Browse button callback
     function browseCB(~,~)
@@ -288,12 +287,27 @@ end
 hpAcq=uipanel('parent',hpControl,'units','pixels','backgroundcolor','w',...
     'title','acquisition','fontsize',6);
 hpAcq.Position(3) = hpControl.Position(3)/2;
-hpAcq.Position(4) = 110;
+hpAcq.Position(4) = 90;
 hpAcq.Position(1) = 1;
 hpAcq.Position(2) = hpCam.Position(2) - hpAcq.Position(4);
 
+
+    function chCamModeCB2(src,evt)
+       disp('Changing camera acquistion mode');
+       camera.CameraMode=src.UserData(src.Value);
+    end
+
+strs ={'single exposure (0x10)','double exposure (0x20)','single video (0x30)'};
+exposure_id_values = [16 32 48];
+pdCamMode  = uicontrol(hpAcq,'units','pixels','style','popupmenu','backgroundcolor','w',...
+    'String',strs,'UserData',exposure_id_values,'fontsize',7,'Callback',@chCamModeCB2,...
+    'Value',1);
+pdCamMode.Position=[5 hpAcq.Position(4)-35 120 20];
+
+
+
 tbl_cama=uitable('parent',hpAcq,'units','pixels','RowName',{},...
-    'ColumnName',{},'fontsize',8,'ColumnWidth',{90,40},...
+    'ColumnName',{},'fontsize',7,'ColumnWidth',{90,40},...
     'columneditable',[false true],'celleditcallback',@chCamSettingsCB,...
     'ColumnFormat',{'char','numeric'});
 
@@ -302,7 +316,7 @@ tbl_cama.Data={...
     'num images', camera.NumImages};
 
 tbl_cama.Position(3:4)=tbl_cama.Extent(3:4);
-tbl_cama.Position(1:2)=[5 hpAcq.Position(4)-tbl_cama.Position(4)-15];
+tbl_cama.Position(1:2)=[5 pdCamMode.Position(2)-tbl_cama.Position(4)];
 
     function chCamSettingsCB(src,evt)
        disp('Changing camera settings');
@@ -326,28 +340,27 @@ tbl_cama.Position(1:2)=[5 hpAcq.Position(4)-tbl_cama.Position(4)-15];
         camera.NumImages=tbl_cama.Data{2,2};
     end
 
-% Button group for deciding what the X/Y plots show
-bgCamMode = uibuttongroup(hpAcq,'units','pixels','backgroundcolor','w','BorderType','None',...
-    'SelectionChangeFcn',@chCamModeCB);  
-bgCamMode.Position(3:4)=[150 50];
-bgCamMode.Position(1:2)=[5 1];
-    
-% Radio buttons for cuts vs sum
-rbSingleAcq=uicontrol(bgCamMode,'Style','radiobutton','String','single exp (0x10)',...
-    'Position',[0 32 150 18],'units','pixels','backgroundcolor','w',...
-    'Value',1,'UserData',16,'fontsize',7);
-rbDoubleAcq=uicontrol(bgCamMode,'Style','radiobutton','String','double exp (0x20)',...
-    'Position',[0 16 150 18],'units','pixels','backgroundcolor','w',...
-    'UserData',32,'fontsize',7);
-rbSingleVideo=uicontrol(bgCamMode,'Style','radiobutton','String','single video (0x30)',...
-    'Position',[0 0 150 18],'units','pixels','backgroundcolor','w',...
-    'UserData',48,'fontsize',7);
-
-
-    function chCamModeCB(~,~)
-       disp('Changing camera acquistion mode');
-       camera.CameraMode=bgCamMode.SelectedObject.UserData;
-    end
+% % Button group for deciding what the X/Y plots show
+% bgCamMode = uibuttongroup(hpAcq,'units','pixels','backgroundcolor','w','BorderType','None',...
+%     'SelectionChangeFcn',@chCamModeCB);  
+% bgCamMode.Position(3:4)=[150 50];
+% bgCamMode.Position(1:2)=[5 1];
+% 
+% % Radio buttons for cuts vs sum
+% rbSingleAcq=uicontrol(bgCamMode,'Style','radiobutton','String','single exp (0x10)',...
+%     'Position',[0 32 150 18],'units','pixels','backgroundcolor','w',...
+%     'Value',1,'UserData',16,'fontsize',7);
+% rbDoubleAcq=uicontrol(bgCamMode,'Style','radiobutton','String','double exp (0x20)',...
+%     'Position',[0 16 150 18],'units','pixels','backgroundcolor','w',...
+%     'UserData',32,'fontsize',7);
+% rbSingleVideo=uicontrol(bgCamMode,'Style','radiobutton','String','single video (0x30)',...
+%     'Position',[0 0 150 18],'units','pixels','backgroundcolor','w',...
+%     'UserData',48,'fontsize',7);
+% 
+%     function chCamModeCB(~,~)
+%        disp('Changing camera acquistion mode');
+%        camera.CameraMode=bgCamMode.SelectedObject.UserData;
+%     end
 
 
 %% Optics Panel
@@ -402,7 +415,7 @@ tbl_cam=uitable('parent',hpOptics,'units','pixels','RowName',{},'ColumnName',{},
 tbl_cam.Data={...
     ['img pixelsize (' char(956) 'm)'], raw_pixel_size*1E6/mag(1)};
 tbl_cam.Position(3:4)=tbl_cam.Extent(3:4);
-tbl_cam.Position(1:2)=[5 5];    
+tbl_cam.Position(1:2)=[5 tbl_optics.Position(2)-tbl_cam.Position(4)-2];    
 
 %% Navigator Panel 
 
@@ -691,21 +704,17 @@ uicontrol('parent',hpImgProcess,'units','pixels',...
 
 
 %% Display Settings panel
+h_hpDisp = 125;
+
 hpDisp=uipanel(hpControl,'units','pixels','backgroundcolor','w',...
     'title','Display Options','fontsize',6);
-h = 125;
-hpDisp.Position=[hpControl.Position(3)/2 hpNav.Position(2)-h ...
-    hpControl.Position(3)/2 h];
-
-
-%%%%% Upper right area of figure %%%%%
+hpDisp.Position=[hpControl.Position(3)/2 hpNav.Position(2)-h_hpDisp ...
+    hpControl.Position(3)/2 h_hpDisp];
 
 % Button group for deciding what the X/Y plots show
-bgPlot = uibuttongroup(hpDisp,'units','pixels','backgroundcolor','w','BorderType','None',...
-    'SelectionChangeFcn',@chPlotCB);  
-% bgPlot.Position(3:4)=[125 20];
-% bgPlot.Position(1:2)=[hpDisp.Position(3)-bgPlot.Position(3) hpDisp.Position(4)-bgPlot.Position(4)];
-    bgPlot.Position = [1 1 200 20];
+bgPlot = uibuttongroup(hpDisp,'units','pixels','backgroundcolor','w',...
+    'BorderType','None','SelectionChangeFcn',@chPlotCB,...
+    'Position',[1 1 200 20]);  
 
 % Radio buttons for cuts vs sum
 rbCut=uicontrol(bgPlot,'Style','radiobutton','String','plot cut',...
@@ -750,17 +759,12 @@ climtbl.Position(1:2) = [40 40];
         end
     end
 
-
-%%%%% Lower right area of figure %%%%%
-
 % Table for changing display limits
 tbl_dispROI=uitable('parent',hpDisp,'units','pixels','RowName',{},'columnname',{},...
     'ColumnEditable',[true true true true],'CellEditCallback',@tbl_dispROICB,...
     'ColumnWidth',{30 30 30 30},'FontSize',8,'Data',[1 size(Z,2) 1 size(Z,1)]);
 tbl_dispROI.Position(3:4)=tbl_dispROI.Extent(3:4);
-
 tbl_dispROI.Position(1:2)=[1 80];
-
 
 
 ttstr='Maximize display ROI to full image size.';
@@ -786,158 +790,112 @@ hbSlctLim=uicontrol(hpDisp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
 hbSlctLim.Position(1:2)=[42 60];
 
 
-% % Callback for changing display table ROI
-%     function tbl_dispROICB(src,evt)             
-%         ROI=src.Data;                               % Grab the new ROI             
-%         [ROI,err] = chDispROI(ROI,src.UserData);    % Update the ROI               
-%         if err
-%             src.Data(evt.Indices(2))=evt.PreviousData;
-%         else            
-%             src.Data = ROI;                     % Update table in case changed     
-%         end
-%     end
-% 
-% % Change display ROI on plots
-%     function [ROI,err] = chDispROI(ROI,img_type)  
-%         err = 0;        
-%         % Determine the ROI limits depending on image type
-%         switch img_type
-%             case 'X'
-%                 ROI_LIM = [min(data.X) max(data.X) min(data.Y) max(data.Y)];
-%             case 'K'
-%                 ROI_LIM = [min(data.f) max(data.f) min(data.f) max(data.f)];
-%             case 'dig'
-%                 ROI_LIM = [min(data.X) max(data.X) min(data.Y) max(data.Y)];
-%             case 'hop'
-%                 ROI_LIM = [min(data.X) max(data.X) min(data.Y) max(data.Y)];
-%             case 'B'
-%                 ROI_LIM = [-500 500 -500 500];
-%             case 'D'
-%                 ROI_LIM = [-500 500 -500 500];
-%             otherwise
-%                 warning('OH GOD NO');            
-%         end        
-%         % Check for string inputs of max and min
-%         if isa(ROI,'char')
-%             if isequal(ROI,'max')
-%                ROI = ROI_LIM;
-%             else               
-%                 switch img_type
-%                     case 'X'
-%                         aROI = tblROI.Data;
-%                     case 'K'
-%                         aROI = tblROIK.Data;
-%                     case 'B'
-%                         if isfield(data,'LatticeBin')
-%                            aROI = [min(data.LatticeBin(1).n1) max(data.LatticeBin(1).n1) ...
-%                                min(data.LatticeBin(1).n2) max(data.LatticeBin(1).n2)];
-%                         else
-%                             aROI=[0 100 0 100];
-%                         end
-%                     case 'D'
-%                         if isfield(data,'LatticeDig')
-%                            aROI = [min(data.LatticeDig(1).n1) max(data.LatticeDig(1).n1) ...
-%                                min(data.LatticeDig(1).n2) max(data.LatticeDig(1).n2)];
-%                         else
-%                             aROI=[0 100 0 100];
-%                         end                        
-%                 end                      
-%                 ROI=[min(aROI(:,1)) max(aROI(:,2)) min(aROI(:,3)) max(aROI(:,4))];
-%            end
-%         end
-% 
-%         % Make sure ROI is numeric
-%          if sum(~isnumeric(ROI)) || sum(isinf(ROI)) || sum(isnan(ROI))
-%             warning('Incorrect data type provided for ROI.');
-%             err = 1;
-%             return
-%         end        
-% 
-%         % Make sure ROI is increasing order
-%         if ROI(2)<=ROI(1) || ROI(4)<=ROI(3)
-%            warning('Bad ROI specification given.');
-%             err = 1;
-%             return
-%         end       
-% 
-%         % Keep ROI within the bounds
-%         if ROI(1)<ROI_LIM(1); ROI(1)=ROI_LIM(1); end       
-%         if ROI(3)<ROI_LIM(3); ROI(3)=ROI_LIM(3); end   
-%         if ROI(2)>ROI_LIM(2); ROI(2)=ROI_LIM(2);end       
-%         if ROI(4)>ROI_LIM(4); ROI(2)=ROI_LIM(4);end       
-% 
-%         % Attempt to change the display ROI
-%         try
-% 
-%             switch img_type
-%                 case 'X'            
-%                     set(axImg,'XLim',ROI(1:2),'YLim',ROI(3:4));
-%                     % set(hAxX,'XLim',ROI(1:2));
-%                     % set(hAxY,'YLim',ROI(3:4));
-%                 case 'K'
-%                     set(axImg_K,'XLim',ROI(1:2),'YLim',ROI(3:4));
-%                     % set(hAxX_K,'XLim',ROI(1:2));
-%                     % set(hAxY_K,'YLim',ROI(3:4));  
-%                 case 'B'
-%                     set(axImg_B,'XLim',ROI(1:2),'YLim',ROI(3:4));
-%                 case 'D'
-%                     set(axImg_D,'XLim',ROI(1:2),'YLim',ROI(3:4));
-%             end
-%             drawnow;
-%             resizePlots;
-%         catch ME
-%             warning('Unable to change display ROI.');            
-%             err = 1;
-%         end    
-%     end
-
-    function tbl_dispROICB(src,evt)
-        ROI=src.Data;        % Grab the new ROI     
-        % Check that the data is numeric
-        if sum(~isnumeric(ROI)) || sum(isinf(ROI)) || sum(isnan(ROI))
-            warning('Incorrect data type provided for ROI.');
+% Celledit Callback for analysis ROI change
+    function tbl_dispROICB(src,evt)             
+        ROI=src.Data;                               % Grab the new ROI             
+        [ROI,err] = chDispROI(ROI);    % Update the ROI               
+        if err
             src.Data(evt.Indices(2))=evt.PreviousData;
-            return;
-        end        
-        ROI=round(ROI);      % Make sure this ROI are integers   
-
-        % Keep the ROI within image bounds (this is hardcoded and could be
-        % changed if we ever implement hardware ROI but want to keep 
-        % absolute pixel positions relative to total sensor.)
-        if ROI(2)<=ROI(1) || ROI(4)<=ROI(3)
-           warning('Bad ROI specification given.');
-           ROI(evt.Indices(2))=evt.PreviousData;
-        end       
-        if ROI(1)<1; ROI(1)=1; end       
-        if ROI(3)<1; ROI(3)=1; end   
-        if ROI(4)>size(dstruct.PWA,1); ROI(4)=size(dstruct.PWA,1);end       
-        if ROI(2)>size(dstruct.PWA,2); ROI(2)=size(dstruct.PWA,2);end       
-        src.Data=ROI;       
-        try
-            set(axImg,'XLim',ROI(1:2),'YLim',ROI(3:4));
-            set(axPWA,'XLim',axImg.XLim,'YLim',axImg.YLim);
-            set(axPWOA,'XLim',axImg.XLim,'YLim',axImg.YLim);
-            set(axDark,'XLim',axImg.XLim,'YLim',axImg.YLim);
-
-            
-            resizePlots;
-            drawnow;
-%             pDisp.Position=[ROI(1) ROI(3) ROI(2)-ROI(1) ROI(4)-ROI(3)];           
-            % updateScalebar;
-            drawnow;
-        catch ab
-            warning('Unable to change display ROI.');
-            src.Data(evt.Indices)=evt.PreviousData;
+        else            
+            src.Data = ROI;                     % Update table in case changed     
         end
     end
+
+% Change display ROI
+    function [ROI,err] = chDispROI(ROI)  
+        % ROI : Input ROI [x1 x2 y1 y2]
+        err = 0;     
+        % this is not good because of double shutter image. how to get the
+        % ROI limits? from the data probably
+        ROI_LIM = [1 1391 1 1024];              
+        % Check for string inputs of max and min
+        if isa(ROI,'char')
+            switch ROI
+                case 'max'
+                    ROI = ROI_LIM;
+                case 'snap'               
+                    allROI = tblROI.Data;                             
+                    ROI=[min(allROI(:,1)) max(allROI(:,2)) ...
+                        min(allROI(:,3)) max(allROI(:,4))];
+                otherwise 
+                    err=1;
+           end
+        end
+        % Make sure ROI is numeric
+         if sum(~isnumeric(ROI)) || sum(isinf(ROI)) || sum(isnan(ROI))
+            warning('Incorrect data type provided for ROI.');
+            err = 1;
+            return
+        end 
+        % Make sure ROI is increasing order
+        if ROI(2)<=ROI(1) || ROI(4)<=ROI(3)
+           warning('Bad ROI specification given.');
+            err = 1;
+            return
+        end 
+        % Keep ROI within the bounds
+        if ROI(1)<ROI_LIM(1); ROI(1)=ROI_LIM(1); end       
+        if ROI(3)<ROI_LIM(3); ROI(3)=ROI_LIM(3); end   
+        if ROI(2)>ROI_LIM(2); ROI(2)=ROI_LIM(2);end       
+        if ROI(4)>ROI_LIM(4); ROI(2)=ROI_LIM(4);end       
+
+        % Attempt to change the display ROI
+        try             
+            set(axImg,'XLim',ROI(1:2),'YLim',ROI(3:4));  
+            resizePlots;
+        catch ME
+            warning('Unable to change display ROI.');            
+            err = 1;
+        end    
+    end
+% 
+%     function tbl_dispROICB(src,evt)
+%         ROI=src.Data;        % Grab the new ROI     
+%         % Check that the data is numeric
+%         if sum(~isnumeric(ROI)) || sum(isinf(ROI)) || sum(isnan(ROI))
+%             warning('Incorrect data type provided for ROI.');
+%             src.Data(evt.Indices(2))=evt.PreviousData;
+%             return;
+%         end        
+%         ROI=round(ROI);      % Make sure this ROI are integers   
+% 
+%         % Keep the ROI within image bounds (this is hardcoded and could be
+%         % changed if we ever implement hardware ROI but want to keep 
+%         % absolute pixel positions relative to total sensor.)
+%         if ROI(2)<=ROI(1) || ROI(4)<=ROI(3)
+%            warning('Bad ROI specification given.');
+%            ROI(evt.Indices(2))=evt.PreviousData;
+%         end       
+%         if ROI(1)<1; ROI(1)=1; end       
+%         if ROI(3)<1; ROI(3)=1; end   
+%         if ROI(4)>size(dstruct.PWA,1); ROI(4)=size(dstruct.PWA,1);end       
+%         if ROI(2)>size(dstruct.PWA,2); ROI(2)=size(dstruct.PWA,2);end       
+%         src.Data=ROI;       
+%         try
+%             set(axImg,'XLim',ROI(1:2),'YLim',ROI(3:4));
+%             set(axPWA,'XLim',axImg.XLim,'YLim',axImg.YLim);
+%             set(axPWOA,'XLim',axImg.XLim,'YLim',axImg.YLim);
+%             set(axDark,'XLim',axImg.XLim,'YLim',axImg.YLim);
+% 
+% 
+%             resizePlots;
+%             drawnow;
+% %             pDisp.Position=[ROI(1) ROI(3) ROI(2)-ROI(1) ROI(4)-ROI(3)];           
+%             % updateScalebar;
+%             drawnow;
+%         catch ab
+%             warning('Unable to change display ROI.');
+%             src.Data(evt.Indices)=evt.PreviousData;
+%         end
+%     end
 
     function fullDispCB(~,~)
        ROI=[1 size(dstruct.PWA,2) 1 size(dstruct.PWOA,1)];
        tbl_dispROI.Data=ROI;
        tbl_dispROICB(tbl_dispROI);
-        set(axPWA,'XLim',axImg.XLim,'YLim',axImg.YLim);
-        set(axPWOA,'XLim',axImg.XLim,'YLim',axImg.YLim);
-        set(axDark,'XLim',axImg.XLim,'YLim',axImg.YLim);
+        % set(axPWA,'XLim',axImg.XLim,'YLim',axImg.YLim);
+        % set(axPWOA,'XLim',axImg.XLim,'YLim',axImg.YLim);
+        % set(axDark,'XLim',axImg.XLim,'YLim',axImg.YLim);
 
        resizePlots;
        drawnow;
@@ -948,9 +906,9 @@ hbSlctLim.Position(1:2)=[42 60];
            min(tblROI.Data(:,3)) max(tblROI.Data(:,4))];
        tbl_dispROI.Data=ROI;
        tbl_dispROICB(tbl_dispROI);
-        set(axPWA,'XLim',axImg.XLim,'YLim',axImg.YLim);
-        set(axPWOA,'XLim',axImg.XLim,'YLim',axImg.YLim);
-        set(axDark,'XLim',axImg.XLim,'YLim',axImg.YLim);
+        % % set(axPWA,'XLim',axImg.XLim,'YLim',axImg.YLim);
+        % set(axPWOA,'XLim',axImg.XLim,'YLim',axImg.YLim);
+        % set(axDark,'XLim',axImg.XLim,'YLim',axImg.YLim);
 
        resizePlots;
        drawnow;
@@ -1049,7 +1007,12 @@ b=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
                     delete(pY(end));pY(end)=[];
                     delete(pYF(end));pYF(end)=[];
                     delete(pGaussRet(end));pGaussRet(end)=[];   
-                
+
+                    if n<hbROI_slct.UserData
+                        chSelectROI([],[],n);
+                    end
+
+
                     delete(tbl_analysis(end));tbl_analysis(end)=[];
                     delete(tabs(end));tabs(end)=[];
                     drawnow;
@@ -1183,14 +1146,6 @@ hbROI_slct=uicontrol(hpROISettings,'style','pushbutton','Cdata',selectLim_colore
 hbROI_slct.Position(1:2)=[hbROI_snap.Position(1)+21 hbROI_snap.Position(2)];
 
 
-% Button for GUI selection of ROI
-% ttstr='Use mouse clicks to choose the selected analysis ROI.';
-% bROISelect=uicontrol(hpROISettings,'style','pushbutton',...
-%     'enable','on','backgroundcolor',coNew(1,:),'position',[50 b.Position(2)-20 150 20],...
-%     'String','Select ROI 1','fontsize',8,'UserData',1,...
-%     'callback',@selectROICB,'ToolTipString',ttstr);
-
-
 % Button for increasing ROI selector
 ttstr='Increase the selected ROI by one';
 hbROI_up=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
@@ -1198,7 +1153,6 @@ hbROI_up=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
     'callback',{@chSelectROI, '+'},'ToolTipString',ttstr);
 
    
-
 % Callback function for GUI selection of ROI
     function selectROICB(src,~)
         RNum=src.UserData;          % ROI number
@@ -1242,7 +1196,11 @@ hbROI_up=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
            case '+'
                 index=min([tblNumROIs.Data hbROI_slct.UserData+1]);    
             otherwise
-                index=1;
+                if isnumeric(state)
+                    index=state;
+                else
+                    index=1;
+                end
         end
         hbROI_slct.UserData=index;
         hbROI_snap.UserData=index;
@@ -2486,7 +2444,9 @@ end
 
         if GetBuffStatus(camera,camera.NumAcquired+1)==3      
 %             camera.NumAcquired
-            if bgCamMode.SelectedObject.UserData == 48
+            % if bgCamMode.SelectedObject.UserData == 48
+            if pdCamMode.UserData(pdCamMode.Value)
+
                 stopCamera(camera.BoardHandle);
                 camera.Images{camera.NumAcquired+1}=double(get(camera.buf_ptrs(camera.NumAcquired+1),'Value'));  
 
