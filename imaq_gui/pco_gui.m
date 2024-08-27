@@ -1372,117 +1372,7 @@ pY=plot(ones(length(Y),1),Y,'k.-');
 pYF=plot(X,0*ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2);
 
 
-
-%%%%%% Upper left area of figure %%%%%
-
-% String for image file name
-tImageFileFig=uicontrol('parent',tab_od_1','units','pixels','string','FILENAME',...
-    'fontsize',12,'fontweight','bold','backgroundcolor','w',...
-    'style','text','horizontalalignment','left');
-tImageFileFig.Position(4)=tImageFileFig.Extent(4);
-tImageFileFig.Position(3)=300;
-
-
-% Save button
-% ttstr=['Save the image, OD, and fits to file. Images are automatically ' ...
-%     'saved to the image history if you want to grab them.'];
-% cdata=imresize(imread('images/save.jpg'),[20 20]);
-% bSave=uicontrol(tab_od_1,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
-%     'Backgroundcolor','w','Position',[140 5 20 20],'Callback',@saveCB,...
-%     'ToolTipString',ttstr);
-% 
-%     function saveCB(~,~)
-%         str=getDayDir;       
-%         [fname,saveDir,indx]=uiputfile([str filesep dstruct.Name '_data.mat']);       
-%         if indx
-%             fname=fullfile(saveDir,fname);
-%             fprintf('%s',[fname ' ...']);
-%             try
-%                 save(fname,'dstruct');
-%                 disp(' done'); 
-%             catch ME
-%                 disp('OH NO');
-%             end
-%         else
-%             disp('no directory chosen!');
-%         end
-    % end
-
-% Settings button
-% ttstr='Change some settings.';
-% cdata=imresize(imread('images/gear.jpg'),[20 20]);
-% hbSettings=uicontrol(tab_od_1,'style','pushbutton','CData',cdata,'callback',@settingsCB,...
-%     'enable','on','backgroundcolor','w','position',[265 5 size(cdata,[1 2])],...
-%     'ToolTipString',ttstr);
-% 
-%     function settingsCB(~,~)
-%        hFSet=figure;
-%        set(hFSet,'name','PCO GUI Settings','windowstyle','modal','units','pixels',...
-%            'color','w','numbertitle','off','resize','off');
-%        hFSet.Position(3:4)=[400 300];
-% 
-%        str='fitresults output variable name : ';
-%        uicontrol(hFSet,'units','pixels','Position',[100 70 200 18],...
-%            'style','text','string',str,'fontsize',8,'backgroundcolor','w');
-% 
-%        eVar=uicontrol(hFSet,'units','pixels','backgroundcolor','w','style','edit',...
-%            'String',frVar,'fontsize',12,'fontname','monospaced',...
-%            'Position',[100 50 200 25]);
-% 
-%        uicontrol(hFSet,'units','pixels','backgroundcolor','w',...
-%            'style','pushbutton','string','ok','fontsize',12,...
-%            'callback',@setGoCB,'userdata',1,'position',[100 10 90 25]);
-% 
-%        uicontrol(hFSet,'units','pixels','backgroundcolor','w',...
-%            'style','pushbutton','string','cancel','fontsize',12,...
-%            'callback',@setGoCB,'userdata',0,'position',[210 10 90 25]);
-% 
-%         function setGoCB(src,~)            
-%             if src.UserData
-%                 disp('Saving changes');
-%                 frVar=eVar.String;
-%             else
-%                 disp('cancel');
-%             end           
-%             close(src.Parent);
-%         end       
-%     end
-% 
-% % Button to load an image into the acquisition
-% ttstr='Load an image into the acquisition GUI.';
-% cdata=imresize(imread('images/browse.jpg'),[20 20]);
-% hbBrowseImage=uicontrol(tab_od_1,'style','pushbutton','CData',cdata,'callback',@browseImageCB,...
-%     'enable','on','backgroundcolor','w','position',[265 5 size(cdata,[1 2])],...
-%     'ToolTipString',ttstr);
-%     function browseImageCB(~,~)
-%        loadImage; 
-%     end
-% 
-% ttstr='Jump to most recent image acquired.';
-% hbhistoryNow=uicontrol(tab_od_1,'Style','pushbutton','units','pixels',...
-%     'backgroundcolor','w','String',[char(10094) char(10094)],'fontsize',10,...
-%     'callback',{@chData, '0'},'ToolTipString',ttstr);
-% hbhistoryNow.Position(3:4)=[24 20];
-% 
-% ttstr='Step to next more recent image';
-% hbhistoryLeft=uicontrol(tab_od_1,'Style','pushbutton','units','pixels',...
-%     'backgroundcolor','w','String',char(10094),'fontsize',10,...
-%     'callback',{@chData, '-'},'ToolTipString',ttstr);
-% hbhistoryLeft.Position(3:4)=[12 20];
-% 
-% thistoryInd=uicontrol(tab_od_1,'Style','text','units','pixels',...
-%     'backgroundcolor','w','string','000','fontsize',12);
-% thistoryInd.Position(3:4)=[30 20];
-
-% 
-% ttstr='Step to later image.';
-% hbhistoryRight=uicontrol(tab_od_1,'Style','pushbutton','units','pixels',...
-%     'backgroundcolor','w','String',char(10095),'fontsize',10,...
-%     'callback',{@chData, '+'},'ToolTipString',ttstr);
-% hbhistoryRight.Position(3:4)=[12 20];
-
     function loadImage(filename)
-
         if nargin<1
             [filename,pathname]=uigetfile([defaultDir filesep '*.mat']);
             if ~filename
@@ -1495,18 +1385,12 @@ tImageFileFig.Position(3)=300;
         olddata=dstruct;
         try
             data=load(filename);
-
-
             dstruct=data.data;
             dstruct=computeOD(dstruct);
-
             updateImages(dstruct);
-
             dstruct=performFits(dstruct);
-
             [~,inds] = sort(lower(fieldnames(dstruct.Params)));
             params = orderfields(dstruct.Params,inds);  
-
             fnames=fieldnames(params);
             for nn=1:length(fnames)
                   tbl_params.Data{nn,1}=fnames{nn};
@@ -1514,12 +1398,10 @@ tImageFileFig.Position(3)=300;
                     if isa(val,'double')
                         tbl_params.Data{nn,2}=num2str(val);
                     end
-
                     if isa(val,'struct')
                        tbl_params.Data{nn,2}='[struct]'; 
                     end  
             end
-
             fnames=fieldnames(dstruct.Flags);
                 for nn=1:length(fnames)
                     tbl_flags.Data{nn,1}=fnames{nn};
@@ -1527,25 +1409,20 @@ tImageFileFig.Position(3)=300;
                     if isa(val,'double')
                         tbl_flags.Data{nn,2}=num2str(val);
                     end
-
                     if isa(val,'struct')
                        tbl_flags.Data{nn,2}='[struct]'; 
                     end                    
                 end
 
         catch ME
-
             warning(ME.message);
             warning('Unable to load image. Reverting to previous');
-
             dstruct=olddata;
             dstruct=computeOD(dstruct);
             updateImages(dstruct);
             dstruct=performFits(dstruct);
-
              [~,inds] = sort(lower(fieldnames(dstruct.Params)));
             params = orderfields(dstruct.Params,inds);  
-
             fnames=fieldnames(params);
             for nn=1:length(fnames)
                   tbl_params.Data{nn,1}=fnames{nn};
@@ -1557,12 +1434,7 @@ tImageFileFig.Position(3)=300;
                     if isa(val,'struct')
                        tbl_params.Data{nn,2}='[struct]'; 
                     end  
-            end
-
-%            tbl_params.Data=[fieldnames(params), ...
-%                     struct2cell(params)];    
-
-
+            end 
             fnames=fieldnames(dstruct.Flags);
                 for nn=1:length(fnames)
                     tbl_flags.Data{nn,1}=fnames{nn};
@@ -1570,46 +1442,13 @@ tImageFileFig.Position(3)=300;
                     if isa(val,'double')
                         tbl_flags.Data{nn,2}=num2str(val);
                     end
-
                     if isa(val,'struct')
                        tbl_flags.Data{nn,2}='[struct]'; 
                     end
-
                 end
         end
     end
-%
-%{
-% Callback function for changing number of ROIs
-    function chData(~,~,state)       
-       % Get mat files in history directory
-       filenames=dir([currDir  filesep '*.mat']);
-       filenames={filenames.name};       
-       filenames=sort(filenames);
-       filenames=flip(filenames);
-       
-       myname=[dstruct.Name '.mat'];           % Current data mat       
-       ind=find(ismember(filenames,myname));    % index in filenames        
-       if isempty(ind)
-          ind=1; 
-       end
-        switch state
-            case '-'
-                ind=max([ind-1 1]);            
-            case '+'
-                ind=min([ind+1 length(filenames)]);
-            case '0'
-                ind=1;        
-        end        
-        
-        
-        thistoryInd.String=sprintf('%03d',ind);
-        drawnow;        
-        filename=filenames{ind};
-        loadImage(fullfile(currDir,filename));
-        drawnow;
-    end
-%}
+
 function chData(src,evt,state)     
         if isempty(src)
             index_type='absolute';
