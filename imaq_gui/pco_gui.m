@@ -135,7 +135,7 @@ coNew=brighten([coNew;coNew;coNew],.2);
 %% UI Panels
 
 % Control Panel
-W_control = 300;
+W_control = 350;
 hpControl = uipanel(hF,'units','pixels');
 hpControl.Position=[0 0 W_control hF.Position(4)];
 
@@ -383,7 +383,6 @@ uicontrol(bgCam,'Style','radiobutton','String','Y Cam',...
                 tblRotate.Data = rotation_angle(2);
 
         end
-       updateScalebar;
     end
 
 tbl_optics=uitable('parent',hpOptics,'units','pixels','RowName',{},'ColumnName',{},...
@@ -907,7 +906,7 @@ tbl_dispROI=uitable('parent',hpDisp,'units','pixels','RowName',{},'columnname',{
     'ColumnWidth',{30 30 30 30},'FontSize',8,'Data',[1 size(Z,2) 1 size(Z,1)]);
 tbl_dispROI.Position(3:4)=tbl_dispROI.Extent(3:4);
 
-tbl_dispROI.Position(1:2)=[60 60];
+tbl_dispROI.Position(1:2)=[1 80];
 
 
 
@@ -916,14 +915,14 @@ cdata=imresize(imread('images/fullLim.png'),[15 15]);
 hbFullLim=uicontrol(hpDisp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
     'Backgroundcolor','w','Position',[1 60 21 20],'Callback',@fullDispCB,...
     'ToolTipString',ttstr);
-hbFullLim.Position(1:2)=[tbl_dispROI.Position(1)-22 60];
+hbFullLim.Position(1:2)=[1 60];
 
 ttstr='Snap display ROI to data ROI(s).';
 cdata=imresize(imread('images/snapLim.png'),[15 15]);
 hbSnapLim=uicontrol(hpDisp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
     'Backgroundcolor','w','Position',[1  60 21 20],'Callback',@snapDispCB,...
     'ToolTipString',ttstr);
-hbSnapLim.Position(1:2)=[hbFullLim.Position(1)-21 60];
+hbSnapLim.Position(1:2)=[21 60];
 
 % Button to enable GUI selection of display limits
 ttstr='Select the display ROI.';
@@ -931,7 +930,7 @@ cdata=imresize(imread('images/target.jpg'),[15 15]);
 hbSlctLim=uicontrol(hpDisp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
     'Backgroundcolor','w','Position',[1 60 20 20],'Callback',@slctDispCB,...
     'ToolTipString',ttstr);
-hbSlctLim.Position(1:2)=[hbSnapLim.Position(1)-21 60];
+hbSlctLim.Position(1:2)=[42 60];
 
     function tbl_dispROICB(src,evt)
         ROI=src.Data;        % Grab the new ROI     
@@ -965,7 +964,7 @@ hbSlctLim.Position(1:2)=[hbSnapLim.Position(1)-21 60];
             resizePlots;
             drawnow;
 %             pDisp.Position=[ROI(1) ROI(3) ROI(2)-ROI(1) ROI(4)-ROI(3)];           
-            updateScalebar;
+            % updateScalebar;
             drawnow;
         catch ab
             warning('Unable to change display ROI.');
@@ -1036,7 +1035,7 @@ hbSlctLim.Position(1:2)=[hbSnapLim.Position(1)-21 60];
 caxisequal=uicontrol('parent',hpDisp,'style','checkbox','string','axis equal tight?',...
     'fontsize',8,'Value',1,'units','pixels','backgroundcolor','w','callback',@axisCB);
 caxisequal.Position(3:4)=[110 caxisequal.Extent(4)];
-caxisequal.Position(1:2) = [1 90];
+caxisequal.Position(1:2) = [1 100];
 % Callback for axis equal tight check box
     function axisCB(src,~)
         if src.Value
@@ -1186,7 +1185,7 @@ ax_gap = 5;
         hpAnl.Position(2) = hpImgProcess.Position(2)-hpAnl.Position(4);
 
         %%%%%% Resize Left Panel %%%%%
-        % hpFit.Position(4)=hF.Position(4)-200-Hacqbar;
+        hpFit.Position(4)=hpDisp.Position(2);
                 resizePlots;                            % Resize plots
 
         drawnow;
