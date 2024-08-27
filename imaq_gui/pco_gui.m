@@ -23,9 +23,6 @@ addpath(sdk_dir);
 
 % Name of the GUI
 guiname='PCO Pixelfly Image Acq';
-cmap = colormap(whitejet);
-cmap = colormap(bone);
-cmap = colormap(inferno);
 
 defaultDir = ['C:' filesep 'ImageHistory'];
 
@@ -90,6 +87,10 @@ hF=figure;clf
 set(hF,'Color','w','units','pixels','Name',guiname,...
     'toolbar','none','Tag','GUI','CloseRequestFcn',@closeGUI,...
     'NumberTitle','off','Position',[200 200 1300 650]);
+
+cmap = colormap(whitejet);
+cmap = colormap(bone);
+cmap = colormap(inferno);
 
 % co=get(gca,'colororder');
 co = colororder;
@@ -1345,15 +1346,21 @@ ax_gap = 5;
         if Rax>Rimg % axes is shorter than image
             h1=h_tab;
             w1=h_tab*Rimg;   
-            cBar.Location='westoutside';
-            drawnow;
+            % cBar.Location='west';
+
+            cBar.Position(1:2) = [axImg.Position(1)+(axImg.Position(3)-w1)/2+10  ...
+                axImg.Position(2)+25];
+            
             hAxX.Position=[axImg.Position(1)+(axImg.Position(3)-w1)/2 axImg.Position(2)-50-ax_gap w1 50];
             hAxY.Position=[axImg.Position(1)+(axImg.Position(3)+w1)/2+ax_gap axImg.Position(2) 50 h1];
         else % Axes is taller than image
             w1=w_tab;
             h1=w1/Rimg;   
-            cBar.Location='northoutside';
+            % cBar.Location='northoutside';
             drawnow;
+
+             cBar.Position(1:2) = [axImg.Position(1)+10  ...
+                axImg.Position(2)+(axImg.Position(4)-h1)/2+25];
 
             hAxX.Position=[axImg.Position(1) ...
                 axImg.Position(2)+(axImg.Position(4)-h1)/2-50-ax_gap ...
@@ -1432,7 +1439,7 @@ axImg=axes('parent',tab_od_1,'UserData','OD');cla
 
 hImg=imagesc(X,Y,Z);
 set(axImg,'box','on','linewidth',.1,'fontsize',8,'units','pixels',...
-    'XAxisLocation','top','colormap',cmap);
+    'XAxisLocation','top','colormap',cmap,'TickDir','out');
 hold on
 axImg.Position=[50 150 tab_od_1.Position(3)-200 tab_od_1.Position(4)-200];
 axImg.CLim=[0 .5];
@@ -1451,9 +1458,21 @@ pROI=rectangle('position',[1 1 1392 1024],'edgecolor',co(1,:),'linewidth',2);
 % Reticle for gaussian fit (this will become an array later)
 pGaussRet=plot(0,0,'-','linewidth',1,'Visible','off','color',co(1,:));
 % Color bar
-cBar=colorbar('fontsize',8,'units','pixels','location','westoutside');
-cBar.Label.String='optical density';
+cBar=colorbar('fontsize',10,'units','pixels','location','west','fontweight','bold',...
+    'box','off');
+cBar.Label.String='OD';
+cBar.Label.FontSize=8;
+cBar.Label.Units='pixels';
+cBar.Label.Position(1)=5;
+cBar.Label.Rotation=0;
+cBar.Label.Position(2)=115;
+cBar.Position(3:4)=[5 100];
+cBar.LineWidth=1;
+cBar.Color=[1 1 1]*.8;
+cBar.Label.Color=[1 1 1]*.8;
 drawnow;
+
+
 
 % X Cut/Sum Axis
 hAxX=axes('box','on','linewidth',1,'fontsize',8,...
