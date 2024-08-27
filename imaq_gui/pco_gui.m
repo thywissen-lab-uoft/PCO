@@ -784,6 +784,112 @@ hbSlctLim=uicontrol(hpDisp,'style','pushbutton','Cdata',cdata,'Fontsize',10,...
     'ToolTipString',ttstr);
 hbSlctLim.Position(1:2)=[42 60];
 
+
+% % Callback for changing display table ROI
+%     function tbl_dispROICB(src,evt)             
+%         ROI=src.Data;                               % Grab the new ROI             
+%         [ROI,err] = chDispROI(ROI,src.UserData);    % Update the ROI               
+%         if err
+%             src.Data(evt.Indices(2))=evt.PreviousData;
+%         else            
+%             src.Data = ROI;                     % Update table in case changed     
+%         end
+%     end
+% 
+% % Change display ROI on plots
+%     function [ROI,err] = chDispROI(ROI,img_type)  
+%         err = 0;        
+%         % Determine the ROI limits depending on image type
+%         switch img_type
+%             case 'X'
+%                 ROI_LIM = [min(data.X) max(data.X) min(data.Y) max(data.Y)];
+%             case 'K'
+%                 ROI_LIM = [min(data.f) max(data.f) min(data.f) max(data.f)];
+%             case 'dig'
+%                 ROI_LIM = [min(data.X) max(data.X) min(data.Y) max(data.Y)];
+%             case 'hop'
+%                 ROI_LIM = [min(data.X) max(data.X) min(data.Y) max(data.Y)];
+%             case 'B'
+%                 ROI_LIM = [-500 500 -500 500];
+%             case 'D'
+%                 ROI_LIM = [-500 500 -500 500];
+%             otherwise
+%                 warning('OH GOD NO');            
+%         end        
+%         % Check for string inputs of max and min
+%         if isa(ROI,'char')
+%             if isequal(ROI,'max')
+%                ROI = ROI_LIM;
+%             else               
+%                 switch img_type
+%                     case 'X'
+%                         aROI = tblROI.Data;
+%                     case 'K'
+%                         aROI = tblROIK.Data;
+%                     case 'B'
+%                         if isfield(data,'LatticeBin')
+%                            aROI = [min(data.LatticeBin(1).n1) max(data.LatticeBin(1).n1) ...
+%                                min(data.LatticeBin(1).n2) max(data.LatticeBin(1).n2)];
+%                         else
+%                             aROI=[0 100 0 100];
+%                         end
+%                     case 'D'
+%                         if isfield(data,'LatticeDig')
+%                            aROI = [min(data.LatticeDig(1).n1) max(data.LatticeDig(1).n1) ...
+%                                min(data.LatticeDig(1).n2) max(data.LatticeDig(1).n2)];
+%                         else
+%                             aROI=[0 100 0 100];
+%                         end                        
+%                 end                      
+%                 ROI=[min(aROI(:,1)) max(aROI(:,2)) min(aROI(:,3)) max(aROI(:,4))];
+%            end
+%         end
+% 
+%         % Make sure ROI is numeric
+%          if sum(~isnumeric(ROI)) || sum(isinf(ROI)) || sum(isnan(ROI))
+%             warning('Incorrect data type provided for ROI.');
+%             err = 1;
+%             return
+%         end        
+% 
+%         % Make sure ROI is increasing order
+%         if ROI(2)<=ROI(1) || ROI(4)<=ROI(3)
+%            warning('Bad ROI specification given.');
+%             err = 1;
+%             return
+%         end       
+% 
+%         % Keep ROI within the bounds
+%         if ROI(1)<ROI_LIM(1); ROI(1)=ROI_LIM(1); end       
+%         if ROI(3)<ROI_LIM(3); ROI(3)=ROI_LIM(3); end   
+%         if ROI(2)>ROI_LIM(2); ROI(2)=ROI_LIM(2);end       
+%         if ROI(4)>ROI_LIM(4); ROI(2)=ROI_LIM(4);end       
+% 
+%         % Attempt to change the display ROI
+%         try
+% 
+%             switch img_type
+%                 case 'X'            
+%                     set(axImg,'XLim',ROI(1:2),'YLim',ROI(3:4));
+%                     % set(hAxX,'XLim',ROI(1:2));
+%                     % set(hAxY,'YLim',ROI(3:4));
+%                 case 'K'
+%                     set(axImg_K,'XLim',ROI(1:2),'YLim',ROI(3:4));
+%                     % set(hAxX_K,'XLim',ROI(1:2));
+%                     % set(hAxY_K,'YLim',ROI(3:4));  
+%                 case 'B'
+%                     set(axImg_B,'XLim',ROI(1:2),'YLim',ROI(3:4));
+%                 case 'D'
+%                     set(axImg_D,'XLim',ROI(1:2),'YLim',ROI(3:4));
+%             end
+%             drawnow;
+%             resizePlots;
+%         catch ME
+%             warning('Unable to change display ROI.');            
+%             err = 1;
+%         end    
+%     end
+
     function tbl_dispROICB(src,evt)
         ROI=src.Data;        % Grab the new ROI     
         % Check that the data is numeric
