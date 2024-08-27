@@ -1272,15 +1272,17 @@ ax_gap = 5;
         hpControl.Position(4) = H;        % Resize image panel        
         hp.Position=[hpControl.Position(3) 0 W-hpControl.Position(3) H];        % Resize image panel        
         
-        hbSettings.Position(1:2)=[1 hp.Position(4)-21];        
-        bSave.Position(1:2)=[20 hp.Position(4)-21];
-        hbBrowseImage.Position(1:2)=[40 hp.Position(4)-21];
-        hbhistoryNow.Position(1:2)=[60 hp.Position(4)-21];
-        hbhistoryLeft.Position(1:2)=[84 hp.Position(4)-21];
-        thistoryInd.Position(1:2)=[96 hp.Position(4)-21];
-        hbhistoryRight.Position(1:2)=[124 hp.Position(4)-21];
+        hbSettings.Position(1:2)=[1 tab_od_1.Position(4)-21];        
+        bSave.Position(1:2)=[20 tab_od_1.Position(4)-21];
+        hbBrowseImage.Position(1:2)=[40 tab_od_1.Position(4)-21];
+        hbhistoryNow.Position(1:2)=[60 tab_od_1.Position(4)-21];
+        hbhistoryLeft.Position(1:2)=[84 tab_od_1.Position(4)-21];
+        thistoryInd.Position(1:2)=[96 tab_od_1.Position(4)-21];
+        hbhistoryRight.Position(1:2)=[124 tab_od_1.Position(4)-21];
         tImageFileFig.Position(1:2)=[136 ...
-        hp.Position(4)-tImageFileFig.Position(4)];
+        tab_od_1.Position(4)-tImageFileFig.Position(4)];
+
+
         %%%%%% Resize Acquisition Panel %%%%
         % hpCam.Position(2:3)=[hF.Position(4)-hpCam.Position(4) hF.Position(3)];
         tSaveDir.Position(3)=hpCam.Position(3)-2;
@@ -1418,23 +1420,23 @@ hbSettings=uicontrol(tab_od_1,'style','pushbutton','CData',cdata,'callback',@set
        set(hFSet,'name','PCO GUI Settings','windowstyle','modal','units','pixels',...
            'color','w','numbertitle','off','resize','off');
        hFSet.Position(3:4)=[400 300];
-       
+
        str='fitresults output variable name : ';
        uicontrol(hFSet,'units','pixels','Position',[100 70 200 18],...
            'style','text','string',str,'fontsize',8,'backgroundcolor','w');
-       
+
        eVar=uicontrol(hFSet,'units','pixels','backgroundcolor','w','style','edit',...
            'String',frVar,'fontsize',12,'fontname','monospaced',...
            'Position',[100 50 200 25]);
-       
+
        uicontrol(hFSet,'units','pixels','backgroundcolor','w',...
            'style','pushbutton','string','ok','fontsize',12,...
            'callback',@setGoCB,'userdata',1,'position',[100 10 90 25]);
-       
+
        uicontrol(hFSet,'units','pixels','backgroundcolor','w',...
            'style','pushbutton','string','cancel','fontsize',12,...
            'callback',@setGoCB,'userdata',0,'position',[210 10 90 25]);
-       
+
         function setGoCB(src,~)            
             if src.UserData
                 disp('Saving changes');
@@ -1480,7 +1482,7 @@ hbhistoryRight=uicontrol(tab_od_1,'Style','pushbutton','units','pixels',...
 hbhistoryRight.Position(3:4)=[12 20];
 
     function loadImage(filename)
-        
+
         if nargin<1
             [filename,pathname]=uigetfile([defaultDir filesep '*.mat']);
             if ~filename
@@ -1493,18 +1495,18 @@ hbhistoryRight.Position(3:4)=[12 20];
         olddata=dstruct;
         try
             data=load(filename);
-            
-            
+
+
             dstruct=data.data;
             dstruct=computeOD(dstruct);
-            
+
             updateImages(dstruct);
-            
+
             dstruct=performFits(dstruct);
 
             [~,inds] = sort(lower(fieldnames(dstruct.Params)));
             params = orderfields(dstruct.Params,inds);  
-          
+
             fnames=fieldnames(params);
             for nn=1:length(fnames)
                   tbl_params.Data{nn,1}=fnames{nn};
@@ -1512,12 +1514,12 @@ hbhistoryRight.Position(3:4)=[12 20];
                     if isa(val,'double')
                         tbl_params.Data{nn,2}=num2str(val);
                     end
-                    
+
                     if isa(val,'struct')
                        tbl_params.Data{nn,2}='[struct]'; 
                     end  
             end
-              
+
             fnames=fieldnames(dstruct.Flags);
                 for nn=1:length(fnames)
                     tbl_flags.Data{nn,1}=fnames{nn};
@@ -1525,25 +1527,25 @@ hbhistoryRight.Position(3:4)=[12 20];
                     if isa(val,'double')
                         tbl_flags.Data{nn,2}=num2str(val);
                     end
-                    
+
                     if isa(val,'struct')
                        tbl_flags.Data{nn,2}='[struct]'; 
                     end                    
                 end
-                
+
         catch ME
-            
+
             warning(ME.message);
             warning('Unable to load image. Reverting to previous');
-            
+
             dstruct=olddata;
             dstruct=computeOD(dstruct);
             updateImages(dstruct);
             dstruct=performFits(dstruct);
-            
+
              [~,inds] = sort(lower(fieldnames(dstruct.Params)));
             params = orderfields(dstruct.Params,inds);  
-            
+
             fnames=fieldnames(params);
             for nn=1:length(fnames)
                   tbl_params.Data{nn,1}=fnames{nn};
@@ -1551,16 +1553,16 @@ hbhistoryRight.Position(3:4)=[12 20];
                     if isa(val,'double')
                         tbl_params.Data{nn,2}=num2str(val);
                     end
-                    
+
                     if isa(val,'struct')
                        tbl_params.Data{nn,2}='[struct]'; 
                     end  
             end
-            
+
 %            tbl_params.Data=[fieldnames(params), ...
 %                     struct2cell(params)];    
-            
-   
+
+
             fnames=fieldnames(dstruct.Flags);
                 for nn=1:length(fnames)
                     tbl_flags.Data{nn,1}=fnames{nn};
@@ -1568,14 +1570,15 @@ hbhistoryRight.Position(3:4)=[12 20];
                     if isa(val,'double')
                         tbl_flags.Data{nn,2}=num2str(val);
                     end
-                    
+
                     if isa(val,'struct')
                        tbl_flags.Data{nn,2}='[struct]'; 
                     end
-                    
+
                 end
         end
     end
+%
 %{
 % Callback function for changing number of ROIs
     function chData(~,~,state)       
@@ -1649,10 +1652,7 @@ function chData(src,evt,state)
         tNavMax.String=['of ' num2str(length(filenames))];  
         drawnow;   
         loadImage(newfilename);
-    end
-
-
-
+end
 
 
 %% Analayis Settings Panel
