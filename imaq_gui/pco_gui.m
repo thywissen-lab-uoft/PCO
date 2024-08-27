@@ -24,7 +24,9 @@ addpath(sdk_dir);
 % Name of the GUI
 guiname='PCO Pixelfly Image Acq';
 
-defaultDir = ['C:' filesep 'ImageHistory'];
+default_camera_settings = defaultPCOSettings;
+
+defaultDir = default_camera_settings.defaultDir;
 
 currDir = defaultDir;
 
@@ -41,7 +43,8 @@ for kk=1:length(a.Children)
     end
 end
 %% Camera and Imaging Settings
-default_camera_settings = defaultPCOSettings;
+
+
 % Camera properties
 raw_pixel_size=6.45E-6; % Pixelsize on the pixefly cameras
 % Optics

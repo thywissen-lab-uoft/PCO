@@ -31,5 +31,9 @@ coNew=brighten([coNew;coNew;coNew],.2);
 
 out.ColorOrder = coNew;
 
+% Previewer Directory
+out.defaultDir = ['C:' filesep 'ImageHistory'];
+
+
 end
 
