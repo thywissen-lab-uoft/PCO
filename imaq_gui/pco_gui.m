@@ -318,65 +318,6 @@ tbl_numimages.Position(1:2)=[tNumImages.Position(1)+tNumImages.Position(3) ...
         camera.NumImages=data;
     end
 
-%% Optics Panel
-hpOptics=uipanel('parent',hpControl,'units','pixels','backgroundcolor','w',...
-    'title','optics','fontsize',6);
-% hpSet.Position=[hpAcq2.Position(1)+hpAcq2.Position(3) hpImg.Position(4) 150 Htop];
-
-hpOptics.Position(3) = hpControl.Position(3)/2;
-hpOptics.Position(4) = 100;
-hpOptics.Position(1) = 1;
-hpOptics.Position(2) = hpCam.Position(2)-hpOptics.Position(4);
-
-pdCamSelect  = uicontrol(hpOptics,'units','pixels','style','popupmenu','backgroundcolor','w',...
-    'String',defaultPCOSettings('CameraName'),'UserData',exposure_id_values,'fontsize',7,'Callback',@chCamCB,...
-    'Value',1);
-pdCamSelect.Position=[5 hpOptics.Position(4)-55 100 20];
-
-    function chCamCB(src,evt)
-        cam_num = evt.Source.Value;
-        updateCamMode(cam_num);       
-    end
-
-    function updateCamMode(ind)
-        % ind = find(strcmp(defaultPCOSettings('CameraName'),cam_name),1);
-        
-        tbl_optics.Data{1,2} = 1e6*defaultPCOSettings('PixelSize',ind);
-
-
-        tbl_optics.Data{2,2} = defaultPCOSettings('Magnification',ind);
-        tbl_cam.Data{1,2} = 1e6*defaultPCOSettings('PixelSize',ind)/...
-            defaultPCOSettings('Magnification',ind);
-        tbl_exposure.Data = defaultPCOSettings('ExposureTime',ind);
-        tbl_numimages.Data= defaultPCOSettings('NumImages',ind);
-        tblRotate.Data = defaultPCOSettings('RotationAngle',ind);
-        tblROIPScale.Data = defaultPCOSettings('ScaleProbeROI',ind);  
-
-
-
-        try
-            chProbeScaleROI(tblROIPScale.Data);
-        end
-    end
-
-tbl_optics=uitable('parent',hpOptics,'units','pixels','RowName',{},'ColumnName',{},...
-    'fontsize',7,'ColumnWidth',{80,40},'columneditable',[false true]);
-tbl_optics.Data={...
-    ['raw pixelsize (' char(956) 'm)'], 0;
-    'magnification',0};
-
-tbl_optics.Position(3:4)=tbl_optics.Extent(3:4);
-tbl_optics.Position(1:2)=[5 pdCamSelect.Position(2)-tbl_optics.Position(4)-2];
-
-
-tbl_cam=uitable('parent',hpOptics,'units','pixels','RowName',{},'ColumnName',{},...
-    'fontsize',7,'ColumnWidth',{80,40},'columneditable',[false false]);
-
-tbl_cam.Data={...
-    ['img pixelsize (' char(956) 'm)'], 0};
-tbl_cam.Position(3:4)=tbl_cam.Extent(3:4);
-tbl_cam.Position(1:2)=[5 tbl_optics.Position(2)-tbl_cam.Position(4)-2];    
-
 
 %% Navigator Panel 
 
@@ -524,15 +465,59 @@ tNavName=uicontrol(hpNav,'style','text','string','FILENAME','fontsize',7,...
 
 % This is alpha stage, perhaps enable filtering? or fringe removal?
 hpImgProcess=uipanel('parent',hpControl,'units','pixels','backgroundcolor','w',...
-    'title','processing','fontsize',6);
+    'title','image processing','fontsize',6);
 % hpImgProcess.Position=[hpSet.Position(1)+hpSet.Position(3) tab_od_1.Position(4) 200 Htop]; 
-hpImgProcess.Position = [0 hpNav.Position(2)-125 hpControl.Position(3)/2 125];
+hpImgProcess.Position = [0 hpNav.Position(2)-125 hpControl.Position(3)/2 210];
+
+pdCamSelect  = uicontrol(hpImgProcess,'units','pixels','style','popupmenu','backgroundcolor','w',...
+    'String',defaultPCOSettings('CameraName'),'UserData',exposure_id_values,'fontsize',7,'Callback',@chCamCB,...
+    'Value',1);
+pdCamSelect.Position=[5 hpImgProcess.Position(4)-35 100 20];
+
+    function chCamCB(src,evt)
+        cam_num = evt.Source.Value;
+        updateCamMode(cam_num);       
+    end
+
+    function updateCamMode(ind)        
+        tbl_optics.Data{1,2} = 1e6*defaultPCOSettings('PixelSize',ind);
+        tbl_optics.Data{2,2} = defaultPCOSettings('Magnification',ind);
+        tbl_cam.Data{1,2} = 1e6*defaultPCOSettings('PixelSize',ind)/...
+            defaultPCOSettings('Magnification',ind);
+        tbl_exposure.Data = defaultPCOSettings('ExposureTime',ind);
+        tbl_numimages.Data= defaultPCOSettings('NumImages',ind);
+        tblRotate.Data = defaultPCOSettings('RotationAngle',ind);
+        tblROIPScale.Data = defaultPCOSettings('ScaleProbeROI',ind);  
+        try
+            chProbeScaleROI(tblROIPScale.Data);
+        end
+    end
+
+tbl_optics=uitable('parent',hpImgProcess,'units','pixels','RowName',{},'ColumnName',{},...
+    'fontsize',7,'ColumnWidth',{80,40},'columneditable',[false true]);
+tbl_optics.Data={...
+    ['raw pixelsize (' char(956) 'm)'], 0;
+    'magnification',0};
+
+tbl_optics.Position(3:4)=tbl_optics.Extent(3:4);
+tbl_optics.Position(1:2)=[5 pdCamSelect.Position(2)-tbl_optics.Position(4)-2];
+
+
+tbl_cam=uitable('parent',hpImgProcess,'units','pixels','RowName',{},'ColumnName',{},...
+    'fontsize',7,'ColumnWidth',{80,40},'columneditable',[false false]);
+
+tbl_cam.Data={...
+    ['img pixelsize (' char(956) 'm)'], 0};
+tbl_cam.Position(3:4)=tbl_cam.Extent(3:4);
+tbl_cam.Position(1:2)=[5 tbl_optics.Position(2)-tbl_cam.Position(4)-2];    
+
+
 % Method of calculating OD
 bgODFieldText=uicontrol('style','text','parent',hpImgProcess,...
-    'String','field:','backgroundcolor','w','position',[0 hpImgProcess.Position(4)-30 25 15],...
+    'String','field:','backgroundcolor','w','position',[0 hpImgProcess.Position(4)-120 25 15],...
     'fontsize',7);
 bgODField = uibuttongroup('units','pixels','backgroundcolor','w',...
-    'position',[25 hpImgProcess.Position(4)-30 180 20],...
+    'position',[25 hpImgProcess.Position(4)-120 180 20],...
     'SelectionChangedFcn',@chOD,'parent',hpImgProcess,'BorderType','None');        
 % Create radio buttons in the button group.
 uicontrol(bgODField,'Style','radiobutton','String','Detect',...
@@ -562,7 +547,7 @@ uicontrol(bgODField,'Style','radiobutton','String','Low',...
 cGaussFilter=uicontrol('style','checkbox','string','gauss filter',...
     'units','pixels','parent',hpImgProcess,'backgroundcolor','w',...
     'value',0,'fontsize',7);
-cGaussFilter.Position=[5 hpImgProcess.Position(4)-50 75 15];
+cGaussFilter.Position=[5 hpImgProcess.Position(4)-140 75 15];
 
 tblGaussFilter=uitable('parent',hpImgProcess,'units','pixels',...
     'rowname',{},'columnname',{},'Data',.5,'columneditable',[true],...
@@ -571,7 +556,7 @@ tblGaussFilter.Position=[80 cGaussFilter.Position(2)-2 50 20];
 
 % Pixels label
 uicontrol('parent',hpImgProcess,'units','pixels',...
-    'style','text','string','px','position',[132 60 15 15],...
+    'style','text','string','px','position',[132 cGaussFilter.Position(2) 15 15],...
     'fontsize',7,'backgroundcolor','w');
 
 % Checkbox for enabling scaling of the probe
@@ -674,7 +659,7 @@ uicontrol('parent',hpImgProcess,'units','pixels',...
 
 
 %% Display Settings panel
-h_hpDisp = 125;
+h_hpDisp = 210;
 
 hpDisp=uipanel(hpControl,'units','pixels','backgroundcolor','w',...
     'title','Display Options','fontsize',6);
@@ -1308,9 +1293,9 @@ ax_gap = 5;
         hpCam.Position(2) = hpControl.Position(4) - hpCam.Position(4);
         hpNav.Position(2) = hpCam.Position(2) - hpNav.Position(4);
 
-        hpOptics.Position(2)=hpNav.Position(2)-hpOptics.Position(4);
+        % hpOptics.Position(2)=hpNav.Position(2)-hpOptics.Position(4);
         
-        hpImgProcess.Position(2) = hpOptics.Position(2)-hpImgProcess.Position(4);
+        hpImgProcess.Position(2) = hpNav.Position(2)-hpImgProcess.Position(4);
         hpAnl.Position(2) = hpImgProcess.Position(2)-hpAnl.Position(4);
 
 
