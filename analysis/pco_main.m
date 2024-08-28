@@ -105,7 +105,7 @@ doProbeFit    = 0;      % Fit probe beam  to 2D Gaussian
 % processed data outputs of the below fits are typically <fit_type>_name
 
 % Box Count
-doBoxCount      = 0;      % Box count analysis
+doBoxCount      = 1;      % Box count analysis
 
 % Gaussian Fit
 % Fit to a gaussian distribution (thermal cloud)
@@ -121,7 +121,7 @@ doBMFit         = 0;
 
 % Fermi-Fit
 % Fit a DFG in long time of flight
-doFermiFitLong  = 1;     
+doFermiFitLong  = 0;     
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Custom Analyses
@@ -400,7 +400,7 @@ if isfield(data.Flags,'lattice_off') && ...
         data.Flags.lattice_off && ...
         ~data.Flags.image_stern_gerlach_mF && ...
         ~data.Flags.image_stern_gerlach_F
-    ROI = [930 1120 275 415]; % -9/2;       
+    ROI = [880 1080 250 400]; % -9/2;       
 end
 
 % if isfield(data.Flags,'lattice_fluor') && ...
