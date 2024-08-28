@@ -1,8 +1,8 @@
-function out = defaultPCOSettings
+function output = defaultPCOSettings(field,index)
 
 out = struct;
 
-out.CameraName      =  {'X Cam','Y Cam'};  % Camera labels
+out.CameraName      =  {'X Cam';'Y Cam'};  % Camera labels
 out.PixelSize       = [6.45e-6; 6.45e-6];  % Camera Pixel Size
 out.Magnification   = [1; 2];              % Manification
 out.RotationAngle   = [0; -1.7];           % Rotation angles (deg.)
@@ -12,7 +12,7 @@ out.NumImages       = [3;3];               % Number of Images
 % Region of interest to scale probe to account for probe beam power
 % fluctuations
 out.ScaleProbeROI = [1300 1350 60 100;      
-                     50 200 60 100];
+                     50 200 250 350];
 
 % Region of interest to subtract background counts for box count
 out.BoxBkgdROI = [400 500 400 500;
@@ -33,6 +33,23 @@ out.ColorOrder = coNew;
 
 % Previewer Directory
 out.defaultDir = ['C:' filesep 'ImageHistory'];
+
+%% Process Output
+% If no input variable then return everything, otherwise, return the
+% specific field that was requested
+if nargin~=0
+    if isfield(out,field)
+        output = out.(field);
+        if nargin>1
+            output = output(index,:);
+        end
+    else
+        output = out;
+    end
+else 
+    output = out;
+
+end
 
 
 end

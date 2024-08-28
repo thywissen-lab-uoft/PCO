@@ -22,7 +22,7 @@ sdk_dir=fullfile(fileparts(curpath), 'pixelfly_plugin_rev3_01_beta');
 addpath(sdk_dir);
 
 % Name of the GUI
-guiname='PCO Pixelfly Image Acq';
+guiname='PCO GUI';
 
 default_camera_settings = defaultPCOSettings;
 
@@ -85,7 +85,6 @@ cmap = colormap(inferno);
 co = colororder;
 co=circshift(co,3,1);
 co=[co;co;co];
-
 
 
 % Callback for when the GUI is requested to be closed.
@@ -160,6 +159,7 @@ hbDisconnect=uicontrol(hpCam,'style','pushbutton','string','disconnect','units',
         hbclear.Enable='on';
         hbstop.Enable='off';
         tbl_cama.Enable='off';  
+        pdCamMode.Enable = 'off';
         rbSingleAcq.Enable='off';
         rbDoubleAcq.Enable='off';
         rbSingleVideo.Enable='off';
@@ -181,6 +181,8 @@ hbDisconnect=uicontrol(hpCam,'style','pushbutton','string','disconnect','units',
         hbstart.Enable='off';
         hbclear.Enable='off';
         hbstop.Enable='off';
+        pdCamMode.Enable = 'on';
+
         tbl_cama.Enable='on';
         rbSingleAcq.Enable='on';
         rbDoubleAcq.Enable='on';
@@ -324,30 +326,6 @@ tbl_cama.Position(1:2)=[5 pdCamMode.Position(2)-tbl_cama.Position(4)];
         camera.ExposureTime=tbl_cama.Data{1,2};
         camera.NumImages=tbl_cama.Data{2,2};
     end
-
-% % Button group for deciding what the X/Y plots show
-% bgCamMode = uibuttongroup(hpAcq,'units','pixels','backgroundcolor','w','BorderType','None',...
-%     'SelectionChangeFcn',@chCamModeCB);  
-% bgCamMode.Position(3:4)=[150 50];
-% bgCamMode.Position(1:2)=[5 1];
-% 
-% % Radio buttons for cuts vs sum
-% rbSingleAcq=uicontrol(bgCamMode,'Style','radiobutton','String','single exp (0x10)',...
-%     'Position',[0 32 150 18],'units','pixels','backgroundcolor','w',...
-%     'Value',1,'UserData',16,'fontsize',7);
-% rbDoubleAcq=uicontrol(bgCamMode,'Style','radiobutton','String','double exp (0x20)',...
-%     'Position',[0 16 150 18],'units','pixels','backgroundcolor','w',...
-%     'UserData',32,'fontsize',7);
-% rbSingleVideo=uicontrol(bgCamMode,'Style','radiobutton','String','single video (0x30)',...
-%     'Position',[0 0 150 18],'units','pixels','backgroundcolor','w',...
-%     'UserData',48,'fontsize',7);
-% 
-%     function chCamModeCB(~,~)
-%        disp('Changing camera acquistion mode');
-%        camera.CameraMode=bgCamMode.SelectedObject.UserData;
-%     end
-
-
 %% Optics Panel
 hpOptics=uipanel('parent',hpControl,'units','pixels','backgroundcolor','w',...
     'title','optics','fontsize',6);
@@ -360,7 +338,7 @@ hpOptics.Position(2) = hpAcq.Position(2);
 
 bgCam = uibuttongroup('units','pixels','backgroundcolor','w',...
     'position',[5 75 150 15],...
-    'SelectionChangedFcn',@chCam,'parent',hpOptics,'BorderType','None');        
+    'SelectionChangedFcn',@chCamCB,'parent',hpOptics,'BorderType','None');        
 bgCam.Position(2) = hpOptics.Position(4)-bgCam.Position(4)-12;
 % Create radio buttons in the button group.
 uicontrol(bgCam,'Style','radiobutton','String','X Cam',...
@@ -369,19 +347,17 @@ uicontrol(bgCam,'Style','radiobutton','String','X Cam',...
 uicontrol(bgCam,'Style','radiobutton','String','Y Cam',...
     'Position',[55 0 70 15],'units','pixels','backgroundcolor','w');
 
-    function chCam(~,evt)
-        switch evt.NewValue.String
-            case 'X Cam'
-                tbl_optics.Data{2,2} = default_camera_settings.Magnification(1);
-                tbl_cam.Data{1,2} = default_camera_settings.PixelSize(1)*1E6/default_camera_settings.Magnification(1);
-                tblRotate.Data = default_camera_settings.RotationAngle(1);
-                tblROIPScale.Data = default_camera_settings.ScaleProbeROI(1,:);                
-            case 'Y Cam'
-                tbl_optics.Data{2,2} = default_camera_settings.Magnification(2);
-                tbl_cam.Data{1,2} = default_camera_settings.PixelSize(2)*1E6/default_camera_settings.Magnification(2);
-                tblRotate.Data = default_camera_settings.RotationAngle(2);
-                tblROIPScale.Data = default_camera_settings.ScaleProbeROI(2,:);  
-        end
+    function chCamCB(src,evt)
+        updateCamMode(evt.NewValue.String);
+    end
+
+    function updateCamMode(cam_name)
+        ind = find(strcmp(defaultPCOSettings('CameraName'),cam_name),1);
+        tbl_optics.Data{2,2} = defaultPCOSettings('Magnification',ind);
+        tbl_cam.Data{1,2} = 1e6*defaultPCOSettings('PixelSize',ind)/...
+            defaultPCOSettings('Magnification',ind);
+        tblRotate.Data = defaultPCOSettings('RotationAngle',ind);
+        tblROIPScale.Data = defaultPCOSettings('ScaleProbeROI',ind);    
     end
 
 tbl_optics=uitable('parent',hpOptics,'units','pixels','RowName',{},'ColumnName',{},...
