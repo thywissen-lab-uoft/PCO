@@ -2,6 +2,7 @@ function output = defaultPCOSettings(field,index)
 
 out = struct;
 
+%% Camera Stuff
 out.CameraName      =  {'X Cam';'Y Cam'};  % Camera labels
 out.PixelSize       = [6.45e-6; 6.45e-6];  % Camera Pixel Size
 out.Magnification   = [1; 2];              % Manification
@@ -9,6 +10,8 @@ out.RotationAngle   = [0; -1.7];           % Rotation angles (deg.)
 out.ExposureTime    = [350;350];           % Exposure Time (us.)
 out.NumImages       = [3;3];               % Number of Images
 
+
+%% Analysis ROIs
 % Region of interest to scale probe to account for probe beam power
 % fluctuations
 out.ScaleProbeROI = [1300 1350 60 100;      
@@ -18,6 +21,7 @@ out.ScaleProbeROI = [1300 1350 60 100;
 out.BoxBkgdROI = [400 500 400 500;
                 400 500 250 400];
 
+%% Color Stuff
 % Color order of lines
 coNew=[hex2dec(['78';'a2';'cc'])';
         hex2dec(['ff';'c7';'a1'])';
@@ -30,10 +34,12 @@ coNew=circshift(coNew,3,1);
 coNew=brighten([coNew;coNew;coNew],.2);       
 
 out.ColorOrder = coNew;
-
+%% Directories
 % Previewer Directory
 out.defaultDir = ['C:' filesep 'ImageHistory'];
 
+out.CameraControlFile = 'Y:\_communication\pco_control.mat';
+out.AnalysisHistoryDirectory = 'Y:\_communication\analysis_history';
 %% Process Output
 % If no input variable then return everything, otherwise, return the
 % specific field that was requested

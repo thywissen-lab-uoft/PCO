@@ -21,17 +21,18 @@ addpath(analysis_path);
 sdk_dir=fullfile(fileparts(curpath), 'pixelfly_plugin_rev3_01_beta');
 addpath(sdk_dir);
 
+%% Important Settings
+
 % Name of the GUI
 guiname='PCO GUI';
 
-default_camera_settings = defaultPCOSettings;
 
-defaultDir = default_camera_settings.defaultDir;
+defaultDir = defaultPCOSettings('defaultDir');
 
 currDir = defaultDir;
 
-camera_control_file='Y:\_communication\pco_control.mat';
-analysis_history_dir = 'Y:\_communication\analysis_history';
+camera_control_file=defaultPCOSettings('CameraControlFile');
+analysis_history_dir=defaultPCOSettings('AnalysisHistoryDirectory');
 
 % Close instances of the GUI incase you ran this without closing 
 a=groot;
@@ -55,7 +56,7 @@ frVar='ExecutionDate';
 camera=initCamStruct;
 scaleProbeDefaultROI=[1300 1350 60 100];
 boxBkgdDefaultROI = [400 500 400 500];
-coNew=default_camera_settings.ColorOrder;
+coNew=defaultPCOSettings('ColorOrder');
 
 %% Initialize Dummy Data
 
