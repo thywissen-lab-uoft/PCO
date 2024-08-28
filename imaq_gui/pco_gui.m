@@ -50,8 +50,8 @@ rotationCrop = 'crop'; % 'crop' or 'loose'
 frVar='ExecutionDate';
 camera=initCamStruct;
 
-scaleProbeDefaultROI=[1300 1350 60 100];
-boxBkgdDefaultROI = [400 500 400 500];
+% scaleProbeDefaultROI=[1300 1350 60 100];
+% boxBkgdDefaultROI = [400 500 400 500];
 coNew=defaultPCOSettings('ColorOrder');
 
 %% Initialize Dummy Data
@@ -354,7 +354,11 @@ uicontrol(bgCam,'Style','radiobutton','String','Y Cam',...
         tbl_cam.Data{1,2} = 1e6*defaultPCOSettings('PixelSize',ind)/...
             defaultPCOSettings('Magnification',ind);
         tblRotate.Data = defaultPCOSettings('RotationAngle',ind);
-        tblROIPScale.Data = defaultPCOSettings('ScaleProbeROI',ind);    
+        tblROIPScale.Data = defaultPCOSettings('ScaleProbeROI',ind);  
+
+        try
+            chProbeScaleROI(tblROIPScale.Data);
+        end
     end
 
 tbl_optics=uitable('parent',hpOptics,'units','pixels','RowName',{},'ColumnName',{},...
@@ -584,7 +588,7 @@ cScaleProbe=uicontrol('style','checkbox','string','scale',...
     end
 
 
-d=scaleProbeDefaultROI;
+d=[1 2 1 2];
 pp=[d(1) d(3) d(2)-d(1) d(4)-d(3)];
 tblROIPScale=uitable(hpImgProcess,'units','pixels','ColumnWidth',{25 25 25 25},...
     'ColumnEditable',true(ones(1,4)),'ColumnName',{},...
@@ -594,12 +598,34 @@ tblROIPScale.Position(3)=tblROIPScale.Extent(3);
 tblROIPScale.Position(4)=20;
 tblROIPScale.Position(1:2)=[45 cScaleProbe.Position(2)-3];
 
-
+    function [ROI,err]=chProbeScaleROI(ROI)
+            % Check that limits go from low to high
+            if ROI(2)<=ROI(1) || ROI(4)<=ROI(3)
+               warning('Bad ROI specification given.');
+               ROI(evt.Indices(2))=evt.PreviousData;
+            end               
+            % Check that ROI is within image bounds
+            if ROI(1)<1; ROI(1)=1; end       
+            if ROI(3)<1; ROI(3)=1; end   
+            if ROI(4)>1024; ROI(4)=1024; end       
+            if ROI(2)>1392; ROI(2)=1392; end         
+            % Reassign the ROI
+            % src.Data(m,:)=ROI;      
+            % Try to update ROI graphics
+            try
+                pos=[ROI(1) ROI(3) ROI(2)-ROI(1) ROI(4)-ROI(3)];
+                set(pROIPScale,'Position',pos);                
+                err = 0;
+            catch
+               warning('Unable to change display ROI.');
+               
+               err = 1;
+            end
+    end
 
 
     function chROIPScale(src,evt)
         m=evt.Indices(1); n=evt.Indices(2);
-        
         ROI=src.Data(1,:);
         % Check that the data is numeric
         if sum(~isnumeric(ROI)) || sum(isinf(ROI)) || sum(isnan(ROI))
@@ -607,27 +633,14 @@ tblROIPScale.Position(1:2)=[45 cScaleProbe.Position(2)-3];
             src.Data(m,n)=evt.PreviousData;
             return;
         end        
-        ROI=round(ROI);      % Make sure this ROI are integers   
-        % Check that limits go from low to high
-        if ROI(2)<=ROI(1) || ROI(4)<=ROI(3)
-           warning('Bad ROI specification given.');
-           ROI(evt.Indices(2))=evt.PreviousData;
-        end               
-        % Check that ROI is within image bounds
-        if ROI(1)<1; ROI(1)=1; end       
-        if ROI(3)<1; ROI(3)=1; end   
-        if ROI(4)>1024; ROI(4)=1024; end       
-        if ROI(2)>1392; ROI(2)=1392; end         
-        % Reassign the ROI
-        src.Data(m,:)=ROI;      
-        % Try to update ROI graphics
-        try
-            pos=[ROI(1) ROI(3) ROI(2)-ROI(1) ROI(4)-ROI(3)];
-            set(pROIPScale,'Position',pos);
-        catch
-           warning('Unable to change display ROI.');
-           src.Data(m,n)=evt.PreviousData;
+        ROI=round(ROI);      % Make sure this ROI are integers  
+
+        [ROI,err]=chProbeScaleROI(ROI);
+
+        if err
+            src.Data(m,n)=evt.PreviousData;
         end
+        
     end
 
 
@@ -1559,7 +1572,7 @@ cBoxBg.Position=[70 cBox.Position(2) 75 15];
        end
     end
 
-d=boxBkgdDefaultROI;
+d=[1 2 1 2];
 pp=[d(1) d(3) d(2)-d(1) d(4)-d(3)];
 tblROIbsub=uitable(hpAnl,'units','pixels','ColumnWidth',{30 30 30 30},...
     'ColumnEditable',true(ones(1,4)),'ColumnName',{},...
@@ -1975,8 +1988,7 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
                 OD = [OD_1; OD_2];
              end            
          end 
-        %OD(PWOA<50) = 0;
-        %OD(PWA<50) = 0;
+    
 
         OD = real(OD);
 %         OD(isnan(OD))=0;
