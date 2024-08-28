@@ -26,9 +26,9 @@ addpath(sdk_dir);
 % Name of the GUI
 guiname='PCO GUI';
 
-
 defaultDir = defaultPCOSettings('defaultDir');
 
+% What is curr dir? I have forgotten
 currDir = defaultDir;
 
 camera_control_file=defaultPCOSettings('CameraControlFile');
@@ -45,15 +45,11 @@ for kk=1:length(a.Children)
 end
 %% Camera and Imaging Settings
 
-
-% Camera properties
-raw_pixel_size=6.45E-6; % Pixelsize on the pixefly cameras
-% Optics
-mag=[1 2]; % ideal manification of X and Y cams respectively
-rotMode = 'bicubic'; % 'nearest','bilinear','bicubic'
-rotCrop = 'crop'; % 'crop' or 'loose'
+rotationMode = 'bicubic'; % 'nearest','bilinear','bicubic'
+rotationCrop = 'crop'; % 'crop' or 'loose'
 frVar='ExecutionDate';
 camera=initCamStruct;
+
 scaleProbeDefaultROI=[1300 1350 60 100];
 boxBkgdDefaultROI = [400 500 400 500];
 coNew=defaultPCOSettings('ColorOrder');
@@ -364,8 +360,8 @@ uicontrol(bgCam,'Style','radiobutton','String','Y Cam',...
 tbl_optics=uitable('parent',hpOptics,'units','pixels','RowName',{},'ColumnName',{},...
     'fontsize',7,'ColumnWidth',{80,40},'columneditable',[false true]);
 tbl_optics.Data={...
-    ['raw pixelsize (' char(956) 'm)'], raw_pixel_size*1E6;
-    'magnification',mag(1)};
+    ['raw pixelsize (' char(956) 'm)'], 0;
+    'magnification',0};
 
 tbl_optics.Position(3:4)=tbl_optics.Extent(3:4);
 tbl_optics.Position(1:2)=[5 bgCam.Position(2)-tbl_optics.Position(4)-2];
@@ -375,9 +371,10 @@ tbl_cam=uitable('parent',hpOptics,'units','pixels','RowName',{},'ColumnName',{},
     'fontsize',7,'ColumnWidth',{80,40},'columneditable',[false false]);
 
 tbl_cam.Data={...
-    ['img pixelsize (' char(956) 'm)'], raw_pixel_size*1E6/mag(1)};
+    ['img pixelsize (' char(956) 'm)'], 0};
 tbl_cam.Position(3:4)=tbl_cam.Extent(3:4);
 tbl_cam.Position(1:2)=[5 tbl_optics.Position(2)-tbl_cam.Position(4)-2];    
+
 
 %% Navigator Panel 
 
@@ -1970,11 +1967,11 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
          if cRotate.Value && tblRotate.Data~=0
              theta = tblRotate.Data;
              if size(data.PWOA,1)==1024   
-                OD = imrotate(OD,theta,rotMode,rotCrop);             
+                OD = imrotate(OD,theta,rotationMode,rotationCrop);             
 
              else
-                OD_1 = imrotate(OD(1:1024,:),theta,rotMode,rotCrop);
-                OD_2 = imrotate(OD(1025:end,:),theta,rotMode,rotCrop);  
+                OD_1 = imrotate(OD(1:1024,:),theta,rotationMode,rotationCrop);
+                OD_2 = imrotate(OD(1025:end,:),theta,rotationMode,rotationCrop);  
                 OD = [OD_1; OD_2];
              end            
          end 
@@ -2591,6 +2588,9 @@ end
 try
     chData([],[],0);   
 end
+% Initialize tables with first camera settings
+updateCamMode(defaultPCOSettings('CameraName',1));
+
 
 enableInteractivity;
 addlistener(axImg,'XLim','PostSet',@foo); 
