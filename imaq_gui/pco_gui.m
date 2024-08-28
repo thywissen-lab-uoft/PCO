@@ -328,23 +328,22 @@ hpOptics.Position(4) = 100;
 hpOptics.Position(1) = 1;
 hpOptics.Position(2) = hpCam.Position(2)-hpOptics.Position(4);
 
-bgCam = uibuttongroup('units','pixels','backgroundcolor','w',...
-    'position',[5 75 150 15],...
-    'SelectionChangedFcn',@chCamCB,'parent',hpOptics,'BorderType','None');        
-bgCam.Position(2) = hpOptics.Position(4)-bgCam.Position(4)-12;
-% Create radio buttons in the button group.
-uicontrol(bgCam,'Style','radiobutton','String','X Cam',...
-    'Position',[0 0 50 15],'units','pixels','backgroundcolor','w',...
+pdCamSelect  = uicontrol(hpOptics,'units','pixels','style','popupmenu','backgroundcolor','w',...
+    'String',defaultPCOSettings('CameraName'),'UserData',exposure_id_values,'fontsize',7,'Callback',@chCamCB,...
     'Value',1);
-uicontrol(bgCam,'Style','radiobutton','String','Y Cam',...
-    'Position',[55 0 70 15],'units','pixels','backgroundcolor','w');
+pdCamSelect.Position=[5 hpOptics.Position(4)-55 100 20];
 
     function chCamCB(src,evt)
-        updateCamMode(evt.NewValue.String);
+        cam_num = evt.Source.Value;
+        updateCamMode(cam_num);       
     end
 
-    function updateCamMode(cam_name)
-        ind = find(strcmp(defaultPCOSettings('CameraName'),cam_name),1);
+    function updateCamMode(ind)
+        % ind = find(strcmp(defaultPCOSettings('CameraName'),cam_name),1);
+        
+        tbl_optics.Data{1,2} = 1e6*defaultPCOSettings('PixelSize',ind);
+
+
         tbl_optics.Data{2,2} = defaultPCOSettings('Magnification',ind);
         tbl_cam.Data{1,2} = 1e6*defaultPCOSettings('PixelSize',ind)/...
             defaultPCOSettings('Magnification',ind);
@@ -352,6 +351,9 @@ uicontrol(bgCam,'Style','radiobutton','String','Y Cam',...
         tbl_numimages.Data= defaultPCOSettings('NumImages',ind);
         tblRotate.Data = defaultPCOSettings('RotationAngle',ind);
         tblROIPScale.Data = defaultPCOSettings('ScaleProbeROI',ind);  
+
+
+
         try
             chProbeScaleROI(tblROIPScale.Data);
         end
@@ -364,7 +366,7 @@ tbl_optics.Data={...
     'magnification',0};
 
 tbl_optics.Position(3:4)=tbl_optics.Extent(3:4);
-tbl_optics.Position(1:2)=[5 bgCam.Position(2)-tbl_optics.Position(4)-2];
+tbl_optics.Position(1:2)=[5 pdCamSelect.Position(2)-tbl_optics.Position(4)-2];
 
 
 tbl_cam=uitable('parent',hpOptics,'units','pixels','RowName',{},'ColumnName',{},...
@@ -1301,20 +1303,13 @@ ax_gap = 5;
         hbSWtrig.Position(1)=hpCam.Position(3)-60;
 
         %%%%% Resize Top Row Panels %%%%%
-        hpROISettings.Position(2)=hp.Position(4);
-        % hpAcq.Position(2)=hp.Position(4);
-        
-        % hpAnl.Position(2)=hp.Position(4);
-        % hpImgProcess.Position(2)=hp.Position(4);
-        
-        
-
-        
-        
+        % hpROISettings.Position(2)=hp.Position(4);      
+                
         hpCam.Position(2) = hpControl.Position(4) - hpCam.Position(4);
-        hpOptics.Position(2)=hpNav.Position(2)-hpOptics.Position(4);
-        % hpAcq.Position(2) = hpCam.Position(2) - hpAcq.Position(4);
         hpNav.Position(2) = hpCam.Position(2) - hpNav.Position(4);
+
+        hpOptics.Position(2)=hpNav.Position(2)-hpOptics.Position(4);
+        
         hpImgProcess.Position(2) = hpOptics.Position(2)-hpImgProcess.Position(4);
         hpAnl.Position(2) = hpImgProcess.Position(2)-hpAnl.Position(4);
 
@@ -1324,7 +1319,7 @@ ax_gap = 5;
 
 
         %%%%%% Resize Left Panel %%%%%
-        hpFit.Position(4)=hpROISettings.Position(2);
+        hpFit.Position(4)=hpAnl.Position(2);
                 resizePlots;                            % Resize plots
 
         drawnow;
@@ -2595,7 +2590,7 @@ try
     chData([],[],0);   
 end
 % Initialize tables with first camera settings
-updateCamMode(defaultPCOSettings('CameraName',1));
+updateCamMode(1);
 
 
 enableInteractivity;
