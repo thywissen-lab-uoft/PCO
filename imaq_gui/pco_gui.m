@@ -2065,8 +2065,7 @@ function updateImages(data)
     if isempty(ind)
       ind=1; 
     end
-    
-    thistoryInd.String=sprintf('%03d',ind);        
+    tNavInd.Data = ind;
 end
 
 
@@ -2488,7 +2487,7 @@ end
                 updateImages(dstruct);          % Update display with new data  
                 dstruct=performFits(dstruct);   % Fit the data                    
             else
-                thistoryInd.String=sprintf('%03d',str2double(thistoryInd.String)+1); 
+                tNavInd.Data=tNavInd.Data+1;
             end
             
             
