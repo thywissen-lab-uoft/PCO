@@ -121,7 +121,7 @@ hpControl.Position=[0 0 W_control hF.Position(4)];
 hpCam=uipanel(hpControl,'units','pixels','backgroundcolor','w','title','camera and acquisition',...
     'fontsize',6);
 hpCam.Position(3) = hpControl.Position(3);
-hpCam.Position(4) = 50;
+hpCam.Position(4) = 80;
 hpCam.Position(1) = 1;
 hpCam.Position(2) = hpControl.Position(4) - hpCam.Position(4);
 
@@ -130,7 +130,7 @@ ttstr='Connect to camera and initialize settings.';
 hbConnect=uicontrol(hpCam,'style','pushbutton','string','connect','units','pixels',...
     'fontsize',8,'Position',[1 20 50 15],'backgroundcolor',[80 200 120]/255,...
     'Callback',@connectCamCB,'ToolTipString',ttstr,'enable','on');
-
+hbConnect.Position(2)=hpCam.Position(4)-29;
 % Disconnect button
 ttstr='Connect to camera and initialize settings.';
 hbDisconnect=uicontrol(hpCam,'style','pushbutton','string','disconnect','units','pixels',...
@@ -143,23 +143,16 @@ hbDisconnect=uicontrol(hpCam,'style','pushbutton','string','disconnect','units',
 
 % Connect to camera callback
     function connectCamCB(~,~)        
-        camera.ExposureTime=tbl_cama.Data{1,2};
-        camera.NumImages=tbl_cama.Data{2,2};
-        % camera.CameraMode=bgCamMode.SelectedObject.UserData;
+        camera.ExposureTime=tbl_exposure.Data;
+        camera.NumImages=tbl_numimages.Data;
         camera.CameraMode=pdCamMode.UserData(pdCamMode.Value);
-
-        camera=initCam(camera);        
-        
+        camera=initCam(camera); 
         hbDisconnect.Enable='on';
         hbConnect.Enable='off';        
         hbstart.Enable='on';
         hbclear.Enable='on';
         hbstop.Enable='off';
-        tbl_cama.Enable='off';  
         pdCamMode.Enable = 'off';
-        rbSingleAcq.Enable='off';
-        rbDoubleAcq.Enable='off';
-        rbSingleVideo.Enable='off';
     end
 
 % Disconnect from camera callback
@@ -167,24 +160,15 @@ hbDisconnect=uicontrol(hpCam,'style','pushbutton','string','disconnect','units',
         disp('Disconnecting from camera.');        
         closeCam(camera.BoardHandle);           
         camera=initCamStruct;
-        % camera.CameraMode=bgCamMode.SelectedObject.UserData;
         camera.CameraMode=pdCamMode.UserData(pdCamMode.Value);
-
-        camera.ExposureTime=tbl_cama.Data{1,2};
-        camera.NumImages=tbl_cama.Data{2,2};
-        
+        camera.ExposureTime=tbl_exposure.Data;
+        camera.NumImages=tbl_numimages.Data;        
         hbDisconnect.Enable='off';
         hbConnect.Enable='on';        
         hbstart.Enable='off';
         hbclear.Enable='off';
         hbstop.Enable='off';
         pdCamMode.Enable = 'on';
-
-        tbl_cama.Enable='on';
-        rbSingleAcq.Enable='on';
-        rbDoubleAcq.Enable='on';
-        rbSingleVideo.Enable='on';
-
     end
 
 % Start acquisition button
@@ -268,70 +252,81 @@ function swTrigCB(~,~)
    triggerCamera(camera); 
 end
 %% Acquisition Settings
-hpAcq=uipanel('parent',hpControl,'units','pixels','backgroundcolor','w',...
-    'title','acquisition','fontsize',6);
-hpAcq.Position(3) = hpControl.Position(3)/2;
-hpAcq.Position(4) = 90;
-hpAcq.Position(1) = 1;
-hpAcq.Position(2) = hpCam.Position(2) - hpAcq.Position(4);
-
 
     function chCamModeCB2(src,evt)
        disp('Changing camera acquistion mode');
        camera.CameraMode=src.UserData(src.Value);
     end
 
-strs ={'single exposure (0x10)','double exposure (0x20)','single video (0x30)'};
+strs ={'single exp. (0x10)','double exp. (0x20)','single video (0x30)'};
 exposure_id_values = [16 32 48];
-pdCamMode  = uicontrol(hpAcq,'units','pixels','style','popupmenu','backgroundcolor','w',...
+pdCamMode  = uicontrol(hpCam,'units','pixels','style','popupmenu','backgroundcolor','w',...
     'String',strs,'UserData',exposure_id_values,'fontsize',7,'Callback',@chCamModeCB2,...
     'Value',1);
-pdCamMode.Position=[5 hpAcq.Position(4)-35 120 20];
+pdCamMode.Position=[5 hpCam.Position(4)-55 100 20];
+tExposure = uicontrol(hpCam,'style','text','units','pixels',...
+    'backgroundcolor','w','fontsize',7,'string',['exposure (' char(956) 's):'],...
+    'horizontalalignment','left');
+tExposure.Position = [pdCamMode.Position(1)+pdCamMode.Position(3)+2 ...
+    pdCamMode.Position(2) 65 15];
 
+tbl_exposure = uitable(hpCam,'units','pixels','RowName',{},...
+    'ColumnName',{},'fontsize',7,'columnwidth',{25},...
+    'celleditcallback',@exposureCB,'ColumnFormat',{'numeric'},...
+    'Data',defaultPCOSettings('ExposureTime',1),'columneditable',[true]);
+tbl_exposure.Position(3:4)=tbl_exposure.Extent(3:4);
+tbl_exposure.Position(1:2)=[tExposure.Position(1)+tExposure.Position(3) ...
+    tExposure.Position(2)-1];
 
+tNumImages = uicontrol(hpCam,'style','text','units','pixels',...
+    'backgroundcolor','w','fontsize',7,'string',['num images:'],...
+    'horizontalalignment','left');
+tNumImages.Position = [tbl_exposure.Position(1)+tbl_exposure.Position(3)+2 ...
+    tExposure.Position(2) 60 15];
 
-tbl_cama=uitable('parent',hpAcq,'units','pixels','RowName',{},...
-    'ColumnName',{},'fontsize',7,'ColumnWidth',{90,40},...
-    'columneditable',[false true],'celleditcallback',@chCamSettingsCB,...
-    'ColumnFormat',{'char','numeric'});
+tbl_numimages = uitable(hpCam,'units','pixels','RowName',{},...
+    'ColumnName',{},'fontsize',7,'columnwidth',{25},...
+    'celleditcallback',@numImagesCB,'ColumnFormat',{'numeric'},...
+    'Data',defaultPCOSettings('NumImages',1),'columneditable',[true]);
+tbl_numimages.Position(3:4)=tbl_numimages.Extent(3:4);
+tbl_numimages.Position(1:2)=[tNumImages.Position(1)+tNumImages.Position(3) ...
+    tNumImages.Position(2)-1];
 
-tbl_cama.Data={...
-    ['exposure (' char(956) 's)'],camera.ExposureTime;
-    'num images', camera.NumImages};
-
-tbl_cama.Position(3:4)=tbl_cama.Extent(3:4);
-tbl_cama.Position(1:2)=[5 pdCamMode.Position(2)-tbl_cama.Position(4)];
-
-    function chCamSettingsCB(src,evt)
-       disp('Changing camera settings');
-       m=evt.Indices(1); n=evt.Indices(2);
-        
-        data=src.Data{m,n};
+    function exposureCB(src,evt)
+        m=evt.Indices(1); n=evt.Indices(2);        
+        data=src.Data(m,n);
         % Check that the data is numeric
         if sum(~isnumeric(data)) || sum(isinf(data)) || sum(isnan(data)) || data<0
             warning('Only positive intergers plox.');
-            src.Data{m,n}=evt.PreviousData;
+            src.Data(m,n)=evt.PreviousData;
             return;
-        end            
-        data=round(data);      % Make sure this ROI are integers 
-                  
-        % Reassign the ROI
-        src.Data{m,n}=data;      
-        
-
-        
-        camera.ExposureTime=tbl_cama.Data{1,2};
-        camera.NumImages=tbl_cama.Data{2,2};
+        end  
+        src.Data(m,n)=data;   
+        camera.ExposureTime=data;
     end
+
+    function numImagesCB(src,evt)
+        m=evt.Indices(1); n=evt.Indices(2);        
+        data=src.Data(m,n);
+        % Check that the data is numeric
+        if sum(~isnumeric(data)) || sum(isinf(data)) || sum(isnan(data)) || data<0
+            warning('Only positive intergers plox.');
+            src.Data(m,n)=evt.PreviousData;
+            return;
+        end  
+        src.Data(m,n)=data;   
+        camera.NumImages=data;
+    end
+
 %% Optics Panel
 hpOptics=uipanel('parent',hpControl,'units','pixels','backgroundcolor','w',...
     'title','optics','fontsize',6);
 % hpSet.Position=[hpAcq2.Position(1)+hpAcq2.Position(3) hpImg.Position(4) 150 Htop];
 
 hpOptics.Position(3) = hpControl.Position(3)/2;
-hpOptics.Position(4) = hpAcq.Position(4);
-hpOptics.Position(1) = hpControl.Position(3)/2;
-hpOptics.Position(2) = hpAcq.Position(2);
+hpOptics.Position(4) = 100;
+hpOptics.Position(1) = 1;
+hpOptics.Position(2) = hpCam.Position(2)-hpOptics.Position(4);
 
 bgCam = uibuttongroup('units','pixels','backgroundcolor','w',...
     'position',[5 75 150 15],...
@@ -353,9 +348,10 @@ uicontrol(bgCam,'Style','radiobutton','String','Y Cam',...
         tbl_optics.Data{2,2} = defaultPCOSettings('Magnification',ind);
         tbl_cam.Data{1,2} = 1e6*defaultPCOSettings('PixelSize',ind)/...
             defaultPCOSettings('Magnification',ind);
+        tbl_exposure.Data = defaultPCOSettings('ExposureTime',ind);
+        tbl_numimages.Data= defaultPCOSettings('NumImages',ind);
         tblRotate.Data = defaultPCOSettings('RotationAngle',ind);
         tblROIPScale.Data = defaultPCOSettings('ScaleProbeROI',ind);  
-
         try
             chProbeScaleROI(tblROIPScale.Data);
         end
@@ -387,7 +383,7 @@ hpNav=uipanel(hpControl,'units','pixels','backgroundcolor','w',...
 hpNav.Position(3) = hpControl.Position(3);
 hpNav.Position(4) = 50;
 hpNav.Position(1) = 0;
-hpNav.Position(2) = hpAcq.Position(2) - hpNav.Position(4);
+hpNav.Position(2) = hpCam.Position(2)-hpNav.Position(4);
 
 % Button to change navigator directory to default
 ttstr='Revert previewer source directory to default location.';
@@ -1306,9 +1302,8 @@ ax_gap = 5;
 
         %%%%% Resize Top Row Panels %%%%%
         hpROISettings.Position(2)=hp.Position(4);
-        hpAcq.Position(2)=hp.Position(4);
+        % hpAcq.Position(2)=hp.Position(4);
         
-        hpOptics.Position(2)=hp.Position(4);
         % hpAnl.Position(2)=hp.Position(4);
         % hpImgProcess.Position(2)=hp.Position(4);
         
@@ -1317,10 +1312,10 @@ ax_gap = 5;
         
         
         hpCam.Position(2) = hpControl.Position(4) - hpCam.Position(4);
-        hpOptics.Position(2) = hpCam.Position(2) - hpAcq.Position(4);
-        hpAcq.Position(2) = hpCam.Position(2) - hpAcq.Position(4);
-        hpNav.Position(2) = hpAcq.Position(2) - hpNav.Position(4);
-        hpImgProcess.Position(2) = hpNav.Position(2)-hpImgProcess.Position(4);
+        hpOptics.Position(2)=hpNav.Position(2)-hpOptics.Position(4);
+        % hpAcq.Position(2) = hpCam.Position(2) - hpAcq.Position(4);
+        hpNav.Position(2) = hpCam.Position(2) - hpNav.Position(4);
+        hpImgProcess.Position(2) = hpOptics.Position(2)-hpImgProcess.Position(4);
         hpAnl.Position(2) = hpImgProcess.Position(2)-hpAnl.Position(4);
 
 
