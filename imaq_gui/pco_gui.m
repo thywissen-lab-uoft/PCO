@@ -471,10 +471,11 @@ hpMarkers = uipanel('parent',hpControl,'units','pixels',...
 hpMarkers.Position(3:4)=[hpControl.Position(3) 100];
 hpMarkers.Position(1:2) = [0 hpNav.Position(2)-hpMarkers.Position(4)];
 
+c0=15;
 c1 = 25;
 c3 = 30;
 c4 = 30;
-cOther = c1 +c3 + c4;
+cOther = c0+c1 +c3 + c4;
 c2 = hpControl.Position(3)-cOther-30;
 
 
@@ -497,17 +498,25 @@ hpMarkersCollapse.Position(3:4) = [15 10];
         SizeChangedFcn;
     end
 
-
-hb_addMarker = uicontrol(hpMarkers,'style','pushbutton',...
+ttstr='Add a new plot marker';
+cdata=imresize(imread('icons/garbage.jpg'),[17 17]);
+hb_newMarker = uicontrol(hpMarkers,'style','pushbutton',...
     'string','add marker','fontsize',7,'backgroundcolor','w',...
-    'units','pixels');
-hb_addMarker.Position=[1 hpMarkers.Position(4)-30 60 15];
+    'units','pixels','tooltipstring',ttstr);
+hb_newMarker.Position=[1 hpMarkers.Position(4)-30 60 15];
 
+
+ttstr='Delete the currently highlighted marker';
+cdata=imresize(imread('icons/garbage.jpg'),[17 17]);
 hb_deleteMarker =  uicontrol(hpMarkers,'style','pushbutton',...
-    'string','delete marker','fontsize',7,'backgroundcolor','w',...
-    'units','pixels');
-hb_deleteMarker.Position(1:2) = hb_addMarker.Position(1:2)+[hb_addMarker.Position(3)+1 0];
-hb_deleteMarker.Position(3:4) = [80 15];
+    'cdata',cdata,'fontsize',7,'backgroundcolor','w',...
+    'units','pixels','tooltipstring',ttstr,'callback',@delMarkerCB);
+hb_deleteMarker.Position(1:2) = hb_newMarker.Position(1:2)+[hb_newMarker.Position(3)+1 0];
+hb_deleteMarker.Position(3:4) = [20 20];
+
+    function delMarkerCB(src,evt)        
+        tbl_markers
+    end
 
 
 hb_moveMarkerUp =  uicontrol(hpMarkers,'style','pushbutton',...
@@ -532,7 +541,7 @@ tbl_markers = uitable('parent',hpMarkers,...
     'CellEditCallback',@markersCB,'BackgroundColor',coNew);
 tbl_markers.Position(3)= tbl_markers.Extent(3)+20;
 tbl_markers.Position(4) = 50;
-tbl_markers.Position(1:2)=[1 1];
+tbl_markers.Position(1:2)=[c0 1];
 
 
 % Adds a marker to the table and the plot
