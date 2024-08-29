@@ -24,7 +24,7 @@ addpath(sdk_dir);
 %% Important Settings
 
 % Name of the GUI
-guiname='PCO GUI';
+guiname='PCO Absorption Image GUI';
 
 defaultDir = defaultPCOSettings('defaultDir');
 
