@@ -1270,40 +1270,18 @@ ax_gap = 5;
 
         hpControl.Position(4) = H;        % Resize image panel        
         hp.Position=[hpControl.Position(3) 0 W-hpControl.Position(3) H];        % Resize image panel        
-        
-        % hbSettings.Position(1:2)=[1 tab_od_1.Position(4)-21];        
-        % bSave.Position(1:2)=[20 tab_od_1.Position(4)-21];
-        % hbBrowseImage.Position(1:2)=[40 tab_od_1.Position(4)-21];
-        % hbhistoryNow.Position(1:2)=[60 tab_od_1.Position(4)-21];
-        % hbhistoryLeft.Position(1:2)=[84 tab_od_1.Position(4)-21];
-        % thistoryInd.Position(1:2)=[96 tab_od_1.Position(4)-21];
-        % hbhistoryRight.Position(1:2)=[124 tab_od_1.Position(4)-21];
-        % tImageFileFig.Position(1:2)=[136 ...
-        % tab_od_1.Position(4)-tImageFileFig.Position(4)];
 
 
-        %%%%%% Resize Acquisition Panel %%%%
-        % hpCam.Position(2:3)=[hF.Position(4)-hpCam.Position(4) hF.Position(3)];
         tSaveDir.Position(3)=hpCam.Position(3)-2;
-        hbSWtrig.Position(1)=hpCam.Position(3)-60;
-
-        %%%%% Resize Top Row Panels %%%%%
-        % hpROISettings.Position(2)=hp.Position(4);      
-                
+        hbSWtrig.Position(1)=hpCam.Position(3)-60;                
         hpCam.Position(2) = hpControl.Position(4) - hpCam.Position(4);
-        hpNav.Position(2) = hpCam.Position(2) - hpNav.Position(4);
-
-        % hpOptics.Position(2)=hpNav.Position(2)-hpOptics.Position(4);
-        
+        hpNav.Position(2) = hpCam.Position(2) - hpNav.Position(4);        
         hpImgProcess.Position(2) = hpNav.Position(2)-hpImgProcess.Position(4);
         hpAnl.Position(2) = hpImgProcess.Position(2)-hpAnl.Position(4);
-
-
         hpDisp.Position(2) = hpNav.Position(2)-hpDisp.Position(4);
         hpROISettings.Position(2)=hpDisp.Position(2)-hpROISettings.Position(4);
 
 
-        %%%%%% Resize Left Panel %%%%%
         hpFit.Position(4)=hpAnl.Position(2);
                 resizePlots;                            % Resize plots
 
@@ -1312,8 +1290,6 @@ ax_gap = 5;
 
 % Initialize image axis
 axImg=axes('parent',tab_od_1,'UserData','OD');cla
-
-
 
 hImg=imagesc(X,Y,Z);
 set(axImg,'box','on','linewidth',.1,'fontsize',8,'units','pixels',...
@@ -1349,8 +1325,6 @@ cBar.LineWidth=1;
 cBar.Color=[1 1 1]*.8;
 cBar.Label.Color=[1 1 1]*.8;
 drawnow;
-
-
 
 % X Cut/Sum Axis
 hAxX=axes('box','on','linewidth',1,'fontsize',8,...
@@ -1622,9 +1596,7 @@ cGaussFit.Position=[1 tblROIbsub.Position(2)-17 75 15];
 
         else
             cDFG.Enable = 'on';
-            cBM.Enable = 'on';
-%             
-            
+            cBM.Enable = 'on';             
             cTemp.Value=0;
             cTemp.Enable='off';
             rbCut.Value=0;
@@ -1676,7 +1648,6 @@ cBMdY.Position=[110 cBM.Position(2)-15 50 15];
             cBMdY.Enable='on'; 
             cBMpX.Value = 1;
             cBMpY.Value = 1;
-
         else
             cBMpX.Enable='off'; 
             cBMpY.Enable='off'; 
@@ -1688,9 +1659,6 @@ cBMdY.Position=[110 cBM.Position(2)-15 50 15];
             cBMdY.Value = 0;
         end
     end
-
-
-
 
 %% Fit Results Panel
 hpFit=uitabgroup(hpControl,'units','pixels');
@@ -2364,30 +2332,18 @@ end
 %             camera.NumAcquired
             % if bgCamMode.SelectedObject.UserData == 48
             if pdCamMode.UserData(pdCamMode.Value)
-
                 stopCamera(camera.BoardHandle);
                 camera.Images{camera.NumAcquired+1}=double(get(camera.buf_ptrs(camera.NumAcquired+1),'Value'));  
-
                 clearCameraBuffer(camera.BoardHandle);
-
                 pause(1);
-%                 startCamera(camera.BoardHandle);
-
-                % figure(3123123);
-                % clf
-                % imagesc(camera.Images{1});
-                % caxis([0 30]);
-            end
-            
-            
-            
+            end   
             % Increment number of images acquired
             camera.NumAcquired=camera.NumAcquired+1;            
             disp(['Trigger (' num2str(camera.NumAcquired) ')']);                
             % Check if acquisition is complete
             if camera.NumImages==camera.NumAcquired
                 doProcess=1;
-            end       
+            end      
 
         end        
         % Process the images
