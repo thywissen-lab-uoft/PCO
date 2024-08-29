@@ -468,14 +468,15 @@ tNavName=uicontrol(hpNav,'style','text','string','FILENAME','fontsize',7,...
 hpMarkers = uipanel('parent',hpControl,'units','pixels',...
     'backgroundcolor','w','title','markers','fontsize',6,...
     'bordertype','line');
-hpMarkers.Position(3:4)=[hpControl.Position(3) 100];
+hpMarkers.Position(3:4)=[hpControl.Position(3) 150];
 hpMarkers.Position(1:2) = [0 hpNav.Position(2)-hpMarkers.Position(4)];
 
-c0=15;
+c0=5;
 c1 = 25;
 c3 = 30;
 c4 = 30;
-cOther = c0+c1 +c3 + c4;
+c5 = 35;
+cOther = c0 + c1 +c3 + c4 +c5;
 c2 = hpControl.Position(3)-cOther-30;
 
 
@@ -492,55 +493,111 @@ hpMarkersCollapse.Position(3:4) = [15 10];
                 hpMarkers.Position(4) = 10;
                 hpMarkersCollapse.String = '+';
             case '+'
-                hpMarkers.Position(4) = 100;
+                hpMarkers.Position(4) = 150;
                 hpMarkersCollapse.String = '-';
         end
         SizeChangedFcn;
     end
 
 ttstr='Add a new plot marker';
-cdata=imresize(imread('icons/garbage.jpg'),[17 17]);
+cdata = imresize(imread('icons/green_add.jpg'),[17 17]);
+cdata = imresize(padarray(cdata, [1 1], 255),[20 20]); 
 hb_newMarker = uicontrol(hpMarkers,'style','pushbutton',...
-    'string','add marker','fontsize',7,'backgroundcolor','w',...
-    'units','pixels','tooltipstring',ttstr);
-hb_newMarker.Position=[1 hpMarkers.Position(4)-30 60 15];
+    'cdata',cdata,'fontsize',7,'backgroundcolor','w',...
+    'units','pixels','tooltipstring',ttstr,'callback',@newMarkerCB);
+hb_newMarker.Position=[1 hpMarkers.Position(4)-35 24 24];
+
+    function newMarkerCB(src,evt)
+        marker = struct;
+        marker.Description = 'new marker';
+        marker.X = 500;
+        marker.Y = 500;
+        addMarker(marker);
+        saveMarkers;
+    end
 
 
-ttstr='Delete the currently highlighted marker';
-cdata=imresize(imread('icons/garbage.jpg'),[17 17]);
+ttstr='Remove selected plot marker';
+cdata = imresize(imread('icons/red_minus.jpg'),[17 17]);
+cdata = imresize(padarray(cdata, [1 1], 255),[20 20]); 
 hb_deleteMarker =  uicontrol(hpMarkers,'style','pushbutton',...
     'cdata',cdata,'fontsize',7,'backgroundcolor','w',...
     'units','pixels','tooltipstring',ttstr,'callback',@delMarkerCB);
 hb_deleteMarker.Position(1:2) = hb_newMarker.Position(1:2)+[hb_newMarker.Position(3)+1 0];
-hb_deleteMarker.Position(3:4) = [20 20];
+hb_deleteMarker.Position(3:4) = [24 24];
 
-    function delMarkerCB(src,evt)        
-        tbl_markers
+    function delMarkerCB(src,evt)      
+        selected_indeces = [tbl_markers.Data{:,1}];
+
+        answer = questdlg('delete selected markers?','delete markers',...
+            'Yes','No','No') ;        
+        switch answer
+            case 'Yes'
+                doDelete = 1;
+            case 'No'
+                doDelete = 0;
+            otherwise
+                doDelete = 0;
+        end  
+
+        if doDelete
+            tbl_markers.Data(selected_indeces,:)=[];
+            updatePlotMarkers;
+            saveMarkers;
+        end
     end
 
 
-hb_moveMarkerUp =  uicontrol(hpMarkers,'style','pushbutton',...
-    'string','move up','fontsize',7,'backgroundcolor','w',...
-    'units','pixels');
-hb_moveMarkerUp.Position(1:2) = hb_deleteMarker.Position(1:2)+[hb_deleteMarker.Position(3)+1 0];
-hb_moveMarkerUp.Position(3:4) = [80 15];
-
 hb_moveMarkerDown =  uicontrol(hpMarkers,'style','pushbutton',...
-    'string','move down','fontsize',7,'backgroundcolor','w',...
-    'units','pixels');
-hb_moveMarkerDown.Position(1:2) = hb_moveMarkerUp.Position(1:2)+[hb_moveMarkerUp.Position(3)+1 0];
-hb_moveMarkerDown.Position(3:4) = [80 15];
+    'string',char(8897),'fontsize',7,'backgroundcolor','w',...
+    'units','pixels','tooltipstring','move selected row down',...
+    'callback',{@moveMarker, +1});
+hb_moveMarkerDown.Position(1:2) = hb_deleteMarker.Position(1:2)+[hb_deleteMarker.Position(3)+1 0];
+hb_moveMarkerDown.Position(3:4) = [15 12];
 
+hb_moveMarkerUp =  uicontrol(hpMarkers,'style','pushbutton',...
+    'string',char(8896),'fontsize',7,'backgroundcolor','w',...
+    'units','pixels','tooltipstring','move selected row up',...
+    'callback',{@moveMarker, -1});
+hb_moveMarkerUp.Position(1:2) = hb_moveMarkerDown.Position(1:2)+[0 hb_moveMarkerDown.Position(4)];
+hb_moveMarkerUp.Position(3:4) = [15 12];
+
+    function moveMarker(src,evt,number)
+        temp_data = tbl_markers.Data;
+        selected_indeces = [temp_data{:,1}];       
+
+        N = length(selected_indeces);
+
+        if number<0
+            for mm=2:N
+                selected_indeces = [temp_data{:,1}]; 
+                if ~selected_indeces(mm-1) && selected_indeces(mm)
+                     temp_data([mm-1 mm],:)=temp_data([mm mm-1],:);
+                end
+            end 
+        else
+            for mm=(N-1):-1:1
+                selected_indeces = [temp_data{:,1}]; 
+                if ~selected_indeces(mm+1) && selected_indeces(mm)
+                     temp_data([mm+1 mm],:)=temp_data([mm mm+1],:);
+                end
+            end
+        end
+
+        tbl_markers.Data = temp_data;
+        updatePlotMarkers;
+        saveMarkers;
+    end
 
 tbl_markers = uitable('parent',hpMarkers,...
-    'ColumnName',{'on?','description','x','y'},...    
-    'ColumnFormat',{'logical','char','numeric','numeric'},...
-    'ColumnEditable',[true true true true], ...
-    'ColumnWidth',{c1 c2 c3 c4},...
-    'RowName',{},'fontsize',8,...
+    'ColumnName',{'select','plot','description','X','Y'},...    
+    'ColumnFormat',{'logical','logical','char','numeric','numeric'},...
+    'ColumnEditable',[true true true true true], ...
+    'ColumnWidth',{c5 c1 c2 c3 c4},...
+    'RowName',{},'fontsize',7,...
     'CellEditCallback',@markersCB,'BackgroundColor',coNew);
 tbl_markers.Position(3)= tbl_markers.Extent(3)+20;
-tbl_markers.Position(4) = 50;
+tbl_markers.Position(4) = hpMarkers.Position(4)-40;
 tbl_markers.Position(1:2)=[c0 1];
 
 
@@ -548,22 +605,25 @@ tbl_markers.Position(1:2)=[c0 1];
     function addMarker(marker)
         ind = size(tbl_markers.Data,1)+1; 
         tbl_markers.Data{ind,1}=false;
-        tbl_markers.Data{ind,2}=marker.Description;
-        tbl_markers.Data{ind,3}=marker.X;
-        tbl_markers.Data{ind,4}=marker.Y;        
+        tbl_markers.Data{ind,2}=false;
+        tbl_markers.Data{ind,3}=marker.Description;
+        tbl_markers.Data{ind,4}=marker.X;
+        tbl_markers.Data{ind,5}=marker.Y;  
+
         plotMarkers(ind)=plot(marker.X,marker.Y,...
-            'x','color',coNew(ind,:),'markersize',10,'parent',axImg,...
-            'Visible','off'); 
+            '+','color',coNew(ind,:),'markersize',12,'parent',axImg,...
+            'Visible','off','linewidth',3); 
         row = dataTipTextRow('desc.',{marker.Description});
         plotMarkers(ind).DataTipTemplate.DataTipRows(3) = row;
     end
 
     function updatePlotMarkers
-        for mm=1:size(tbl_markers,1)
-            status = tbl_markers.Data{mm,1};
-            x=tbl_markers.Data{mm,3};
-            y=tbl_markers.Data{mm,4};
-            desc = tbl_markers.Data{mm,2};
+        for mm=1:size(tbl_markers.Data,1)
+            status = tbl_markers.Data{mm,2};
+            desc = tbl_markers.Data{mm,3};
+
+            x=tbl_markers.Data{mm,4};
+            y=tbl_markers.Data{mm,5};
             set(plotMarkers(mm),'XData',x,'YData',y,'Visible',status);
             plotMarkers(mm).DataTipTemplate.DataTipRows(3).Value={desc};
         end
@@ -582,28 +642,31 @@ tbl_markers.Position(1:2)=[c0 1];
     end
 
     function saveMarkers
-        disp('saving markers');
         mypath = fileparts(mfilename('fullpath'));
         markers=struct;
         for mm=1:size(tbl_markers.Data,1)
-            markers(mm).Description = tbl_markers.Data{mm,2};
-            markers(mm).X = tbl_markers.Data{mm,3};
-            markers(mm).Y = tbl_markers.Data{mm,4};
+            markers(mm).Description = tbl_markers.Data{mm,3};
+            markers(mm).X = tbl_markers.Data{mm,4};
+            markers(mm).Y = tbl_markers.Data{mm,5};
         end
         save(fullfile(mypath,'markers.mat'),'markers');
     end
 
     function markersCB(src,evt)
+        
         m=evt.Indices(1); n=evt.Indices(2);
-        if n~=1
-            updatePlotMarkers
-            saveMarkers; 
-        else
-            if evt.NewData
-                plotMarkers(m).Visible='on';
-            else
-                plotMarkers(m).Visible='off';
-            end
+        switch n
+            case 1
+                
+            case 2
+                if evt.NewData
+                    plotMarkers(m).Visible='on';
+                else
+                    plotMarkers(m).Visible='off';
+                end
+            otherwise
+                updatePlotMarkers
+                saveMarkers; 
         end
     end
 
