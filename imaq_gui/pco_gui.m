@@ -10,15 +10,15 @@ if nargin == 0; doDebug=0;end
 
 %% Load dependencies
 % Add all subdirectories for this m file
-curpath = fileparts(mfilename('fullpath'));
-addpath(curpath);addpath(genpath(curpath))
+guipath = fileparts(mfilename('fullpath'));
+addpath(guipath);addpath(genpath(guipath))
 
 % Add analysis directory
-analysis_path = fullfile(fileparts(curpath),'analysis');
+analysis_path = fullfile(fileparts(guipath),'analysis');
 addpath(analysis_path);
 
 % Add the SDK MATLAB drivers to the path
-sdk_dir=fullfile(fileparts(curpath), 'pixelfly_plugin_rev3_01_beta');
+sdk_dir=fullfile(fileparts(guipath), 'pixelfly_plugin_rev3_01_beta');
 addpath(sdk_dir);
 
 %% Important Settings
@@ -461,6 +461,144 @@ tNavName=uicontrol(hpNav,'style','text','string','FILENAME','fontsize',7,...
     'Position',[1 1 hpNav.Position(3) 14],'tooltipstring',ttstr);
 % tNavName.String=data.Name;
 
+%% Markers and Special Images?
+
+
+
+hpMarkers = uipanel('parent',hpControl,'units','pixels',...
+    'backgroundcolor','w','title','markers','fontsize',6,...
+    'bordertype','line');
+hpMarkers.Position(3:4)=[hpControl.Position(3) 100];
+hpMarkers.Position(1:2) = [0 hpNav.Position(2)-hpMarkers.Position(4)];
+
+c1 = 25;
+c3 = 30;
+c4 = 30;
+cOther = c1 +c3 + c4;
+c2 = hpControl.Position(3)-cOther-30;
+
+
+hpMarkersCollapse = uicontrol(hpControl,'units','pixels',...
+    'style','pushbutton','backgroundcolor','w','fontsize',12,...
+    'string','-','CallBack',@markersPanelSizeCB);
+hpMarkersCollapse.Position(1) = hpMarkers.Position(1)+hpMarkers.Position(3)-20;
+hpMarkersCollapse.Position(2) = hpMarkers.Position(2)-hpMarkers.Position(4)-10;
+hpMarkersCollapse.Position(3:4) = [15 10];
+
+    function markersPanelSizeCB(src,evt)
+        switch src.String
+            case '-'
+                hpMarkers.Position(4) = 10;
+                hpMarkersCollapse.String = '+';
+            case '+'
+                hpMarkers.Position(4) = 100;
+                hpMarkersCollapse.String = '-';
+        end
+        SizeChangedFcn;
+    end
+
+
+hb_addMarker = uicontrol(hpMarkers,'style','pushbutton',...
+    'string','add marker','fontsize',7,'backgroundcolor','w',...
+    'units','pixels');
+hb_addMarker.Position=[1 hpMarkers.Position(4)-30 60 15];
+
+hb_deleteMarker =  uicontrol(hpMarkers,'style','pushbutton',...
+    'string','delete marker','fontsize',7,'backgroundcolor','w',...
+    'units','pixels');
+hb_deleteMarker.Position(1:2) = hb_addMarker.Position(1:2)+[hb_addMarker.Position(3)+1 0];
+hb_deleteMarker.Position(3:4) = [80 15];
+
+
+hb_moveMarkerUp =  uicontrol(hpMarkers,'style','pushbutton',...
+    'string','move up','fontsize',7,'backgroundcolor','w',...
+    'units','pixels');
+hb_moveMarkerUp.Position(1:2) = hb_deleteMarker.Position(1:2)+[hb_deleteMarker.Position(3)+1 0];
+hb_moveMarkerUp.Position(3:4) = [80 15];
+
+hb_moveMarkerDown =  uicontrol(hpMarkers,'style','pushbutton',...
+    'string','move down','fontsize',7,'backgroundcolor','w',...
+    'units','pixels');
+hb_moveMarkerDown.Position(1:2) = hb_moveMarkerUp.Position(1:2)+[hb_moveMarkerUp.Position(3)+1 0];
+hb_moveMarkerDown.Position(3:4) = [80 15];
+
+
+tbl_markers = uitable('parent',hpMarkers,...
+    'ColumnName',{'on?','description','x','y'},...    
+    'ColumnFormat',{'logical','char','numeric','numeric'},...
+    'ColumnEditable',[true true true true], ...
+    'ColumnWidth',{c1 c2 c3 c4},...
+    'RowName',{},'fontsize',8,...
+    'CellEditCallback',@markersCB,'BackgroundColor',coNew);
+tbl_markers.Position(3)= tbl_markers.Extent(3)+20;
+tbl_markers.Position(4) = 50;
+tbl_markers.Position(1:2)=[1 1];
+
+
+% Adds a marker to the table and the plot
+    function addMarker(marker)
+        ind = size(tbl_markers.Data,1)+1; 
+        tbl_markers.Data{ind,1}=false;
+        tbl_markers.Data{ind,2}=marker.Description;
+        tbl_markers.Data{ind,3}=marker.X;
+        tbl_markers.Data{ind,4}=marker.Y;        
+        plotMarkers(ind)=plot(marker.X,marker.Y,...
+            'x','color',coNew(ind,:),'markersize',10,'parent',axImg,...
+            'Visible','off'); 
+        row = dataTipTextRow('desc.',{marker.Description});
+        plotMarkers(ind).DataTipTemplate.DataTipRows(3) = row;
+    end
+
+    function updatePlotMarkers
+        for mm=1:size(tbl_markers,1)
+            status = tbl_markers.Data{mm,1};
+            x=tbl_markers.Data{mm,3};
+            y=tbl_markers.Data{mm,4};
+            desc = tbl_markers.Data{mm,2};
+            set(plotMarkers(mm),'XData',x,'YData',y,'Visible',status);
+            plotMarkers(mm).DataTipTemplate.DataTipRows(3).Value={desc};
+        end
+    end
+
+    function initMarkers
+        mypath = fileparts(mfilename('fullpath'));
+        m = load(fullfile(mypath,'markers.mat'));
+        markers = m.markers;
+        tbl_markers.Data={};
+        delete(plotMarkers);
+        plotMarkers=plot([],[]);
+        for ii=1:length(markers)
+            addMarker(markers(ii));
+        end
+    end
+
+    function saveMarkers
+        disp('saving markers');
+        mypath = fileparts(mfilename('fullpath'));
+        markers=struct;
+        for mm=1:size(tbl_markers.Data,1)
+            markers(mm).Description = tbl_markers.Data{mm,2};
+            markers(mm).X = tbl_markers.Data{mm,3};
+            markers(mm).Y = tbl_markers.Data{mm,4};
+        end
+        save(fullfile(mypath,'markers.mat'),'markers');
+    end
+
+    function markersCB(src,evt)
+        m=evt.Indices(1); n=evt.Indices(2);
+        if n~=1
+            updatePlotMarkers
+            saveMarkers; 
+        else
+            if evt.NewData
+                plotMarkers(m).Visible='on';
+            else
+                plotMarkers(m).Visible='off';
+            end
+        end
+    end
+
+ 
 %% Image Pre Processing Panel
 
 % This is alpha stage, perhaps enable filtering? or fringe removal?
@@ -468,6 +606,8 @@ hpImgProcess=uipanel('parent',hpControl,'units','pixels','backgroundcolor','w',.
     'title','image processing','fontsize',6);
 % hpImgProcess.Position=[hpSet.Position(1)+hpSet.Position(3) tab_od_1.Position(4) 200 Htop]; 
 hpImgProcess.Position = [0 hpNav.Position(2)-125 hpControl.Position(3)/2 210];
+
+hpImgProcess.Position = [0 hpMarkers.Position(2)-125 hpControl.Position(3)/2 210];
 
 pdCamSelect  = uicontrol(hpImgProcess,'units','pixels','style','popupmenu','backgroundcolor','w',...
     'String',defaultPCOSettings('CameraName'),'UserData',exposure_id_values,'fontsize',7,'Callback',@chCamCB,...
@@ -1226,11 +1366,17 @@ ax_gap = 5;
         hbSWtrig.Position(1)=hpCam.Position(3)-60;                
         hpCam.Position(2) = hpControl.Position(4) - hpCam.Position(4);
         hpNav.Position(2) = hpCam.Position(2) - hpNav.Position(4);        
-        hpImgProcess.Position(2) = hpNav.Position(2)-hpImgProcess.Position(4);
+
+        hpMarkers.Position(2) = hpNav.Position(2) -hpMarkers.Position(4);
+        hpImgProcess.Position(2) = hpMarkers.Position(2)-hpImgProcess.Position(4);
+        hpDisp.Position(2) = hpMarkers.Position(2)-hpDisp.Position(4);
         hpAnl.Position(2) = hpImgProcess.Position(2)-hpAnl.Position(4);
-        hpDisp.Position(2) = hpNav.Position(2)-hpDisp.Position(4);
         hpROISettings.Position(2)=hpDisp.Position(2)-hpROISettings.Position(4);
-        hpFit.Position(4)=hpAnl.Position(2);
+        hpFit.Position(4)=max([hpAnl.Position(2) 0]);
+
+        hpMarkersCollapse.Position(2) = hpMarkers.Position(2) + ...
+            hpMarkers.Position(4)-hpMarkersCollapse.Position(4);
+
         resizePlots; 
         drawnow;
     end
@@ -1244,6 +1390,8 @@ set(axImg,'box','on','linewidth',.1,'fontsize',8,'units','pixels',...
 hold on
 axImg.Position=[50 150 tab_od_1.Position(3)-200 tab_od_1.Position(4)-200];
 axImg.CLim=[0 .5];
+
+plotMarkers=plot([],[]); % initialize plot markers
 
 axis equal tight
 
@@ -2484,7 +2632,7 @@ updateCamMode(1);
 enableInteractivity;
 addlistener(axImg,'XLim','PostSet',@foo); 
 addlistener(axImg,'YLim','PostSet',@foo); 
-
+initMarkers;
 
 function enableInteractivity
     enableDefaultInteractivity(axImg);
@@ -2618,10 +2766,7 @@ function dstruct=fitGauss(dstruct)
     for n=1:size(dstruct.ROI,1)              
         ROI=dstruct.ROI(n,:);         
         disp(['Fitting 2D gaussian on [' num2str(ROI) '].']);
-        t1=now;
-
-        
-        
+        t1=now;        
         % Grab data from the data structure
         x=dstruct.X(ROI(1):ROI(2));                 % X vector
         y=dstruct.Y(ROI(3):ROI(4));                 % Y vector

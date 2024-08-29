@@ -10,7 +10,6 @@ out.RotationAngle   = [0; -1.7];           % Rotation angles (deg.)
 out.ExposureTime    = [350;350];           % Exposure Time (us.)
 out.NumImages       = [3;3];               % Number of Images
 
-
 %% Analysis ROIs
 % Region of interest to scale probe to account for probe beam power
 % fluctuations
