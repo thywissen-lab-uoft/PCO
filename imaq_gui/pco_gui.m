@@ -648,12 +648,9 @@ uicontrol('parent',hpImgProcess,'units','pixels',...
     'ToolTipString',mstr);
 
     function recalcODCB(~,~)
-        dstruct=computeOD(dstruct);
-        
-        updateImages(dstruct);
-        
+        dstruct=computeOD(dstruct);        
+        updateImages(dstruct);        
         dstruct=performFits(dstruct);
-        
         updatePlots(dstruct);
     end
 
@@ -821,9 +818,6 @@ hbSlctLim.Position(1:2)=[42 60];
         end    
     end
 
-
-
-
 % Toggle for axis equal tight
 caxisequal=uicontrol('parent',hpDisp,'style','checkbox','string','axis equal tight?',...
     'fontsize',8,'Value',1,'units','pixels','backgroundcolor','w','callback',@axisCB);
@@ -939,8 +933,6 @@ b=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
             otherwise
                 tblNumROIs.Data=state;                
         end
-        % tblROI.Position(4)=min([hpROISettings.Position(4) tblROI.Extent(4)]);
-        % tblROI.Position(2)=hpROISettings.Position(4)-tblROI.Position(4)-5;
         drawnow;
     end
 
@@ -1028,42 +1020,6 @@ ttstr='Increase the selected ROI by one';
 hbROI_up=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
     'backgroundcolor',coNew(1,:),'String',char(10095),'Position',[hbROI_slct.Position(1)+hbROI_slct.Position(3) b.Position(2) 12 20],...
     'callback',{@chSelectROI, '+'},'ToolTipString',ttstr);
-
-   
-% % Callback function for GUI selection of ROI
-%     function selectROICB(src,~)
-%         RNum=src.UserData;          % ROI number
-%         disp(['Selecting ROI ' num2str(RNum) '.' ...
-%             ' Click two points that form the rectangle ROI.']);
-%         axes(axImg)                 % Select the OD image axis
-%         [x1,y1]=ginputMe(1);          % Get a mouse click
-%         x1=round(x1);y1=round(y1);  % Round to interger        
-%         p1=plot(x1,y1,'+','color',co(RNum,:),'linewidth',1); % Plot it
-% 
-%         [x2,y2]=ginputMe(1);          % Get a mouse click
-%         x2=round(x2);y2=round(y2);  % Round it        
-%         p2=plot(x2,y2,'+','color',co(RNum,:),'linewidth',1);  % Plot it
-%         delete(p1);delete(p2);                   % Delete markers
-% 
-%         % Create the ROI
-%         ROI=[min([x1 x2]) max([x1 x2]) min([y1 y2]) max([y1 y2])];
-% 
-%         % Constrain ROI to image
-%         if ROI(1)<1; ROI(1)=1; end       
-%         if ROI(3)<1; ROI(3)=1; end   
-%         if ROI(4)>size(dstruct.PWA,1); ROI(4)=size(dstruct.PWA,1); end       
-%         if ROI(2)>size(dstruct.PWA,2); ROI(2)=size(dstruct.PWA,2); end     
-%         % Try to update ROI graphics
-%         try
-%             pos=[ROI(1) ROI(3) ROI(2)-ROI(1) ROI(4)-ROI(3)];
-%             set(pROI(RNum),'Position',pos);
-%             tblROI.Data(RNum,:)=ROI;      
-%         catch 
-%             disp('bad ROI selected.');
-%         end                
-% 
-%         enableInteractivity;
-%     end
 
     function chSelectROI(~,~,state)
         switch state
@@ -1259,19 +1215,13 @@ ax_gap = 5;
 
     function SizeChangedFcn(~,~)
         % This resize fucntion ensures that the X and Y cut/sum plot has
-        % commenserate positioning with respect the actual image shown       
-        
-        
-        W=hF.Position(3);H=hF.Position(4);      % Grab figure dimensions     
-        
+        % commenserate positioning with respect the actual image shown           
+        W=hF.Position(3);H=hF.Position(4);      % Grab figure dimensions             
         if W<300 || H <300
             return;
         end
-
         hpControl.Position(4) = H;        % Resize image panel        
-        hp.Position=[hpControl.Position(3) 0 W-hpControl.Position(3) H];        % Resize image panel        
-
-
+        hp.Position=[hpControl.Position(3) 0 W-hpControl.Position(3) H];      
         tSaveDir.Position(3)=hpCam.Position(3)-2;
         hbSWtrig.Position(1)=hpCam.Position(3)-60;                
         hpCam.Position(2) = hpControl.Position(4) - hpCam.Position(4);
@@ -1280,11 +1230,8 @@ ax_gap = 5;
         hpAnl.Position(2) = hpImgProcess.Position(2)-hpAnl.Position(4);
         hpDisp.Position(2) = hpNav.Position(2)-hpDisp.Position(4);
         hpROISettings.Position(2)=hpDisp.Position(2)-hpROISettings.Position(4);
-
-
         hpFit.Position(4)=hpAnl.Position(2);
-                resizePlots;                            % Resize plots
-
+        resizePlots; 
         drawnow;
     end
 
@@ -2942,10 +2889,8 @@ function camera=initCam(camera)
         error(['Could not connect to the board. Error is ' ...
             '0x' dec2hex(pco_uint32err(error_code))]);
         return;
-    end   
-    
+    end       
     camera.isConnected=1;
-
     [error_code, value] = pfGETBOARDVAL(camera.BoardHandle,'PCC_VAL_BOARD_STATUS');
     if(error_code)
         pco_errdisp('pfGETBOARDVAL',error_code);    
@@ -2955,13 +2900,10 @@ function camera=initCam(camera)
             error_code=pfSTOP_CAMERA(camera.BoardHandle);
             pco_errdisp('pfSTOP_CAMERA',error_code);
         end 
-    end    
-    
-    disp('Done');
-    
+    end        
+    disp('Done');    
     % Configure the camera
-    camera=configCam(camera);
-    
+    camera=configCam(camera);    
 end
 
 function error_code=clearCameraBuffer(board_handle)
