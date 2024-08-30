@@ -113,13 +113,13 @@ co=[co;co;co];
 
 % Control Panel
 W_control = 310;
-hpControl = uipanel(hF,'units','pixels');
+hpControl = uipanel(hF,'units','pixels','bordertype','none');
 hpControl.Position=[0 0 W_control hF.Position(4)];
 
 
 %% Camera Panel
 hpCam=uipanel(hpControl,'units','pixels','backgroundcolor','w','title','camera and acquisition',...
-    'fontsize',6);
+    'fontsize',7,'bordertype','etchedout','BorderWidth',1);
 hpCam.Position(3) = hpControl.Position(3);
 hpCam.Position(4) = 80;
 hpCam.Position(1) = 1;
@@ -322,7 +322,7 @@ tbl_numimages.Position(1:2)=[tNumImages.Position(1)+tNumImages.Position(3) ...
 %% Navigator Panel 
 
 hpNav=uipanel(hpControl,'units','pixels','backgroundcolor','w',...
-    'title','GUI Image Source','fontsize',6);
+    'title','GUI Image Source','fontsize',7,'bordertype','etchedout');
 hpNav.Position(3) = hpControl.Position(3);
 hpNav.Position(4) = 50;
 hpNav.Position(1) = 0;
@@ -464,10 +464,9 @@ tNavName=uicontrol(hpNav,'style','text','string','FILENAME','fontsize',7,...
 %% Markers and Special Images?
 
 
-
 hpMarkers = uipanel('parent',hpControl,'units','pixels',...
-    'backgroundcolor','w','title','markers','fontsize',6,...
-    'bordertype','line');
+    'backgroundcolor','w','title','markers','fontsize',7,...
+    'bordertype','etchedout');
 hpMarkers.Position(3:4)=[hpControl.Position(3) 150];
 hpMarkers.Position(1:2) = [0 hpNav.Position(2)-hpMarkers.Position(4)];
 
@@ -483,14 +482,14 @@ c2 = hpControl.Position(3)-cOther-30;
 hpMarkersCollapse = uicontrol(hpControl,'units','pixels',...
     'style','pushbutton','backgroundcolor','w','fontsize',12,...
     'string','-','CallBack',@markersPanelSizeCB);
-hpMarkersCollapse.Position(1) = hpMarkers.Position(1)+hpMarkers.Position(3)-20;
-hpMarkersCollapse.Position(2) = hpMarkers.Position(2)-hpMarkers.Position(4)-10;
+hpMarkersCollapse.Position(1) = hpMarkers.Position(1)+hpMarkers.Position(3)-15;
+hpMarkersCollapse.Position(2) = hpMarkers.Position(2)-hpMarkers.Position(4);
 hpMarkersCollapse.Position(3:4) = [15 10];
 
     function markersPanelSizeCB(src,evt)
         switch src.String
             case '-'
-                hpMarkers.Position(4) = 10;
+                hpMarkers.Position(4) = 12;
                 hpMarkersCollapse.String = '+';
             case '+'
                 hpMarkers.Position(4) = 150;
@@ -505,7 +504,7 @@ cdata = imresize(padarray(cdata, [1 1], 255),[20 20]);
 hb_newMarker = uicontrol(hpMarkers,'style','pushbutton',...
     'cdata',cdata,'fontsize',7,'backgroundcolor','w',...
     'units','pixels','tooltipstring',ttstr,'callback',@newMarkerCB);
-hb_newMarker.Position=[1 hpMarkers.Position(4)-35 24 24];
+hb_newMarker.Position=[1 hpMarkers.Position(4)-36 24 24];
 
     function newMarkerCB(src,evt)
         marker = struct;
@@ -671,11 +670,92 @@ tbl_markers.Position(1:2)=[c0 1];
     end
 
  
+%% Flagged Images
+
+hpFlaggedImages = uipanel('parent',hpControl,'units','pixels',...
+    'backgroundcolor','w','title','flagged images','fontsize',7,...
+    'bordertype','etchedout');
+hpFlaggedImages.Position(3:4)=[hpControl.Position(3) 200];
+hpFlaggedImages.Position(1:2) = [0 hpMarkers.Position(2)-hpFlaggedImages.Position(4)];
+
+hpFlaggedImagesCollapse = uicontrol(hpControl,'units','pixels',...
+    'style','pushbutton','backgroundcolor','w','fontsize',12,...
+    'string','-','CallBack',@flaggedImagesPanelSizeCB);
+hpFlaggedImagesCollapse.Position(1) = hpFlaggedImages.Position(1)+hpFlaggedImages.Position(3)-15;
+hpFlaggedImagesCollapse.Position(2) = hpFlaggedImages.Position(2)-hpFlaggedImages.Position(4);
+hpFlaggedImagesCollapse.Position(3:4) = [15 10];
+
+    function flaggedImagesPanelSizeCB(src,evt)
+        switch src.String
+            case '-'
+                hpFlaggedImages.Position(4) = 15;
+                hpFlaggedImagesCollapse.String = '+';
+            case '+'
+                hpFlaggedImages.Position(4) = 200;
+                hpFlaggedImagesCollapse.String = '-';
+        end
+        SizeChangedFcn;
+    end
+
+
+ttstr='Add a new plot marker';
+cdata = imresize(imread('icons/green_add.jpg'),[17 17]);
+cdata = imresize(padarray(cdata, [1 1], 255),[20 20]); 
+hb_addFlaggedImage = uicontrol(hpFlaggedImages,'style','pushbutton',...
+    'cdata',cdata,'fontsize',7,'backgroundcolor','w',...
+    'units','pixels','tooltipstring',ttstr,'callback',@addFlaggedImageCB);
+hb_addFlaggedImage.Position=[1 hpFlaggedImages.Position(4)-36 24 24];
+
+    function addFlaggedImageCB(src,evt)
+        disp('hi');
+    end
+
+ttstr='Delete flagged image plot marker';
+cdata = imresize(imread('icons/red_minus.jpg'),[17 17]);
+cdata = imresize(padarray(cdata, [1 1], 255),[20 20]); 
+hb_deleteFlaggedImage =  uicontrol(hpFlaggedImages,'style','pushbutton',...
+    'cdata',cdata,'fontsize',7,'backgroundcolor','w',...
+    'units','pixels','tooltipstring',ttstr,'callback',@delFlaggedImageCB);
+hb_deleteFlaggedImage.Position(1:2) = hb_addFlaggedImage.Position(1:2)+[hb_addFlaggedImage.Position(3)+1 0];
+hb_deleteFlaggedImage.Position(3:4) = [24 24];
+
+    function delFlaggedImageCB(src,evt)      
+        answer = questdlg('delete flagged image?','delete image',...
+            'Yes','No','No') ;        
+        switch answer
+            case 'Yes'
+                doDelete = 1;
+            case 'No'
+                doDelete = 0;
+            otherwise
+                doDelete = 0;
+        end  
+
+        if doDelete
+            disp('i will delete in the future')
+        end
+    end
+
+% 'Helvetica-Narrow' 
+
+tbl_flaggedimages = uitable('parent',hpFlaggedImages,...
+    'ColumnName',{'filename','description'},...    
+    'ColumnFormat',{'char','char'},...
+    'ColumnEditable',[true false false true], ...
+    'ColumnWidth',{140 100},...
+    'fontsize',7,...
+    'FontName','Arial Narrow',...
+    'CellEditCallback',@(src,evt) disp('i will update this'),'BackgroundColor',coNew);
+tbl_flaggedimages.Position(3)= tbl_flaggedimages.Extent(3)+20;
+tbl_flaggedimages.Position(4) = hpFlaggedImages.Position(4)-40;
+tbl_flaggedimages.Position(1:2)=[c0 1];
+
+tbl_flaggedimages.Data = {'PixelflyImage_2021-06-29_09-03-26.mat' 'X Cam MT insitu'};
 %% Image Pre Processing Panel
 
 % This is alpha stage, perhaps enable filtering? or fringe removal?
 hpImgProcess=uipanel('parent',hpControl,'units','pixels','backgroundcolor','w',...
-    'title','image processing','fontsize',6);
+    'title','image processing','fontsize',7,'bordertype','etchedout');
 % hpImgProcess.Position=[hpSet.Position(1)+hpSet.Position(3) tab_od_1.Position(4) 200 Htop]; 
 hpImgProcess.Position = [0 hpNav.Position(2)-125 hpControl.Position(3)/2 210];
 
@@ -871,7 +951,7 @@ uicontrol('parent',hpImgProcess,'units','pixels',...
 h_hpDisp = 210;
 
 hpDisp=uipanel(hpControl,'units','pixels','backgroundcolor','w',...
-    'title','Display Options','fontsize',6);
+    'title','Display Options','fontsize',7,'bordertype','etchedout');
 hpDisp.Position=[hpControl.Position(3)/2 hpNav.Position(2)-h_hpDisp ...
     hpControl.Position(3)/2 h_hpDisp];
 
@@ -1048,7 +1128,7 @@ caxisequal.Position(1:2) = [1 100];
 
 %% ROI Settings panel
 hpROISettings=uipanel(hpControl,'units','pixels','backgroundcolor','w',...
-    'title','Analysis ROI','fontsize',6);
+    'title','Analysis ROI','fontsize',7,'bordertype','etchedout');
 hpROISettings.Position=[hpControl.Position(3)/2 hpDisp.Position(2)-150 ...
     hpControl.Position(3)/2 150];
 
@@ -1440,14 +1520,22 @@ ax_gap = 5;
         hpNav.Position(2) = hpCam.Position(2) - hpNav.Position(4);        
 
         hpMarkers.Position(2) = hpNav.Position(2) -hpMarkers.Position(4);
-        hpImgProcess.Position(2) = hpMarkers.Position(2)-hpImgProcess.Position(4);
-        hpDisp.Position(2) = hpMarkers.Position(2)-hpDisp.Position(4);
+        hpMarkersCollapse.Position(2) = hpMarkers.Position(2) + ...
+            hpMarkers.Position(4)-hpMarkersCollapse.Position(4);
+        
+
+        hpFlaggedImages.Position(2) = hpMarkers.Position(2)-hpFlaggedImages.Position(4);
+        hpFlaggedImagesCollapse.Position(2) = hpFlaggedImages.Position(2) + ...
+            hpFlaggedImages.Position(4)-hpFlaggedImagesCollapse.Position(4);
+
+
+        hpImgProcess.Position(2) = hpFlaggedImages.Position(2)-hpImgProcess.Position(4);
+        hpDisp.Position(2) = hpFlaggedImages.Position(2)-hpDisp.Position(4);
         hpAnl.Position(2) = hpImgProcess.Position(2)-hpAnl.Position(4);
         hpROISettings.Position(2)=hpDisp.Position(2)-hpROISettings.Position(4);
         hpFit.Position(4)=max([hpAnl.Position(2) 0]);
 
-        hpMarkersCollapse.Position(2) = hpMarkers.Position(2) + ...
-            hpMarkers.Position(4)-hpMarkersCollapse.Position(4);
+
 
         resizePlots; 
         drawnow;
@@ -1642,7 +1730,7 @@ end
 
 % Panel for controlling and viewing the automated analysis
 hpAnl=uipanel('parent',hpControl,'units','pixels','backgroundcolor','w',...
-    'title','analysis','fontsize',6);
+    'title','analysis','fontsize',7,'bordertype','etchedout');
 hpAnl.Position = [0 hpImgProcess.Position(2)-150 hpControl.Position(3)/2 150];
 
 % Refit button
