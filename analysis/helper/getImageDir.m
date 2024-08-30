@@ -8,6 +8,7 @@ dirDay   = [dirMonth filesep sprintf('%2.2d',mydatevec(2)) '.' sprintf('%2.2d',m
 if ~exist(dirSource)
    warning('No data server found.');
    dirDay = 0;
+   dirDay = pwd;
    return;  
 end
 

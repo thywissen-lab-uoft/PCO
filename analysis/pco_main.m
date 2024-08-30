@@ -203,14 +203,16 @@ disp(['Loading data from ' imgdir]);
 files=dir([imgdir filesep '*.mat']);
 files={files.name};
 
-for kk=1:length(files)
-    str=fullfile(imgdir,files{kk});
-    [a,b,c]=fileparts(str);      
-    disp(['     (' num2str(kk) ')' files{kk}]);    
-    data=load(str);     
-    data=data.data;  
+filenames = fullfile(imgdir,files);
 
-    % Display image properties
+% Update image file type if necessary
+update_pco_mat_format(filenames);
+
+for kk=1:length(files)    
+    disp(['     (' num2str(kk) ')' files{kk}]);    
+    str = filenames{kk};
+    data=load(str);     
+
     try
         disp(['     Image Name     : ' data.Name]);
         disp(['     Execution Time : ' datestr(data.Date)]);

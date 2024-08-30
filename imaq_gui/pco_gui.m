@@ -362,6 +362,30 @@ hbchdir=uicontrol(hpNav,'style','pushbutton','CData',cdata,'callback',@chDirCB,.
         end
     end
 
+    function updateImageTable
+        filenames = updateImageList;
+        update_pco_mat_format(filenames)     
+        for uu=1:length(filenames)
+            npt = load(filenames{uu},'Params','Description');
+            Params{uu} = npt.Params;
+            Description{uu}=npt.Description;
+        end
+        [dirs,names,exts]=fileparts(filenames);
+        tbl_flaggedimages.Data={};        
+        for uu=1:length(names)
+            tbl_flaggedimages.Data{uu,1} = names{uu};
+            tbl_flaggedimages.Data{uu,2} = Description{uu};
+        end
+        drawnow;
+    end
+
+    function filenames = updateImageList             
+        [path,~,~] = fileparts(tNavName.String); % Location of file
+        filenames=dir([path filesep '*.mat']); % mat files
+        filenames={filenames.name};    
+        filenames=fullfile(path,filenames);
+    end
+
 % Button to load an image into the acquisition
 ttstr='Load an image into the previer and change the source directory.';
 cdata=imresize(imread('icons/file.jpg'),[17 17]);
@@ -462,7 +486,6 @@ tNavName=uicontrol(hpNav,'style','text','string','FILENAME','fontsize',7,...
     'backgroundcolor','w','units','pixels','horizontalalignment','left',...
     'Position',[1 1 hpNav.Position(3) 14],'tooltipstring',ttstr,...
     'fontname','arial narrow');
-% tNavName.String=data.Name;
  
 %% Flagged Images
 
@@ -2815,7 +2838,7 @@ end
     end
 
 
-
+updateImageTable
 end
 
 
