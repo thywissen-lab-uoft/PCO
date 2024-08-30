@@ -365,16 +365,43 @@ hbchdir=uicontrol(hpNav,'style','pushbutton','CData',cdata,'callback',@chDirCB,.
     function updateImageTable
         filenames = updateImageList;
         update_pco_mat_format(filenames)     
+        ParamNames ={};
         for uu=1:length(filenames)
             npt = load(filenames{uu},'Params','Description');
             Params{uu} = npt.Params;
+            ParamNames=unique([ParamNames; fieldnames(npt.Params)]);
             Description{uu}=npt.Description;
         end
         [dirs,names,exts]=fileparts(filenames);
-        tbl_flaggedimages.Data={};        
+        tbl_flaggedimages.Data={};         
+        if isempty(pdVarShow.String) || isempty(pdVarShow.String{pdVarShow.Value})       
+            oldVar='ExecutionDate';
+        else
+            oldVar = pdVarShow.String{pdVarShow.Value};
+        end
+
+        iNew = find(strcmp(ParamNames,oldVar),1);
+        if isempty(iNew)
+            varName = 'ExecutionDate';
+            iNew = find(strcmp(ParamNames,varName),1);
+        else
+            varName = ParamNames{iNew};
+        end       
+
+        pdVarShow.String = ParamNames;
+        pdVarShow.Value = iNew;
+
         for uu=1:length(names)
             tbl_flaggedimages.Data{uu,1} = names{uu};
             tbl_flaggedimages.Data{uu,2} = Description{uu};
+
+            if isfield(Params{uu},varName)
+                if isequal(varName,'ExecutionDate')
+                    tbl_flaggedimages.Data{uu,3} = datestr(Params{uu}.(varName),'HH:MM:SS');
+                else
+                    tbl_flaggedimages.Data{uu,3} = Params{uu}.(varName);
+                end
+            end
         end
         drawnow;
     end
@@ -384,6 +411,7 @@ hbchdir=uicontrol(hpNav,'style','pushbutton','CData',cdata,'callback',@chDirCB,.
         filenames=dir([path filesep '*.mat']); % mat files
         filenames={filenames.name};    
         filenames=fullfile(path,filenames);
+        filenames=flip(filenames);
     end
 
 % Button to load an image into the acquisition
@@ -490,8 +518,8 @@ tNavName=uicontrol(hpNav,'style','text','string','FILENAME','fontsize',7,...
 %% Flagged Images
 
 hpFlaggedImages = uipanel('parent',hpControl,'units','pixels',...
-    'backgroundcolor','w','title','flagged images','fontsize',7,...
-    'bordertype','etchedout');
+    'backgroundcolor','w','title','image table','fontsize',7,...
+    'bordertype','none');
 hpFlaggedImages.Position(3:4)=[hpControl.Position(3) 200];
 hpFlaggedImages.Position(1:2) = [0 hpNav.Position(2)-hpFlaggedImages.Position(4)];
 
@@ -514,16 +542,32 @@ hpFlaggedImagesCollapse.Position(3:4) = [15 10];
         SizeChangedFcn;
     end
 
+
+strs ={};
+pdVarShow  = uicontrol(hpFlaggedImages,'units','pixels','style',...
+    'popupmenu','backgroundcolor','w',...
+    'String',strs,'fontsize',7,...
+    'Callback',@pdVarShowCB,...
+    'Value',1);
+pdVarShow.Position = [5 pdVarShow.Parent.Position(4)-35 ...
+    pdVarShow.Parent.Position(3)-10 20];
+    function pdVarShowCB(src,evt)
+
+        updateImageTable;
+
+    end
+
 tbl_flaggedimages = uitable('parent',hpFlaggedImages,...
-    'ColumnName',{'filename','description'},...    
+    'ColumnName',{'filename','description','var.'},...    
     'ColumnFormat',{'char','char'},...
     'ColumnEditable',[false true], ...
-    'ColumnWidth',{140 105},...
+    'ColumnWidth',{130 105 40},...
     'fontsize',7,...
+    'RowName',{},...
     'FontName','Arial Narrow',...
     'CellEditCallback',@(src,evt) disp('i will update this'),'BackgroundColor',coNew);
 tbl_flaggedimages.Position(3)= tbl_flaggedimages.Extent(3)+20;
-tbl_flaggedimages.Position(4) = hpFlaggedImages.Position(4)-30;
+tbl_flaggedimages.Position(4) = hpFlaggedImages.Position(4)-40;
 tbl_flaggedimages.Position(1:2)=[5 1];
 
 tbl_flaggedimages.Data = {'PixelflyImage_2021-06-29_09-03-26.mat' 'X Cam MT insitu'};
@@ -1599,12 +1643,16 @@ pYF=plot(X,0*ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2)
                 return;
             end
             filename=[pathname filename];
-        end          
+        end
+
+        update_pco_mat_format({filename});
+
         disp(['     Loading ' filename]);        
         olddata=dstruct;
         try
             data=load(filename);
-            dstruct=data.data;
+            % dstruct=data.data;
+            dstruct = data;
             dstruct=computeOD(dstruct);
             updateImages(dstruct);
             dstruct=performFits(dstruct);
@@ -2732,7 +2780,7 @@ end
         end        
         fname=fullfile(saveDir,fname);
         fprintf('%s',[fname ' ...']);
-        save(fname,'data');
+        save(fname,'-struct','data');
         disp(' done'); 
     end
 
@@ -2760,7 +2808,7 @@ end
 
             fname=fullfile(saveDir,fname);
             fprintf('%s',[fname ' ...']);
-            save(fname,'data');
+            save(fname,'-struct','data');
             disp(' done'); 
         else
             warning('unable to save GUI data')
