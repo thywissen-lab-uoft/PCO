@@ -66,6 +66,8 @@ dstruct=load(example_fname);
 dstruct=dstruct.data;
 dstruct.Name='example';
 
+
+
 %% Initialize GUI Figure
 
 % Initialize the primary figure
@@ -458,9 +460,9 @@ cAutoUpdate.Position=[hbNavLast.Position(1)+hbNavLast.Position(3) 20 90 14];
 ttstr='Name of current image';
 tNavName=uicontrol(hpNav,'style','text','string','FILENAME','fontsize',7,...
     'backgroundcolor','w','units','pixels','horizontalalignment','left',...
-    'Position',[1 1 hpNav.Position(3) 14],'tooltipstring',ttstr);
+    'Position',[1 1 hpNav.Position(3) 14],'tooltipstring',ttstr,...
+    'fontname','arial narrow');
 % tNavName.String=data.Name;
-
  
 %% Flagged Images
 
