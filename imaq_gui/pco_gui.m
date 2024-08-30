@@ -450,8 +450,8 @@ hbNavLast.Position=[hbNavRight.Position(1)+hbNavRight.Position(3) 18 24 20];
 % Checkbox for auto updating when new images are taken
 ttstr='Automatically refresh to most recent image upon new image acquisition.';
 cAutoUpdate=uicontrol('parent',hpNav,'units','pixels','string',...
-    'hold image?','value',0,'fontsize',8,'backgroundcolor','w',...
-    'Style','checkbox','ToolTipString',ttstr);
+    'hold?','value',0,'fontsize',7,'backgroundcolor','w',...
+    'Style','checkbox','ToolTipString',ttstr,'fontname','arial narrow');
 cAutoUpdate.Position=[hbNavLast.Position(1)+hbNavLast.Position(3) 20 90 14];
 
 % Text for string of full file name
@@ -461,6 +461,48 @@ tNavName=uicontrol(hpNav,'style','text','string','FILENAME','fontsize',7,...
     'Position',[1 1 hpNav.Position(3) 14],'tooltipstring',ttstr);
 % tNavName.String=data.Name;
 
+ 
+%% Flagged Images
+
+hpFlaggedImages = uipanel('parent',hpControl,'units','pixels',...
+    'backgroundcolor','w','title','flagged images','fontsize',7,...
+    'bordertype','etchedout');
+hpFlaggedImages.Position(3:4)=[hpControl.Position(3) 200];
+hpFlaggedImages.Position(1:2) = [0 hpNav.Position(2)-hpFlaggedImages.Position(4)];
+
+hpFlaggedImagesCollapse = uicontrol(hpControl,'units','pixels',...
+    'style','pushbutton','backgroundcolor','w','fontsize',12,...
+    'string','-','CallBack',@flaggedImagesPanelSizeCB);
+hpFlaggedImagesCollapse.Position(1) = hpFlaggedImages.Position(1)+hpFlaggedImages.Position(3)-15;
+hpFlaggedImagesCollapse.Position(2) = hpFlaggedImages.Position(2)-hpFlaggedImages.Position(4);
+hpFlaggedImagesCollapse.Position(3:4) = [15 10];
+
+    function flaggedImagesPanelSizeCB(src,evt)
+        switch src.String
+            case '-'
+                hpFlaggedImages.Position(4) = 15;
+                hpFlaggedImagesCollapse.String = '+';
+            case '+'
+                hpFlaggedImages.Position(4) = 200;
+                hpFlaggedImagesCollapse.String = '-';
+        end
+        SizeChangedFcn;
+    end
+
+tbl_flaggedimages = uitable('parent',hpFlaggedImages,...
+    'ColumnName',{'filename','description'},...    
+    'ColumnFormat',{'char','char'},...
+    'ColumnEditable',[false true], ...
+    'ColumnWidth',{140 105},...
+    'fontsize',7,...
+    'FontName','Arial Narrow',...
+    'CellEditCallback',@(src,evt) disp('i will update this'),'BackgroundColor',coNew);
+tbl_flaggedimages.Position(3)= tbl_flaggedimages.Extent(3)+20;
+tbl_flaggedimages.Position(4) = hpFlaggedImages.Position(4)-30;
+tbl_flaggedimages.Position(1:2)=[5 1];
+
+tbl_flaggedimages.Data = {'PixelflyImage_2021-06-29_09-03-26.mat' 'X Cam MT insitu'};
+
 %% Markers and Special Images?
 
 
@@ -468,7 +510,7 @@ hpMarkers = uipanel('parent',hpControl,'units','pixels',...
     'backgroundcolor','w','title','markers','fontsize',7,...
     'bordertype','etchedout');
 hpMarkers.Position(3:4)=[hpControl.Position(3) 150];
-hpMarkers.Position(1:2) = [0 hpNav.Position(2)-hpMarkers.Position(4)];
+hpMarkers.Position(1:2) = [0 hpFlaggedImages.Position(2)-hpMarkers.Position(4)];
 
 c0=5;
 c1 = 25;
@@ -669,88 +711,6 @@ tbl_markers.Position(1:2)=[c0 1];
         end
     end
 
- 
-%% Flagged Images
-
-hpFlaggedImages = uipanel('parent',hpControl,'units','pixels',...
-    'backgroundcolor','w','title','flagged images','fontsize',7,...
-    'bordertype','etchedout');
-hpFlaggedImages.Position(3:4)=[hpControl.Position(3) 200];
-hpFlaggedImages.Position(1:2) = [0 hpMarkers.Position(2)-hpFlaggedImages.Position(4)];
-
-hpFlaggedImagesCollapse = uicontrol(hpControl,'units','pixels',...
-    'style','pushbutton','backgroundcolor','w','fontsize',12,...
-    'string','-','CallBack',@flaggedImagesPanelSizeCB);
-hpFlaggedImagesCollapse.Position(1) = hpFlaggedImages.Position(1)+hpFlaggedImages.Position(3)-15;
-hpFlaggedImagesCollapse.Position(2) = hpFlaggedImages.Position(2)-hpFlaggedImages.Position(4);
-hpFlaggedImagesCollapse.Position(3:4) = [15 10];
-
-    function flaggedImagesPanelSizeCB(src,evt)
-        switch src.String
-            case '-'
-                hpFlaggedImages.Position(4) = 15;
-                hpFlaggedImagesCollapse.String = '+';
-            case '+'
-                hpFlaggedImages.Position(4) = 200;
-                hpFlaggedImagesCollapse.String = '-';
-        end
-        SizeChangedFcn;
-    end
-
-
-ttstr='Add a new plot marker';
-cdata = imresize(imread('icons/green_add.jpg'),[17 17]);
-cdata = imresize(padarray(cdata, [1 1], 255),[20 20]); 
-hb_addFlaggedImage = uicontrol(hpFlaggedImages,'style','pushbutton',...
-    'cdata',cdata,'fontsize',7,'backgroundcolor','w',...
-    'units','pixels','tooltipstring',ttstr,'callback',@addFlaggedImageCB);
-hb_addFlaggedImage.Position=[1 hpFlaggedImages.Position(4)-36 24 24];
-
-    function addFlaggedImageCB(src,evt)
-        disp('hi');
-    end
-
-ttstr='Delete flagged image plot marker';
-cdata = imresize(imread('icons/red_minus.jpg'),[17 17]);
-cdata = imresize(padarray(cdata, [1 1], 255),[20 20]); 
-hb_deleteFlaggedImage =  uicontrol(hpFlaggedImages,'style','pushbutton',...
-    'cdata',cdata,'fontsize',7,'backgroundcolor','w',...
-    'units','pixels','tooltipstring',ttstr,'callback',@delFlaggedImageCB);
-hb_deleteFlaggedImage.Position(1:2) = hb_addFlaggedImage.Position(1:2)+[hb_addFlaggedImage.Position(3)+1 0];
-hb_deleteFlaggedImage.Position(3:4) = [24 24];
-
-    function delFlaggedImageCB(src,evt)      
-        answer = questdlg('delete flagged image?','delete image',...
-            'Yes','No','No') ;        
-        switch answer
-            case 'Yes'
-                doDelete = 1;
-            case 'No'
-                doDelete = 0;
-            otherwise
-                doDelete = 0;
-        end  
-
-        if doDelete
-            disp('i will delete in the future')
-        end
-    end
-
-% 'Helvetica-Narrow' 
-
-tbl_flaggedimages = uitable('parent',hpFlaggedImages,...
-    'ColumnName',{'filename','description'},...    
-    'ColumnFormat',{'char','char'},...
-    'ColumnEditable',[true false false true], ...
-    'ColumnWidth',{140 100},...
-    'fontsize',7,...
-    'FontName','Arial Narrow',...
-    'CellEditCallback',@(src,evt) disp('i will update this'),'BackgroundColor',coNew);
-tbl_flaggedimages.Position(3)= tbl_flaggedimages.Extent(3)+20;
-tbl_flaggedimages.Position(4) = hpFlaggedImages.Position(4)-40;
-tbl_flaggedimages.Position(1:2)=[c0 1];
-
-tbl_flaggedimages.Data = {'PixelflyImage_2021-06-29_09-03-26.mat' 'X Cam MT insitu'};
 %% Image Pre Processing Panel
 
 % This is alpha stage, perhaps enable filtering? or fringe removal?
@@ -1519,18 +1479,20 @@ ax_gap = 5;
         hpCam.Position(2) = hpControl.Position(4) - hpCam.Position(4);
         hpNav.Position(2) = hpCam.Position(2) - hpNav.Position(4);        
 
-        hpMarkers.Position(2) = hpNav.Position(2) -hpMarkers.Position(4);
-        hpMarkersCollapse.Position(2) = hpMarkers.Position(2) + ...
-            hpMarkers.Position(4)-hpMarkersCollapse.Position(4);
-        
-
-        hpFlaggedImages.Position(2) = hpMarkers.Position(2)-hpFlaggedImages.Position(4);
+       hpFlaggedImages.Position(2) = hpNav.Position(2)-hpFlaggedImages.Position(4);
         hpFlaggedImagesCollapse.Position(2) = hpFlaggedImages.Position(2) + ...
             hpFlaggedImages.Position(4)-hpFlaggedImagesCollapse.Position(4);
 
 
-        hpImgProcess.Position(2) = hpFlaggedImages.Position(2)-hpImgProcess.Position(4);
-        hpDisp.Position(2) = hpFlaggedImages.Position(2)-hpDisp.Position(4);
+
+        hpMarkers.Position(2) = hpFlaggedImages.Position(2) -hpMarkers.Position(4);
+        hpMarkersCollapse.Position(2) = hpMarkers.Position(2) + ...
+            hpMarkers.Position(4)-hpMarkersCollapse.Position(4);
+        
+
+     
+        hpImgProcess.Position(2) = hpMarkers.Position(2)-hpImgProcess.Position(4);
+        hpDisp.Position(2) = hpMarkers.Position(2)-hpDisp.Position(4);
         hpAnl.Position(2) = hpImgProcess.Position(2)-hpAnl.Position(4);
         hpROISettings.Position(2)=hpDisp.Position(2)-hpROISettings.Position(4);
         hpFit.Position(4)=max([hpAnl.Position(2) 0]);
