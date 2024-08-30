@@ -1,4 +1,11 @@
 function [isOld,fullfilenames] = check_pco_mat_version(dirorfile)
+% Author : CJ Fujiwara
+%
+% This function checks whether the image is saved int he "old" way where
+% the structure is saved as a variable to the mat file versus the "new" way
+% where the strucutre fields are saved.  This allow easy loading of
+% image parameters without needing to load the entire image which can save
+% memory resources.
 
 if nargin==0
     dirorfile = pwd;
