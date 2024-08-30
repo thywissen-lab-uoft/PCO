@@ -28,6 +28,10 @@ guiname='PCO Absorption Image GUI';
 
 defaultDir = defaultPCOSettings('defaultDir');
 
+if ~exist(defaultDir,'dir')
+    mkdir(defaultDir);
+end
+
 % What is curr dir? I have forgotten
 currDir = defaultDir;
 
@@ -370,9 +374,11 @@ hbchdir=uicontrol(hpNav,'style','pushbutton','CData',cdata,'callback',@chDirCB,.
             npt = load(filenames{uu},'Params','Description');
             Params{uu} = npt.Params;
             ParamNames=unique([ParamNames; fieldnames(npt.Params)]);
-            Description{uu}=npt.Description;
+            Description{uu}=npt.Description;            
+            [dirs{uu},names{uu},exts{uu}]=fileparts(filenames{uu});
         end
-        [dirs,names,exts]=fileparts(filenames);
+        
+        
         tbl_flaggedimages.Data={};         
         if isempty(pdVarShow.String) || isempty(pdVarShow.String{pdVarShow.Value})       
             oldVar='ExecutionDate';
