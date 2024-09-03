@@ -439,7 +439,8 @@ hbchdir=uicontrol(hpNav,'style','pushbutton','CData',cdata,'callback',@chGUIDir,
     end
 
     function filenames = updateImageList             
-        [path,~,~] = fileparts(tNavName.String); % Location of file
+%         [path,~,~] = fileparts(tNavName.String); % Location of file       
+        path = currDir;
         filenames=dir([path filesep '*.mat']); % mat files
         filenames={filenames.name};    
         filenames=fullfile(path,filenames);
@@ -464,6 +465,14 @@ hbflag=uicontrol(hpNav,'style','pushbutton','CData',cdata,...
     'position',[hbhomeflag.Position(1)+hbhomeflag.Position(3) hbhome.Position(2) 20 20],'ToolTipString',ttstr);
 
     function flagImageCB(src,evt)
+        fprintf(['Moving %s to flagged direcotry ...' ],tNavName.String);
+        [status,msg] = copyfile( tNavName.String,defaultPCOSettings('FlaggedImageDirectory'));
+        
+        if status
+           disp('done')
+        else
+            warning(msg);
+        end
         
     end
 
@@ -479,7 +488,7 @@ ttstr='Delete this image from the source directory';
 cdata=imresize(imread('icons/garbage.jpg'),[17 17]);
 hbdelete=uicontrol(hpNav,'style','pushbutton','CData',cdata,...
     'callback',@deleteImageCB,'enable','on','backgroundcolor','w',...
-    'position',[hbhomeflag.Position(1)+hbhomeflag.Position(3) hbhome.Position(2) 20 20],'ToolTipString',ttstr);
+    'position',[hbflag.Position(1)+hbflag.Position(3) hbhome.Position(2) 20 20],'ToolTipString',ttstr);
 
     function deleteImageCB(src,evt)
         filename = tNavName.String;
