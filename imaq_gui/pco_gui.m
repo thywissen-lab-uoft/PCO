@@ -366,6 +366,7 @@ hbhome.Position(1:2) = [1 hpNav.Position(4)-hbhome.Position(4)-15];
         end
         if ~isequal(mydir,0) && ~isempty(mydir) && exist(mydir,'dir') && ~isequal(mydir,currDir)
             currDir=mydir;
+            updateImageTable;
             chData([],[],0);        
         end
 
@@ -391,6 +392,7 @@ hbchdir=uicontrol(hpNav,'style','pushbutton','CData',cdata,'callback',@chGUIDir,
 %     end
 
     function updateImageTable
+        
         filenames = updateImageList;
         update_pco_mat_format(filenames)     
         ParamNames ={};
@@ -466,18 +468,18 @@ hbflag=uicontrol(hpNav,'style','pushbutton','CData',cdata,...
     end
 
 % Button to load an image into the acquisition
-ttstr='Load an image into the previer and change the source directory.';
-cdata=imresize(imread('icons/file.jpg'),[17 17]);
-hbload=uicontrol(hpNav,'style','pushbutton','CData',cdata,...
-    'callback',@browseImageCB,'enable','on','backgroundcolor','w',...
-    'position',[hbflag.Position(1)+hbflag.Position(3) hbhome.Position(2) 20 20],'ToolTipString',ttstr);
+% ttstr='Load an image into the previer and change the source directory.';
+% cdata=imresize(imread('icons/file.jpg'),[17 17]);
+% hbload=uicontrol(hpNav,'style','pushbutton','CData',cdata,...
+%     'callback',@browseImageCB,'enable','on','backgroundcolor','w',...
+%     'position',[hbflag.Position(1)+hbflag.Position(3) hbhome.Position(2) 20 20],'ToolTipString',ttstr);
 
 % Button to delete image
 ttstr='Delete this image from the source directory';
 cdata=imresize(imread('icons/garbage.jpg'),[17 17]);
 hbdelete=uicontrol(hpNav,'style','pushbutton','CData',cdata,...
     'callback',@deleteImageCB,'enable','on','backgroundcolor','w',...
-    'position',[hbload.Position(1)+hbload.Position(3) hbhome.Position(2) 20 20],'ToolTipString',ttstr);
+    'position',[hbhomeflag.Position(1)+hbhomeflag.Position(3) hbhome.Position(2) 20 20],'ToolTipString',ttstr);
 
     function deleteImageCB(src,evt)
         filename = tNavName.String;
@@ -494,6 +496,7 @@ hbdelete=uicontrol(hpNav,'style','pushbutton','CData',cdata,...
                     recycle(previousState);
                     disp('deleted');
                     chData([],[],tNavInd.Data);
+                    updateImageTable
                 else
                     disp('no file to delete?')
                 end
@@ -527,6 +530,7 @@ tNavInd.Position(3:4)=tNavInd.Extent(3:4);
     function tblch(src,evt)
         n=evt.NewData;        
         if isnumeric(n) && n > 0 && floor(n) == n
+            updateImageTable
             chData(src,evt,n)% n is a natural number
         else
             src.Data = evt.PreviousData;
@@ -561,7 +565,7 @@ cAutoUpdate.Position=[hbNavLast.Position(1)+hbNavLast.Position(3) hbhome.Positio
 
 % Text for string of full file name
 ttstr='full file name of current image';
-tNavName=uicontrol(hpNav,'style','text','string','FILENAME','fontsize',7,...
+tNavName=uicontrol(hpNav,'style','text','string',defaultPCOSettings('defaultDir'),'fontsize',7,...
     'backgroundcolor','w','units','pixels','horizontalalignment','left',...
     'Position',[1 1 hpNav.Position(3) hbhome.Position(2)-2],'tooltipstring',ttstr,...
     'fontname','arial narrow');
@@ -1777,12 +1781,12 @@ pYF=plot(X,0*ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2)
     end
 
 function chData(src,evt,state)     
+    
         if isempty(src)
             index_type='absolute';
         else
             index_type = src.UserData;
         end
-        updateImageTable;
         
        % Get mat files in history directory          
        filenames=dir([currDir  filesep '*.mat']);
@@ -2881,9 +2885,6 @@ end
 
     end
 
-try
-    chData([],[],0);   
-end
 % Initialize tables with first camera settings
 updateCamMode(1);
 
@@ -2893,64 +2894,20 @@ addlistener(axImg,'XLim','PostSet',@foo);
 addlistener(axImg,'YLim','PostSet',@foo); 
 initMarkers;
 
+try    
+    chData([],[],0);   
+end
+updateImageTable;
 function enableInteractivity
     enableDefaultInteractivity(axImg);
 end
 
     function foo(~,~)
-% imgnum = menuSelectImg.Value;
-%         switch menuSelectImgType.Value
-%             case 1
-%                 Z = data.Z(:,:,imgnum);
-%             case 2
-%                 Z = data.ZNoFilter(:,:,imgnum);
-%         end
-% 
-%         if cAutoColor_X.Value;setClim('X');end 
-%         % Find center of update
-%         xC = mean(axImg.XLim);yC = mean(axImg.YLim);
-% 
-%         % Update crosshair
-%         set(pCrossX,'XData',axImg.XLim,'YData',[1 1]*yC);
-%         set(pCrossY,'YData',axImg.YLim,'XData',[1 1]*xC); 
-% 
-%         % Round the table limits
         tbl_dispROI.Data = round([axImg.XLim axImg.YLim]); 
-% 
-%         % Get the region of interest
-%         ROI =  [axImg.XLim axImg.YLim];
-% 
-%         % Find indeces in which correspond to ROI boundary
-%         [~,c1] = min(abs(data.X-ROI(1)));
-%         [~,c2] = min(abs(data.X-ROI(2)));
-%         [~,r1] = min(abs(data.Y-ROI(3)));
-%         [~,r2] = min(abs(data.Y-ROI(4)));
-% 
-%         % Find indeces corresponding to center of displayed image
-%         [~,iC] = min(abs(data.X-xC));
-%         [~,iR] = min(abs(data.Y-yC));
-% 
-%         % Update plots if cut
-%         if rbCut_X.Value
-%             set(pX,'XData',data.X,'YData',Z(iR,:));
-%             set(pY,'YData',data.Y,'XData',Z(:,iC));
-%         end     
-% 
-%         if rbSum_X.Value    
-%             zsub = Z(r1:r2,c1:c2);    
-%             xsub = data.X(c1:c2);
-%             ysub = data.Y(r1:r2);
-%             set(pX,'XData',xsub,'YData',sum(zsub,1));
-%             set(pY,'YData',ysub,'XData',sum(zsub,2));
-%         end 
-% 
-%         if hc_anlX_Gauss.Value
-%             updateGaussLinePlot;
-%         end
     end
 
 
-updateImageTable
+
 end
 
 
