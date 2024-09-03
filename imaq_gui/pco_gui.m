@@ -19,7 +19,15 @@ addpath(analysis_path);
 
 % Add the SDK MATLAB drivers to the path
 sdk_dir=fullfile(fileparts(guipath), 'pixelfly_plugin_rev3_01_beta');
-addpath(sdk_dir);
+fprintf('loading pixelfly sdk from %s ... ',sdk_dir);
+if exist(sdk_dir,'dir')
+    try
+        addpath(sdk_dir);
+    end
+else
+    warning('sdk directory not found');
+end
+disp('done');
 
 %% Important Settings
 
