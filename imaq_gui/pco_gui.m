@@ -338,7 +338,7 @@ tbl_numimages.Position(1:2)=[tNumImages.Position(1)+tNumImages.Position(3) ...
 hpNav=uipanel(hpControl,'units','pixels','backgroundcolor','w',...
     'title','GUI Image Source','fontsize',7,'bordertype','etchedout');
 hpNav.Position(3) = hpControl.Position(3);
-hpNav.Position(4) = 50;
+hpNav.Position(4) = 62;
 hpNav.Position(1) = 0;
 hpNav.Position(2) = hpCam.Position(2)-hpNav.Position(4);
 
@@ -346,33 +346,49 @@ hpNav.Position(2) = hpCam.Position(2)-hpNav.Position(4);
 ttstr='Revert previewer source directory to default location.';
 cdata=imresize(imread('icons/home.jpg'),[17 17]);
 hbhome=uicontrol(hpNav,'style','pushbutton','CData',cdata,...
-    'callback',@defaultDirCB,'enable','on','backgroundcolor','w',...
+    'callback',{@chGUIDir, defaultPCOSettings('defaultDir')},'enable','on','backgroundcolor','w',...
     'position',[1 18 20 20],'ToolTipString',ttstr);
+hbhome.Position(3:4)= [20 20];
+hbhome.Position(1:2) = [1 hpNav.Position(4)-hbhome.Position(4)-15];
 
-% Change directory to default
-    function defaultDirCB(~,~)
-        disp(['Changing previwer directory to ' defaultDir]);
-        currDir=defaultDir;
-        chData([],[],0);        
+
+% Browse button callback
+    function chGUIDir(src,evt,mydir)
+        if nargin == 2
+            str=getDayDir;
+            
+            if exist(str,'dir')
+                mydir=uigetdir(str);        
+            else
+                mydir = uigetdir(defaultPCOSettings('defaultDir'));
+            end     
+
+        end
+        if ~isequal(mydir,0) && ~isempty(mydir) && exist(mydir,'dir') && ~isequal(mydir,currDir)
+            currDir=mydir;
+            chData([],[],0);        
+        end
+
     end
+
 
 % Button to change preview source directory
 ttstr='Change previwer source directory.';
 cdata=imresize(imread('icons/browse.jpg'),[20 20]);
-hbchdir=uicontrol(hpNav,'style','pushbutton','CData',cdata,'callback',@chDirCB,...
-    'enable','on','backgroundcolor','w','position',[hbhome.Position(1)+hbhome.Position(3) 18 20 20],...
+hbchdir=uicontrol(hpNav,'style','pushbutton','CData',cdata,'callback',@chGUIDir,...
+    'enable','on','backgroundcolor','w','position',[hbhome.Position(1)+hbhome.Position(3) hbhome.Position(2) 20 20],...
     'ToolTipString',ttstr);
 
 % Get directory from user and load first image in the folder
-    function chDirCB(~,~)
-        str=getDayDir;
-        str=uigetdir(str);        
-        if ~isequal(str,0) && ~isequal(str,currDir)       
-            disp(['Changing directory to ' str]);
-            currDir=str;
-            chData([],[],0);   
-        end
-    end
+%     function chDirCB(~,~)
+%         str=getDayDir;
+%         str=uigetdir(str);        
+%         if ~isequal(str,0) && ~isequal(str,currDir)       
+%             disp(['Changing directory to ' str]);
+%             currDir=str;
+%             chData([],[],0);   
+%         end
+%     end
 
     function updateImageTable
         filenames = updateImageList;
@@ -428,19 +444,40 @@ hbchdir=uicontrol(hpNav,'style','pushbutton','CData',cdata,'callback',@chDirCB,.
         filenames=flip(filenames);
     end
 
+% Button to flag this image and move it to the special folder
+ttstr='Jump to home directory of flagged images';
+cdata=imresize(imread('icons/home_yellow_flag.jpg'),[17 17]);
+hbhomeflag=uicontrol(hpNav,'style','pushbutton','CData',cdata,...
+    'callback',{@chGUIDir, defaultPCOSettings('FlaggedImageDirectory')},...
+    'enable','on','backgroundcolor','w',...
+    'position',[hbchdir.Position(1)+hbchdir.Position(3) hbhome.Position(2) 20 20],'ToolTipString',ttstr);
+ 
+%<a href="https://www.flaticon.com/free-icons/flag" title="flag icons">Flag icons created by Good Ware - Flaticon</a>
+
+% Button to flag this image and move it to the special folder
+ttstr='Flag this image and move it to special folder';
+cdata=imresize(imread('icons/yellowflag.jpg'),[17 17]);
+hbflag=uicontrol(hpNav,'style','pushbutton','CData',cdata,...
+    'callback',@flagImageCB,'enable','on','backgroundcolor','w',...
+    'position',[hbhomeflag.Position(1)+hbhomeflag.Position(3) hbhome.Position(2) 20 20],'ToolTipString',ttstr);
+
+    function flagImageCB(src,evt)
+        
+    end
+
 % Button to load an image into the acquisition
 ttstr='Load an image into the previer and change the source directory.';
 cdata=imresize(imread('icons/file.jpg'),[17 17]);
 hbload=uicontrol(hpNav,'style','pushbutton','CData',cdata,...
     'callback',@browseImageCB,'enable','on','backgroundcolor','w',...
-    'position',[hbchdir.Position(1)+hbchdir.Position(3) 18 20 20],'ToolTipString',ttstr);
+    'position',[hbflag.Position(1)+hbflag.Position(3) hbhome.Position(2) 20 20],'ToolTipString',ttstr);
 
 % Button to delete image
 ttstr='Delete this image from the source directory';
 cdata=imresize(imread('icons/garbage.jpg'),[17 17]);
 hbdelete=uicontrol(hpNav,'style','pushbutton','CData',cdata,...
     'callback',@deleteImageCB,'enable','on','backgroundcolor','w',...
-    'position',[hbload.Position(1)+hbload.Position(3) 18 20 20],'ToolTipString',ttstr);
+    'position',[hbload.Position(1)+hbload.Position(3) hbhome.Position(2) 20 20],'ToolTipString',ttstr);
 
     function deleteImageCB(src,evt)
         filename = tNavName.String;
@@ -472,19 +509,19 @@ ttstr='Jump to most recent image acquired.';
 hbNavNow=uicontrol(hpNav,'Style','pushbutton','units','pixels',...
     'backgroundcolor','w','String',[char(10094) char(10094)],'fontsize',10,...
     'callback',{@chData, 1},'ToolTipString',ttstr,'UserData','absolute');
-hbNavNow.Position=[hbdelete.Position(1)+hbdelete.Position(3) 18 24 20];
+hbNavNow.Position=[hbdelete.Position(1)+hbdelete.Position(3) hbhome.Position(2) 24 20];
 
 ttstr='Step to next more recent image';
 hbNavLeft=uicontrol(hpNav,'Style','pushbutton','units','pixels',...
     'backgroundcolor','w','String',char(10094),'fontsize',10,...
     'callback',{@chData, -1},'ToolTipString',ttstr,'UserData','increment');
-hbNavLeft.Position=[hbNavNow.Position(1)+hbNavNow.Position(3) 18 12 20];
+hbNavLeft.Position=[hbNavNow.Position(1)+hbNavNow.Position(3) hbhome.Position(2) 12 20];
 
 tNavInd=uitable('parent',hpNav,'units','pixels','columnformat',{'numeric'},...
     'fontsize',8,'columnwidth',{25},'rowname',{},'columnname',{},...
     'columneditable',[true],'CellEditCallback',@tblch,'UserData','absolute');
 tNavInd.Data=[200];
-tNavInd.Position(1:2)=[hbNavLeft.Position(1)+hbNavLeft.Position(3)  18];
+tNavInd.Position(1:2)=[hbNavLeft.Position(1)+hbNavLeft.Position(3)  hbhome.Position(2)-2];
 tNavInd.Position(3:4)=tNavInd.Extent(3:4);
 
     function tblch(src,evt)
@@ -500,19 +537,19 @@ tNavInd.Position(3:4)=tNavInd.Extent(3:4);
 ttstr='Total number of images in the directory';
 tNavMax=uicontrol(hpNav,'style','text','string','of 2001','fontsize',7,...
     'backgroundcolor','w','units','pixels','horizontalalignment','center',...
-    'Position',[tNavInd.Position(1)+tNavInd.Position(3) 18 35 14],'tooltipstring',ttstr);
+    'Position',[tNavInd.Position(1)+tNavInd.Position(3) hbhome.Position(2) 35 14],'tooltipstring',ttstr);
 
 ttstr='Step to later image.';
 hbNavRight=uicontrol(hpNav,'Style','pushbutton','units','pixels',...
     'backgroundcolor','w','String',char(10095),'fontsize',10,...
     'callback',{@chData, 1},'ToolTipString',ttstr,'UserData','increment');
-hbNavRight.Position=[tNavMax.Position(1)+tNavMax.Position(3) 18 12 20];
+hbNavRight.Position=[tNavMax.Position(1)+tNavMax.Position(3) hbhome.Position(2) 12 20];
 
 ttstr='Jump to first image acquired.';
 hbNavLast=uicontrol(hpNav,'Style','pushbutton','units','pixels',...
     'backgroundcolor','w','String',[char(10095) char(10095)],'fontsize',10,...
     'callback',{@chData, inf},'ToolTipString',ttstr,'UserData','absolute');
-hbNavLast.Position=[hbNavRight.Position(1)+hbNavRight.Position(3) 18 24 20];
+hbNavLast.Position=[hbNavRight.Position(1)+hbNavRight.Position(3) hbhome.Position(2) 24 20];
 
 
 % Checkbox for auto updating when new images are taken
@@ -520,13 +557,13 @@ ttstr='Automatically refresh to most recent image upon new image acquisition.';
 cAutoUpdate=uicontrol('parent',hpNav,'units','pixels','string',...
     'hold?','value',0,'fontsize',7,'backgroundcolor','w',...
     'Style','checkbox','ToolTipString',ttstr,'fontname','arial narrow');
-cAutoUpdate.Position=[hbNavLast.Position(1)+hbNavLast.Position(3) 20 90 14];
+cAutoUpdate.Position=[hbNavLast.Position(1)+hbNavLast.Position(3) hbhome.Position(2) 90 14];
 
 % Text for string of full file name
-ttstr='Name of current image';
+ttstr='full file name of current image';
 tNavName=uicontrol(hpNav,'style','text','string','FILENAME','fontsize',7,...
     'backgroundcolor','w','units','pixels','horizontalalignment','left',...
-    'Position',[1 1 hpNav.Position(3) 14],'tooltipstring',ttstr,...
+    'Position',[1 1 hpNav.Position(3) hbhome.Position(2)-2],'tooltipstring',ttstr,...
     'fontname','arial narrow');
  
 %% Flagged Images
@@ -574,18 +611,27 @@ pdVarShow.Position = [5 pdVarShow.Parent.Position(4)-35 ...
 tbl_flaggedimages = uitable('parent',hpFlaggedImages,...
     'ColumnName',{'filename','description','var.'},...    
     'ColumnFormat',{'char','char'},...
-    'ColumnEditable',[false true], ...
-    'ColumnWidth',{130 105 40},...
+    'ColumnEditable',[false true false], ...
+    'ColumnWidth',{130 85 40},...
     'fontsize',7,...
-    'RowName',{},...
     'FontName','Arial Narrow',...
-    'CellEditCallback',@(src,evt) disp('i will update this'),'BackgroundColor',coNew);
+    'CellEditCallback',@tbl_flaggedimagesCB,'BackgroundColor',coNew);
 tbl_flaggedimages.Position(3)= tbl_flaggedimages.Extent(3)+20;
 tbl_flaggedimages.Position(4) = hpFlaggedImages.Position(4)-40;
 tbl_flaggedimages.Position(1:2)=[5 1];
 
 tbl_flaggedimages.Data = {'PixelflyImage_2021-06-29_09-03-26.mat' 'X Cam MT insitu'};
 
+    function tbl_flaggedimagesCB(src,evt)
+        if evt.Indices(2)==2
+            [path,name,ext]=fileparts(tNavName.String);
+            str = src.Data{evt.Indices(1),1};
+            fullstr = fullfile(path,str);
+            Description = evt.NewData;
+            save(fullstr,'Description',"-append"); % update description
+        end
+%           ty = get(src, 'SelectionType')
+    end
 %% Markers and Special Images?
 
 
@@ -1736,6 +1782,8 @@ function chData(src,evt,state)
         else
             index_type = src.UserData;
         end
+        updateImageTable;
+        
        % Get mat files in history directory          
        filenames=dir([currDir  filesep '*.mat']);
        filenames={filenames.name};       
@@ -1766,12 +1814,14 @@ function chData(src,evt,state)
            case  'absolute'               
                i1 = max([min([state length(filenames)]) 1]); 
        end        
+       
         newfilename=fullfile(currDir,filenames{i1});
-        tNavInd.Data(1)=i1;
+        tNavInd.Data=i1;
         tNavName.String = newfilename;
         tNavMax.String=['of ' num2str(length(filenames))];  
         drawnow;   
         loadImage(newfilename);
+        drawnow;   
 end
 
 
@@ -3282,7 +3332,12 @@ end
 %% Helper Functions
 function s3=getDayDir
     t=now;
-    d=['X:\Data'];
+    d=defaultPCOSettings('DataDirectory');
+    
+    if ~exist(d,'dir')
+       s3 = [];
+       return;
+    end
     s1=datestr(t,'yyyy');s2=datestr(t,'yyyy.mm');s3=datestr(t,'mm.dd');
     s1=[d filesep s1];s2=[s1 filesep s2];s3=[s2 filesep s3];
 

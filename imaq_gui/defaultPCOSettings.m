@@ -43,9 +43,10 @@ if ~exist(out.FlaggedImageDirectory,'dir')
     out.FlaggedImageDirectory = ['C:' filesep 'PCOFlaggedImages'];
      if ~exist(out.FlaggedImageDirectory,'dir')
         mkdir(out.FlaggedImageDirectory);
-    end
-
+     end
 end
+
+out.DataDirectory = ['X: ' filesep 'Data'];
 %% Process Output
 % If no input variable then return everything, otherwise, return the
 % specific field that was requested
