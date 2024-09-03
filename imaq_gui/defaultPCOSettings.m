@@ -36,9 +36,16 @@ out.ColorOrder = coNew;
 %% Directories
 % Previewer Directory
 out.defaultDir = ['C:' filesep 'ImageHistory'];
-
 out.CameraControlFile = 'Y:\_communication\pco_control.mat';
 out.AnalysisHistoryDirectory = 'Y:\_communication\analysis_history';
+out.FlaggedImageDirectory = ['X:' filesep 'PCOFlaggedImages'];
+if ~exist(out.FlaggedImageDirectory,'dir')
+    out.FlaggedImageDirectory = ['C:' filesep 'PCOFlaggedImages'];
+     if ~exist(out.FlaggedImageDirectory,'dir')
+        mkdir(out.FlaggedImageDirectory);
+    end
+
+end
 %% Process Output
 % If no input variable then return everything, otherwise, return the
 % specific field that was requested
