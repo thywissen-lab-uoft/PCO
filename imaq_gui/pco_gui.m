@@ -86,7 +86,7 @@ dstruct.Name='example';
 hF=figure;clf
 set(hF,'Color','w','units','pixels','Name',guiname,...
     'toolbar','none','Tag','GUI','CloseRequestFcn',@closeGUI,...
-    'NumberTitle','off','Position',[200 200 1300 650]);
+    'NumberTitle','off','Position',[200 200 1350 550]);
 
 cmap = colormap(whitejet);
 cmap = colormap(bone);
@@ -401,6 +401,11 @@ hbchdir=uicontrol(hpNav,'style','pushbutton','CData',cdata,'callback',@chGUIDir,
         filenames = updateImageList;
         update_pco_mat_format(filenames)     
         ParamNames ={};
+        dirs={};
+        names={};
+        exts={};
+        Params={};
+        Description={};
         for uu=1:length(filenames)
             npt = load(filenames{uu},'Params','Description');
             Params{uu} = npt.Params;
@@ -438,8 +443,15 @@ hbchdir=uicontrol(hpNav,'style','pushbutton','CData',cdata,'callback',@chGUIDir,
             if isfield(Params{uu},varName)
                 if isequal(varName,'ExecutionDate')
                     tbl_flaggedimages.Data{uu,3} = datestr(Params{uu}.(varName),'HH:MM:SS');
-                else
-                    tbl_flaggedimages.Data{uu,3} = Params{uu}.(varName);
+                else                  
+                    val=Params{uu}.(varName);
+                    if isa(val,'double')
+                        tbl_flaggedimages.Data{uu,3} = num2str(val);
+                    end
+                    if isa(val,'struct')
+                       tbl_params.Data{nn,2}='[struct]'; 
+                    end  
+                    
                 end
             end
         end
@@ -1622,8 +1634,17 @@ ax_gap = 5;
         if W<300 || H <300
             return;
         end
-        hpControl.Position(4) = H;        % Resize image panel        
-        hp.Position=[hpControl.Position(3) 0 W-hpControl.Position(3) H];      
+        hpControl.Position(4) = H;        % Resize image panel      
+        hp.Position=[hpControl.Position(3) 0 W-hpControl.Position(3) H];     
+
+        hpFit.Position(4)=H;
+%         hpFit.Position(1)=;
+
+        hp.Position=[hpFit.Position(3)+hpFit.Position(1) 0 W-hpControl.Position(3)-hpFit.Position(3) H];     
+
+        
+        
+        
         tSaveDir.Position(3)=hpCam.Position(3)-2;
         hbSWtrig.Position(1)=hpCam.Position(3)-60;                
         hpCam.Position(2) = hpControl.Position(4) - hpCam.Position(4);
@@ -1645,7 +1666,7 @@ ax_gap = 5;
         hpDisp.Position(2) = hpMarkers.Position(2)-hpDisp.Position(4);
         hpAnl.Position(2) = hpImgProcess.Position(2)-hpAnl.Position(4);
         hpROISettings.Position(2)=hpDisp.Position(2)-hpROISettings.Position(4);
-        hpFit.Position(4)=max([hpAnl.Position(2) 0]);
+%         hpFit.Position(4)=max([hpAnl.Position(2) 0]);
 
 
 
@@ -2036,8 +2057,13 @@ cBMdY.Position=[110 cBM.Position(2)-15 50 15];
     end
 
 %% Fit Results Panel
-hpFit=uitabgroup(hpControl,'units','pixels');
-hpFit.Position=[1 0 hpControl.Position(3) hpAnl.Position(4)];
+% hpFit=uitabgroup(hpControl,'units','pixels');
+
+% hpFit.Position=[1 0 hpControl.Position(3) hpAnl.Position(4)];
+
+hpFit=uitabgroup(hF,'units','pixels');
+
+hpFit.Position=[hpControl.Position(3) 0 hpControl.Position(3) hpControl.Position(4)];
 
 tabs(1)=uitab(hpFit,'Title','params','units','pixels');
 tabs(2)=uitab(hpFit,'Title','flags','units','pixels');
@@ -2919,7 +2945,10 @@ end
     end
 
 
-
+hpFlaggedImagesCollapse.String='-';
+flaggedImagesPanelSizeCB(hpFlaggedImagesCollapse);
+hpMarkersCollapse.String='-';
+markersPanelSizeCB(hpMarkersCollapse);
 end
 
 
