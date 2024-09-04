@@ -272,10 +272,15 @@ end
        camera.CameraMode=src.UserData(src.Value);
     end
 
-strs ={'single exp. (0x10)','double exp. (0x20)','single video (0x30)'};
-exposure_id_values = [16 32 48];
+% strs ={'single exp. (0x10)','double exp. (0x20)','single video (0x30)'};
+% exposure_id_values = [16 32 48];
+% 
+
+
+
 pdCamMode  = uicontrol(hpCam,'units','pixels','style','popupmenu','backgroundcolor','w',...
-    'String',strs,'UserData',exposure_id_values,'fontsize',7,'Callback',@chCamModeCB2,...
+    'String',defaultPCOSettings('ExposureModeLabels'),'UserData',defaultPCOSettings('ExposureModeValues'),...
+    'fontsize',7,'Callback',@chCamModeCB2,...
     'Value',1);
 pdCamMode.Position=[5 hpCam.Position(4)-55 100 20];
 tExposure = uicontrol(hpCam,'style','text','units','pixels',...
@@ -864,7 +869,7 @@ hpImgProcess.Position = [0 hpNav.Position(2)-125 hpControl.Position(3)/2 210];
 hpImgProcess.Position = [0 hpMarkers.Position(2)-125 hpControl.Position(3)/2 210];
 
 pdCamSelect  = uicontrol(hpImgProcess,'units','pixels','style','popupmenu','backgroundcolor','w',...
-    'String',defaultPCOSettings('CameraName'),'UserData',exposure_id_values,'fontsize',7,'Callback',@chCamCB,...
+    'String',defaultPCOSettings('CameraName'),'UserData',defaultPCOSettings('ExposureModeValues'),'fontsize',7,'Callback',@chCamCB,...
     'Value',1);
 pdCamSelect.Position=[5 hpImgProcess.Position(4)-35 100 20];
 
@@ -2219,7 +2224,7 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
     end
        
     function data=computeOD(data)
-        disp('Calculating optical density.');
+        fprintf('calculating OD ...');
 
         PWA=data.PWA;
         PWOA=data.PWOA;
@@ -2234,7 +2239,7 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
           s=tblGaussFilter.Data;
           PWOA=imgaussfilt(PWOA,s);
           PWA=imgaussfilt(PWA,s);
-          disp(['Applying gaussian filter. s=' num2str(s) ' px']);
+          fprintf(['gauss filt s=' num2str(s) ' px ...']);
        end
 
        % Scale the probe beams
@@ -2245,8 +2250,9 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
                s1=sum(sum(PWOA(R(3):R(4),R(1):R(2))));
                s2=sum(sum(PWA(R(3):R(4),R(1):R(2))));
                s=s2/s1;
-               PWOA=s*PWOA;
-               disp(['Scaling the PWOA image by ' num2str(round(s,4))]);
+               PWOA=s*PWOA;               
+                fprintf(['scaling pwoa x' num2str(round(s,4)) '...']);
+
            else
                s1=sum(sum(PWOA(R(3):R(4),R(1):R(2))));
                s2=sum(sum(PWA(R(3):R(4),R(1):R(2))));
@@ -2258,9 +2264,9 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
                sb=s4/s3;
                
                 PWOA(1:1024,:)=sa*PWOA(1:1024,:);               
-                PWOA(1025:2048,:)=sb*PWOA(1025:2048,:);
-               disp(['Scaling the PWOA image by ' ...
-                   num2str(round(sa,4)) ' and ' num2str(round(sb,4))]);               
+                PWOA(1025:2048,:)=sb*PWOA(1025:2048,:);     
+               fprintf([', scaling pwoa x(' num2str(round(s,4)) ',' num2str(round(sb,4)) '...']);
+
            end
        end       
 
@@ -2276,19 +2282,21 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
 
       switch ODtype
           case 'Low'
-                disp('Computing low-field optical density');
+                fprintf('low field...');
                 OD=log(PWOA./PWA);
           case 'High'
-              disp('Computing high-field optical density');
+                fprintf('high field...');
                 OD=log(abs(PWOA./(2*PWA-PWOA))); %deets on labbook entry 2021.06.26 
           otherwise
-              warning('Issue with OD type. Assuming low field.');
+              fprintf('ERROR low field...');
               OD=log(PWOA./PWA);
       end 
       
       % Rotate Images
          if cRotate.Value && tblRotate.Data~=0
              theta = tblRotate.Data;
+               fprintf('rotating %s ...',round(theta,1));
+
              if size(data.PWOA,1)==1024   
                 OD = imrotate(OD,theta,rotationMode,rotationCrop);             
 
@@ -2297,13 +2305,11 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
                 OD_2 = imrotate(OD(1025:end,:),theta,rotationMode,rotationCrop);  
                 OD = [OD_1; OD_2];
              end            
-         end 
-    
+         end    
 
         OD = real(OD);
-%         OD(isnan(OD))=0;
         data.OD=single(OD);
-
+        disp('done');
     end
 
 
@@ -2382,7 +2388,6 @@ end
 function updatePlots(data)
 
     
-    fprintf('Updating graphics ... ');
     data.ROI=tblROI.Data;
         
     for n=1:size(data.ROI,1)
@@ -2455,7 +2460,6 @@ function updatePlots(data)
         end
     end  
     
-    disp('done.');
 end
 
 function data=performFits(data)
@@ -2506,7 +2510,6 @@ function data=performFits(data)
     end
     
     %%%%% Post-processing for exporting to tables and variables
-    fprintf('Processing fits ... ');
 
     gauss_fit_data = struct;
     
@@ -2619,7 +2622,6 @@ function data=performFits(data)
             fr(m,ind)=fr(2,3)/fr(1,3);ind=ind+1; % N2/N1
         end        
     end
-    disp('done');
 
     % Update plots        
     updatePlots(data);     
@@ -2698,7 +2700,7 @@ end
         if pco_GetBuffStatus(camera,camera.NumAcquired+1)==3      
 %             camera.NumAcquired
             % if bgCamMode.SelectedObject.UserData == 48
-            if pdCamMode.UserData(pdCamMode.Value)
+            if pdCamMode.UserData(pdCamMode.Value) == defaultPCOSettings('ExposureModeValues',3)
                 stopCamera(camera.BoardHandle);
                 camera.Images{camera.NumAcquired+1}=double(get(camera.buf_ptrs(camera.NumAcquired+1),'Value'));  
                 clearCameraBuffer(camera.BoardHandle);
@@ -2730,13 +2732,11 @@ end
             
 
             data=processImages(t);           % Process images   
-            disp(' ');
-            disp('     New Image!');
-            disp(['     Image     : ' data.Name]);            
+            disp([' Image     : ' data.Name]);            
             t=datetime(data.Params.ExecutionDateStr,'InputFormat',...
                 'dd-MMM-yyyy HH:mm:SS');
             tstr=datestr(t,'yyyy-MM-dd HH:mm:SS');            
-            disp(['     Sequence  : ' tstr]);
+            disp([' ExecutionDate  : ' tstr]);
             disp(' ');
             
             % Save image to history
@@ -2921,16 +2921,13 @@ end
 
 
 %% Analysis Functions
-function dstruct=boxCount(dstruct,bgROI)
-    fprintf('Performing box count analysis ...');    
-    if nargin==1
-        disp(' No background ROI provided, will assume background of zero.');
-        bgROI=[];
-    else
-        disp([' Using background counts from ROI = [' ...
-            num2str(bgROI) ']']);        
-    end    
+function dstruct=boxCount(dstruct,bgROI)     
     BoxCount=struct;    
+    
+    if nargin==1
+        bgROI=[];
+    end
+       
     
     for k=1:size(dstruct.ROI,1)
         ROI=dstruct.ROI(k,:);
@@ -2990,15 +2987,15 @@ function dstruct=fitGauss(dstruct)
     
     for n=1:size(dstruct.ROI,1)              
         ROI=dstruct.ROI(n,:);         
-        disp(['Fitting 2D gaussian on [' num2str(ROI) '].']);
-        t1=now;        
+%         disp(['Fitting 2D gaussian on [' num2str(ROI) '].']);
+%         t1=now;        
         % Grab data from the data structure
         x=dstruct.X(ROI(1):ROI(2));                 % X vector
         y=dstruct.Y(ROI(3):ROI(4));                 % Y vector
         z=dstruct.OD(ROI(3):ROI(4),ROI(1):ROI(2));  % optical density     
         % Perform the fit
         fout=gaussfit2D(x,y,z);
-        t2=now;
+%         t2=now;
         fits{n}=fout;  
     end
     dstruct.GaussFit=fits;
@@ -3100,14 +3097,23 @@ end
 % Display initial guess
 str1=['(Xc0,Yc0)=(' num2str(round(Xc)) ',' num2str(round(Yc)) ');'];
 str2=['(Xs0,Ys0)=(' num2str(round(Xs)) ',' num2str(round(Ys)) ')'];
-fprintf([str1 str2 ';']);
 
+% =[N0 Xc Xs Yc Ys bg];
+fprintf('gauss fit (A,Xc0,Xs,Yc,Ys,bg) : ');
+fprintf('(%.2f,%.0f,%.0f,%.0f,%.0f,%.2f) -> ', round(opt.StartPoint(1),2), round(opt.StartPoint(2)),...
+    round(opt.StartPoint(3)),round(opt.StartPoint(4)),round(opt.StartPoint(5)),...
+    round(opt.StartPoint(6),2));
+
+% fprintf([str1 str2 ';']);
+% keyboard
 % Perform the fit
-fprintf(' fitting...');
+% fprintf(' fitting...');
 t1=now;
 [fout,gof,output]=fit([xx2(:) yy2(:)],data2(:),myfit,opt);
 t2=now;
-disp([' done (' num2str(round((t2-t1)*24*60*60,1)) ' sec.).']);
+
+fprintf('(%.2f,%.0f,%.0f,%.0f,%.0f,%.2f)',fout.A,fout.Xc,fout.Xs,fout.Yc,fout.Ys,fout.nbg);
+disp([' (' num2str(round((t2-t1)*24*60*60,2)) ' sec.).']);
 
 end
 
@@ -3316,7 +3322,7 @@ function [out,dstr]=grabSequenceParams(src)
     if nargin~=1
         src='Y:\_communication\control.txt';
     end
-    disp(['Opening information from from ' src]);
+%     disp(['Opening information from from ' src]);
 
     out=struct;
     % Open the control file
@@ -3351,7 +3357,7 @@ function [vals,units,flags]=grabSequenceParams2(src)
         src='Y:\_communication\control2.mat';
     end    
     data=load(src);    
-    disp(['Opening information from from ' src]);
+%     disp(['Opening information from from ' src]);
     vals=data.vals;
     units=data.units;   
     flags=data.flags;

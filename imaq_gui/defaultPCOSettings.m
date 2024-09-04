@@ -48,6 +48,12 @@ if ~exist(out.FlaggedImageDirectory,'dir')
      end
 end
 
+%% PCO Exposure Modes
+% See the pixel fly manual for description of these modes
+
+out.ExposureModeValues = [16; 32; 48]; % 16=0x10; 32=0x20; 48=x30
+out.ExposureModeLabels = {'single exp. (0x10)';'double exp. (0x20)';'single video (0x30)'};
+
 %% Process Output
 % If no input variable then return everything, otherwise, return the
 % specific field that was requested
