@@ -86,7 +86,7 @@ dstruct.Name='example';
 hF=figure;clf
 set(hF,'Color','w','units','pixels','Name',guiname,...
     'toolbar','none','Tag','GUI','CloseRequestFcn',@closeGUI,...
-    'NumberTitle','off','Position',[200 200 1350 550]);
+    'NumberTitle','off','Position',[200 200 1350 550],'menubar','none');
 
 cmap = colormap(whitejet);
 cmap = colormap(bone);
@@ -599,7 +599,7 @@ tNavName=uicontrol(hpNav,'style','text','string',defaultPCOSettings('defaultDir'
     'Position',[1 1 hpNav.Position(3) hbhome.Position(2)-2],'tooltipstring',ttstr,...
     'fontname','arial narrow');
  
-%% Flagged Images
+% Flagged Images
 
 hpFlaggedImages = uipanel('parent',hpControl,'units','pixels',...
     'backgroundcolor','w','title','image table','fontsize',7,...
@@ -999,7 +999,9 @@ tblROIPScale.Position(1:2)=[45 cScaleProbe.Position(2)-3];
             % Check that limits go from low to high
             if ROI(2)<=ROI(1) || ROI(4)<=ROI(3)
                warning('Bad ROI specification given.');
-               ROI(evt.Indices(2))=evt.PreviousData;
+               err=1;
+               return;
+%                ROI(evt.Indices(2))=evt.PreviousData;
             end               
             % Check that ROI is within image bounds
             if ROI(1)<1; ROI(1)=1; end       
@@ -2063,21 +2065,25 @@ hpFit=uitabgroup(hF,'units','pixels');
 
 hpFit.Position=[hpControl.Position(3) 0 hpControl.Position(3) hpControl.Position(4)];
 
-tabs(1)=uitab(hpFit,'Title','params','units','pixels');
-tabs(2)=uitab(hpFit,'Title','flags','units','pixels');
-tabs(3)=uitab(hpFit,'Title','1','units','pixels','foregroundcolor',co(1,:));
+
+tabs(1)=uitab(hpFit,'Title','images','units','pixels');
+
+tabs(2)=uitab(hpFit,'Title','params','units','pixels');
+tabs(3)=uitab(hpFit,'Title','flags','units','pixels');
+
+tabs(4)=uitab(hpFit,'Title','1','units','pixels','foregroundcolor',co(1,:));
 
 % Table for run parameters
-tbl_params=uitable(tabs(1),'units','normalized','RowName',{},'fontsize',7,...
+tbl_params=uitable(tabs(2),'units','normalized','RowName',{},'fontsize',7,...
     'ColumnName',{},'ColumnWidth',{220 60},'columneditable',[false false],...
     'Position',[0 0 1 1]);
 % Table for run parameters
-tbl_flags=uitable(tabs(2),'units','normalized','RowName',{},'fontsize',7,...
+tbl_flags=uitable(tabs(3),'units','normalized','RowName',{},'fontsize',7,...
     'ColumnName',{},'ColumnWidth',{220 60},'columneditable',[false false],...
     'Position',[0 0 1 1]);
 
 % Table for analysis outputs
-tbl_analysis(1)=uitable(tabs(3),'units','normalized','RowName',{},'ColumnName',{},...
+tbl_analysis(1)=uitable(tabs(4),'units','normalized','RowName',{},'ColumnName',{},...
     'fontsize',8,'ColumnWidth',{140 70 70},'columneditable',false(ones(1,3)),...
     'Position',[0 0 1 1],'backgroundcolor',[brighten(coNew(1,:),.5); 1 1 1]);
 %% Raw Image Panel
