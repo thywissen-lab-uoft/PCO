@@ -405,7 +405,10 @@ hbchdir=uicontrol(hpNav,'style','pushbutton','CData',cdata,'callback',@chGUIDir,
             npt = load(filenames{uu},'Params','Description');
             Params{uu} = npt.Params;
             ParamNames=unique([ParamNames; fieldnames(npt.Params)]);
-            Description{uu}=npt.Description;            
+            if ~isfield(npt,'Description')
+                npt.Description='';
+            end
+            Description{uu}=npt.Description;               
             [dirs{uu},names{uu},exts{uu}]=fileparts(filenames{uu});
         end
         
