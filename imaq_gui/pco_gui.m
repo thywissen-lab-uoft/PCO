@@ -1569,11 +1569,9 @@ hp.Position=[hpControl.Position(3) 0 hF.Position(3)-hpControl.Position(3) hF.Pos
 
 
 % Tab Groups for each display
-tab_od_1=uitab(hp,'Title','OD 1','units','pixels','backgroundcolor','w');
-tab_od_2=uitab(hp,'Title','OD 2','units','pixels','backgroundcolor','w');
-tab_raw_1=uitab(hp,'Title','PWA','units','pixels','backgroundcolor','w');
-tab_raw_2=uitab(hp,'Title','PWOA','units','pixels','backgroundcolor','w');
-tab_raw_3=uitab(hp,'Title','dark','units','pixels','backgroundcolor','w');
+tab_od_1=uitab(hp,'Title','optical density','units','pixels','backgroundcolor','w');
+tab_raw_1=uitab(hp,'Title','images','units','pixels','backgroundcolor','w');
+
 
 % Define spacing for images, useful for resizing
 l=80;   % Left gap for fitting and data analysis summary
