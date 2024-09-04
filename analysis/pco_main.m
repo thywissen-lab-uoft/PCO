@@ -83,6 +83,7 @@ pco_overrideUnit='ms';
 %%
 ODopts=struct;
 ODopts.GaussFilter=.5;
+ODopts.GaussFilter=1;
 
 %% Analysis Flags
 
@@ -105,7 +106,7 @@ doProbeFit    = 0;      % Fit probe beam  to 2D Gaussian
 % processed data outputs of the below fits are typically <fit_type>_name
 
 % Box Count
-doBoxCount      = 1;      % Box count analysis
+doBoxCount      = 0;      % Box count analysis
 
 % Gaussian Fit
 % Fit to a gaussian distribution (thermal cloud)
@@ -121,7 +122,7 @@ doBMFit         = 0;
 
 % Fermi-Fit
 % Fit a DFG in long time of flight
-doFermiFitLong  = 0;     
+doFermiFitLong  = 1;     
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Custom Analyses
@@ -141,7 +142,7 @@ doLandauZener   =  0;
 doRamanSpec   =0;   
 
 % Band Map Fit and Analysis for AM Spec
-doBMFit_AM   = 0; doBMFit_AM_Dir = 'H';
+doBMFit_AM   = 0; doBMFit_AM_Dir = 'V';
 doBMFit_AM_Spec  = 0; 
 doBMFit_AM_Spec2 = 0; % not used?
 
@@ -361,9 +362,9 @@ end
 if isfield(data.Flags,'image_stern_gerlach_F') && data.Flags.image_stern_gerlach_F
     % 15 ms XDT mF SG
 % F Stern Gerlach
-    ROI=[950 1080 335 400;
-    950 1080 250 335];
-     ROI = ROI(1:Nbox,:);
+    ROI=[920 1030 340 450;
+    920 1030 240 340];
+%      ROI = ROI(1:Nbox,:);
 end
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%% LATTICE LOW FIELD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -388,9 +389,10 @@ end
 if isfield(data.Flags,'lattice_off') && ...
         data.Flags.lattice_off && ...
         data.Flags.image_stern_gerlach_F
-    ROI = [920 1110 170 350; % 7/2
-         920 1110 350 530]; % 9/2;
-          
+%     ROI = [920 1110 170 350; % 7/2
+%          920 1110 350 530]; % 9/2;
+          ROI=[920 1030 340 450;
+    920 1030 240 340];
     
 %    ROI = [920 1110 740 840; % -9/2;
 %         920 1110 640 740];   % -7/2;
@@ -400,7 +402,7 @@ if isfield(data.Flags,'lattice_off') && ...
         data.Flags.lattice_off && ...
         ~data.Flags.image_stern_gerlach_mF && ...
         ~data.Flags.image_stern_gerlach_F
-    ROI = [880 1080 250 400]; % -9/2;       
+    ROI = [880 1080 150 530]; % -9/2;       
 end
 
 % if isfield(data.Flags,'lattice_fluor') && ...
@@ -1209,8 +1211,8 @@ if doAnimate && doSave
      animateOpts.doubleStack='horizontal';
 
      % Asceneding or descending
-    animateOpts.Order='descend';   
-%       animateOpts.Order='ascend';
+%     animateOpts.Order='descend';   
+      animateOpts.Order='ascend';
         animateOpts.CLim='auto';
         
 
