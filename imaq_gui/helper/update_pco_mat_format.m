@@ -10,7 +10,6 @@ for kk=1:length(filenames)
         if ~isfield(data,'Description')
             data.Description= '';
         end
-
         fprintf(['Updating mat format for %s'],filename);
         save(filename,'-struct','data');
         disp('done');

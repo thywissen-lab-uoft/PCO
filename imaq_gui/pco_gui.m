@@ -218,7 +218,7 @@ hbstop=uicontrol(hpCam,'style','pushbutton','string','stop',...
 ttstr=['Enable/Disable saving to external directory. Does ' ...
     'not override saving to image history.'];
 hcSave=uicontrol(hpCam,'style','checkbox','string','save?','fontsize',6,...
-    'backgroundcolor','w','Position',[230 hbConnect.Position(2) 60 15],'callback',@saveCheck,...
+    'backgroundcolor','w','Position',[1 2 60 15],'callback',@saveCheck,...
     'ToolTipString',ttstr);
 
 % Save checkbox callback
@@ -235,7 +235,7 @@ hcSave=uicontrol(hpCam,'style','checkbox','string','save?','fontsize',6,...
 % Browse button
 cdata=imresize(imread('images/browse.jpg'),[15 15]);
 bBrowse=uicontrol(hpCam,'style','pushbutton','CData',cdata,'callback',@browseCB,...
-    'enable','off','backgroundcolor','w','position',[1 2 size(cdata,[1 2])]);
+    'enable','off','backgroundcolor','w','position',[40 2 size(cdata,[1 2])]);
 
 % String for current save directory
 tSaveDir=uicontrol(hpCam,'style','text','string','directory','fontsize',8,...
@@ -574,10 +574,10 @@ hbNavLast.Position=[hbNavRight.Position(1)+hbNavRight.Position(3) hbhome.Positio
 
 % Checkbox for auto updating when new images are taken
 ttstr='Automatically refresh to most recent image upon new image acquisition.';
-cAutoUpdate=uicontrol('parent',hpNav,'units','pixels','string',...
+cHoldImage=uicontrol('parent',hpNav,'units','pixels','string',...
     'hold?','value',0,'fontsize',7,'backgroundcolor','w',...
     'Style','checkbox','ToolTipString',ttstr,'fontname','arial narrow');
-cAutoUpdate.Position=[hbNavLast.Position(1)+hbNavLast.Position(3) hbhome.Position(2) 90 14];
+cHoldImage.Position=[hbNavLast.Position(1)+hbNavLast.Position(3) hbhome.Position(2) 90 14];
 
 % Text for string of full file name
 ttstr='full file name of current image';
@@ -2719,7 +2719,7 @@ end
             end                          
 
             % Update displayed image
-            if cAutoUpdate.Value        
+            if ~cHoldImage.Value        
                 dstruct=data;
                 
                 % Update parameters table                            
