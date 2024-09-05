@@ -1359,7 +1359,7 @@ hbROI_full=uicontrol(hpROISettings,'style','pushbutton','Cdata',fullLim_colored(
 hbROI_full.Position(1:2)=[hbROI_down.Position(1)+hbROI_down.Position(3) b.Position(2)];
 
 
-% ttstr='Snap analysis ROI to data ROI(s).';
+ttstr='Snap analysis ROI to current display ROI.';
 cdata_snapLim=imread('images/snapLim.png');
 cdata_snapLim_mask = [sum(cdata_snapLim,3)/255==3];
     function CData=snapLim_colored(index)
