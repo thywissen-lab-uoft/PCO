@@ -343,7 +343,7 @@ tbl_numimages.Position(1:2)=[tNumImages.Position(1)+tNumImages.Position(3) ...
 hpNav=uipanel(hpControl,'units','pixels','backgroundcolor','w',...
     'title','GUI Image Source','fontsize',7,'bordertype','etchedout');
 hpNav.Position(3) = hpControl.Position(3);
-hpNav.Position(4) = 62;
+hpNav.Position(4) = 80;
 hpNav.Position(1) = 0;
 hpNav.Position(2) = hpCam.Position(2)-hpNav.Position(4);
 
@@ -385,17 +385,6 @@ hbchdir=uicontrol(hpNav,'style','pushbutton','CData',cdata,'callback',@chGUIDir,
     'enable','on','backgroundcolor','w','position',[hbhome.Position(1)+hbhome.Position(3) hbhome.Position(2) 20 20],...
     'ToolTipString',ttstr);
 
-% Get directory from user and load first image in the folder
-%     function chDirCB(~,~)
-%         str=getDayDir;
-%         str=uigetdir(str);        
-%         if ~isequal(str,0) && ~isequal(str,currDir)       
-%             disp(['Changing directory to ' str]);
-%             currDir=str;
-%             chData([],[],0);   
-%         end
-%     end
-
     function updateImageTable
         
         filenames = updateImageList;
@@ -406,6 +395,9 @@ hbchdir=uicontrol(hpNav,'style','pushbutton','CData',cdata,'callback',@chGUIDir,
         exts={};
         Params={};
         Description={};
+
+
+
         for uu=1:length(filenames)
             npt = load(filenames{uu},'Params','Description');
             Params{uu} = npt.Params;
@@ -455,6 +447,8 @@ hbchdir=uicontrol(hpNav,'style','pushbutton','CData',cdata,'callback',@chGUIDir,
                 end
             end
         end
+
+
         drawnow;
     end
 
@@ -495,13 +489,6 @@ hbflag=uicontrol(hpNav,'style','pushbutton','CData',cdata,...
         end
         
     end
-
-% Button to load an image into the acquisition
-% ttstr='Load an image into the previer and change the source directory.';
-% cdata=imresize(imread('icons/file.jpg'),[17 17]);
-% hbload=uicontrol(hpNav,'style','pushbutton','CData',cdata,...
-%     'callback',@browseImageCB,'enable','on','backgroundcolor','w',...
-%     'position',[hbflag.Position(1)+hbflag.Position(3) hbhome.Position(2) 20 20],'ToolTipString',ttstr);
 
 % Button to delete image
 ttstr='Delete this image from the source directory';
@@ -596,75 +583,51 @@ cAutoUpdate.Position=[hbNavLast.Position(1)+hbNavLast.Position(3) hbhome.Positio
 ttstr='full file name of current image';
 tNavName=uicontrol(hpNav,'style','text','string',defaultPCOSettings('defaultDir'),'fontsize',7,...
     'backgroundcolor','w','units','pixels','horizontalalignment','left',...
-    'Position',[1 1 hpNav.Position(3) hbhome.Position(2)-2],'tooltipstring',ttstr,...
+    'Position',[2 hbhome.Position(2)-24 hpNav.Position(3)-4 24],'tooltipstring',ttstr,...
     'fontname','arial narrow');
- 
-% Flagged Images
 
-hpFlaggedImages = uipanel('parent',hpControl,'units','pixels',...
-    'backgroundcolor','w','title','image table','fontsize',7,...
-    'bordertype','none');
-hpFlaggedImages.Position(3:4)=[hpControl.Position(3) 200];
-hpFlaggedImages.Position(1:2) = [0 hpNav.Position(2)-hpFlaggedImages.Position(4)];
-
-hpFlaggedImagesCollapse = uicontrol(hpControl,'units','pixels',...
-    'style','pushbutton','backgroundcolor','w','fontsize',12,...
-    'string','-','CallBack',@flaggedImagesPanelSizeCB);
-hpFlaggedImagesCollapse.Position(1) = hpFlaggedImages.Position(1)+hpFlaggedImages.Position(3)-15;
-hpFlaggedImagesCollapse.Position(2) = hpFlaggedImages.Position(2)-hpFlaggedImages.Position(4);
-hpFlaggedImagesCollapse.Position(3:4) = [15 10];
-
-    function flaggedImagesPanelSizeCB(src,evt)
-        switch src.String
-            case '-'
-                hpFlaggedImages.Position(4) = 15;
-                hpFlaggedImagesCollapse.String = '+';
-            case '+'
-                hpFlaggedImages.Position(4) = 200;
-                hpFlaggedImagesCollapse.String = '-';
-        end
-        SizeChangedFcn;
-    end
-
-
+tNavName.String= repmat('A',1,500);
 strs ={};
-pdVarShow  = uicontrol(hpFlaggedImages,'units','pixels','style',...
-    'popupmenu','backgroundcolor','w',...
-    'String',strs,'fontsize',7,...
-    'Callback',@pdVarShowCB,...
-    'Value',1);
-pdVarShow.Position = [5 pdVarShow.Parent.Position(4)-35 ...
-    pdVarShow.Parent.Position(3)-10 20];
+pdVarShow  = uicontrol(hpNav,'units','pixels','style',...
+    'popupmenu','backgroundcolor','w','String',strs,'fontsize',7,...
+    'Callback',@pdVarShowCB,'Value',1);
+pdVarShow.Position = [4 1 200 20];
     function pdVarShowCB(src,evt)
-
         updateImageTable;
-
+        updatePreviewText;
     end
 
-tbl_flaggedimages = uitable('parent',hpFlaggedImages,...
-    'ColumnName',{'filename','description','var.'},...    
-    'ColumnFormat',{'char','char'},...
-    'ColumnEditable',[false true false], ...
-    'ColumnWidth',{130 85 40},...
-    'fontsize',7,...
-    'FontName','Arial Narrow',...
-    'CellEditCallback',@tbl_flaggedimagesCB,'BackgroundColor',coNew);
-tbl_flaggedimages.Position(3)= tbl_flaggedimages.Extent(3)+20;
-tbl_flaggedimages.Position(4) = hpFlaggedImages.Position(4)-40;
-tbl_flaggedimages.Position(1:2)=[5 1];
-
-tbl_flaggedimages.Data = {'PixelflyImage_2021-06-29_09-03-26.mat' 'X Cam MT insitu'};
-
-    function tbl_flaggedimagesCB(src,evt)
-        if evt.Indices(2)==2
-            [path,name,ext]=fileparts(tNavName.String);
-            str = src.Data{evt.Indices(1),1};
-            fullstr = fullfile(path,str);
-            Description = evt.NewData;
-            save(fullstr,'Description',"-append"); % update description
+    function updatePreviewText    
+        updateImageTable;
+        varname = pdVarShow.String{pdVarShow.Value};
+        P = dstruct.Params;
+       
+        if isfield(P,varname)
+            if isfield(dstruct,'Units')
+                unitStr = dstruct.Units.(varname);
+            else
+                unitStr = '';
+            end
+            val=P.(varname);
+            if isequal(varname,'ExecutionDate')
+                tDispVar.String = datestr(val,'HH:MM:SS');
+            else                  
+                if isa(val,'double')
+                    tDispVar.String = [num2str(val) ' ' unitStr];
+                end
+                if isa(val,'struct')
+                   tDispVar.String='[struct]'; 
+                end                                  
+            end
+        else
+            tDispVar.String='var not found';
         end
-%           ty = get(src, 'SelectionType')
     end
+
+tDispVar = uicontrol(hpNav,'units','pixels','style','text',....
+    'backgroundcolor','w','string','display variable value','fontsize',7,...
+   'Position',[204 5 hpNav.Position(3)-pdVarShow.Position(3)-10 12],'horizontalalignment','center');
+
 %% Markers and Special Images?
 
 
@@ -672,7 +635,7 @@ hpMarkers = uipanel('parent',hpControl,'units','pixels',...
     'backgroundcolor','w','title','markers','fontsize',7,...
     'bordertype','etchedout');
 hpMarkers.Position(3:4)=[hpControl.Position(3) 150];
-hpMarkers.Position(1:2) = [0 hpFlaggedImages.Position(2)-hpMarkers.Position(4)];
+hpMarkers.Position(1:2) = [0 hpNav.Position(2)-hpMarkers.Position(4)];
 
 c0=5;
 c1 = 25;
@@ -1638,25 +1601,15 @@ ax_gap = 5;
         hp.Position=[hpControl.Position(3) 0 W-hpControl.Position(3) H];     
 
         hpFit.Position(4)=H;
-%         hpFit.Position(1)=;
-
         hp.Position=[hpFit.Position(3)+hpFit.Position(1) 0 W-hpControl.Position(3)-hpFit.Position(3) H];     
 
-        
-        
-        
         tSaveDir.Position(3)=hpCam.Position(3)-2;
         hbSWtrig.Position(1)=hpCam.Position(3)-60;                
         hpCam.Position(2) = hpControl.Position(4) - hpCam.Position(4);
         hpNav.Position(2) = hpCam.Position(2) - hpNav.Position(4);        
 
-       hpFlaggedImages.Position(2) = hpNav.Position(2)-hpFlaggedImages.Position(4);
-        hpFlaggedImagesCollapse.Position(2) = hpFlaggedImages.Position(2) + ...
-            hpFlaggedImages.Position(4)-hpFlaggedImagesCollapse.Position(4);
 
-
-
-        hpMarkers.Position(2) = hpFlaggedImages.Position(2) -hpMarkers.Position(4);
+        hpMarkers.Position(2) = hpNav.Position(2) -hpMarkers.Position(4);
         hpMarkersCollapse.Position(2) = hpMarkers.Position(2) + ...
             hpMarkers.Position(4)-hpMarkersCollapse.Position(4);
         
@@ -1666,10 +1619,11 @@ ax_gap = 5;
         hpDisp.Position(2) = hpMarkers.Position(2)-hpDisp.Position(4);
         hpAnl.Position(2) = hpImgProcess.Position(2)-hpAnl.Position(4);
         hpROISettings.Position(2)=hpDisp.Position(2)-hpROISettings.Position(4);
-%         hpFit.Position(4)=max([hpAnl.Position(2) 0]);
+        drawnow;
 
+        % tbl_flaggedimages.Position(4) = tabs(1).Position(4)-pdVarShow.Position(4);
 
-
+        % pdVarShow.Position(2) = pdVarShow.Parent.Position(4)-pdVarShow.Position(4);
         resizePlots; 
         drawnow;
     end
@@ -1757,6 +1711,7 @@ pYF=plot(X,0*ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2)
             dstruct = data;
             dstruct=computeOD(dstruct);
             updateImages(dstruct);
+            updatePreviewText;  
             dstruct=performFits(dstruct);
             [~,inds] = sort(lower(fieldnames(dstruct.Params)));
             params = orderfields(dstruct.Params,inds);  
@@ -2057,20 +2012,13 @@ cBMdY.Position=[110 cBM.Position(2)-15 50 15];
     end
 
 %% Fit Results Panel
-% hpFit=uitabgroup(hpControl,'units','pixels');
-
-% hpFit.Position=[1 0 hpControl.Position(3) hpAnl.Position(4)];
 
 hpFit=uitabgroup(hF,'units','pixels');
-
 hpFit.Position=[hpControl.Position(3) 0 hpControl.Position(3) hpControl.Position(4)];
 
-
 tabs(1)=uitab(hpFit,'Title','images','units','pixels');
-
 tabs(2)=uitab(hpFit,'Title','params','units','pixels');
 tabs(3)=uitab(hpFit,'Title','flags','units','pixels');
-
 tabs(4)=uitab(hpFit,'Title','1','units','pixels','foregroundcolor',co(1,:));
 
 % Table for run parameters
@@ -2086,6 +2034,28 @@ tbl_flags=uitable(tabs(3),'units','normalized','RowName',{},'fontsize',7,...
 tbl_analysis(1)=uitable(tabs(4),'units','normalized','RowName',{},'ColumnName',{},...
     'fontsize',8,'ColumnWidth',{140 70 70},'columneditable',false(ones(1,3)),...
     'Position',[0 0 1 1],'backgroundcolor',[brighten(coNew(1,:),.5); 1 1 1]);
+
+
+tbl_flaggedimages = uitable('parent',tabs(1),'units','normalized',...
+    'ColumnName',{'filename','description','var.'},...    
+    'ColumnFormat',{'char','char','char'},'ColumnEditable',[false true false], ...
+    'ColumnWidth',{130 85 40},'fontsize',7,'FontName','Arial Narrow',...
+    'CellEditCallback',@tbl_flaggedimagesCB,'BackgroundColor',coNew,...
+    'position',[0 0 1 1]);
+
+    function tbl_flaggedimagesCB(src,evt)
+        if evt.Indices(2)==2
+            [path,name,ext]=fileparts(tNavName.String);
+            str = src.Data{evt.Indices(1),1};
+            fullstr = fullfile(path,str);
+            Description = evt.NewData;
+            save(fullstr,'Description',"-append"); % update description
+        end
+    end
+
+
+
+
 %% Raw Image Panel
 %{
 hpRaw=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
@@ -2948,9 +2918,6 @@ end
         tbl_dispROI.Data = round([axImg.XLim axImg.YLim]); 
     end
 
-
-hpFlaggedImagesCollapse.String='-';
-flaggedImagesPanelSizeCB(hpFlaggedImagesCollapse);
 hpMarkersCollapse.String='-';
 markersPanelSizeCB(hpMarkersCollapse);
 end
