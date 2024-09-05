@@ -399,12 +399,17 @@ hbchdir=uicontrol(hpNav,'style','pushbutton','CData',cdata,'callback',@chGUIDir,
 
 
         for uu=1:length(filenames)
-            npt = load(filenames{uu},'Params','Description');
-            Params{uu} = npt.Params;
-            ParamNames=unique([ParamNames; fieldnames(npt.Params)]);
-            if ~isfield(npt,'Description')
+            varInfo = who('-file',filenames{uu});
+            hasDescription=sum(logical(strcmp(varInfo, 'Description')));
+
+            if hasDescription
+                npt = load(filenames{uu},'Params','Description');
+            else
+                npt = load(filenames{uu},'Params');
                 npt.Description='';
             end
+            Params{uu} = npt.Params;
+            ParamNames=unique([ParamNames; fieldnames(npt.Params)]);     
             Description{uu}=npt.Description;               
             [dirs{uu},names{uu},exts{uu}]=fileparts(filenames{uu});
         end
@@ -2157,6 +2162,7 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
         data.X=1:camera.W;
         data.Y=1:camera.H;
         data.BitDepth=camera.BitDepth;
+        data.Description='';
         
         data.PWA=camera.Images{1};
         data.PWOA=camera.Images{2};
