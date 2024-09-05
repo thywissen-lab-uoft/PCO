@@ -619,9 +619,19 @@ pdVarShow.Position = [4 1 200 20];
                    tDispVar.String='[struct]'; 
                 end                                  
             end
+
+            tVarText.String = [varname ' : ' tDispVar.String];
+            tVarText.Visible='on';
+
         else
+            tVarText.String = '';
+            tVarText.Visible='off';
+
             tDispVar.String='var not found';
         end
+% 
+            % str = [pdVarShow.String{pdVarShow.Value} ' : ' tDispVar.String];
+
     end
 
 tDispVar = uicontrol(hpNav,'units','pixels','style','text',....
@@ -1654,7 +1664,11 @@ pROIPScale=rectangle('position',pp,'edgecolor','r','linewidth',2,...
 
 tImageFile=text(3,3,'FILENAME','units','pixels','fontsize',8,'fontweight','bold',...
     'horizontalalignment','left','verticalalignment','bottom','margin',1,...
-    'interpreter','none','backgroundcolor',[1 1 1 .5]);
+    'interpreter','none','backgroundcolor',[1 1 1 .7]);
+
+tVarText=text(.01,.99,'FILENAME','units','normalized','fontsize',8,'fontweight','bold',...
+    'horizontalalignment','left','verticalalignment','top','margin',1,...
+    'interpreter','none','backgroundcolor',[1 1 1 .7]);
 
 % Box for ROI (this will become an array later)
 pROI=rectangle('position',[1 1 1392 1024],'edgecolor',co(1,:),'linewidth',2);
@@ -2318,8 +2332,15 @@ function updateImages(data)
 
 
     % Update data string
+
     set(tImageFile,'String',data.Name);
-    % set(tImageFileFig,'String',data.Name);
+
+
+
+                 
+
+       
+
 
     % Find where in the history this image lies
     filenames=dir([currDir  filesep '*.mat']);
