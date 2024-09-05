@@ -2047,7 +2047,8 @@ hpFit.Position=[hpControl.Position(3) 0 hpControl.Position(3) hpControl.Position
 tabs(1)=uitab(hpFit,'Title','images','units','pixels');
 tabs(2)=uitab(hpFit,'Title','params','units','pixels');
 tabs(3)=uitab(hpFit,'Title','flags','units','pixels');
-tabs(4)=uitab(hpFit,'Title','1','units','pixels','foregroundcolor',co(1,:));
+% tabs(4)=uitab(hpFit,'Title','analysis','units','pixels','foregroundcolor',co(1,:));
+tabs(4)=uitab(hpFit,'Title','analysis','units','pixels');
 
 % Table for run parameters
 tbl_params=uitable(tabs(2),'units','normalized','RowName',{},'fontsize',7,...
