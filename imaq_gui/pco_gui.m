@@ -891,20 +891,20 @@ tbl_cam.Position(1:2)=[5 tbl_optics.Position(2)-tbl_cam.Position(4)-2];
 
 % Method of calculating OD
 bgODFieldText=uicontrol('style','text','parent',hpImgProcess,...
-    'String','field:','backgroundcolor','w','position',[0 hpImgProcess.Position(4)-120 25 15],...
+    'String','field:','backgroundcolor','w','position',[0 hpImgProcess.Position(4)-125 25 15],...
     'fontsize',7);
 bgODField = uibuttongroup('units','pixels','backgroundcolor','w',...
-    'position',[25 hpImgProcess.Position(4)-120 180 20],...
+    'position',[25 hpImgProcess.Position(4)-120 180 15],...
     'SelectionChangedFcn',@chOD,'parent',hpImgProcess,'BorderType','None');        
 % Create radio buttons in the button group.
 uicontrol(bgODField,'Style','radiobutton','String','Detect',...
-    'Position',[0 0 48 20],'units','pixels','backgroundcolor','w',...
+    'Position',[0 0 48 15],'units','pixels','backgroundcolor','w',...
     'Value',1,'fontsize',7);
 uicontrol(bgODField,'Style','radiobutton','String','High',...
-    'Position',[47 0 40 20],'units','pixels','backgroundcolor','w',...
+    'Position',[47 0 40 15],'units','pixels','backgroundcolor','w',...
     'Value',0,'fontsize',7);
 uicontrol(bgODField,'Style','radiobutton','String','Low',...
-    'Position',[85 0 50 20],'units','pixels','backgroundcolor','w',...
+    'Position',[85 0 50 15],'units','pixels','backgroundcolor','w',...
     'fontsize',7,'value',0);
 
     function chOD(src,evt)
@@ -1535,7 +1535,14 @@ hp.Position=[hpControl.Position(3) 0 hF.Position(3)-hpControl.Position(3) hF.Pos
 
 % Tab Groups for each display
 tab_od_1=uitab(hp,'Title','optical density','units','pixels','backgroundcolor','w');
-tab_raw_1=uitab(hp,'Title','images','units','pixels','backgroundcolor','w');
+tab_raw_1=uitab(hp,'Title','raw images','units','pixels','backgroundcolor','w');
+tab_notes=uitab(hp,'Title','notes','units','pixels','backgroundcolor','w');
+
+
+% doesn't work at all
+t_notes = uicontrol(tab_notes,'style','edit','fontsize',10,...
+    'units','normalized','position',[.01 .01 .98 .98],'backgroundcolor','w',...
+    'horizontalalignment','left');
 
 
 % Define spacing for images, useful for resizing
@@ -1684,6 +1691,8 @@ hAxY.Position=[axImg.Position(1)+axImg.Position(3) axImg.Position(2) l axImg.Pos
 
 linkaxes([axImg hAxY],'y');
 linkaxes([axImg hAxX],'x');
+
+
 
 hold on
 % Add Y data data and fit plots
@@ -2057,118 +2066,56 @@ tbl_flaggedimages = uitable('parent',tabs(1),'units','normalized',...
 
 
 %% Raw Image Panel
-%{
-hpRaw=uipanel('parent',hF,'units','pixels','backgroundcolor','w',...
-    'title','raw images','fontsize',6);
-hpRaw.Position=[hpImgProcess.Position(1)+hpImgProcess.Position(3) tab_od_1.Position(4) 800 Htop];
-
-Wraw = Htop-18;
-
-% Axes for images of raw data
-axPWA=axes('parent',hpRaw,'units','pixels','UserData','PWA');
-axPWA.Position=[5 3 Wraw Wraw];
-hPWA=imagesc(X,Y,Z);
-set(axPWA,'box','on','XTick',[],'YTick',[]);
-axis equal tight
-% pDisp=rectangle('position',[1 1 1392 1024],'edgecolor','k','linewidth',2);
-hold on
-caxis([0 4096]);
-
-axPWOA=axes('parent',hpRaw,'units','pixels','UserData','PWOA');
-
-axPWOA.Position=[Wraw+15 3 Wraw Wraw];
-hPWOA=imagesc(X,Y,Z);
-set(axPWOA,'box','on','XTick',[],'YTick',[]);
-axis equal tight
-hold on
-caxis([0 1000]);
-
-
-cBarRaw=colorbar('fontsize',6,'units','pixels','orientation','horizontal');
-      cBarRaw.Position=[axPWOA.Position(1)+axPWOA.Position(3)+10 90 ...
-            120 10]; 
-
-% Text label for color limit table on OD image
-crawlimtext=uicontrol('parent',hpRaw,'units','pixels','string','light',...
-    'fontsize',8,'backgroundcolor','w','style','text');
-crawlimtext.Position(3:4)=crawlimtext.Extent(3:4);
-crawlimtext.Position(1) = axPWOA.Position(1)+axPWOA.Position(3)+5;
-crawlimtext.Position(2) =60;
 
 
 
-htblLight=uitable('parent',hpRaw,'units','pixels','RowName',{},'ColumnName',{},...
-    'fontsize',8,'ColumnWidth',{45 45},'columneditable',[true true],...
-    'Data',[0 1000],'celleditcallback',@climrawcb);
-htblLight.Position(1:2) = crawlimtext.Position(1:2)+[30 0];
-htblLight.Position(3:4)=[htblLight.Extent(3) htblLight.Extent(4)];
+% Color limit table for OD image
+probe_clim_tbl=uitable('parent',tab_raw_1,'units','pixels','RowName',{'probe','dark'},...
+    'ColumnName',{},...
+    'Data',[0 1000; 0 50],'ColumnWidth',{40,40},'ColumnEditable',[true true],...
+    'CellEditCallback',@probe_clim_tblCB,'fontsize',8);
+probe_clim_tbl.Position(3:4)=probe_clim_tbl.Extent(3:4);
+probe_clim_tbl.Position(1:2) = [1 1];
 
-% Callback for changing the color limits table
-    function climrawcb(src,evt)
+    function probe_clim_tblCB(src,evt)
         try
-            axPWA.CLim=htblLight.Data;
-            axPWOA.CLim=htblLight.Data;
-        catch exception
-            warning('Bad OD color limits given. Using old value.');
-            src.Data(evt.Indices)=evt.PreviousData;
+            axPWA.CLim=probe_clim_tbl.Data(1,:);
+            axPWOA.CLim=probe_clim_tbl.Data(1,:);
+            axDark.CLim=probe_clim_tbl.Data(2,:);
+        catch ME
+            warning('bad color limits given. Using old value.');
+            src.Data(evt.Indices(1),evt.Indices(2))=evt.PreviousData;
         end
     end
 
 
-
-% Dark Image Axis
-axDark=axes('parent',hpRaw,'units','pixels','UserData','Dark');
-axDark.Position=[htblLight.Position(1)+htblLight.Position(3)+10 3 Wraw Wraw];
-Zdark = Z + normrnd(50,10,size(Z,1),size(Z,2));
-hDark=imagesc(X,Y,Zdark);
-set(axDark,'box','on','XTick',[],'YTick',[]);
+axPWA = subplot(2,2,1,'parent',tab_raw_1);
+hImg_PWA = imagesc(zeros(500));
+set(axPWA,'box','on','linewidth',1,'fontsize',8);
+title('pwa');
 axis equal tight
-hold on
-caxis([0 50]);
+hold on;
+% colorbar
 
-% Text label for color limit table on OD image
-cdarklimtext=uicontrol('parent',hpRaw,'units','pixels','string','dark',...
-    'fontsize',8,'backgroundcolor','w','style','text');
-cdarklimtext.Position(3:4)=cdarklimtext.Extent(3:4);
-cdarklimtext.Position(1) = crawlimtext.Position(1);
-cdarklimtext.Position(2) =35;
-
-htblDark=uitable('parent',hpRaw,'units','pixels','RowName',{},'ColumnName',{},...
-    'fontsize',8,'ColumnWidth',{45 45},'columneditable',[true true],...
-    'Data',[0 50],'celleditcallback',@climrawdarkcb);
-htblDark.Position(1:2) = cdarklimtext.Position(1:2)+[30 0];
-htblDark.Position(3:4)=[htblDark.Extent(3) htblDark.Extent(4)];
-
-% Callback for changing the color limits table
-    function climrawdarkcb(src,evt)
-        try
-            axDark.CLim=htblDark.Data;
-        catch exception
-            warning('Bad color limits given. Using old value.');
-            src.Data(evt.Indices)=evt.PreviousData;
-        end
-    end
+axPWOA = subplot(2,2,2,'parent',tab_raw_1);
+hImg_PWOA = imagesc(zeros(500));
+set(axPWOA,'box','on','linewidth',1,'fontsize',8);
+title('pwoa');
+axis equal tight
+hold on;
+% colorbar
 
 
-
-cBarRawDark=colorbar('fontsize',6,'units','pixels','orientation','horizontal');
-cBarRawDark.Position=[cBarRaw.Position(1) 20 ...
-    120 10]; 
-
-tbl_raw1counts=uitable('parent',hpRaw,'units','pixels','RowName',{},'columnname',{},...
-    'ColumnEditable',[false false],'CellEditCallback',@tbl_rawROICB,...
-    'ColumnWidth',{70 60},'FontSize',7,'Data',[1 size(Z,2) 1 size(Z,1)]);
-tbl_raw1counts.Data={'PWA 1',0;'PWOA 1',0; 'Dark', 0; 'Dark Avg / px',0};
-tbl_raw1counts.Position(3:4)=tbl_raw1counts.Extent(3:4);
-tbl_raw1counts.Position(1:2)=[axDark.Position(1)+axDark.Position(3)+5 10];
-
-tbl_raw2counts=uitable('parent',hpRaw,'units','pixels','RowName',{},'columnname',{},...
-    'ColumnEditable',[false false],'CellEditCallback',@tbl_rawROICB,...
-    'ColumnWidth',{70 60},'FontSize',7,'Data',[1 size(Z,2) 1 size(Z,1)],'Enable','off');
-tbl_raw2counts.Data={'PWA 2',0;'PWOA 2',0; 'Dark', 0; 'Dark Avg / px',0};
-tbl_raw2counts.Position(3:4)=tbl_raw2counts.Extent(3:4);
-tbl_raw2counts.Position(1:2)=[tbl_raw1counts.Position(1)+tbl_raw1counts.Position(3)+5 10 ];
-%}
+linkaxes([axPWOA axPWA],'x')
+axDark = subplot(2,2,3,'parent',tab_raw_1);
+hImg_Dark = imagesc(zeros(500));
+set(axDark,'box','on','linewidth',1,'fontsize',8);
+title('dark');
+axis equal tight
+hold on;
+% colorbar
+probe_clim_tblCB
+linkaxes([axImg axPWA axPWOA axDark]);
 
 
 %% Finish graphics initialization
@@ -2319,13 +2266,13 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
 function updateImages(data)             
     
     % Update images
-    % set(hPWOA,'XData',data.X,'YData',data.Y,'CData',data.PWOA);
-    % set(hPWA,'XData',data.X,'YData',data.Y,'CData',data.PWA);
+    set(hImg_PWOA,'XData',data.X,'YData',data.Y,'CData',data.PWOA);
+    set(hImg_PWA,'XData',data.X,'YData',data.Y,'CData',data.PWA);
     set(hImg,'XData',data.X,'YData',data.Y,'CData',data.OD);
     
-    % if isfield(data,'Dark')
-    %     set(hDark,'XData',data.X,'YData',data.Y,'CData',data.Dark);
-    % end
+    if isfield(data,'Dark')
+        set(hImg_Dark,'XData',data.X,'YData',data.Y,'CData',data.Dark);
+    end
 
     NPWOA_1=sum(sum(data.PWOA(1:1024,:)));
     NPWA_1=sum(sum(data.PWA(1:1024,:)));
@@ -2912,10 +2859,31 @@ end
 updateImageTable;
 function enableInteractivity
     enableDefaultInteractivity(axImg);
+enableDefaultInteractivity(axPWA);
+enableDefaultInteractivity(axPWOA);
+enableDefaultInteractivity(axDark);
+
 end
 
     function foo(~,~)
         tbl_dispROI.Data = round([axImg.XLim axImg.YLim]); 
+        
+        xx = round(axImg.XLim);
+        yy = round(axImg.YLim);
+
+        xx(1) = max([1 xx(1)]);
+        xx(2) = min([xx(2) size(hImg_PWA.CData,2)]);
+
+        yy(1) = max([1 yy(1)]);
+        yy(2) = min([yy(2) size(hImg_PWA.CData,1)]);
+        NPWA=sum(hImg_PWA.CData(yy(1):yy(2),xx(1):xx(2)),'all');
+        NPWOA=sum(hImg_PWOA.CData(yy(1):yy(2),xx(1):xx(2)),'all');
+        NDark=sum(hImg_Dark.CData(yy(1):yy(2),xx(1):xx(2)),'all');
+
+        title(axPWA,['PWA : ' num2str(NPWA,'%.2e')])
+        title(axPWOA,['PWOA : ' num2str(NPWOA,'%.2e')])
+        title(axDark,['Dark : ' num2str(NDark,'%.2e')])
+
     end
 
 hpMarkersCollapse.String='-';
