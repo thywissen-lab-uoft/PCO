@@ -1277,8 +1277,8 @@ b=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
                     end
 
 
-                    delete(tbl_analysis(end));tbl_analysis(end)=[];
-                    delete(tabs(end));tabs(end)=[];
+                    % delete(tbl_analysis(end));tbl_analysis(end)=[];
+                    % delete(tabs(end));tabs(end)=[];
                     drawnow;
                 end
             case '+'
@@ -1300,12 +1300,12 @@ b=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
                 pXF(end+1)=plot(0,0,'r-','parent',hAxX,'color',co(n,:),'linewidth',2);
                 pYF(end+1)=plot(0,0,'r-','parent',hAxY,'color',co(n,:),'linewidth',2);
                 
-                tabs(end+1)=uitab(hpFit,'Title',num2str(n),'units','pixels',...
-                    'foregroundcolor',co(n,:));
+                % tabs(end+1)=uitab(hpFit,'Title',num2str(n),'units','pixels',...
+                    % 'foregroundcolor',co(n,:));
 
-                tbl_analysis(end+1)=uitable(tabs(end),'units','normalized','RowName',{},'ColumnName',{},...
-                    'fontsize',8,'ColumnWidth',{60 65 65},'columneditable',false(ones(1,3)),...
-                    'Position',[0 0 1 1],'backgroundcolor',[brighten(coNew(n,:),.5); 1 1 1]);
+                % tbl_analysis(end+1)=uitable(tabs(end),'units','normalized','RowName',{},'ColumnName',{},...
+                    % 'fontsize',8,'ColumnWidth',{60 65 65},'columneditable',false(ones(1,3)),...
+                    % 'Position',[0 0 1 1],'backgroundcolor',[brighten(coNew(n,:),.5); 1 1 1]);
 
             case 0
                 tblNumROIs.Data=1;
@@ -2059,10 +2059,12 @@ tbl_flags=uitable(tabs(3),'units','normalized','RowName',{},'fontsize',7,...
     'Position',[0 0 1 1]);
 
 % Table for analysis outputs
+% tbl_analysis(1)=uitable(tabs(4),'units','normalized','RowName',{},'ColumnName',{},...
+    % 'fontsize',8,'ColumnWidth',{140 70 70},'columneditable',false(ones(1,3)),...
+    % 'Position',[0 0 1 1],'backgroundcolor',[brighten(coNew(1,:),.5); 1 1 1]);
 tbl_analysis(1)=uitable(tabs(4),'units','normalized','RowName',{},'ColumnName',{},...
     'fontsize',8,'ColumnWidth',{140 70 70},'columneditable',false(ones(1,3)),...
-    'Position',[0 0 1 1],'backgroundcolor',[brighten(coNew(1,:),.5); 1 1 1]);
-
+    'Position',[0 0 1 1]);
 
 tbl_flaggedimages = uitable('parent',tabs(1),'units','normalized',...
     'ColumnName',{'filename','description','var.'},...    
@@ -2442,9 +2444,7 @@ end
 function data=performFits(data)
    
 % Use mean wavelength for calculating corss section (simpler)
-    lambdaRb=780E-9;lambdaK=770E-9;   % Rb and K wavelengths             
-    lambda=mean([lambdaRb lambdaK]);  % mean wavelength      
-    crosssec=3/(2*pi)*lambda^2; % ideal cross 2-level cross section
+    crosssec=defaultPCOSettings('CrossSection');
 
     % Grab the variable to export to fitresults
     val=data.Params.(frVar);
@@ -2460,7 +2460,6 @@ function data=performFits(data)
     % Create fitresults output
     fr=ones(size(data.ROI,1),1)*val;
 
-    
     % Create sum profiles        
     for m=1:size(ROI,1)
         subOD=data.OD(ROI(m,3):ROI(m,4),ROI(m,1):ROI(m,2));
@@ -2485,11 +2484,12 @@ function data=performFits(data)
             data=boxCount(data);
         end
     end
-    
+
+    updateAnalysisTable(data)
     %%%%% Post-processing for exporting to tables and variables
 
     gauss_fit_data = struct;
-    
+    %{
     % Update Analysis table
     for m=1:size(ROI,1)
         ind=2;fr(m,ind)=m;ind=ind+1; %
@@ -2550,14 +2550,10 @@ function data=performFits(data)
                     '','',''};   
 
                 % Update analysis table
-                tbl_analysis(m).Data=[tbl_analysis(m).Data; str]; 
-                
-                
-         
+                tbl_analysis(m).Data=[tbl_analysis(m).Data; str];                
+                         
                 gauss_fit_data(m).GaussTemperatureRb = sqrt(TyRb*TxRb);
                 gauss_fit_data(m).GaussTemperatureK = sqrt(TyK*TxK);
-
-
             end 
 
             % Box Counts analysis
@@ -2599,34 +2595,137 @@ function data=performFits(data)
             fr(m,ind)=fr(2,3)/fr(1,3);ind=ind+1; % N2/N1
         end        
     end
-
+    %}
     % Update plots        
     updatePlots(data);     
     
-    % Save Partial Analysis
-    adwin_data = struct;
-    adwin_data.Name = data.Name;
-    adwin_data.Date = data.Date;
-    adwin_data.ExecutionDate = data.Params.ExecutionDate;
-    adwin_data.AnalysisDate = now;
-    adwin_data.ROI = tblROI.Data;
-    adwin_data.GaussData = gauss_fit_data;   
-%     save(summary_analysis_output_file,'adwin_data');
+%     % Save Partial Analysis
+%     adwin_data = struct;
+%     adwin_data.Name = data.Name;
+%     adwin_data.Date = data.Date;
+%     adwin_data.ExecutionDate = data.Params.ExecutionDate;
+%     adwin_data.AnalysisDate = now;
+%     adwin_data.ROI = tblROI.Data;
+%     adwin_data.GaussData = gauss_fit_data;   
+% %     save(summary_analysis_output_file,'adwin_data');
+% 
+%     saveSummaryData(adwin_data);
 
-    saveSummaryData(adwin_data);
-
-    %%%%%% Output to fit results
-    % Output some analysis to the main workspace, this is done to be
-    % comptaible with old regimens for fitting and analysis
-    try
-        fitresults=evalin('base','fitresults');         % Get fitresults
-    catch ME
-        fitresults=[];
-    end
-    M=size(fitresults,1)+1;                         % Find next row
-    fitresults(M:(M+size(fr,1)-1),1:size(fr,2))=fr;   % Append data        
-    assignin('base','fitresults',fitresults);       % Rewrite fitresults        
+    % %%%%%% Output to fit results
+    % % Output some analysis to the main workspace, this is done to be
+    % % comptaible with old regimens for fitting and analysis
+    % try
+    %     fitresults=evalin('base','fitresults');         % Get fitresults
+    % catch ME
+    %     fitresults=[];
+    % end
+    % M=size(fitresults,1)+1;                         % Find next row
+    % fitresults(M:(M+size(fr,1)-1),1:size(fr,2))=fr;   % Append data        
+    % assignin('base','fitresults',fitresults);       % Rewrite fitresults        
 end
+
+    function str=fooText(str,ind)
+        % cc= brighten(coNew(ind,:),-1);
+        % cc=coNew(ind,:)*.8;
+        % s1=dec2hex(round(255*cc(1)));
+        % s2=dec2hex(round(255*cc(2)));
+        % s3=dec2hex(round(255*cc(3)));
+        % s=[s1 s2 s3];
+        % str=sprintf('<html><font color="#%s">%s',s,str);
+        % str
+    end
+
+    function updateAnalysisTable(data)
+        CrossSection=defaultPCOSettings('CrossSection');
+        pxsize=tbl_cam.Data{1,2};       % Pixel size in um
+        tbl_analysis(1).Data=[];
+
+        if isfield(data,'BoxCount') && cBox.Value  
+            Nbox=[];
+            centerx=[];
+            centery=[];
+            sigmax = [];
+            sigmay= [];
+            
+            for ii=1:length(data.BoxCount)
+                bc = data.BoxCount(ii);
+                Natoms = bc.Ncounts*(pxsize*1e-6)^2/CrossSection;                
+                Nbox(ii)=Natoms;
+                centerx(ii)=bc.Xc;
+                centery(ii)=bc.Yc;
+                sigmax(ii)=bc.Xs;
+                sigmay(ii)=bc.Ys;               
+            end
+            Nrelative = Nbox/sum(Nbox);     
+
+            for ii=1:length(data.BoxCount)
+                str={
+                       fooText([num2str(ii) '. Box Number (N,%)'],ii),Nbox(ii),Nrelative(ii)*100;
+                        fooText([num2str(ii) '. Box Center (Xpx,Ypx)'],ii),centerx(ii),centery(ii);
+                        fooText([num2str(ii) '. Box ' char(963) ' (Xpx,Ypx)'],ii),sigmax(ii),sigmay(ii)
+                   };   
+                str=[str; {'','',''}];
+                tbl_analysis(1).Data=[tbl_analysis(1).Data; str]; 
+            end
+  
+
+
+
+        end
+
+        if isfield(data,'GaussFit') && cGaussFit.Value  
+            Ngauss=[];
+            centerx=[];
+            centery=[];
+            sigmax = [];
+            sigmay= [];
+            TxK=[];
+            TxRb=[];
+            TyK=[];
+            TyRb=[];
+
+            amu=1.66054e-27;            % amu in kg
+            kB=1.38064852E-23;          % kB in J/K                
+            mRb=87*amu;                 % 87Rb mass
+            mK=40*amu;                  % 40K mass
+            tof=data.Params.tof*1E-3;   % TOF in seconds
+            
+            for ii=1:length(data.GaussFit)
+                fout = data.GaussFit{ii};
+                N = 2*pi*fout.Xs*fout.Ys*fout.A;
+                Natoms = N*(pxsize*1e-6)^2/CrossSection;                
+                Ngauss(ii)=Natoms;
+                centerx(ii)=fout.Xc;
+                centery(ii)=fout.Yc;
+                sigmax(ii)=fout.Xs;
+                sigmay(ii)=fout.Ys;
+                TxK(ii)=(fout.Xs*pxsize*1e-6/tof)^2*mK/kB;TyK(ii)=(fout.Ys*pxsize*1e-6/tof)^2*mK/kB;
+                TxRb(ii)=(fout.Xs*pxsize*1e-6/tof)^2*mRb/kB;TyRb(ii)=(fout.Ys*pxsize*1e-6/tof)^2*mRb/kB;
+            end
+            Nrelative = Ngauss/sum(Ngauss);     
+            for ii=1:length(data.GaussFit)
+                str={
+                        fooText([num2str(ii) '. Gauss Number (N,%)'],ii),Ngauss(ii),Nrelative(ii)*100;
+                        fooText([num2str(ii) '. Gauss Center (Xpx,Ypx)'],ii),centerx(ii),centery(ii);
+                        fooText([num2str(ii) '. Gauss ' char(963) ' (Xpx,Ypx)'],ii),sigmax(ii),sigmay(ii)
+                   };
+
+                if cTemp.Value            
+                    dstr={fooText([num2str(ii) '. TOF (ms,s)'],ii),data.Params.tof,tof;
+                            fooText([num2str(ii) '. TK (' char(956) 'K)'],ii), TxK(ii)*1E6, TyK(ii)*1E6;
+                            fooText([num2str(ii) '. TRb (' char(956) 'K)'],ii), TxRb(ii)*1E6, TyRb(ii)*1E6};   
+                    str=[str;dstr];
+                end         
+  
+                          
+                str=[str; {'','',''}];
+
+                 tbl_analysis(1).Data=[tbl_analysis(1).Data; str]; 
+            end              
+        end
+        
+        
+    end
 
 %% Communication Checker
     function commCheckerCB(src,evt)

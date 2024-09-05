@@ -47,7 +47,11 @@ if ~exist(out.FlaggedImageDirectory,'dir')
         mkdir(out.FlaggedImageDirectory);
      end
 end
-
+%% Imaging Cross section
+lambdaRb=780E-9;lambdaK=770E-9;   % Rb and K wavelengths             
+lambda=mean([lambdaRb lambdaK]);  % mean wavelength      
+crosssec=3/(2*pi)*lambda^2; % ideal cross 2-level cross section
+out.CrossSection = crosssec;
 %% PCO Exposure Modes
 % See the pixel fly manual for description of these modes
 
