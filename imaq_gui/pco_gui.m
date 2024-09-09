@@ -96,7 +96,7 @@ cmap = colormap(inferno);
 co = colororder;
 co=circshift(co,3,1);
 co=[co;co;co];
-
+hF.UserData.Listeners={};
 
 % Callback for when the GUI is requested to be closed.
     function closeGUI(fig,~)
@@ -117,6 +117,11 @@ co=[co;co;co];
             if camera.isConnected
                 closeCam(camera.BoardHandle);   
             end
+            for nn=1:length(hF.UserData.Listeners)
+                hF.UserData.Listeners{nn}.Enabled=false;
+                delete(hF.UserData.Listeners{nn})
+            end
+            hF.UserData.Listeners={};
         catch ME
             warning('Error when closing GUI.');
             warning(ME.message);
@@ -592,7 +597,7 @@ tNavName=uicontrol(hpNav,'style','text','string',defaultPCOSettings('defaultDir'
     'fontname','arial narrow');
 
 tNavName.String= repmat('A',1,500);
-strs ={};
+strs ={'dummy'};
 pdVarShow  = uicontrol(hpNav,'units','pixels','style',...
     'popupmenu','backgroundcolor','w','String',strs,'fontsize',7,...
     'Callback',@pdVarShowCB,'Value',1);
@@ -2070,7 +2075,7 @@ tbl_analysis(1)=uitable(tabs(4),'units','normalized','RowName',{},'ColumnName',{
 tbl_flaggedimages = uitable('parent',tabs(1),'units','normalized',...
     'ColumnName',{'filename','description','var.'},...    
     'ColumnFormat',{'char','char','char'},'ColumnEditable',[false true false], ...
-    'ColumnWidth',{130 85 40},'fontsize',7,'FontName','Arial Narrow',...
+    'ColumnWidth',{130 70 40},'fontsize',7,'FontName','Arial Narrow',...
     'CellEditCallback',@tbl_flaggedimagesCB,'BackgroundColor',coNew,...
     'position',[0 0 1 1]);
 
@@ -2974,10 +2979,9 @@ end
 % Initialize tables with first camera settings
 updateCamMode(1);
 
-
 enableInteractivity;
-addlistener(axImg,'XLim','PostSet',@foo); 
-addlistener(axImg,'YLim','PostSet',@foo); 
+hF.UserData.Listeners{end+1}=addlistener(axImg,'XLim','PostSet',@foo); 
+hF.UserData.Listeners{end+1}=addlistener(axImg,'YLim','PostSet',@foo); 
 initMarkers;
 
 try    
@@ -2986,10 +2990,9 @@ end
 updateImageTable;
 function enableInteractivity
     enableDefaultInteractivity(axImg);
-enableDefaultInteractivity(axPWA);
-enableDefaultInteractivity(axPWOA);
-enableDefaultInteractivity(axDark);
-
+    enableDefaultInteractivity(axPWA);
+    enableDefaultInteractivity(axPWOA);
+    enableDefaultInteractivity(axDark);
 end
 
     function foo(~,~)
