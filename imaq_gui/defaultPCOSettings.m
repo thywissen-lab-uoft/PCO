@@ -39,7 +39,7 @@ out.defaultDir = ['C:' filesep 'ImageHistory'];
 out.CameraControlFile = 'Y:\_communication\pco_control.mat';
 out.AnalysisHistoryDirectory = 'Y:\_communication\analysis_history';
 out.FlaggedImageDirectory = ['X:' filesep 'PCOFlaggedImages'];
-out.DataDirectory = ['X: ' filesep 'Data'];
+out.DataDirectory = ['X:' filesep 'Data'];
 
 if ~exist(out.FlaggedImageDirectory,'dir')
     out.FlaggedImageDirectory = ['C:' filesep 'PCOFlaggedImages'];
