@@ -2243,7 +2243,7 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
                
                 PWOA(1:1024,:)=sa*PWOA(1:1024,:);               
                 PWOA(1025:2048,:)=sb*PWOA(1025:2048,:);     
-               fprintf([', scaling pwoa x(' num2str(round(s,4)) ',' num2str(round(sb,4)) '...']);
+               fprintf([', scaling pwoa x(' num2str(round(sa,4)) ',' num2str(round(sb,4)) '...']);
 
            end
        end       
