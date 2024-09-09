@@ -73,7 +73,7 @@ pco_xVar = 'ExecutionDate';
 % pco_xVar ='mt_hold_time';
 
 % Should the analysis attempt to automatically find the xvariable?
-pco_autoXVar = 1;
+pco_autoXVar = 0;
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit = 1;
@@ -87,7 +87,7 @@ ODopts.GaussFilter=.5;
 %% Analysis Flags
 
 % Standard Analysis
-doODProfile = 1;
+doODProfile = 0;
 doStandard = 1;
 
 doAnimate = 1;
@@ -335,7 +335,7 @@ if isfield(data.Flags,'xdt') && ~(data.Flags.xdt)
 
     % ROI = [500 1380 50 750]; %RF1A 5ms TOF
     %%%%% RF1B X CAM
-    ROI = [750 1250 200 600];     % RF1B 5ms TOF    
+    ROI = [750 1250 150 550];     % RF1B 5ms TOF    
     
 %         ROI = [700 1300 50 400];     % RF1B 5ms TOF    
 
@@ -354,9 +354,16 @@ end
 if isfield(data.Flags,'image_stern_gerlach_mF') && data.Flags.image_stern_gerlach_mF
     % 15 ms XDT mF SG
     Nbox = 2;
-    ROI = [960 1080 740 820;    
-        960 1080 620 740;   
-        ];
+%     ROI = [960 1080 740 820;    
+%         960 1080 620 740;   
+%         ];
+    
+    ROI = [940 1000 560 610; % -9/2 xdtB
+        940 1000 510 560]; % -7/2 xdtB
+    
+    ROI = [940 1000 510 560; % -9/2 
+        940 1000 460 510]; % -7/2
+    
     ROI = ROI(1:Nbox,:);
 end
 
