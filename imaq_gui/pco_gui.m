@@ -2299,7 +2299,7 @@ function updateImages(data)
     set(hImg,'XData',data.X,'YData',data.Y,'CData',data.OD);
     
     if isfield(data,'Dark')
-        set(hImg_Dark,'XData',data.X,'YData',data.Y,'CData',data.Dark);
+        set(hImg_Dark,'XData',data.X,'YData',data.Y,'CData',data.Dark);    
     end
 
     NPWOA_1=sum(sum(data.PWOA(1:1024,:)));
@@ -3008,11 +3008,14 @@ end
         yy(2) = min([yy(2) size(hImg_PWA.CData,1)]);
         NPWA=sum(hImg_PWA.CData(yy(1):yy(2),xx(1):xx(2)),'all');
         NPWOA=sum(hImg_PWOA.CData(yy(1):yy(2),xx(1):xx(2)),'all');
-        NDark=sum(hImg_Dark.CData(yy(1):yy(2),xx(1):xx(2)),'all');
+        
+        if isfield(dstruct,'Dark')
+            NDark=sum(hImg_Dark.CData(yy(1):yy(2),xx(1):xx(2)),'all');
+            title(axDark,['Dark : ' num2str(NDark,'%.2e')])
+        end
 
         title(axPWA,['PWA : ' num2str(NPWA,'%.2e')])
         title(axPWOA,['PWOA : ' num2str(NPWOA,'%.2e')])
-        title(axDark,['Dark : ' num2str(NDark,'%.2e')])
 
     end
 
