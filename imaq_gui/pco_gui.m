@@ -2802,59 +2802,63 @@ end
             disp(' ');
             
             % Save image to history
-            saveData(data)     
-            
+            save_file_history = saveData(data);
+
             % Save image to folder
             if hcSave.Value
-               saveData(data,tSaveDir.UserData); 
-            end                          
-
-            % Update displayed image
-            if ~cHoldImage.Value        
-                dstruct=data;
-                
-                % Update parameters table                            
-                [~,inds] = sort(lower(fieldnames(dstruct.Params)));
-                    params = orderfields(dstruct.Params,inds);  
-                    
-                    fnames=fieldnames(params);
-                    for nn=1:length(fnames)
-                      tbl_params.Data{nn,1}=fnames{nn};
-                        val=dstruct.Params.(fnames{nn});
-                        if isa(val,'double')
-                            tbl_params.Data{nn,2}=num2str(val);
-                        end
-
-                        if isa(val,'struct')
-                           tbl_params.Data{nn,2}='[struct]'; 
-                        end  
-                    end
-                    
-                % Update flags table
-                fnames=fieldnames(dstruct.Flags);
-                for nn=1:length(fnames)
-                    tbl_flags.Data{nn,1}=fnames{nn};
-                    val=dstruct.Flags.(fnames{nn});
-                    if isa(val,'double')
-                        tbl_flags.Data{nn,2}=num2str(val);
-                    end                    
-                    if isa(val,'struct')
-                       tbl_flags.Data{nn,2}='[struct]'; 
-                    end                    
-                end        
-                
-                dstruct=computeOD(dstruct);     % Calculate the optical density 
-                updateImages(dstruct);          % Update display with new data  
-                dstruct=performFits(dstruct);   % Fit the data                    
-            else
-                tNavInd.Data=tNavInd.Data+1;
-            end
+               save_file = saveData(data,tSaveDir.UserData); 
+            end  
             
-            
+            % Restart Camera for acquisition
             CamQueueBuffers(camera);             % Requeue buffers
             camera.NumAcquired=0;
+            start(src);                         % Restart trig timer  
+            
+            updateImageTable;
 
-            start(src);                         % Restart trig timer              
+            % Update displayed image
+            if ~cHoldImage.Value   
+                loadImage(save_file_history)
+                
+%                 dstruct=data;
+%                 
+%                 % Update parameters table                            
+%                 [~,inds] = sort(lower(fieldnames(dstruct.Params)));
+%                     params = orderfields(dstruct.Params,inds);  
+%                     
+%                     fnames=fieldnames(params);
+%                     for nn=1:length(fnames)
+%                       tbl_params.Data{nn,1}=fnames{nn};
+%                         val=dstruct.Params.(fnames{nn});
+%                         if isa(val,'double')
+%                             tbl_params.Data{nn,2}=num2str(val);
+%                         end
+% 
+%                         if isa(val,'struct')
+%                            tbl_params.Data{nn,2}='[struct]'; 
+%                         end  
+%                     end
+%                     
+%                 % Update flags table
+%                 fnames=fieldnames(dstruct.Flags);
+%                 for nn=1:length(fnames)
+%                     tbl_flags.Data{nn,1}=fnames{nn};
+%                     val=dstruct.Flags.(fnames{nn});
+%                     if isa(val,'double')
+%                         tbl_flags.Data{nn,2}=num2str(val);
+%                     end                    
+%                     if isa(val,'struct')
+%                        tbl_flags.Data{nn,2}='[struct]'; 
+%                     end                    
+%                 end        
+%                 
+%                 dstruct=computeOD(dstruct);     % Calculate the optical density 
+%                 updateImages(dstruct);          % Update display with new data  
+%                 dstruct=performFits(dstruct);   % Fit the data                    
+%             else
+%                 tNavInd.Data=tNavInd.Data+1;
+            end            
+                             
         end                    
     end
 
@@ -2900,7 +2904,7 @@ end
         start(trigTimer);
     end
 
-    function saveData(data,saveDir)
+    function fname = saveData(data,saveDir)
         if nargin==1           
            saveDir = defaultPCOSettings('ImageHistoryDirectory');           
            filenames=dir([saveDir filesep '*.mat']);
