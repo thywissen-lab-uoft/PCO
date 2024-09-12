@@ -73,7 +73,7 @@ pco_xVar = 'ExecutionDate';
 % pco_xVar ='mt_hold_time';
 
 % Should the analysis attempt to automatically find the xvariable?
-pco_autoXVar = 0;
+pco_autoXVar = 1;
 
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit = 1;
@@ -105,7 +105,7 @@ doProbeFit    = 0;      % Fit probe beam  to 2D Gaussian
 % processed data outputs of the below fits are typically <fit_type>_name
 
 % Box Count
-doBoxCount      = 0;      % Box count analysis
+doBoxCount      = 1;      % Box count analysis
 
 % Gaussian Fit
 % Fit to a gaussian distribution (thermal cloud)
@@ -121,7 +121,7 @@ doBMFit         = 0;
 
 % Fermi-Fit
 % Fit a DFG in long time of flight
-doFermiFitLong  = 1;     
+doFermiFitLong  = 0;     
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Custom Analyses
@@ -353,7 +353,7 @@ end
 
 if isfield(data.Flags,'image_stern_gerlach_mF') && data.Flags.image_stern_gerlach_mF
     % 15 ms XDT mF SG
-    Nbox = 2;
+    Nbox = 4;
 %     ROI = [960 1080 740 820;    
 %         960 1080 620 740;   
 %         ];
@@ -363,6 +363,11 @@ if isfield(data.Flags,'image_stern_gerlach_mF') && data.Flags.image_stern_gerlac
     
     ROI = [940 1000 510 560; % -9/2 
         940 1000 460 510]; % -7/2
+    
+    ROI = [940 1000 740 800; % -9/2 
+        940 1000 680 740; % -7/2
+        940 1000 620 680;
+        940 1000 560 620];
     
     ROI = ROI(1:Nbox,:);
 end
@@ -497,8 +502,10 @@ end
  if atomdata(1).Flags.image_atomtype==2           
      if isfield(f,'mt') && f.mt
          % 5ms + 15 ms tof
-         ROI = [850 1250 200 550;
-                700 1392 1400 2000];            
+         ROI = [850 1250 150 500;
+                700 1392 1400 2000];    
+            ROI = [830 1250 150 500;
+                700 1392 1200 2000]; 
          % RF1A
          % 5ms + 15 ms tof
 %          ROI = [550 1390 50 610;
@@ -522,8 +529,8 @@ end
         % 5ms + 15 ms tof
 %          ROI = [800 1300 50 300;
 %                 800 1300 50+1024 300+1024];
-         ROI = [750 1300 50 500;
-                750 1300 50+1024 500+1024];  
+%          ROI = [750 1300 50 500;
+%                 750 1300 50+1024 500+1024];  
  end
 %%
 if isequal(camaxis,'Y')
@@ -563,7 +570,7 @@ if isequal(camaxis,'Y')
 ROI = [400 750 350 600]; % MT in situ 2024.08.22
 
 end
-
+ROI=[900 1050 550 750];   % XDT  TOF 25 ms evaporation
  
 %% Aissgn the ROI
 
@@ -1210,7 +1217,7 @@ if doAnimate && doSave
     animateOpts.MidDelay=.5;    % Time to hold in middle picutres
     animateOpts.EndDelay=1;     % Time to hold final picture
     animateOpts.doAverage=1;    % Average over duplicates?
-    animateOpts.doRotate=0;     % Rotate the image?
+    animateOpts.doRotate=1;     % Rotate the image?
     animateOpts.xUnit=pco_unit;
     
     % Stacking images (applicable only for double exposure)
@@ -1218,8 +1225,8 @@ if doAnimate && doSave
      animateOpts.doubleStack='horizontal';
 
      % Asceneding or descending
-    animateOpts.Order='descend';   
-%       animateOpts.Order='ascend';
+%     animateOpts.Order='descend';   
+      animateOpts.Order='ascend';
         animateOpts.CLim='auto';
         
 
