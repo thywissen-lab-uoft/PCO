@@ -53,10 +53,6 @@ if ~exist(out.defaultDir,'dir')
     mkdir(out.defaultDir);
 end
 
-
-
-
-
 if ~exist(out.FlaggedImageDirectory,'dir')
     out.FlaggedImageDirectory = ['C:' filesep 'PCOFlaggedImages'];
      if ~exist(out.FlaggedImageDirectory,'dir')
