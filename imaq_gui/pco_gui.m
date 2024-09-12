@@ -31,17 +31,8 @@ disp('done');
 
 %% Important Settings
 
-% Name of the GUI
-guiname='PCO Absorption Image GUI';
-
-defaultDir = defaultPCOSettings('defaultDir');
-
-if ~exist(defaultDir,'dir')
-    mkdir(defaultDir);
-end
-
-% What is curr dir? I have forgotten
-currDir = defaultDir;
+% Current directory of GUI
+currDir = defaultPCOSettings('defaultDir');
 
 camera_control_file=defaultPCOSettings('CameraControlFile');
 analysis_history_dir=defaultPCOSettings('AnalysisHistoryDirectory');
@@ -50,7 +41,7 @@ analysis_history_dir=defaultPCOSettings('AnalysisHistoryDirectory');
 a=groot;
 for kk=1:length(a.Children)
     try
-       if isequal(a.Children(kk).Name,guiname)
+       if isequal(a.Children(kk).Name,defaultPCOSettings('GUIName'))
           close(a.Children(kk)); 
        end
     end
@@ -78,13 +69,11 @@ dstruct=load(example_fname);
 dstruct=dstruct.data;
 dstruct.Name='example';
 
-
-
 %% Initialize GUI Figure
 
 % Initialize the primary figure
 hF=figure;clf
-set(hF,'Color','w','units','pixels','Name',guiname,...
+set(hF,'Color','w','units','pixels','Name',defaultPCOSettings('GUIName'),...
     'toolbar','none','Tag','GUI','CloseRequestFcn',@closeGUI,...
     'NumberTitle','off','Position',[200 200 1350 550],'menubar','none');
 
@@ -134,7 +123,6 @@ hF.UserData.Listeners={};
 W_control = 310;
 hpControl = uipanel(hF,'units','pixels','bordertype','none');
 hpControl.Position=[0 0 W_control hF.Position(4)];
-
 
 %% Camera Panel
 hpCam=uipanel(hpControl,'units','pixels','backgroundcolor','w','title','camera and acquisition',...
@@ -596,7 +584,6 @@ tNavName=uicontrol(hpNav,'style','text','string',defaultPCOSettings('defaultDir'
     'Position',[2 hbhome.Position(2)-24 hpNav.Position(3)-4 24],'tooltipstring',ttstr,...
     'fontname','arial narrow');
 
-tNavName.String= repmat('A',1,500);
 strs ={'dummy'};
 pdVarShow  = uicontrol(hpNav,'units','pixels','style',...
     'popupmenu','backgroundcolor','w','String',strs,'fontsize',7,...
@@ -1726,7 +1713,7 @@ pYF=plot(X,0*ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2)
 
     function loadImage(filename)
         if nargin<1
-            [filename,pathname]=uigetfile([defaultDir filesep '*.mat']);
+            [filename,pathname]=uigetfile([defaultPCOSettings('defaultDir') filesep '*.mat']);
             if ~filename
                 disp('No mat file chosen!');
                 return;
@@ -2347,13 +2334,7 @@ function updateImages(data)
 
     % Update data string
 
-    set(tImageFile,'String',data.Name);
-
-
-
-                 
-
-       
+    set(tImageFile,'String',data.Name);            
 
 
     % Find where in the history this image lies
@@ -2810,8 +2791,7 @@ end
             % Rotate images to get into "correct" orientation
             for i=1:camera.NumImages
                camera.Images{i}=imrotate(camera.Images{i},-90); 
-            end   
-            
+            end               
 
             data=processImages(t);           % Process images   
             disp([' Image     : ' data.Name]);            
@@ -2921,8 +2901,8 @@ end
     end
 
     function saveData(data,saveDir)
-        if nargin==1
-           saveDir=currDir;
+        if nargin==1           
+           saveDir = defaultPCOSettings('ImageHistoryDirectory');           
            filenames=dir([saveDir filesep '*.mat']);
            filenames={filenames.name};
            filenames=sort(filenames);

@@ -2,6 +2,8 @@ function output = defaultPCOSettings(field,index)
 
 out = struct;
 
+out.GUIName = 'PCO';
+
 %% Camera Stuff
 out.CameraName      =  {'X Cam';'Y Cam'};  % Camera labels
 out.PixelSize       = [6.45e-6; 6.45e-6];  % Camera Pixel Size
@@ -35,11 +37,25 @@ coNew=brighten([coNew;coNew;coNew],.2);
 out.ColorOrder = coNew;
 %% Directories
 % Previewer Directory
-out.defaultDir = ['C:' filesep 'ImageHistory'];
+
+out.ImageHistoryDirectory = ['C:' filesep 'ImageHistory'];
 out.CameraControlFile = 'Y:\_communication\pco_control.mat';
 out.AnalysisHistoryDirectory = 'Y:\_communication\analysis_history';
 out.FlaggedImageDirectory = ['X:' filesep 'PCOFlaggedImages'];
 out.DataDirectory = ['X:' filesep 'Data'];
+
+out.defaultDir = out.ImageHistoryDirectory;
+
+if ~exist(out.ImageHistoryDirectory,'dir')
+    mkdir(out.ImageHistoryDirectory);
+end
+if ~exist(out.defaultDir,'dir')
+    mkdir(out.defaultDir);
+end
+
+
+
+
 
 if ~exist(out.FlaggedImageDirectory,'dir')
     out.FlaggedImageDirectory = ['C:' filesep 'PCOFlaggedImages'];
