@@ -594,6 +594,18 @@ pdVarShow.Position = [4 1 200 20];
         updatePreviewText;
     end
 
+    function updateNavigator
+        filename = tNavName.String;             % current file
+        [path,name,ext]=fileparts(filename);    % file parts
+        filenames=dir([path filesep '*.mat']);  % get mat files
+        filenames={filenames.name};             % get names
+        filenames=fullfile(path,filenames);     % get full names
+        filenames=flip(filenames);              % reverse chronological order        
+        index = find(ismember(filenames, filename));
+        tNavInd.Data=index;
+        tNavMax.String=['of ' num2str(length(filenames))];  
+    end
+
     function updatePreviewText    
         updateImageTable;
         varname = pdVarShow.String{pdVarShow.Value};
@@ -1732,6 +1744,7 @@ pYF=plot(X,0*ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2)
             dstruct=computeOD(dstruct);
             updateImages(dstruct);
             updatePreviewText;  
+            updateNavigator;
             dstruct=performFits(dstruct);
             [~,inds] = sort(lower(fieldnames(dstruct.Params)));
             params = orderfields(dstruct.Params,inds);  
@@ -2775,9 +2788,9 @@ end
             % Check if acquisition is complete
             if camera.NumImages==camera.NumAcquired
                 doProcess=1;
-            end      
-
-        end        
+            end 
+        end       
+        
         % Process the images
         if doProcess            
             t=evt.Data.time;    % Grab the time
@@ -2812,51 +2825,14 @@ end
             % Restart Camera for acquisition
             CamQueueBuffers(camera);             % Requeue buffers
             camera.NumAcquired=0;
-            start(src);                         % Restart trig timer  
+            start(src);                         % Restart trig timer             
             
-            updateImageTable;
-
             % Update displayed image
             if ~cHoldImage.Value   
-                loadImage(save_file_history)
-                
-%                 dstruct=data;
-%                 
-%                 % Update parameters table                            
-%                 [~,inds] = sort(lower(fieldnames(dstruct.Params)));
-%                     params = orderfields(dstruct.Params,inds);  
-%                     
-%                     fnames=fieldnames(params);
-%                     for nn=1:length(fnames)
-%                       tbl_params.Data{nn,1}=fnames{nn};
-%                         val=dstruct.Params.(fnames{nn});
-%                         if isa(val,'double')
-%                             tbl_params.Data{nn,2}=num2str(val);
-%                         end
-% 
-%                         if isa(val,'struct')
-%                            tbl_params.Data{nn,2}='[struct]'; 
-%                         end  
-%                     end
-%                     
-%                 % Update flags table
-%                 fnames=fieldnames(dstruct.Flags);
-%                 for nn=1:length(fnames)
-%                     tbl_flags.Data{nn,1}=fnames{nn};
-%                     val=dstruct.Flags.(fnames{nn});
-%                     if isa(val,'double')
-%                         tbl_flags.Data{nn,2}=num2str(val);
-%                     end                    
-%                     if isa(val,'struct')
-%                        tbl_flags.Data{nn,2}='[struct]'; 
-%                     end                    
-%                 end        
-%                 
-%                 dstruct=computeOD(dstruct);     % Calculate the optical density 
-%                 updateImages(dstruct);          % Update display with new data  
-%                 dstruct=performFits(dstruct);   % Fit the data                    
-%             else
-%                 tNavInd.Data=tNavInd.Data+1;
+                loadImage(save_file_history)                
+            else
+                updateImageTable;
+                updateNavigator;
             end            
                              
         end                    
