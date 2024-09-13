@@ -367,7 +367,6 @@ hbhome.Position(1:2) = [1 hpNav.Position(4)-hbhome.Position(4)-15];
             updateImageTable;
             chData([],[],0);        
         end
-
     end
 
 
@@ -1723,7 +1722,11 @@ pY=plot(ones(length(Y),1),Y,'k.-');
 pYF=plot(X,0*ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2);
 
 
+% Load a new image into the GUI
     function loadImage(filename)
+
+        % If no filename provided, look in the current directory (NOT
+        % DEFAULT)
         if nargin<1
             [filename,pathname]=uigetfile([defaultPCOSettings('defaultDir') filesep '*.mat']);
             if ~filename
@@ -1732,20 +1735,22 @@ pYF=plot(X,0*ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2)
             end
             filename=[pathname filename];
         end
-
+        % Make sure struct format is correct
         update_pco_mat_format({filename});
 
         disp(['     Loading ' filename]);        
         olddata=dstruct;
         try
-            data=load(filename);
+            data=load(filename);                % load data
             % dstruct=data.data;
             dstruct = data;
-            dstruct=computeOD(dstruct);
-            updateImages(dstruct);
-            updatePreviewText;  
-            updateNavigator;
-            dstruct=performFits(dstruct);
+            dstruct=computeOD(dstruct);         % compute OD
+            updateImages(dstruct);              % update graphics
+            updatePreviewText;                  % update graphics
+            updateNavigator;                    % update navigator
+            dstruct=performFits(dstruct);       % do analysis
+
+            % update params and flags table (should happen first?)
             [~,inds] = sort(lower(fieldnames(dstruct.Params)));
             params = orderfields(dstruct.Params,inds);  
             fnames=fieldnames(params);
@@ -1772,6 +1777,7 @@ pYF=plot(X,0*ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2)
                 end
 
         catch ME
+            % if something goes wrong, just load the previous file
             warning(ME.message);
             warning('Unable to load image. Reverting to previous');
             dstruct=olddata;
@@ -1845,6 +1851,7 @@ function chData(src,evt,state)
                i1 = max([min([state length(filenames)]) 1]); 
        end        
        
+       % move all this to the updatenavigator.
         newfilename=fullfile(currDir,filenames{i1});
         tNavInd.Data=i1;
         tNavName.String = newfilename;
