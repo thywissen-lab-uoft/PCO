@@ -109,7 +109,7 @@ doBoxCount      = 1;      % Box count analysis
 
 % Gaussian Fit
 % Fit to a gaussian distribution (thermal cloud)
-doGaussFit      = 0;      % Enable gauss fitting
+doGaussFit      = 1;      % Enable gauss fitting
 
 % Erf Fit
 doErfFit        = 0;    
@@ -502,9 +502,9 @@ end
  if atomdata(1).Flags.image_atomtype==2           
      if isfield(f,'mt') && f.mt
          % 5ms + 15 ms tof
-         ROI = [850 1250 150 500;
-                700 1392 1400 2000];    
-            ROI = [830 1250 150 500;
+%          ROI = [850 1250 150 500;
+%                 700 1392 1400 2000];    
+            ROI = [830 1250 150 500
                 700 1392 1200 2000]; 
          % RF1A
          % 5ms + 15 ms tof
@@ -570,7 +570,7 @@ if isequal(camaxis,'Y')
 ROI = [400 750 350 600]; % MT in situ 2024.08.22
 
 end
-ROI=[900 1050 550 750];   % XDT  TOF 25 ms evaporation
+% ROI=[900 1050 550 750];   % XDT  TOF 25 ms evaporation
  
 %% Aissgn the ROI
 

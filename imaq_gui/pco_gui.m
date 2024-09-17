@@ -360,9 +360,9 @@ hbhome.Position(1:2) = [1 hpNav.Position(4)-hbhome.Position(4)-15];
             else
                 mydir = uigetdir(defaultPCOSettings('defaultDir'));
             end     
-
-        end
-        if ~isequal(mydir,0) && ~isempty(mydir) && exist(mydir,'dir') && ~isequal(mydir,currDir)
+        end       
+        
+        if ~isequal(mydir,0) && ~isempty(mydir) && exist(mydir,'dir') 
             currDir=mydir;
             updateImageTable;
             chData([],[],0);        
@@ -1740,6 +1740,8 @@ pYF=plot(X,0*ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2)
         try
             data=load(filename);
             % dstruct=data.data;
+            tNavName.String = filename;
+            
             dstruct = data;
             dstruct=computeOD(dstruct);
             updateImages(dstruct);
