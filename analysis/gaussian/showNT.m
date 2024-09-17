@@ -24,6 +24,8 @@ PixelSize = gauss_data.PixelSize;
 Xs = gauss_data.Xs*PixelSize;
 Ys = gauss_data.Ys*PixelSize;
 
+Yc = gauss_data.Yc;
+
 TOFs = repmat(TOFs,[size(Xs,2) 1]);
 TOFs=TOFs';
 
@@ -107,9 +109,34 @@ set(hax1,'box','on','linewidth',1,'fontsize',10,...
 hold on
 xlabel([xVar ' (' opts.xUnit ')'],'interpreter','none');
 ylabel([gauss_data.FitType ' atom number (10^5)']);
-        
+
+if  gauss_data.Atom==2 
+    yyaxis left
+    ylabel([gauss_data.FitType ' K atom number (10^5)']);
+    set(gca,'YColor','k');    
+    yyaxis right
+    ylabel([gauss_data.FitType ' Rb atom number (10^5)']);
+    set(gca,'YColor','k');
+end
+
+if gauss_data.Atom ==3
+    yyaxis left
+    set(gca,'YColor','k');
+    ylabel([gauss_data.FitType ' Rb atom number (10^5)']);
+    yyaxis right
+    ylabel([gauss_data.FitType ' K atom number (10^5)']);
+    set(gca,'YColor','k');
+end
+
 % Plot the data
 for nn=1:size(Natoms,2)
+    if gauss_data.Atom==2 || gauss_data.Atom==3 
+        if Yc(nn)>1024
+            yyaxis right;
+        else
+            yyaxis left;
+        end
+    end
    plot(X,Natoms(:,nn)*1e-5,'o','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
