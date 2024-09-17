@@ -2719,6 +2719,10 @@ end
             mK=40*amu;                  % 40K mass
             tof=data.Params.tof*1E-3;   % TOF in seconds
 
+            if ~isfield(data.Flags,'image_atomtype')
+                error('The gui requires "image_atomtype" flags [0,1,2] for gauss analysis')
+            end
+
             switch data.Flags.image_atomtype
                 case 0 
                     ms = [Rb Rb];
@@ -2732,6 +2736,7 @@ end
                     if isfield(data.Params,'tof_krb_diff')
                         dt = 1e-3*data.Params.tof_krb_diff;
                     else 
+                        warning('The GUI requires tof_krb_diff param for double shutter')
                         dt = 0;
                     end
                     tofs = [tof tof+dt];
