@@ -2788,7 +2788,7 @@ end
                     mymass(ii)=m;
                 end
                 Tx(ii) = (fout.Xs*pxsize*1e-6/tof)^2*m/kB;
-                Ty(ii) = (fout.Xs*pxsize*1e-6/tof)^2*m/kB;
+                Ty(ii) = (fout.Ys*pxsize*1e-6/tof)^2*m/kB;
 
                 % TxK(ii)=(fout.Xs*pxsize*1e-6/tof)^2*mK/kB;TyK(ii)=(fout.Ys*pxsize*1e-6/tof)^2*mK/kB;
                 % TxRb(ii)=(fout.Xs*pxsize*1e-6/tof2)^2*mRb/kB;TyRb(ii)=(fout.Ys*pxsize*1e-6/tof2)^2*mRb/kB;
