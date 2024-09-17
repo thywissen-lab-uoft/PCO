@@ -2710,12 +2710,56 @@ end
             TyK=[];
             TyRb=[];
 
+            mymass=[];
+            mytof=[];
+
             amu=1.66054e-27;            % amu in kg
             kB=1.38064852E-23;          % kB in J/K                
             mRb=87*amu;                 % 87Rb mass
             mK=40*amu;                  % 40K mass
             tof=data.Params.tof*1E-3;   % TOF in seconds
-            
+
+            switch data.Flags.image_atomtype
+                case 0 
+                    ms = [Rb Rb];
+                    tofs = [tof tof];
+                case 1
+                    ms = [mK mK];
+                    tofs = [tof tof];
+                case 2
+                    ms = [mK mRb];
+
+                    if isfield(data.Params,'tof_krb_diff')
+                        dt = 1e-3*data.Params.tof_krb_diff;
+                    else 
+                        dt = 0;
+                    end
+                    tofs = [tof tof+dt];
+                otherwise
+                    ms = [mK mRb];
+                    tofs = [tof tof];
+            end
+
+            % if isfield(data,'Flags') &&  isequal(data.Flags.image_atomtype,1)
+            %     ms = [mK mK];                
+            % end
+            % 
+            % if isfield(data,'Flags') & ...
+            %         isfield(data.Flags,'image_atomtype') && ...
+            %         isequal(data.Flags.image_atomtype,2)
+            %     ms = [mK mRb];
+            %     if isfield(data.Params,'tof_krb_diff')
+            %         dt = data.Params.tof_krb_diff;
+            %         tof2= tof + dt*1e-3;
+            %     else 
+            %         tof2 = tof;
+            %     end
+            %     for rr = 1:length(data.GaussFit)
+            %         if data.GaussFit{rr}.Yc>1024
+            %             tofs(rr)=tof2;
+            %         end
+            %     end
+            % end            
             for ii=1:length(data.GaussFit)
                 fout = data.GaussFit{ii};
                 N = 2*pi*fout.Xs*fout.Ys*fout.A;
@@ -2725,9 +2769,26 @@ end
                 centery(ii)=fout.Yc;
                 sigmax(ii)=fout.Xs;
                 sigmay(ii)=fout.Ys;
-                TxK(ii)=(fout.Xs*pxsize*1e-6/tof)^2*mK/kB;TyK(ii)=(fout.Ys*pxsize*1e-6/tof)^2*mK/kB;
-                TxRb(ii)=(fout.Xs*pxsize*1e-6/tof)^2*mRb/kB;TyRb(ii)=(fout.Ys*pxsize*1e-6/tof)^2*mRb/kB;
+                
+
+                if fout.Yc(1)<=1024
+                    tof = tofs(1);
+                    m=ms(1);
+                    mytof(ii)=tof;
+                    mymass(ii)=m;
+                else
+                    tof=tofs(2);
+                    m=ms(2);
+                    mytof(ii)=tof;
+                    mymass(ii)=m;
+                end
+                Tx(ii) = (fout.Xs*pxsize*1e-6/tof)^2*m/kB;
+                Ty(ii) = (fout.Xs*pxsize*1e-6/tof)^2*m/kB;
+
+                % TxK(ii)=(fout.Xs*pxsize*1e-6/tof)^2*mK/kB;TyK(ii)=(fout.Ys*pxsize*1e-6/tof)^2*mK/kB;
+                % TxRb(ii)=(fout.Xs*pxsize*1e-6/tof2)^2*mRb/kB;TyRb(ii)=(fout.Ys*pxsize*1e-6/tof2)^2*mRb/kB;
             end
+
             Nrelative = Ngauss/sum(Ngauss);     
             for ii=1:length(data.GaussFit)
                 str={
@@ -2735,15 +2796,18 @@ end
                         fooText([num2str(ii) '. Gauss Center (Xpx,Ypx)'],ii),centerx(ii),centery(ii);
                         fooText([num2str(ii) '. Gauss ' char(963) ' (Xpx,Ypx)'],ii),sigmax(ii),sigmay(ii)
                    };
-
+                % 
+                % if cTemp.Value            
+                %     dstr={fooText([num2str(ii) '. TOF (ms,ms)'],ii),1e3*tof,1e3*tof2;
+                %             fooText([num2str(ii) '. TK (' char(956) 'K)'],ii), TxK(ii)*1E6, TyK(ii)*1E6;
+                %             fooText([num2str(ii) '. TRb (' char(956) 'K)'],ii), TxRb(ii)*1E6, TyRb(ii)*1E6};   
+                %     str=[str;dstr];
+                % end
                 if cTemp.Value            
-                    dstr={fooText([num2str(ii) '. TOF (ms,s)'],ii),data.Params.tof,tof;
-                            fooText([num2str(ii) '. TK (' char(956) 'K)'],ii), TxK(ii)*1E6, TyK(ii)*1E6;
-                            fooText([num2str(ii) '. TRb (' char(956) 'K)'],ii), TxRb(ii)*1E6, TyRb(ii)*1E6};   
+                    dstr={fooText([num2str(ii) '. TOF,mass (ms,amu)'],ii),1e3*mytof(ii),mymass(ii)/amu;
+                            fooText([num2str(ii) '. T (' char(956) 'K)'],ii), Tx(ii)*1E6, Ty(ii)*1E6};   
                     str=[str;dstr];
-                end         
-  
-                          
+                end                            
                 str=[str; {'','',''}];
 
                  tbl_analysis(1).Data=[tbl_analysis(1).Data; str]; 
@@ -3029,6 +3093,8 @@ function data=boxCount(data,bgROI)
             x=data.X(ROI(1):ROI(2));                 % X vector
             y=data.Y(ROI(3):ROI(4));                 % Y vector
             z=data.OD(ROI(3):ROI(4),ROI(1):ROI(2));  % optical density    
+            z(isnan(z))=0;
+            z(isinf(z))=0;
         end
         nbg=0;
         
