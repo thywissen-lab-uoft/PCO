@@ -1157,16 +1157,20 @@ hbSlctLim.Position(1:2)=[42 60];
         err = 0;     
         % this is not good because of double shutter image. how to get the
         % ROI limits? from the data probably
-        ROI_LIM = [1 1391 1 1024];              
+        % ROI_LIM = [1 1391 1 1024];    
+        ROI_LIM = [1 size(hImg.CData,2) 1 size(hImg.CData,1)];    
+
+           
         % Check for string inputs of max and min
         if isa(ROI,'char')
             switch ROI
                 case 'max'
                     ROI = ROI_LIM;
                 case 'snap'               
-                    allROI = tblROI.Data;                             
-                    ROI=[min(allROI(:,1)) max(allROI(:,2)) ...
-                        min(allROI(:,3)) max(allROI(:,4))];
+                    allROI = tblROI.Data;  
+                    [~,inds]=validROIs;
+                    ROI=[min(allROI(inds,1)) max(allROI(inds,2)) ...
+                        min(allROI(inds,3)) max(allROI(inds,4))];
                 case 'select'
                     disp(['Selecting display ROI .' ...
             '        Click two points that form the rectangle ROI.']);
@@ -1274,43 +1278,26 @@ b=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
                     delete(pXF(end));pXF(end)=[];
                     delete(pY(end));pY(end)=[];
                     delete(pYF(end));pYF(end)=[];
-                    delete(pGaussRet(end));pGaussRet(end)=[];   
-
+                    delete(pGaussRet(end));pGaussRet(end)=[];  
                     if n<hbROI_slct.UserData
                         chSelectROI([],[],n);
-                    end
-
-
-                    % delete(tbl_analysis(end));tbl_analysis(end)=[];
-                    % delete(tabs(end));tabs(end)=[];
+                    end              
                     drawnow;
                 end
             case '+'
                 n=tblNumROIs.Data+1;
                 tblNumROIs.Data=n;
-                ROI=tblROI.Data(end,:);
-                
+                ROI=tblROI.Data(end,:);                
                 pos=[ROI(1) ROI(3) ROI(2)-ROI(1) ROI(4)-ROI(3)];
-
                 tblROI.Data=[tblROI.Data; ROI];
                 pROI(end+1)=rectangle('position',pos,'edgecolor',co(n,:),...
                     'linewidth',2,'parent',axImg);                
                 pGaussRet(end+1)=plot(0,0,'-','parent',axImg,'color',co(n,:),...
-                    'linewidth',1,'Visible',cGaussRet.Value);                
-                
+                    'linewidth',1,'Visible',cGaussRet.Value);
                 pX(end+1)=plot(0,0,'k.-','parent',hAxX);
-                pY(end+1)=plot(0,0,'k.-','parent',hAxY);
-                
+                pY(end+1)=plot(0,0,'k.-','parent',hAxY);                
                 pXF(end+1)=plot(0,0,'r-','parent',hAxX,'color',co(n,:),'linewidth',2);
-                pYF(end+1)=plot(0,0,'r-','parent',hAxY,'color',co(n,:),'linewidth',2);
-                
-                % tabs(end+1)=uitab(hpFit,'Title',num2str(n),'units','pixels',...
-                    % 'foregroundcolor',co(n,:));
-
-                % tbl_analysis(end+1)=uitable(tabs(end),'units','normalized','RowName',{},'ColumnName',{},...
-                    % 'fontsize',8,'ColumnWidth',{60 65 65},'columneditable',false(ones(1,3)),...
-                    % 'Position',[0 0 1 1],'backgroundcolor',[brighten(coNew(n,:),.5); 1 1 1]);
-
+                pYF(end+1)=plot(0,0,'r-','parent',hAxY,'color',co(n,:),'linewidth',2); 
             case 0
                 tblNumROIs.Data=1;
                 tblROI.Data=[1 size(Z,2) 1 size(Z,1)];
@@ -1319,15 +1306,12 @@ b=uicontrol(hpROISettings,'Style','pushbutton','units','pixels',...
                 delete(pY(2:end));pY(2:end)=[];
                 delete(pXF(2:end));pXF(2:end)=[];
                 delete(pYF(2:end));pYF(2:end)=[];
-                delete(pGaussRet(2:end));pGaussRet(2:end)=[];
-                
+                delete(pGaussRet(2:end));pGaussRet(2:end)=[];                
                 delete(tbl_analysis(2:end));tbl_analysis(2:end)=[];
-                delete(tabs(4:end));tabs(4:end)=[];
-                
+                delete(tabs(4:end));tabs(4:end)=[];                
                 ROI=tblROI.Data(1,:);
                 pos=[ROI(1) ROI(3) ROI(2)-ROI(1) ROI(4)-ROI(3)];
                 set(pROI(1),'Position',pos);
-
             otherwise
                 tblNumROIs.Data=state;                
         end
@@ -1459,6 +1443,21 @@ tblROI.Position(4) = 105;
 tblROI.Position(1:2) = [5 5];
 % Callback function for changing ROI via table
 
+    function [out,inds]=validROIs
+        sz = size(hImg.CData);
+        out = ones(size(tblROI.Data,1),1);
+        inds = [];
+        for rr=1:length(out)
+            ROI = tblROI.Data(rr,:);
+            if ROI(1)<1; out(rr)=0;end
+            if ROI(2)>sz(2); out(rr)=0;end
+            if ROI(3)<1;out(rr)=0;end
+            if ROI(4)>sz(1);out(rr)=0;end    
+
+            if out(rr);inds(end+1)=rr;end
+        end
+    end
+
 
 
     function chROICB(src,evt)
@@ -1581,7 +1580,12 @@ ax_gap = 5;
         drawnow;
         axImg.Position=[60 80 tab_od_1.Position(3)-120 tab_od_1.Position(4)-120];
         drawnow;
-        % Get the aspect ratio of plot objects
+        updatePlotAxes
+        drawnow;
+    end
+    
+    function updatePlotAxes
+% Get the aspect ratio of plot objects
         Rimg=axImg.PlotBoxAspectRatio;        
         w_tab = tab_od_1.Position(3)-120;
         h_tab = tab_od_1.Position(4)-120;        
@@ -1613,7 +1617,6 @@ ax_gap = 5;
             hAxY.Position=[axImg.Position(1)+axImg.Position(3)+ax_gap ...
                 axImg.Position(2)+(axImg.Position(4)-h1)/2 50 h1]; 
         end     
-        drawnow;
     end
 
     function SizeChangedFcn(~,~)
@@ -1780,7 +1783,10 @@ pYF=plot(X,0*ones(length(X),1),'-','Visible','on','color',co(1,:),'linewidth',2)
         catch ME
             % if something goes wrong, just load the previous file
             warning(ME.message);
-            warning('Unable to load image. Reverting to previous');
+            for nn=1:length(ME.stack)
+                warning([ME.stack(nn).name ' ' num2str(ME.stack(nn).line)]);       
+            end
+            
             dstruct=olddata;
             dstruct=computeOD(dstruct);
             updateImages(dstruct);
@@ -2379,16 +2385,26 @@ function updatePlots(data)
         
     for n=1:size(data.ROI,1)
         ROI=data.ROI(n,:);
-        x=ROI(1):ROI(2);
-        y=ROI(3):ROI(4); 
+   
+        if ROI(1)<1 || ROI(2)>data.X(end) || ROI(3) < 1 || ROI(4)>data.Y(end)
+            x = ROI(1):ROI(2)';
+            y = ROI(3):ROI(4)';
+            z = zeros(length(y),length(x));
+        else
+            x=data.X(ROI(1):ROI(2));                 % X vector
+            y=data.Y(ROI(3):ROI(4));                 % Y vector
+            z=data.OD(ROI(3):ROI(4),ROI(1):ROI(2));  % optical density    
+        end
+        subOD = z;
+        % 
+        % x=ROI(1):ROI(2);
+        % y=ROI(3):ROI(4); 
         [xx,yy]=meshgrid(x,y);
-        subOD=data.OD(ROI(3):ROI(4),ROI(1):ROI(2));
+        % subOD=data.OD(ROI(3):ROI(4),ROI(1):ROI(2));       
         
-        
-        if rbSum.Value
+        if rbSum.Value        
             ODySum=sum(subOD,2);
-            ODxSum=sum(subOD,1);
-            
+            ODxSum=sum(subOD,1);            
             set(pX(n),'XData',x,'YData',ODxSum);
             set(pY(n),'XData',ODySum,'YData',y);
             drawnow;
@@ -2410,9 +2426,7 @@ function updatePlots(data)
 
             binds = logical([xR<x1]+[xR>x2]+[yR<y1]+[yR>y2]);
             xR(binds)=[];
-            yR(binds)=[];
-
-       
+            yR(binds)=[];       
 
             
             set(pGaussRet(n),'XData',xR,'YData',yR,'linewidth',2);  
@@ -2420,18 +2434,23 @@ function updatePlots(data)
             
             if rbCut.Value 
                 indy=find(round(fout.Yc)==y);           % Y center
-                indx=find(round(fout.Xc)==x);           % X center               
+                indx=find(round(fout.Xc)==x);           % X center   
+                if isempty(indy)||isempty(indx)
+                    indy=1;
+                end
+                
+
+                    ODyCut=subOD(:,indx);
+                    ODxCut=subOD(indy,:);    
+                    ODyCutF=zF(:,indx);
+                    ODxCutF=zF(indy,:);    
+                    set(pX(n),'XData',x,'YData',ODxCut);
+                    set(pXF(n),'XData',x,'YData',ODxCutF,'Visible','on');
+                    set(pY(n),'XData',ODyCut,'YData',y);
+                    set(pYF(n),'XData',ODyCutF,'YData',y,'Visible','on');
+
+                
     
-                ODyCut=subOD(:,indx);
-                ODxCut=subOD(indy,:);
-    
-                ODyCutF=zF(:,indx);
-                ODxCutF=zF(indy,:);
-    
-                set(pX(n),'XData',x,'YData',ODxCut);
-                set(pXF(n),'XData',x,'YData',ODxCutF,'Visible','on');
-                set(pY(n),'XData',ODyCut,'YData',y);
-                set(pYF(n),'XData',ODyCutF,'YData',y,'Visible','on');
             else    
                 ODySum=sum(subOD,2);
                 ODxSum=sum(subOD,1);
@@ -2465,22 +2484,21 @@ function data=performFits(data)
     % Grab the ROI(s)
     ROI=tblROI.Data;data.ROI=ROI;
 
-    % Create fitresults output
-    fr=ones(size(data.ROI,1),1)*val;
 
-    % Create sum profiles        
-    for m=1:size(ROI,1)
-        subOD=data.OD(ROI(m,3):ROI(m,4),ROI(m,1):ROI(m,2));
-        data.ODxSum{m}=sum(subOD,1);
-        data.ODySum{m}=sum(subOD,2);
-    end       
+    % Create fitresults output
+    % fr=ones(size(data.ROI,1),1)*val;
+
+    % % Create sum profiles       
+    % for m=1:size(ROI,1)        
+    %     subOD=data.OD(ROI(m,3):ROI(m,4),ROI(m,1):ROI(m,2));
+    %     data.ODxSum{m}=sum(subOD,1);
+    %     data.ODySum{m}=sum(subOD,2);        
+    % end       
 
     %%%%%% Where the actual analysis occurs
     
     % Perform 2D gaussian fit       
-    if cGaussFit.Value
-        data=fitGauss(data);
-    end
+    if cGaussFit.Value;data=fitGauss(data);end
     
     % Perform box analysis
     if cBox.Value         
@@ -2985,6 +3003,7 @@ end
         title(axPWA,['PWA : ' num2str(NPWA,'%.2e')])
         title(axPWOA,['PWOA : ' num2str(NPWOA,'%.2e')])
 
+        updatePlotAxes;
     end
 
 hpMarkersCollapse.String='-';
@@ -2993,26 +3012,31 @@ end
 
 
 %% Analysis Functions
-function dstruct=boxCount(dstruct,bgROI)     
+function data=boxCount(data,bgROI)     
     BoxCount=struct;    
     
     if nargin==1
         bgROI=[];
-    end
-       
+    end       
     
-    for k=1:size(dstruct.ROI,1)
-        ROI=dstruct.ROI(k,:);
-        x=dstruct.X(ROI(1):ROI(2));                 % X vector
-        y=dstruct.Y(ROI(3):ROI(4));                 % Y vector
-        z=double(dstruct.OD(ROI(3):ROI(4),ROI(1):ROI(2)));
+    for k=1:size(data.ROI,1)
+        ROI=data.ROI(k,:);
+        if ROI(1)<1 || ROI(2)>data.X(end) || ROI(3) < 1 || ROI(4)>data.Y(end)
+            x = ROI(1):ROI(2);
+            y = ROI(3):ROI(4);
+            z = zeros(length(y),length(x));
+        else
+            x=data.X(ROI(1):ROI(2));                 % X vector
+            y=data.Y(ROI(3):ROI(4));                 % Y vector
+            z=data.OD(ROI(3):ROI(4),ROI(1):ROI(2));  % optical density    
+        end
         nbg=0;
         
         if nargin==2            
             if ROI(3)<=1024         
-                zbg=double(dstruct.OD(bgROI(3):bgROI(4),bgROI(1):bgROI(2)));
+                zbg=double(data.OD(bgROI(3):bgROI(4),bgROI(1):bgROI(2)));
             else
-                zbg=double(dstruct.OD(1024+[bgROI(3):bgROI(4)],bgROI(1):bgROI(2)));
+                zbg=double(data.OD(1024+[bgROI(3):bgROI(4)],bgROI(1):bgROI(2)));
             end
             nbg=sum(sum(zbg))/(size(zbg,1)*size(zbg,2)); % count density
         end   
@@ -3050,28 +3074,27 @@ function dstruct=boxCount(dstruct,bgROI)
         BoxCount(k).Ys=Ys;              % Y standard deviation
     end
     
-    dstruct.BoxCount=BoxCount;
+    data.BoxCount=BoxCount;
     
 end
 
-function dstruct=fitGauss(dstruct)
-    fits={};
-    
-    for n=1:size(dstruct.ROI,1)              
-        ROI=dstruct.ROI(n,:);         
-%         disp(['Fitting 2D gaussian on [' num2str(ROI) '].']);
-%         t1=now;        
-        % Grab data from the data structure
-        x=dstruct.X(ROI(1):ROI(2));                 % X vector
-        y=dstruct.Y(ROI(3):ROI(4));                 % Y vector
-        z=dstruct.OD(ROI(3):ROI(4),ROI(1):ROI(2));  % optical density     
-        % Perform the fit
-        fout=gaussfit2D(x,y,z);
-%         t2=now;
+function data=fitGauss(data)
+    fits={};    
+    for n=1:size(data.ROI,1)              
+        ROI=data.ROI(n,:);
+        if ROI(1)<1 || ROI(2)>data.X(end) || ROI(3) < 1 || ROI(4)>data.Y(end)
+            x = ROI(1):ROI(2);
+            y = ROI(3):ROI(4);
+            z = zeros(length(y),length(x));
+        else
+            x=data.X(ROI(1):ROI(2));                 % X vector
+            y=data.Y(ROI(3):ROI(4));                 % Y vector
+            z=data.OD(ROI(3):ROI(4),ROI(1):ROI(2));  % optical density    
+        end
+        fout=gaussfit2D(x,y,z);                  % Perform the fit
         fits{n}=fout;  
     end
-    dstruct.GaussFit=fits;
-    
+    data.GaussFit=fits;    
 end
   
 function fout=gaussfit2D(Dx,Dy,data)
