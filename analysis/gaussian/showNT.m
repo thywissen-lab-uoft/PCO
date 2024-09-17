@@ -131,12 +131,14 @@ end
 % Plot the data
 for nn=1:size(Natoms,2)
     if gauss_data.Atom==2 || gauss_data.Atom==3 
-        if Yc(nn)>1024
+        ycmed = median(Yc(:,nn));
+        if ycmed>1024
             yyaxis right;
         else
             yyaxis left;
         end
     end
+    
    plot(X,Natoms(:,nn)*1e-5,'o','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
@@ -149,6 +151,15 @@ end
 
 yL = get(gca,'Ylim');
 set(gca,'YLim',[0 yL(2)]);
+
+if gauss_data.Atom ==3 || gauss_data.Atom ==2
+   yyaxis right
+   yL = get(gca,'Ylim');
+    set(gca,'YLim',[0 yL(2)]);
+    yyaxis left
+     yL = get(gca,'Ylim');
+    set(gca,'YLim',[0 yL(2)]);
+end
 
 % Make axis
 hax2=subplot(132);
