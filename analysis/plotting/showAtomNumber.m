@@ -12,6 +12,8 @@ params=[data.Params];
 X=[params.(xVar)]';
 Natoms = data.Natoms;
 
+Yc = data.Yc;
+
 %% Exponential Decay Fit
 
 if isfield(opts,'NumberExpFit') && opts.NumberExpFit && size(Natoms,1)>2
@@ -104,6 +106,18 @@ ylabel([data.FitType ' atom number']);
         
 % Plot the data
 for nn=1:size(Natoms,2)
+    
+    ycmed = median(Yc(:,nn));
+    
+    if ycmed>1024
+        yyaxis right;
+        set(gca,'YColor','k');
+
+    else
+        yyaxis left;
+        set(gca,'YColor','k');
+    end
+
    plot(X,Natoms(:,nn),'o','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
 end
@@ -113,6 +127,14 @@ if (opts.NumberExpFit || opts.NumberExpOffsetFit) && size(Natoms,1)>3
     xx=linspace(0,max(X),1000);
     
     for nn=1:size(Natoms,2)
+        
+           ycmed = median(Yc(:,nn));    
+            if ycmed>1024
+                yyaxis right;
+            else
+                yyaxis left;
+            end
+        
         pExp(nn)=plot(xx,feval(fout_exp{nn},xx),'-','linewidth',1,...
             'color',0.8*co(nn,:)); 
         
@@ -135,6 +157,14 @@ if doLorentzianFit
     legStr={};
     
     for rr=1:length(fouts_lorentz)
+        
+           ycmed = median(Yc(:,rr));    
+            if ycmed>1024
+                yyaxis right;
+            else
+                yyaxis left;
+            end
+        
         fout_lorentz=fouts_lorentz{rr};
         pFs(rr)=plot(xx,feval(fout_lorentz,xx),'-','linewidth',2,'color',...
         co(rr,:)*.8);

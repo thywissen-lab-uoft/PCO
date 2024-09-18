@@ -87,7 +87,7 @@ ODopts.GaussFilter=.5;
 %% Analysis Flags
 
 % Standard Analysis
-doODProfile = 0;
+doODProfile = 1;
 doStandard = 1;
 
 doAnimate = 1;
@@ -342,10 +342,7 @@ if isfield(data.Flags,'xdt') && ~(data.Flags.xdt)
 %     ROI = [750 1250 400 900];     % RF1B 15ms TOF
 %     ROI = [592 1392 32 932];    %MT no RF1A Rb 10ms TOF
          
-    if data.Flags.image_insitu
-         ROI = [960 1080 100 200]; 
-        ROI = [900 1050 100 200]; % wrong
-    end     
+ 
 end
 
 
@@ -504,7 +501,7 @@ end
          % 5ms + 15 ms tof
 %          ROI = [850 1250 150 500;
 %                 700 1392 1400 2000];    
-            ROI = [830 1250 150 500
+            ROI = [830 1250 100 500
                 700 1392 1200 2000]; 
          % RF1A
          % 5ms + 15 ms tof
@@ -532,6 +529,10 @@ end
 %          ROI = [750 1300 50 500;
 %                 750 1300 50+1024 500+1024];  
  end
+ 
+     if data.Flags.image_insitu
+        ROI = [900 1050 100 200]; 
+    end    
 %%
 if isequal(camaxis,'Y')
 %     ROI = [470 750 375 600];
@@ -1217,7 +1218,7 @@ if doAnimate && doSave
     animateOpts.MidDelay=.5;    % Time to hold in middle picutres
     animateOpts.EndDelay=1;     % Time to hold final picture
     animateOpts.doAverage=1;    % Average over duplicates?
-    animateOpts.doRotate=1;     % Rotate the image?
+    animateOpts.doRotate=0;     % Rotate the image?
     animateOpts.xUnit=pco_unit;
     
     % Stacking images (applicable only for double exposure)
@@ -1265,10 +1266,15 @@ if doAnimate && doSave
     if doFermiFitLong
          animateOpts.CLim = [0 .5];
     end
+       animateOpts.CLim=[0 .5;
+         0 2]; 
+    if ~atomdata(1).Flags.xdt && atomdata(1).Flags.image_insitu
+           animateOpts.CLim=[0 4;
+         0 4]; 
+    end
     
     
-         animateOpts.CLim=[0 .2;
-         0 .2]; 
+      
     animateCloud(atomdata,pco_xVar,animateOpts);    
 end
 
