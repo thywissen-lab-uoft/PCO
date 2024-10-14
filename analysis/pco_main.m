@@ -67,7 +67,7 @@ end
 
 % Defautl variable to plot against
 % pco_xVar = 'rf_freq_HF_shift';
-pco_xVar = 'ExecutionDate';
+pco_xVar = 'mt_hold_time';
 % pco_xVar = 'qgm_Raman1_shift';
 % pco_xVar = 'lattice_rf_freq_shift';
 % pco_xVar ='mt_hold_time';
@@ -87,7 +87,7 @@ ODopts.GaussFilter=.5;
 %% Analysis Flags
 
 % Standard Analysis
-doODProfile = 1;
+doODProfile = 0;
 doStandard = 1;
 
 doAnimate = 1;
@@ -105,11 +105,11 @@ doProbeFit    = 0;      % Fit probe beam  to 2D Gaussian
 % processed data outputs of the below fits are typically <fit_type>_name
 
 % Box Count
-doBoxCount      = 1;      % Box count analysis
+doBoxCount      = 0;      % Box count analysis
 
 % Gaussian Fit
 % Fit to a gaussian distribution (thermal cloud)
-doGaussFit      = 1;      % Enable gauss fitting
+doGaussFit      = 0;      % Enable gauss fitting
 
 % Erf Fit
 doErfFit        = 0;    
@@ -121,7 +121,7 @@ doBMFit         = 0;
 
 % Fermi-Fit
 % Fit a DFG in long time of flight
-doFermiFitLong  = 0;     
+doFermiFitLong  = 1;     
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Custom Analyses
@@ -138,7 +138,7 @@ doBEC           = 0;      % Enable BEC analys
 doLandauZener   =  0;         
 
 % Raman box count count analyis
-doRamanSpec   =0;   
+doRamanSpec   =0;    
 
 % Band Map Fit and Analysis for AM Spec
 doBMFit_AM   = 0; doBMFit_AM_Dir = 'H';
@@ -170,7 +170,7 @@ doUpload = 1;       % Upload to google drive?
 %% Select image directory
 % Choose the directory where the images to analyze are stored
 disp([datestr(now,13) ' Choose an image analysis folder...']);
-dialog_title='Choose the root dire ctory of the images';
+dialog_title='Choose the root directory of the images';
 
 
 if getImageDir(datevec(now))
@@ -294,11 +294,7 @@ rpt_opts.FigLabel = FigLabel;
 
 [hF_var_counts]=showRepeats(atomdata,pco_xVar,rpt_opts);
 if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
-%% 
-
-%% X CAM Analysis ROI
-
-
+%% ROI 
 % Analysis ROI is an Nx4 matrix of [X1 X2 Y1 Y2] which specifies a region
 % to analyze. Each new row in the matrix indicates a separate ROI to
 % perform analysis on.
@@ -306,28 +302,36 @@ if doSave;saveFigure(hF_var_counts,'xvar_repeats',saveOpts);end
 % While in principle different images can have different analysis ROIs,
 % this is currently disabled because it creates code issues at the moment.
 
+do_overrride_ROI  = 0;
+ROI_override = [970 1080 640 550];
+ROI_override = 'X_ROI_RF1B_insitu';
 
+%% ROI DEFINITIONS
+% IN PROGRESS
 
-% 15 ms XDT mF SG
-% ROI=[970 1080 745 830;
-%     970 1080 630 745];
+X_ROI_RF1B_insitu = [];
+X_ROI_RF1B_5ms = [];
+X_ROI_RF1B_15ms = [];
 
-% ROI=[970 1080 730 820;
-%     970 1080 640 730;
-%     970 1080 550 640;
-%     970 1080 460 550;
-%     970 1080 370 460
-%     ];
+X_ROI_XDT_insitu = [];
+X_ROI_XDT_5ms = [];
+X_ROI_XDT_15ms = [];
+X_ROI_XDT_25ms = [];
+
+X_ROI_XDT_SG_15ms=[];
+X_ROI_XDT_SG_15ms=[];
+
+X_ROI_LATT_15ms = [];
+X_ROI_LATT_SG_15ms = [];
+
+% %% AUTO ROI SELECT
 % 
+% if isequal(camaxis,'X')
+%     
+%     
+% end
 
-% big box
-% ROI = [723 1071 200 872];
-
-% ROI=[800 960 390 500;
-%        800 960 500 610]; % 15 ms  xcam,XDT F SG
-
-%% Magtrap ROI
-
+%%
 if isfield(data.Flags,'xdt') && ~(data.Flags.xdt)    
     %%%%%%% RF1A X CAM
     % ROI = [429 1381 104 1004]; % RF1A 15ms TOF
@@ -335,14 +339,19 @@ if isfield(data.Flags,'xdt') && ~(data.Flags.xdt)
 
     % ROI = [500 1380 50 750]; %RF1A 5ms TOF
     %%%%% RF1B X CAM
-    ROI = [750 1250 150 550];     % RF1B 5ms TOF    
+%     ROI = [750 1250 150 550];     % RF1B 5ms TOF    
     
 %         ROI = [700 1300 50 400];     % RF1B 5ms TOF    
 
 %     ROI = [750 1250 400 900];     % RF1B 15ms TOF
 %     ROI = [592 1392 32 932];    %MT no RF1A Rb 10ms TOF
-         
- 
+
+
+%              ROI = [750 1250 200 500];     % XDT 15ms TOF
+
+
+%      ROI = [750 1250 100 300];     % 5ms TOF    
+    ROI = [750 1250 100 600];     % RF1B 15ms TOF
 end
 
 
@@ -366,15 +375,19 @@ if isfield(data.Flags,'image_stern_gerlach_mF') && data.Flags.image_stern_gerlac
         940 1000 620 680;
         940 1000 560 620];
     
+    
     ROI = ROI(1:Nbox,:);
+    
+        ROI = [930 1020 400 700];
+
 end
 
 if isfield(data.Flags,'image_stern_gerlach_F') && data.Flags.image_stern_gerlach_F
     % 15 ms XDT mF SG
 % F Stern Gerlach
-    ROI=[950 1080 335 400;
-    950 1080 250 335];
-     ROI = ROI(1:Nbox,:);
+    ROI=[920 1020 330 450;
+    950 1080 220 330];
+%      ROI = ROI(1:Nbox,:);
 end
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%% LATTICE LOW FIELD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -490,8 +503,6 @@ end
 
 % ROI = ROI(1,:); % 9 only 
 %ROI = ROI(2,:); % 7 only
-
-
 % ROI = [600 1175 200 900];
 
 %% K + Rb Double Shutter Imaging
@@ -501,7 +512,7 @@ end
          % 5ms + 15 ms tof
 %          ROI = [850 1250 150 500;
 %                 700 1392 1400 2000];    
-            ROI = [830 1250 100 500
+            ROI = [850 1150 100 400
                 700 1392 1200 2000]; 
          % RF1A
          % 5ms + 15 ms tof
@@ -518,6 +529,10 @@ end
          if isfield(f,'CDT_evap') && f.CDT_evap
             ROI=[880 1200 570 750
                 920 1120 1680 1850];   % XDT  TOF 25 ms evaporation
+            
+            ROI=[800 1200 50 450
+                800 1200 1200 1700];   % XDT  TOF 25 ms evaporation
+            
 %             ROI = [800 1200 290 630
 %                    900 1170 1640 1825];
          end
@@ -528,11 +543,41 @@ end
 %                 800 1300 50+1024 300+1024];
 %          ROI = [750 1300 50 500;
 %                 750 1300 50+1024 500+1024];  
+
+            %ROI = [850 1150 100 400];
+%ROI=ROI(2,:);
  end
  
      if data.Flags.image_insitu
-        ROI = [900 1050 100 200]; 
-    end    
+        ROI = [900 1050 100 200
+            900 1050 1100 1260]; 
+        
+     end 
+    
+     ROI=[900 1050 550 750];
+%          900 1050 1700 1800]; 
+%      ROI=[900 1050 100 750];
+%     ROI=[750 1200 1200 1600];
+
+if isfield(data.Flags,'image_stern_gerlach_mF') && data.Flags.image_stern_gerlach_mF
+    % 15 ms XDT mF SG K only double shutter
+% mF Stern Gerlach
+    ROI = [940 1000 560 630; % -9/2 xdtB
+        940 1000 490 560]; % -7/2 xdtB
+end
+
+
+
+if isfield(data.Flags,'image_stern_gerlach_F') && data.Flags.image_stern_gerlach_F
+    % 15 ms XDT mF SG K only double shutter
+% F Stern Gerlach
+    ROI=[920 1040 330 450;
+    920 1040 220 330];
+%      ROI = ROI(1:Nbox,:);
+end
+
+%     ROI=[900 1070 250 420];
+
 %%
 if isequal(camaxis,'Y')
 %     ROI = [470 750 375 600];
@@ -571,7 +616,7 @@ if isequal(camaxis,'Y')
 ROI = [400 750 350 600]; % MT in situ 2024.08.22
 
 end
-% ROI=[900 1050 550 750];   % XDT  TOF 25 ms evaporation
+% ROI=[800 1200 100 300];   % XDT  TOF 25 ms evaporation
  
 %% Aissgn the ROI
 
@@ -1218,7 +1263,7 @@ if doAnimate && doSave
     animateOpts.MidDelay=.5;    % Time to hold in middle picutres
     animateOpts.EndDelay=1;     % Time to hold final picture
     animateOpts.doAverage=1;    % Average over duplicates?
-    animateOpts.doRotate=0;     % Rotate the image?
+    animateOpts.doRotate=1;     % Rotate the image?
     animateOpts.xUnit=pco_unit;
     
     % Stacking images (applicable only for double exposure)
@@ -1266,15 +1311,16 @@ if doAnimate && doSave
     if doFermiFitLong
          animateOpts.CLim = [0 .5];
     end
-       animateOpts.CLim=[0 .5;
-         0 2]; 
+       animateOpts.CLim=[0 .2;
+         0 1]; 
     if ~atomdata(1).Flags.xdt && atomdata(1).Flags.image_insitu
            animateOpts.CLim=[0 4;
          0 4]; 
     end
     
     
-      
+       animateOpts.CLim=[0 .5;
+         0 .5]; 
     animateCloud(atomdata,pco_xVar,animateOpts);    
 end
 

@@ -1520,7 +1520,8 @@ tblROI.Position(1:2) = [5 5];
         end 
         % Make sure ROI is increasing order
         if ROI(2)<=ROI(1) || ROI(4)<=ROI(3)
-           warning('Bad ROI specification given.');
+
+warning('Bad ROI specification given.');
             err = 1;
             return
         end 
@@ -2727,7 +2728,7 @@ end
 
             switch data.Flags.image_atomtype
                 case 0 
-                    ms = [Rb Rb];
+                    ms = [mRb mRb];
                     tofs = [tof tof];
                 case 1
                     ms = [mK mK];
@@ -3074,7 +3075,7 @@ end
         title(axPWA,['PWA : ' num2str(NPWA,'%.2e')])
         title(axPWOA,['PWOA : ' num2str(NPWOA,'%.2e')])
 
-        updatePlotAxes;
+%         updatePlotAxes;
     end
 
 hpMarkersCollapse.String='-';

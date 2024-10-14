@@ -12,8 +12,16 @@ params=[data.Params];
 X=[params.(xVar)]';
 Natoms = data.Natoms;
 
-Yc = data.Yc;
 
+ycmed = median(data.Yc,1);        
+
+if sum(ycmed>1024)
+    isBig = true;
+else 
+    isBig = false;
+end
+
+Yc=data.Yc;
 %% Exponential Decay Fit
 
 if isfield(opts,'NumberExpFit') && opts.NumberExpFit && size(Natoms,1)>2
@@ -107,16 +115,17 @@ ylabel([data.FitType ' atom number']);
 % Plot the data
 for nn=1:size(Natoms,2)
     
-    ycmed = median(Yc(:,nn));
-    
-    if ycmed>1024
-        yyaxis right;
-        set(gca,'YColor','k');
-
-    else
-        yyaxis left;
-        set(gca,'YColor','k');
-    end
+   ycmed = median(Yc(:,nn));        
+   
+   if isBig
+        if ycmed>1024 
+            yyaxis right;
+            set(gca,'YColor','k');
+        else
+            yyaxis left;
+            set(gca,'YColor','k');
+        end
+   end
 
    plot(X,Natoms(:,nn),'o','color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);
@@ -129,11 +138,15 @@ if (opts.NumberExpFit || opts.NumberExpOffsetFit) && size(Natoms,1)>3
     for nn=1:size(Natoms,2)
         
            ycmed = median(Yc(:,nn));    
-            if ycmed>1024
-                yyaxis right;
-            else
-                yyaxis left;
-            end
+   if isBig
+        if ycmed>1024 
+            yyaxis right;
+            set(gca,'YColor','k');
+        else
+            yyaxis left;
+            set(gca,'YColor','k');
+        end
+   end
         
         pExp(nn)=plot(xx,feval(fout_exp{nn},xx),'-','linewidth',1,...
             'color',0.8*co(nn,:)); 
@@ -159,11 +172,15 @@ if doLorentzianFit
     for rr=1:length(fouts_lorentz)
         
            ycmed = median(Yc(:,rr));    
-            if ycmed>1024
-                yyaxis right;
-            else
-                yyaxis left;
-            end
+   if isBig
+        if ycmed>1024 
+            yyaxis right;
+            set(gca,'YColor','k');
+        else
+            yyaxis left;
+            set(gca,'YColor','k');
+        end
+   end
         
         fout_lorentz=fouts_lorentz{rr};
         pFs(rr)=plot(xx,feval(fout_lorentz,xx),'-','linewidth',2,'color',...
@@ -182,6 +199,17 @@ end
 if isequal(xVar,'ExecutionDate')
     datetick('x');
     xlabel('ExecutionDate');
+end
+
+if isBig && sum(median(Yc,1)>1024)>0
+yyaxis left
+hax.YLim(1)=0; 
+
+    yyaxis right
+    hax.YLim(1)=0;
+else
+    hax.YLim(1)=0; 
+
 end
 
 resizeFig(hF,t,[hax]);

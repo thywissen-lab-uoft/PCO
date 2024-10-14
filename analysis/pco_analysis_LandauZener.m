@@ -8,9 +8,9 @@
 % Select the data source
 
 % data_source = 'box';
-% data_source = 'gauss';
+data_source = 'gauss';
 % data_source = 'erf';
-data_source = 'bm';
+% data_source = 'bm';
 
 switch data_source
     case 'box'        
@@ -27,8 +27,8 @@ end
 if doLandauZener && size(data.Natoms,2)>1
     lz_opts=struct;
     lz_opts.Mode='auto';
-    lz_opts.BoxIndex=1;  % N1/(N1+N2) or N2/(N1+N2) analysis transfer
-    lz_opts.LZ_GUESS=[5 .9]; % Fit guess kHz,ampltidue can omit guess as well
+    lz_opts.BoxIndex=2;  % N1/(N1+N2) or N2/(N1+N2) analysis transfer
+    lz_opts.LZ_GUESS=[5 1]; % Fit guess kHz,ampltidue can omit guess as well
 %     lz_opts.num_scale = 0.6;        
     lz_opts.FigLabel=FigLabel;
     lz_opts.num_scale = 1;        
@@ -42,10 +42,13 @@ if doLandauZener && size(data.Natoms,2)>1
     SweepTimeVar='uWave_time';'sweep_time';      % Variable that defines sweep time
     SweepRangeVar='uwave_delta_freq';'sweep_range';    %    Variable that defines sweep range
 
-      SweepTimeVar='qgm_pulse_time';'sweep_time';      % Variable that defines sweep time
-    SweepRangeVar='lattice_rf_freq_shift';'sweep_range';    %    Variable that defines sweep range
-    
-    SweepTimeVar='lattice_rf_pulse_length_pre_op';
+%       SweepTimeVar='qgm_pulse_time';'sweep_time';      % Variable that defines sweep time
+%     SweepRangeVar='lattice_rf_freq_shift';'sweep_range';    %    Variable that defines sweep range
+%     
+%     SweepTimeVar='lattice_rf_pulse_length_pre_op';
+%     
+%     SweepTimeVar = 'Rb_uWave_transfer_time';
+%     SweepRangeVar = 'Rb_uWave_transfer_freq_amp';
 %     SweepRangeVar=50;
 
     
@@ -54,9 +57,9 @@ if doLandauZener && size(data.Natoms,2)>1
     % Convert the parameter into df and dt (add whatever custom processing
     % you want).
     dT=[params.(SweepTimeVar)];
-    dF=[params.(SweepRangeVar)];
+    dF=[params.(SweepRangeVar)]*1e3;
     
-    dF=5;
+%     dF=5;
 
 %     dF=[params.(SweepRangeVar)]*1000; % Factor of two for the SRS
 %     dF=[params.(SweepRangeVar)]*1000*2; % Factor of two for the AOM DP

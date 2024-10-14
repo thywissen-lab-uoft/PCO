@@ -56,7 +56,7 @@ if doGaussFit
     gaussPopts = struct;
     gaussPopts.FigLabel = FigLabel;
     gaussPopts.xUnit=pco_unit;
-    gaussPopts.NumberExpFit = 1;        % Fit exponential decay to atom number
+    gaussPopts.NumberExpFit =0;        % Fit exponential decay to atom number
     gaussPopts.NumberLorentzianFit=0;   % Fit atom number to lorentzian
     gaussPopts.CenterSineFit = 0;       % Fit sine fit to cloud center
     gaussPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
@@ -74,8 +74,15 @@ if doGaussFit
     hF_stats=showGaussStats(gauss_data,gaussPopts);     
     if doSave;saveFigure(hF_stats,'gauss_stats',saveOpts);end       
     
+    
+%     gaussPopts.NScale = 'log';
     hF_number_gauss = showAtomNumber(gauss_data,pco_xVar,gaussPopts);  
-    ylim([0 max(get(gca,'YLim'))]);    
+    ylim([0 max(get(gca,'YLim'))]);  
+%yyaxis left
+%set(gca,'yscale','log');
+%yyaxis right
+%set(gca,'yscale','log');
+    
     if doSave;saveFigure(hF_number_gauss,'gauss_number',saveOpts);end
     
     if ~isequal(pco_xVar,'ExecutionDate')
@@ -93,6 +100,7 @@ if doGaussFit
     end
     
          if size(gauss_data.Natoms,2)==2
+             gaussPopts.NumberRatioDifference_rabi=0;
        hF_number_gauss_ratio2=showNumberRatioDifference(gauss_data,pco_xVar,gaussPopts);
         if doSave;saveFigure(hF_number_gauss_ratio2,'gauss_number_ratio_difference',saveOpts);end
          end

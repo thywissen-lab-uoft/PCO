@@ -1,4 +1,6 @@
+
 function [hF,frabi,frabi2] = landauZenerAnalysis(data,dt,df,opts)
+
 %%
 
 frabi = 0 ;
@@ -31,6 +33,10 @@ ind=opts.BoxIndex;
 scale = opts.num_scale;
 Natoms(:,2) = Natoms(:,ind)./scale;
 Nrel=Natoms(:,ind)./NatomsTot;
+
+% % for loss signal
+% NatomsTot = data.Natoms(1,2);
+% Nrel=(NatomsTot-Natoms(:,ind))./NatomsTot;
 
 %% Ignore Bad Data Points
 badInds=[NatomsTot<1E4];
@@ -145,6 +151,7 @@ legStr={f1str,f2str};
 legend([pF1 pF2],legStr,'location','southeast','fontsize',10,'interpreter','latex');
 end
 
+
 hax2=subplot(1,4,[4]);
 plot(dtdf,dt,'ko')
 hold on
@@ -170,7 +177,7 @@ myfit=fittype('A*(1-exp(-0.25*(2*pi*f_rabi).^2*dtdf))','independent','dtdf','coe
 opts=fitoptions(myfit);
 opts.StartPoint=lz_guess; % Initial rabi guess is 3 kHz
 opts.Lower=[0 .5];      % Lower limits
-opts.Upper=[1000 1.2];     % Upper limits
+opts.Upper=[1000 1.001];     % Upper limits
 
 % Output 
 fout=fit(dtdf,Nrel,myfit,opts);

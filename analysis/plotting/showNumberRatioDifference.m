@@ -67,6 +67,22 @@ if isequal(xVar,'ExecutionDate')
 end
 
 resizeFig(hF,t,[hax]);
+
+if isfield(opts,'NumberRatioDifference_rabi') && opts.NumberRatioDifference_rabi
+    
+     myfit=fittype('cos(2*pi*f.*t)*exp(-t./tau)','coefficients',{'f','tau'},...
+            'independent','t');
+    opt=fitoptions(myfit);
+    opt.StartPoint=[8 5];
+    opt.Lower=[1 0];
+    
+    xx= linspace(min(X),max(X),1e3);
+    
+    fout_rabi=fit(X,Y,myfit,opt);
+    pF=plot(xx,feval(fout_rabi,xx),'r-');
+    str=['f = ' num2str(round(fout_rabi.f,2)) ', \tau=' num2str(round(fout_rabi.tau,1))];
+legend(pF,str,'location','best');
+end
 %% Fit Lorentzian
 
 if isfield(opts,'RelNumberLorentzian') && opts.RelNumberLorentzian
