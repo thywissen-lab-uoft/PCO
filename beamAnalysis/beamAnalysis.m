@@ -15,7 +15,7 @@ doSelectROI = false;
 % doSelectROI = true;
 
 % Output waist vectors
-output = struct;
+temp = struct;
 
 % Saving
 doSave=1;
@@ -103,7 +103,7 @@ for ii=1:length(fnames)
     img=imread(fname);
     Z = double(img(:,:,1));
     [src_dir,fname_short,~]=fileparts(fname);
-    output(ii).Name = fname;
+    temp(ii).Name = fname;
     
     % Make the figure
     hF=figure;
@@ -216,8 +216,8 @@ for ii=1:length(fnames)
         '(' num2str(round(x0,1)) ',' num2str(round(y0,1)) ') center; ' ...
         '' num2str(round(theta*180/pi,2)) ' deg. rot']);
     
-   output(ii).Waist1_px = 2*xs;
-   output(ii).Waist2_px = 2*ys;
+   temp(ii).Waist1_px = 2*xs;
+   temp(ii).Waist2_px = 2*ys;
    
    if doSave
       disp('saving figure to png');
@@ -227,9 +227,14 @@ for ii=1:length(fnames)
   
 end
 
+output = struct;
+output.Waist1_px = [temp.Waist1_px];
+output.Waist2_px = [temp.Waist2_px];
+output.Names = {temp.Name};
 
-   if doSave
-   disp('saving output to mat file');
+
+if doSave
+    disp('saving output to mat file');
     save(fullfile(src_dir,'beamanalysis'),'-struct','output');
 end
 
