@@ -69,20 +69,26 @@ doLorentzianFit=opts.NumberLorentzianFit;
 fouts_lorentz={};
 if doLorentzianFit
     for rr=1:size(Natoms,2)
-        myfit=fittype('A*((x-x0).^2+(G/2).^2).^(-1).*(G/2)^2','coefficients',{'A','G','x0'},...
+        myfit=fittype('A*((x-x0).^2+(G/2).^2).^(-1).*G/pi+D','coefficients',{'A','G','x0','D'},...
             'independent','x');
         opt=fitoptions(myfit);
-        A0=max(Natoms(:,rr));
+        A0=-(max(Natoms(:,rr)) - min(Natoms(:,rr)));
         G0=range(X)/2;
-
+        D0 = mean(Natoms(:,rr));
         inds=[Natoms(:,rr)>.8*max(Natoms(:,rr))];
-        x0=mean(X(inds));       
-        opt.StartPoint=[A0 G0 x0];    
+        x0=mean(X);      
+
+        A0 = -1000;
+        G0 = 0.02;
+        x0 = 131.9;
+        D0 = 1.5e5;
+        opt.StartPoint=[A0 G0 x0 D0];    
         fout_lorentz=fit(X,Natoms(:,rr),myfit,opt);
         fouts_lorentz{rr}=fout_lorentz;
     end
 end
 
+% keyboard
 
 %% Make Figure
 

@@ -49,6 +49,7 @@ end
 %% Camera and Imaging Settings
 
 rotationMode = 'bicubic'; % 'nearest','bilinear','bicubic'
+
 rotationCrop = 'crop'; % 'crop' or 'loose'
 frVar='ExecutionDate';
 camera=initCamStruct;
@@ -2286,15 +2287,23 @@ trigTimer=timer('name','PCO Trigger Checker','Period',0.5,...
               fprintf('ERROR low field...');
               OD=log(PWOA./PWA);
       end 
+
+        OD = real(OD);
+        % OD(isinf(OD))=0;
+
+       
+
       
+
       % Rotate Images
          if cRotate.Value && tblRotate.Data~=0
              theta = tblRotate.Data;
                fprintf('rotating %s ...',round(theta,1));
 
-             if size(data.PWOA,1)==1024   
-                OD = imrotate(OD,theta,rotationMode,rotationCrop);             
-
+             if size(data.PWOA,1)==1024        
+                 % keyboard
+                OD = imrotate(OD,theta,rotationMode,rotationCrop); 
+                
              else
                 OD_1 = imrotate(OD(1:1024,:),theta,rotationMode,rotationCrop);
                 OD_2 = imrotate(OD(1025:end,:),theta,rotationMode,rotationCrop);  

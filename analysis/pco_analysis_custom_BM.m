@@ -83,7 +83,8 @@ y_Lbl{33}     = 'Ns';
 p_inds=[01,02,25,31,32,33,4];
 
 p_inds=[25,32,33];
-p_inds = [01,02,25];
+p_inds = [01,02,06,25];
+% p_inds = [25];
 
 % p_inds = [01];
 
@@ -119,14 +120,14 @@ p_inds = [01,02,25];
 FitFlags = struct;
 
 % Exponential Decay
-FitFlags.expdecay =1;               % Exponential Decay no offset
+FitFlags.expdecay =0;               % Exponential Decay no offset
 FitFlags.expdecayoffset = 0;        % Exponential Decay w/offset
 
 
 FitFlags.T2exp=0;
 
 
-FitFlags.Rabi_oscillation = 0;
+FitFlags.Rabi_oscillation =0;
 FitFlags.Rabi_oscillation2 = 0;
 FitFlags.NGaussPeak=0;
 
@@ -138,7 +139,7 @@ FitFlags.gauss_double = 0;
 FitFlags.gauss_triple = 0;
  
 FitFlags.lorentz_neg_single=0;    
-FitFlags.lorentz_neg_double=1;  
+FitFlags.lorentz_neg_double=0;  
 
 FitFlags.lorentz_single=0;
 FitFlags.lorentz_double=0;    
@@ -164,26 +165,27 @@ custom_data_bm.NatomsBands = src_data.NatomsBands;
 custom_data_bm.X = src_data.X;
 custom_data_bm.XVar = src_data.xVar;
 custom_data_bm.XStr = src_data.xVar;
+xstr                 = src_data.xVar;
 custom_data_bm.XUnit = src_data.Units(1).(src_data.xVar);
 
 if doCustomX
     % Select mF states
-%     mF1 = -7/2;
-%     mF2 = -9/2;
-     
     mF1 = -7/2;
-    mF2 = -5/2;
+    mF2 = -9/2;
+     
+    % mF1 = -7/2;
+    % mF2 = -5/2;
 
-   Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
-%     Bfb   = src_data.Params(1).HF_FeshValue_Spectroscopy;
-%     Bfb   = src_data.Params(1).HF_FeshValue_Final_Lattice;
-    Bshim = src_data.Params(1).HF_zshim_Initial_Lattice*2.35;
-%     Boff  = 0.11;
-    Boff  = 0.11;
-    B = Bfb + Bshim + Boff;
-%     B = 199.5 + 0 + 0.11; 
-
-    
+%    Bfb   = src_data.Params(1).HF_FeshValue_Initial_Lattice;
+% %     Bfb   = src_data.Params(1).HF_FeshValue_Spectroscopy;
+% %     Bfb   = src_data.Params(1).HF_FeshValue_Final_Lattice;
+%     Bshim = src_data.Params(1).HF_zshim_Initial_Lattice*2.35;
+% %     Boff  = 0.11;
+%     Boff  = 0.1238;
+%     B = Bfb + Bshim + Boff;
+% %     B = 199.5 + 0 + 0.11; 
+% 
+% 
     % Transition Energy
     x0 = abs((BreitRabiK(B,9/2,mF1)-BreitRabiK(B,9/2,mF2)))/6.6260755e-34/1E6; 
 

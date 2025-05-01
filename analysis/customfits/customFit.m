@@ -53,7 +53,7 @@ set(gca,'fontsize',12,'linewidth',1,'box','on','xgrid','on','ygrid','on');
 % Y Limits
 yL = get(gca,'YLim');
 ylim(yL);
-ylim([0 yL(2)]);
+% ylim([0 yL(2)]);
 
 % X Limits
 xL = get(gca,'XLim');
@@ -286,8 +286,8 @@ if length(X)>4 && FitFlags.lorentz_neg_double
     xC=X(ind);
 
     % Assign guess
-    xC1 = -5;
-    xC2 = -35;
+    xC1 = 90;
+    xC2 = 110;
     G=[A 20 xC1 A/10 20 xC2 bg];        
 
     opt.StartPoint=G;
@@ -909,7 +909,8 @@ end
 if length(X)>4 && FitFlags.Rabi_oscillation2       
 
     guess_freq = 1/.5;
-    guess_tau = 20;
+    guess_freq = 4;
+    guess_tau = 0.5;
 %     tau2=0.1;
 %     
 %         myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t))/2;           
@@ -925,7 +926,7 @@ myfit=fittype(@(N0,f,tau,tau2,bg,t) myfunc(N0,f,tau,tau2,bg,t),'independent','t'
 opt=fitoptions(myfit);   
 
 
-opt.StartPoint=[max(Y) guess_freq guess_tau 50 -0.3];
+opt.StartPoint=[max(Y) guess_freq guess_tau 0.5 -0.3];
 % opt.Lower=[max(Y)/5 .1 0,0.01,-1];
 % opt.Upper=[max(Y) 100 1000,1000,1];
 

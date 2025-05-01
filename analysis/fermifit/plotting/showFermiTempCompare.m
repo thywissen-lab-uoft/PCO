@@ -258,7 +258,7 @@ for ll=1:size(data.Natoms,2)
         'fontsize',12,'interpreter','latex');  
     
     yL=get(gca,'YLim');
-    yL(2)=min([yL(2) 10]);
+    % yL(2)=min([yL(2) 10]);
     set(gca,'YLim',[0 yL(2)]);
     
     resizeFig(hF,t);

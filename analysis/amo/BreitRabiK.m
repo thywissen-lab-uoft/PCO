@@ -10,6 +10,7 @@ function out = BreitRabiK(B,F,mF)
     h = 6.6260755e-34;
     muB = 9.27400915e-24; % (J/T)
     ahfs = -h*285730800; % is ground state splitting divided by 9/2
+    gJ = 2.00229421; % 1977 reference
     gS = 2.0023193043622; % electron-g (equal to "gJ" since S = J = 1/2)
     gI = 0.000176490; % 40K (Tiecke)
         

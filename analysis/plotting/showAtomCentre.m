@@ -26,14 +26,13 @@ xvals = [params.(xVar)];
 
 PixelSize = data.PixelSize;
 
-
 %% Make Figure
 
 hF=figure('Name',[pad([data.FitType ' centre'],20) FigLabel],...
     'units','pixels','color','w','numbertitle','off');
 hF.Position(1)=510;
 hF.Position(2)=380;
-hF.Position(3)=500;
+hF.Position(3)=750;
 hF.Position(4)=600;
 drawnow;
 
@@ -51,7 +50,7 @@ uicontrol('style','text','string','PCO','units','pixels','backgroundcolor',...
 resizeFig(hF,t)
 
 %% Track X
-hax1=subplot(221);
+hax1=subplot(2,3,[1 2]);
 set(hax1,'box','on','linewidth',1,'fontsize',10,...
     'xgrid','on','ygrid','on');
 hold on
@@ -82,7 +81,7 @@ text(0.02,.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',.
 
 %% Table X
 
-a=subplot(222);
+a=subplot(2,3,3);
 pos=get(a,'position');
 delete(a)
 
@@ -96,7 +95,7 @@ drawnow;
 
 %% Track Y
 
-hax2=subplot(223);
+hax2=subplot(2,3,[4 5]);
 set(hax2,'box','on','linewidth',1,'fontsize',10,...
     'xgrid','on','ygrid','on');
 hold on
@@ -150,7 +149,7 @@ text(0.02,0.98,str,'units','normalized','fontsize',12,'verticalalignment','cap',
 yyaxis left
 %% Table Y
 
-a=subplot(224);
+a=subplot(2,3,6);
 pos=get(a,'position');
 delete(a)
 
@@ -238,106 +237,139 @@ drawnow;
     
 
 if isequal(opts.CenterDecaySineFit,1) && length(xvals)>4
-    tVec=linspace(min(xvals),max(xvals),100);    
-    
+    tVec=linspace(min(xvals),max(xvals),1000);        
     % X Fit
     axes(hax1);
     fit1=makeSineDecayFit(xvals',Xc(:,nn));
     plot(tVec,feval(fit1,tVec),'r-');  
-
     sTblX.ColumnWidth={60 60 60};
     sTblY.ColumnWidth={60 60 60};
 
     cX=coeffvalues(fit1);
-    cIntX=confint(fit1);
-    
-    
+    cIntX=confint(fit1);      
 
+    
+    % sTblX.Data={};
+    % tbl_data{1,1}='amp (px)';
+    % tbl_data{2,1}='period';
+    % tbl_data{3,1}='freq';
+    % tbl_data{4,1}='phase (rad)';
+    % tbl_data{5,1}='offset (px)';
+    % tbl_data{6,1}='tau ';
+    % tbl_data{1,2}=cX(1);
+    % tbl_data{2,2}=cX(2);
+    % tbl_data{3,2}=1/cX(2);
+    % tbl_data{4,2}=cX(3);
+    % tbl_data{5,2}=cX(4);
+    % tbl_data{6,2}=cX(5);    
+    % tbl_data{7,1}='<HTML> &Delta;X (px)</HTML>';
+    % tbl_data{7,2}=range(Xc(:,nn));
+    % tbl_data{8,1}='<HTML> Mean(x) </HTML>';
+    % tbl_data{8,2}=mean(Xc(:,nn));  
+    % tbl_data{1,3}=range(cIntX(:,1))/2;
+    % tbl_data{2,3}=range(cIntX(:,2))/2;
+    % tbl_data{3,3}=(range(cIntX(:,2))/2)/cX(2)^2;
+    % tbl_data{4,3}=range(cIntX(:,3))/2;
+    % tbl_data{5,3}=range(cIntX(:,4))/2;
+    % tbl_data{6,3}=range(cIntX(:,5))/2;    
+    % sTblX.Data=tbl_data;
+    % sTblX.Position(3)=sTblX.Extent(3);
+    % sTblX.Position(4)=sTblX.Extent(4); 
     
     sTblX.Data={};
-    tbl_data{1,1}='amp (px)';
-    tbl_data{2,1}='period';
-    tbl_data{3,1}='freq';
+    tbl_data{1,1} ='amp (px)';
+    tbl_data{2,1} ='freq';
+    tbl_data{3,1} ='phase (rad)';
+    tbl_data{4,1} ='offset (px)';
+    tbl_data{5,1} ='tau ';
 
-    tbl_data{4,1}='phase (rad)';
-    tbl_data{5,1}='offset (px)';
-    tbl_data{6,1}='tau ';
+    tbl_data{1,2} = cX(1);
+    tbl_data{2,2} = cX(2);
+    tbl_data{3,2} = cX(3);
+    tbl_data{4,2} = cX(4);
+    tbl_data{5,2} = cX(5);    
 
-    tbl_data{1,2}=cX(1);
-    tbl_data{2,2}=cX(2);
-    tbl_data{3,2}=1/cX(2);
-
-    tbl_data{4,2}=cX(3);
-    tbl_data{5,2}=cX(4);
-    tbl_data{6,2}=cX(5);
-    
-    tbl_data{7,1}='<HTML> &Delta;X (px)</HTML>';
-    tbl_data{7,2}=range(Xc(:,nn));
-    tbl_data{8,1}='<HTML> Mean(x) </HTML>';
-    tbl_data{8,2}=mean(Xc(:,nn));
-    
-    
     tbl_data{1,3}=range(cIntX(:,1))/2;
     tbl_data{2,3}=range(cIntX(:,2))/2;
-    tbl_data{3,3}=(range(cIntX(:,2))/2)/cX(2)^2;
-    tbl_data{4,3}=range(cIntX(:,3))/2;
-    tbl_data{5,3}=range(cIntX(:,4))/2;
-    tbl_data{6,3}=range(cIntX(:,5))/2;
-    
-    
-    
-    
+    tbl_data{3,3}=range(cIntX(:,3))/2;
+    tbl_data{4,3}=range(cIntX(:,4))/2;
+    tbl_data{5,3}=range(cIntX(:,5))/2;  
+
+    tbl_data{6,1} = '<HTML> &Delta;X (px)</HTML>';
+    tbl_data{6,2} = max(Xc(:,nn))-min(Xc(:,nn));
+    tbl_data{7,1} = '<HTML> Mean(x) </HTML>';
+    tbl_data{7,2} = mean(Xc(:,nn));  
+
     sTblX.Data=tbl_data;
     sTblX.Position(3)=sTblX.Extent(3);
     sTblX.Position(4)=sTblX.Extent(4); 
     
+
     % Y Fit
-    tbl_data={};
-    
-    
+    tbl_data={};       
     axes(hax2);
     fit2=makeSineDecayFit(xvals',Yc(:,nn));
-    cIntY=confint(fit2);
-    
-
-    
+    cIntY=confint(fit2);      
     plot(tVec,feval(fit2,tVec),'r-');  
-
     cY=coeffvalues(fit2);
     
+    % sTblY.Data={};
+    % tbl_data{1,1}='amp (px)';
+    % tbl_data{2,1}='period';
+    % tbl_data{3,1}='freq';
+    % tbl_data{4,1}='phase (rad)';
+    % tbl_data{5,1}='offset (px)';
+    % tbl_data{6,1}='tau ';
+    % tbl_data{1,2}=cY(1);
+    % tbl_data{2,2}=cY(2);
+    % tbl_data{3,2}=1/cY(2);
+    % tbl_data{4,2}=cY(3);
+    % tbl_data{5,2}=cY(4);
+    % tbl_data{6,2}=cY(5);           
+    % tbl_data{1,3}=range(cIntY(:,1))/2;
+    % tbl_data{2,3}=range(cIntY(:,2))/2;
+    % tbl_data{3,3}=(range(cIntY(:,2))/2)/cY(2)^2;
+    % tbl_data{4,3}=range(cIntY(:,3))/2;
+    % tbl_data{5,3}=range(cIntY(:,4))/2;
+    % tbl_data{6,3}=range(cIntY(:,5))/2;    
+    % tbl_data{7,1}='<HTML> &Delta;Y (px)</HTML>';
+    % tbl_data{7,2}=range(Yc(:,nn));
+    % tbl_data{8,1}='<HTML> Mean(y) </HTML>';
+    % tbl_data{8,2}=mean(Yc(:,nn));    
+    % sTblY.Data=tbl_data;
+    % sTblY.Position(3)=sTblY.Extent(3);
+    % sTblY.Position(4)=sTblY.Extent(4); 
+
+
     sTblY.Data={};
-    tbl_data{1,1}='amp (px)';
-    tbl_data{2,1}='period';
-    tbl_data{3,1}='freq';
-    tbl_data{4,1}='phase (rad)';
-    tbl_data{5,1}='offset (px)';
-    tbl_data{6,1}='tau ';
+    tbl_data{1,1} ='amp (px)';
+    tbl_data{2,1} ='freq';
+    tbl_data{3,1} ='phase (rad)';
+    tbl_data{4,1} ='offset (px)';
+    tbl_data{5,1} ='tau ';
 
-    tbl_data{1,2}=cY(1);
-    tbl_data{2,2}=cY(2);
-    tbl_data{3,2}=1/cY(2);
+    tbl_data{1,2} = cY(1);
+    tbl_data{2,2} = cY(2);
+    tbl_data{3,2} = cY(3);
+    tbl_data{4,2} = cY(4);
+    tbl_data{5,2} = cY(5);    
 
-    tbl_data{4,2}=cY(3);
-    tbl_data{5,2}=cY(4);
-    tbl_data{6,2}=cY(5);
-    
-    
-        
     tbl_data{1,3}=range(cIntY(:,1))/2;
     tbl_data{2,3}=range(cIntY(:,2))/2;
-    tbl_data{3,3}=(range(cIntY(:,2))/2)/cY(2)^2;
-    tbl_data{4,3}=range(cIntY(:,3))/2;
-    tbl_data{5,3}=range(cIntY(:,4))/2;
-    tbl_data{6,3}=range(cIntY(:,5))/2;
-    
-    tbl_data{7,1}='<HTML> &Delta;Y (px)</HTML>';
-    tbl_data{7,2}=range(Yc(:,nn));
-    tbl_data{8,1}='<HTML> Mean(y) </HTML>';
-    tbl_data{8,2}=mean(Yc(:,nn));
-    
+    tbl_data{3,3}=range(cIntY(:,3))/2;
+    tbl_data{4,3}=range(cIntY(:,4))/2;
+    tbl_data{5,3}=range(cIntY(:,5))/2;  
+
+    tbl_data{6,1} = '<HTML> &Delta;Y (px)</HTML>';
+    tbl_data{6,2} = max(Yc(:,nn))-min(Yc(:,nn));
+    tbl_data{7,1} = '<HTML> Mean(y) </HTML>';
+    tbl_data{7,2} = mean(Yc(:,nn));  
+
     sTblY.Data=tbl_data;
     sTblY.Position(3)=sTblY.Extent(3);
-    sTblY.Position(4)=sTblY.Extent(4); 
+    sTblY.Position(4)=sTblY.Extent(4);    
+
+
     drawnow;
 end
 
@@ -544,87 +576,200 @@ for nn=1:size(Xc,2)
    plot(Xc(:,nn),Yc(:,nn),m,'color',co(nn,:),'linewidth',1,'markersize',8,...
        'markerfacecolor',co(nn,:),'markeredgecolor',co(nn,:)*.5);   
 end
-
+% 
 yLCam = [yL yH]+(yH-yL)*.1*[-1 1];
-
+% 
 yyaxis left
 ylim(yLCam);
 
-yyaxis right
-ylim(yLCam+1024);
+% yyaxis right
+% ylim(yLCam+1024);
 
-% if opts.angleTrack
-%     fit_xy=polyfit(Xc(:,1),Yc(:,1),1);
-%     xx=linspace(min(Xc(:,1)),max(Xc(:,1)),100);
+if isfield(opts,'CenterXYLinearFit') && opts.CenterXYLinearFit
+    myfit = fittype('m*x+y0','independent','x','coefficients',{'m','y0'});
+    fitopt = fitoptions(myfit);
+    x = Xc(:,1);
+    y = Yc(:,1);
+
+    mGuess = (max(y)-min(y))/(max(x)-min(x));
+    fitopt.StartPoint = [mGuess 0];
+
+    fout = fit(x,y,myfit,fitopt);
+% keyboard
+    % % fit_xy=polyfit(Xc(:,1),Yc(:,1),1);
+    % xx=linspace(min(Xc(:,1)),max(Xc(:,1)),100);
+
+    % theta = atan(1/fit_xy(1))*180/pi;
 % 
-%     theta = atan(1/fit_xy(1))*180/pi;
-% 
-%     pf=plot(xx,polyval(fit_xy,xx),'r-','linewidth',1);  
-%     str = ['$\theta = ' num2str(round(theta,2)) '^\circ$'];
-%     legend(pf,{str},'location','best','interpreter','latex');
-%     
-% %     text(5,5,str,'units','pixels','interpreter','latex','verticalalignment','bottom',...
-% %         'backgroundcolor',);
-% end
+    pf=plot(x,feval(fout,x),'r-','linewidth',1);  
+    str = ['$y=mx+y0$' newline '(m='  num2str(fout.m,'%.3e') ',b=' num2str(round(fout.y0,1))];
+    legend(pf,{str},'location','best','interpreter','latex');
+    % text(5,5,str,'units','pixels','interpreter','latex','verticalalignment','bottom',...
+        % 'backgroundcolor',);
+end
+
+    
+
+
 
 resizeFig(hF2,t)
 end
+% 
+% function fitResult=makeSineDecayFit(X,Y,W)
+% 
+% % Guess the amplitude and offset
+% gA=0.5*range(Y);
+% gD=(max(Y)+min(Y))*.5;
+% 
+% % Guess the period
+% iHigh=find((Y-gD)/gA>.8,1);
+% iLow=find((Y-gD)/gA<-.8,1);
+% gB=abs(X(iHigh)-X(iLow))*2.2;
+% 
+% % gB=8;
+% 
+% minValues=X(Y==min(Y));
+% maxValues=X(Y==max(Y));
+% % gB=1*abs(maxValues(1)-minValues(1));
+% gB=range(X)/2;
+% 
+% gB = 3;
+% 
+% gB = 1e3/278;
+% 
+% 
+% gC=maxValues(1);
+% gC=pi;
+% gD=0.5*(max(Y)+min(Y));
+% 
+% gC=3*pi/2;
+% gE = range(X)*10;
+% 
+% % Correlation Measurement
+% f1=.020;
+% f2=.500;
+% nf=1000;
+% fVec = linspace(f1,f2,nf);
+% clear CC
+% for nn=1:nf
+%     fme = fVec(nn);
+% 
+%     Yf = exp(1i*2*pi*fme*X);
+%     CC(nn) = sum(Yf.*Y);
+% end
+% 
+% cosFit=fittype('A*cos(2*pi*t/B+C)*exp(-t/E)+D','independent',{'t'},...
+%     'coefficients',{'A','B','C','D','E'});
+% options=fitoptions(cosFit);          
+% 
+%         options.TolFun = 1E-14;
+%         options.Lower  = [0.5*gA,...
+%             .1*gB,...
+%             0, ...
+%             0.75*gD, ...
+%             100];
+%         options.Upper  = [2*gA, ...
+%             20*gB,...
+%             2*pi, ...
+%             1.5*gD, ...
+%             inf];
+%         options.StartPoint = [gA, gB,...
+%             gC,gD, gE];
+%         options.MaxIter = 3000;
+%         options.MaxFunEvals = 3000;
+%         options.TolFun = 1E-9;
+% 
+%         if nargin==3
+%            options.Weights = W;
+%         end        
+% 
+% 
+%         fitResult=fit(X,Y,cosFit,options);      
+% 
+% disp(fitResult)
+% end
+% 
 
 function fitResult=makeSineDecayFit(X,Y,W)
 
-% Guess the amplitude and offset
-gA=0.5*range(Y);
-gD=(max(Y)+min(Y))*.5;
+% GUESS : AMPLITUDE
+guess_amp = 0.5*range(Y);
 
-% Guess the period
-iHigh=find((Y-gD)/gA>.8,1);
-iLow=find((Y-gD)/gA<-.8,1);
-gB=abs(X(iHigh)-X(iLow))*2.2;
+% GUESS : OFFSET
+guess_off = (max(Y)+min(Y))*.5;
 
-% gB=8;
+% GUESS : FREQUENCY
+dX = diff(sort(unique(X),'ascend'));
+dXMin = min(dX);             % Minimum separation sets highest freq
+dXMax = max(X) - min(X);     % Total range sets lowest freq
 
-minValues=X(Y==min(Y));
-maxValues=X(Y==max(Y));
-% gB=1*abs(maxValues(1)-minValues(1));
-% gB=range(X)/2;
-gB = 1/0.130;
+% Set reasonable frequency guess bounds
+freq_min = 1.5*(1/dXMax);
+freq_max = 0.2*(1/dXMin);
+% freq_min = 0.03;
+% freq_max = 0.05;
+N=1e4;
+
+% Do a correlation measurement with the frequency vector
+fVec = linspace(freq_min,freq_max,N);
+CC=zeros(N,1);
+Yosc = Y(:)-guess_off;
+for nn=1:N
+    fme = fVec(nn);
+    Yf = exp(1i*2*pi*fme*X(:));
+    CC(nn) = sum(Yf.*Yosc);
+end
+
+% Find the index whose frequency has the highest correlation
+[~,ind] = max(abs(CC).^2);
+
+% Get the frequency
+guess_freq = fVec(ind);
+% Get the phase
+guess_phi = atan2(imag(CC(ind)),real(CC(ind))); 
+
+% keyboard
+
+% Tau Guess
+guess_tau = max(X) - min(X);
 
 
+% Override Guess
+% guess_tau = 1000;           % manual override
+% guess_freq = .3; % manual overide
 
-gC=maxValues(1);
-gC=pi;
-gD=0.5*(max(Y)+min(Y));
 
-gC=pi;
-gE = range(X)*2;
-
-cosFit=fittype('A*cos(2*pi*t/B+C)*exp(-t/E)+D','independent',{'t'},...
-    'coefficients',{'A','B','C','D','E'});
+cosFit=fittype('amp*cos(2*pi*freq*t-phi)*exp(-t/tau)+off','independent',{'t'},...
+    'coefficients',{'amp','freq','phi','tau','off'});
 options=fitoptions(cosFit);          
-        set(options, 'TolFun', 1E-14);
-        set(options,'Lower', [0.25*gA,...
-            .1*gB,...
-            0, ...
-            0.75*gD, ...
-            0]);
-        set(options, 'Upper', [5*gA, ...
-            20*gB,...
-            2*pi, ...
-            1.5*gD, ...
-            inf]);            
-        set(options, 'StartPoint', [gA, gB,...
-            gC,gD, gE]);     
-        set(options, 'MaxIter',3000);
-        set(options, 'MaxFunEvals',3000);
-        set(options,'TolFun',10^-9);
-        
-        if nargin==3
-           set(options,'Weights',W); 
-        end        
-        
-        
-        fitResult=fit(X,Y,cosFit,options);      
-        
-disp(fitResult)
+
+options.TolFun = 1E-14;
+options.Lower  = [...
+    0.5*guess_amp,...
+    .5*guess_freq,...
+    guess_phi-pi, ...
+    guess_tau*0.1, ...
+    guess_off-100];
+options.Upper  = [...
+    2*guess_amp, ...
+    2.0*guess_freq,...
+    guess_phi+pi, ...
+    guess_tau*20, ...
+    guess_off+100];
+options.StartPoint = [guess_amp, guess_freq,...
+    guess_phi,guess_tau, guess_off];
+options.MaxIter = 3000;
+options.MaxFunEvals = 3000;
+options.TolFun = 1E-9;
+
+if nargin==3
+   options.Weights = W;
+end                
+
+fitResult=fit(X,Y,cosFit,options);             
+disp(fitResult);
+
+
+
 end
 
