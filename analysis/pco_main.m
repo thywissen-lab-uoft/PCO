@@ -44,10 +44,10 @@ disp('Setting global settings for analysis...');
 lambdaRb=780E-9;lambdaK=770E-9;   % Rb and K wavelengths             
 lambda=mean([lambdaRb lambdaK]);  % mean wavelength      
 CrossSection = 3/(2*pi)*lambda^2; 
-
+ 
 
 % Choose your camera
-camaxis='X';
+camaxis='X'; 
   % camaxis='Y';
 % Choose the pixel size base on the camera
 switch camaxis
@@ -72,12 +72,14 @@ pco_xVar = 'mt_hold_time';
 % pco_xVar = 'lattice_rf_freq_shift';
 % pco_xVar ='mt_hold_time';
 pco_xVar = 'ExecutionDate';
-pco_xVar = 'xdtb_rf_freq_shift';
-% pco_xVar = 'xdt_power_scale';
+pco_xVar = 'lattice_RF_spec_frequency';
+% pco_xVar = 'Raman_DP_freq_shift';
+% pco_xVar = 'xdtb_rf_freq';
+% pco_xVar = 'xdtb_rf_freq_shift';
+% pco_xVar = 'RF_hold';
 
 % Should the analysis attempt to automatically find the xvariable?
 pco_autoXVar = 1;
-
 % Should the analysis attempt to automatically find the unit?
 pco_autoUnit = 1;
 
@@ -112,7 +114,7 @@ doBoxCount      = 0;      % Box count analysis
 
 % Gaussian Fit
 % Fit to a gaussian distribution (thermal cloud)
-doGaussFit      = 0;      % Enable gauss fitting
+doGaussFit      = 0;     % Enable gauss fitting
 
 % Erf Fit
 doErfFit        = 0;    
@@ -138,7 +140,7 @@ doGaussRabi     = 0;      % Enable gauss rabi
 doBEC           = 0;      % Enable BEC analys
 
 % Landau Zener Analysis
-doLandauZener   =  0;         
+doLandauZener   =  1;         
 
 % Raman box count count analyis
 doRamanSpec   =0;    
@@ -337,7 +339,7 @@ X_ROI_LATT_SG_15ms = [];
 %     
 % end
 
-%%
+%% RF1b
 if isfield(data.Flags,'xdt') && ~(data.Flags.xdt)    
     %%%%%%% RF1A X CAM
     % ROI = [429 1381 104 1004]; % RF1A 15ms TOF
@@ -356,7 +358,7 @@ if isfield(data.Flags,'xdt') && ~(data.Flags.xdt)
 %              ROI = [750 1250 200 500];     % XDT 15ms TOF
 
 
-%      ROI = [750 1250 100 300];     % 5ms TOF    
+     % ROI = [750 1250 100 400];     % 5ms TOF    
     ROI = [750 1250 100 600];     % RF1B 15ms TOF
 end
 
@@ -468,7 +470,6 @@ if doFermiFitLong || doBEC
     end
 
 end
-ROI=[900 1050 550 725];
 %%
 
 if isfield(data(1).Flags,'HF_Imaging') && data(1).Flags.HF_Imaging

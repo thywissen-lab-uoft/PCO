@@ -49,6 +49,7 @@ end
 xlabel(opts.xstr,'interpreter','none');
 
 set(gca,'fontsize',12,'linewidth',1,'box','on','xgrid','on','ygrid','on');
+xscale('log');
 
 % Y Limits
 yL = get(gca,'YLim');
@@ -192,6 +193,38 @@ if FitFlags.expdecayoffset
     t=text(.02,.03,str,'units','normalized',...
         'fontsize',10,'interpreter','latex');
 end
+
+%% Two-body decay with offset
+if FitFlags.twobodydecayoffset
+    myfit=fittype('1/(A1+t/tau)+A0',...
+        'coefficients',{'A1','A0','tau'},...
+        'independent','t');
+
+    % Fit options and guess
+    opt=fitoptions(myfit);        
+    Ag = range(Y);
+    A0 = min(X);
+    taug = mean(X);
+    
+    G=[Ag A0 taug];        
+    opt.StartPoint=G;
+    opt.Lower= [0 0 0];
+
+    % Perform the fit
+    fout=fit(X,Y,myfit,opt);
+
+    % Plot the fit
+    tt=linspace(0,max(X),1000);
+    xlim([0 max(X)]);
+    pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
+    lStr=['$ \tau = ' num2str(round(fout.tau,3)) '~\mathrm{ms}$' newline ...
+        '$A_1 = ' num2str(fout.A1,'%.3e') '$' newline ...
+         '$A_0 = ' num2str(fout.A0,'%.3e') '$'];
+    legend(pF,lStr,'location','best','interpreter','latex');        
+    str = '$A_1\exp(-t/\tau)+A_0$';
+    t=text(.02,.03,str,'units','normalized',...
+        'fontsize',10,'interpreter','latex');
+end
 %% Negative Double Gauss
 if length(X)>8 && FitFlags.gauss_neg_double
     myfit=fittype(['bg-A1*exp(-(x-x1).^2/(2*s1.^2))- ' ...
@@ -286,13 +319,17 @@ if length(X)>4 && FitFlags.lorentz_neg_double
     xC=X(ind);
 
     % Assign guess
-    xC1 = 90;
-    xC2 = 110;
-    G=[A 20 xC1 A/10 20 xC2 bg];        
+    xC1 = 60;
+    xC2 = 70;
+
+    G=[A .02 xC1 A/10 .02 xC2 bg];        
+    G = [0.5 5 5 0.1 5 -60 bg];
+     G = [A 10 xC1 A 10 xC2 bg];
 
     opt.StartPoint=G;
     opt.Robust='bisquare';
     opt.Lower=[0 0 -inf 0 0 -inf 0];
+    opt.upper=[A*1.1 inf inf inf inf inf inf]
 
     % Perform the fit
     fout=fit(X,Y,myfit,opt);
@@ -491,9 +528,16 @@ if length(X)>4 && FitFlags.lorentz_neg_single
     A=bg-Ymin;   
     A=range(Y);
     xC=X(ind);
+    xC =32.6115; 132.13;
+    xC = 0;
+    % xC = 132.01;
+    
+    w = 0.001;
+    w = 10;
+    % w = 0.01;
 
     % Assign guess
-    G=[A 0.04 -49.55 bg];
+    G=[A w xC bg];[A 0.04 xC bg];
     opt.StartPoint=G;
 
     % Perform the fit
@@ -516,20 +560,25 @@ if length(X)>4 && FitFlags.lorentz_double
     opt=fitoptions(myfit);
 
     % Background is max
-    bg=max(Y);
+    bg=min(Y);
 
     % Find center
-    [Ymin,ind]=min(Y);
-    A=bg-Ymin;        
+    [Ymax,ind]=max(Y);
+    A=Ymax-bg;        
     xC=X(ind);
 
     % Assign guess
-    G=[A 30 -160 A 30 -135 bg];
+    G=[0.1 2.5 -2.8 0.5 2.5 -2 bg];
+    G=[A/10 20 50 10 10 -2 bg];
+    % Gr=[1e3 20 0 2e4 10 -60 bg];
+    % G = [0.5 0.05 32.605 0.05 0.05 32.58 bg];
 
 
     opt.StartPoint=G;
     opt.Robust='bisquare';
-    opt.Lower=[0 0 -inf 0 0 -inf 0];
+    opt.Lower=[0 5 -inf 0 0 -inf -inf];
+    opt.Upper=[A/4 30 inf inf inf inf inf];
+
 
     % Perform the fit
     fout=fit(X,Y,myfit,opt);
@@ -539,7 +588,7 @@ if length(X)>4 && FitFlags.lorentz_double
     tt=linspace(min(X),max(X),1000);
     pF=plot(tt,feval(fout,tt),'r-','linewidth',1);
     lStr=['xC=(' num2str(round(fout.x1,1)) ',' num2str(round(fout.x2,1)) ')' ...
-        ' FWHM=(' num2str(round(fout.G1,1)) ',' num2str(round(fout.G2,1)) ')' ];
+        ' FWHM=(' num2str(round(fout.G1,1)) ',' num2str(round(fout.G2,1)) ')'];
     legend(pF,lStr,'location','best');
 end
 
@@ -560,11 +609,11 @@ if length(X)>4 && FitFlags.lorentz_triple
 
     % Assign guess
     G=[0.7 100 -220 0.7 100 -100 0.75 30 15 bg];
-
+    G=[0.2 13 -60 0.7 10 0 0.2 10 50 bg];
 
     opt.StartPoint=G;
     opt.Robust='bisquare';
-    opt.Lower=[0 0 -inf 0 0 -inf 0];
+    % opt.Lower=[-1 0 -inf -1 0 -inf 0];
 
     % Perform the fit
     fout=fit(X,Y,myfit,opt);
@@ -681,6 +730,7 @@ if length(X)>4 && FitFlags.lorentz_asym_single
 
     % Linewidth
     G1=30;
+    G1=2.5;
 
     % Contrast
     A1 = range(Y);
@@ -688,11 +738,11 @@ if length(X)>4 && FitFlags.lorentz_asym_single
     % Center Point
     inds=[Y>.99*max(Y)];         
     x1=mean(X(inds)); 
-    x1 = -150;
+    x1 = 0;
 
     % Assymetry
     a1 = 1/-0.05; % Long on right
-%         a1 = +0.05; % Long on left
+    a1 = +0.05; % Long on left
 
     opt.StartPoint=[bg a1 x1 G1 A1];  
     opt.Robust='bisquare';
@@ -801,11 +851,11 @@ if length(X)>4 && FitFlags.lorentz_single
     A1=(max(Y)-min(Y));
     inds=[Y>.8*max(Y)];
     x0=mean(X(inds));
-    G0 = 2.5;
-    x0 = -2.5;
+    x0=-2.95
+    G0 = 20;
     
-    opt.StartPoint=[A1/10 G0 x0 bg];   
-        opt.Upper=[A1*1.1 3*G0 x0+range(X) 0];   
+    opt.StartPoint=[A1 G0 x0 bg];   
+    opt.Upper=[A1*1.1 3*G0 x0+range(X) inf];   
 
     opt.Robust='bisquare';
 
@@ -908,27 +958,27 @@ end
 
 if length(X)>4 && FitFlags.Rabi_oscillation2       
 
-    guess_freq = 1/.5;
-    guess_freq = 4;
-    guess_tau = 0.5;
+    guess_freq = 80;25;
+    %guess_freq = 4;
+    guess_tau = 3;
 %     tau2=0.1;
 %     
 %         myfunc=@(N0,f,tau,t) N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t))/2;           
 %         fitFuncStr = '$0.5N_0\left(1-\exp(-\pi t / \tau)\cos(2 \pi f t)\right)$';
 
-myfunc=@(N0,f,tau,tau2,bg, t) (N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t))/2)+bg.*exp(-t/tau2);   
+myfunc=@(N0,f,tau,tau2,bg, phi,t) (N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t+phi))/2)+bg.*exp(-t/tau2);   
 fitFuncStr = '$N_0\left(1-\exp(-\pi t / \tau)\cos(2 \pi f t)\right)\exp(-t/\tau_2)+bg$';
 
 
 % Define the fit
-myfit=fittype(@(N0,f,tau,tau2,bg,t) myfunc(N0,f,tau,tau2,bg,t),'independent','t',...
-    'coefficients',{'N0','f','tau','tau2','bg'});
+myfit=fittype(@(N0,f,tau,tau2,bg,phi,t) myfunc(N0,f,tau,tau2,bg,phi,t),'independent','t',...
+    'coefficients',{'N0','f','tau','tau2','bg','phi'});
 opt=fitoptions(myfit);   
 
 
-opt.StartPoint=[max(Y) guess_freq guess_tau 0.5 -0.3];
-% opt.Lower=[max(Y)/5 .1 0,0.01,-1];
-% opt.Upper=[max(Y) 100 1000,1000,1];
+opt.StartPoint=[max(Y) guess_freq guess_tau guess_tau -0.3 0];
+% opt.Lower=[max(Y)/5 .1 0 0.01 -1 0];
+% opt.Upper=[max(Y)*2 100 1000 1000 1 2*pi];
 
 opt.Robust='bisquare';
 
@@ -940,6 +990,62 @@ paramStr=['$N_0=' num2str(fout.N0,2) ',~f=' num2str(round(fout.f,2)) ...
     '~\mathrm{kHz},~\tau=' num2str(round(fout.tau,2)) '~\mathrm{ms}' ...
     ', bg=' num2str(round(fout.bg,2))...
     ', \tau_2=' num2str(round(fout.tau2,2))...
+    '$'];
+
+tt=linspace(0,max(X),1000);
+ pF=plot(tt,feval(fout,tt),'r-','linewidth',3);
+
+text(.45,.90,fitFuncStr,'units','normalized','interpreter','latex',...
+    'horizontalalignment','right','fontsize',14);
+
+xL=get(gca,'XLim');
+yL=get(gca,'YLim');
+
+% xlim([0 0.2]);
+% ylim([0 yL(2)+.1]);
+
+legend(pF,paramStr,'location','northeast','interpreter','latex');
+outdata.Fit=fout;
+
+end
+
+%% Rabi two freq
+
+if length(X)>4 && FitFlags.Rabi_oscillation_two_tone 
+
+    guess_freq = 80;25;
+    %guess_freq = 4;
+    guess_tau = 3;
+%     tau2=0.1;
+%     
+
+myfunc=@(N0,f,tau,bg, phi,N02,f2,tau2,t) (N0*(1 - exp(-pi*t/tau).*cos(2*pi*f*t+phi))/2)+(N02*(1 - exp(-pi*t/tau2).*cos(2*pi*f2*t))/2)+bg;   
+fitFuncStr = '$N_0\left(1-\exp(-\pi t / \tau)\cos(2 \pi f t)\right)\exp(-t/\tau_2)+bg$';
+
+
+% Define the fit
+myfit=fittype(@(N0,f,tau,bg,phi,N02,f2,tau2,t) myfunc(N0,f,tau,bg,phi,N02,f2,tau2,t),'independent','t',...
+    'coefficients',{'N0','f','tau','bg','phi','N02','f2','tau2'});
+opt=fitoptions(myfit);   
+
+
+opt.StartPoint=[max(Y) guess_freq guess_tau guess_tau -0.3 0];
+opt.StartPoint=[0.5 45 3.8 -0.35 0 0.5 10 0.2];
+opt.StartPoint=[-0.5 11 0.4 -0.35 0 -0.5 5.6 0.5];
+% opt.Lower     =[0 .1 0 -inf 0 0 0.1 0.5];
+% opt.Upper     =[10*max(abs(Y)) 1000 10000 max(abs(Y))*10 0 10*max(abs(Y)) 1000 10000];
+
+opt.Robust='bisquare';
+
+% Perform the fit
+fout=fit(X,Y,myfit,opt);
+% Construct fit strings
+omega_rabi=2*pi*fout.f; 
+paramStr=['$N_0=' num2str(fout.N0,2) ',~f=' num2str(round(fout.f,2)) ...
+    '~\mathrm{kHz},~\tau=' num2str(round(fout.tau,2)) '~\mathrm{ms}' ...
+    ', bg=' num2str(round(fout.bg,2))...
+    ', N_{02}=' num2str(fout.N02,2) ',~f_2=' num2str(round(fout.f2,2)) ...
+    '~\mathrm{kHz},~\tau_2=' num2str(round(fout.tau2,2)) '~\mathrm{ms}' ...
     '$'];
 
 tt=linspace(0,max(X),1000);

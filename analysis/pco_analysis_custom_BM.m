@@ -53,38 +53,38 @@ y_Lbl{27}     = 'N7pH/(N7pH+N9pH)';
 %%%%%%%%%% Relative ground band only
 y_Lbl{28}     = 'N9s/(N7s+N9s)';
 y_Lbl{29}     = 'N7s/(N7s+N9s)';
-
-
 %%%%%%%%%% N7/N9
 y_Lbl{30}     = 'N7/N9';
-
 %%%%%%%%%% relative excited
 y_Lbl{31}     = 'Ne/Ntot';
-
 y_Lbl{32}     = 'Ns/Ntot';
-
-
+%%%%%%%%%% ground band
 y_Lbl{33}     = 'Ns';
+%%%%%%%%% Relative differential excited
+y_Lbl{34}     = '(N9p-N7p)/(N7+N9)';
+y_Lbl{35}     = '(N7p-N9p)/(N7+N9)';
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%% Choose what to plot %%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % p_inds is a list where each element is a plot idnex to show. The 
 % number corresponds to the plot index as defined above. 
-% p_inds=[01 02]; %total number
-
-% p_inds=[05];
 
 % Excitations to 7
 % p_inds = [01,02,03,04];
 %  p_inds = [01,02,03,04,05,06];
 
-%p_inds=[02,04,05,01,25];
 
-p_inds=[01,02,25,31,32,33,4];
+% positive 
+p_inds = [01,06,26,34];
 
-p_inds=[25,32,33];
-p_inds = [01,02,06,25];
-% p_inds = [25];
+% % negative
+% p_inds = [02,25,27];
+p_inds = [25];
+
+% All
+p_inds = [01,02,03,04,06,25,26,27,34];
+
 
 % p_inds = [01];
 
@@ -123,12 +123,16 @@ FitFlags = struct;
 FitFlags.expdecay =0;               % Exponential Decay no offset
 FitFlags.expdecayoffset = 0;        % Exponential Decay w/offset
 
+% Two-body decay
+FitFlags.twobodydecayoffset =0;
+
 
 FitFlags.T2exp=0;
 
 
 FitFlags.Rabi_oscillation =0;
 FitFlags.Rabi_oscillation2 = 0;
+FitFlags.Rabi_oscillation_two_tone = 0;
 FitFlags.NGaussPeak=0;
 
 FitFlags.gauss_single=0;
@@ -183,7 +187,7 @@ if doCustomX
 % %     Boff  = 0.11;
 %     Boff  = 0.1238;
 %     B = Bfb + Bshim + Boff;
-% %     B = 199.5 + 0 + 0.11; 
+    B = 199.5 + 0 + 0.11; 
 % 
 % 
     % Transition Energy
@@ -408,6 +412,17 @@ Y(32).Y          = (N7s+N9s)./(N7+N9);
 Y(33).YName      = y_Lbl{33};
 Y(33).FigName    = 'bm_custom_Ns';
 Y(33).Y          = (N7s+N9s);
+
+%%%% Relative differential excited
+Y(34).YName      = y_Lbl{34};
+Y(34).FigName    = 'bm_custom_diff_9pH7pH_rel';
+Y(34).Y          = (N9pH-N7pH)./N0;
+
+%%%% Relative differential excited
+Y(35).YName      = y_Lbl{35};
+Y(35).FigName    = 'bm_custom_diff_7p9p_rel';
+Y(35).Y          = -(N9pH+N9pV-N7pH-N7pV)./N0;
+
 
 % Assign to output
 custom_data_bm.Y = Y;

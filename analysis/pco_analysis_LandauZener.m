@@ -8,9 +8,9 @@
 % Select the data source
 
 % data_source = 'box';
-data_source = 'gauss';
+% data_source = 'gauss';
 % data_source = 'erf';
-% data_source = 'bm';
+data_source = 'bm';
 
 switch data_source
     case 'box'        
@@ -42,6 +42,10 @@ if doLandauZener && size(data.Natoms,2)>1
     SweepTimeVar='uWave_time';'sweep_time';      % Variable that defines sweep time
     SweepRangeVar='uwave_delta_freq';'sweep_range';    %    Variable that defines sweep range
 
+    % SweepRangeVar='lattice_
+    SweepTimeVar = 'lattice_post_spec_feshbach_time';
+    
+
 %       SweepTimeVar='qgm_pulse_time';'sweep_time';      % Variable that defines sweep time
 %     SweepRangeVar='lattice_rf_freq_shift';'sweep_range';    %    Variable that defines sweep range
 %     
@@ -58,6 +62,8 @@ if doLandauZener && size(data.Natoms,2)>1
     % you want).
     dT=[params.(SweepTimeVar)];
     dF=[params.(SweepRangeVar)]*1e3;
+
+    dF=0.01;
     
 %     dF=5;
 

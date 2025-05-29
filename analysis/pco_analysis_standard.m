@@ -57,7 +57,7 @@ if doGaussFit
     gaussPopts.FigLabel = FigLabel;
     gaussPopts.xUnit=pco_unit;
     gaussPopts.NumberExpFit =0;        % Fit exponential decay to atom number
-    gaussPopts.NumberLorentzianFit=1;   % Fit atom number to lorentzian
+    gaussPopts.NumberLorentzianFit=0;   % Fit atom number to lorentzian
     gaussPopts.CenterSineFit = 0;       % Fit sine fit to cloud center
     gaussPopts.CenterDecaySineFit = 0;  % Fit decaying sine to cloud center
     gaussPopts.CenterParabolaFit = 0;
@@ -68,14 +68,14 @@ if doGaussFit
     gaussPopts.CenterLinearFit = 0;     % Linear fit to cloud center
     gaussPopts.NumberExpOffsetFit = 0; % Exp decay fit with nonzero offset
     gaussPopts.angleTrack = 0;
-        gaussPopts.RelNumberLorentzian = 1;
+        gaussPopts.RelNumberLorentzian = 0;
 
     % Plot the statistics of gaussian fit
     hF_stats=showGaussStats(gauss_data,gaussPopts);     
     if doSave;saveFigure(hF_stats,'gauss_stats',saveOpts);end       
     
     
-%     gaussPopts.NScale = 'log';
+%     gaussPopts.NScale = 'log';rabi
     hF_number_gauss = showAtomNumber(gauss_data,pco_xVar,gaussPopts);  
     ylim([0 max(get(gca,'YLim'))]);  
 %yyaxis left
